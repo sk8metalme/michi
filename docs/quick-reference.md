@@ -1,0 +1,273 @@
+# クイックリファレンス
+
+## 新規プロジェクト作成
+
+### パターンA: 既存リポジトリにMichiワークフローを追加（最も簡単 ⭐）
+
+```bash
+# 既存プロジェクトに移動
+cd /path/to/existing-repo
+
+# 対話式セットアップスクリプト実行
+bash /path/to/michi/scripts/setup-existing.sh
+```
+
+プロジェクト名、JIRAキー、顧客名を入力するだけで完了！
+
+### パターンB: 新規リポジトリを作成してセットアップ
+
+```bash
+# Michiから実行
+cd /path/to/michi
+npm run create-project -- \
+  --name "customer-a-service-1" \
+  --project-name "A社 サービス1" \
+  --customer "A社" \
+  --jira-key "PRJA"
+```
+
+### パターンC: 完全手動セットアップ
+
+```bash
+# 1. リポジトリ作成・クローン
+gh repo create org/repo-name --private
+jj git clone https://github.com/org/repo-name
+cd repo-name
+
+# 2. cc-sdd導入
+npx cc-sdd@latest --cursor --lang ja --yes
+
+# 3. プロジェクトメタデータ作成
+cat > .kiro/project.json << 'EOF'
+{
+  "projectId": "repo-name",
+  "projectName": "プロジェクト名",
+  "jiraProjectKey": "PRJX",
+  "confluenceLabels": ["project:x", "service:y"]
+}
+EOF
+
+# 4. Michiから共通ファイルコピー（自動スクリプト推奨）
+npx tsx /path/to/michi/scripts/setup-existing-project.ts \
+  --michi-path /path/to/michi \
+  --project-name "プロジェクト名" \
+  --jira-key "PRJX"
+
+# 5. npm install
+# 6. 初期コミット
+```
+
+詳細: [新規プロジェクトセットアップガイド](./new-project-setup.md)
+
+## 開発フロー
+
+### 要件定義
+
+```
+/kiro:spec-init <機能説明>
+/kiro:spec-requirements <feature>
+jj commit -m "docs: 要件定義"
+jj git push
+npx @michi/cli phase:run <feature> requirements
+```
+
+### 設計
+
+```
+/kiro:spec-design <feature>
+jj commit -m "docs: 設計"
+jj git push
+npx @michi/cli phase:run <feature> design
+```
+
+### タスク分割
+
+```
+/kiro:spec-tasks <feature>
+jj commit -m "docs: タスク分割"
+jj git push
+npx @michi/cli phase:run <feature> tasks
+```
+
+### 実装
+
+```
+/kiro:spec-impl <feature> <tasks>
+jj commit -m "feat: 実装 [JIRA-XXX]"
+jj bookmark create <project-id>/feature/<feature> -r '@-'
+jj git push --bookmark <project-id>/feature/<feature> --allow-new
+gh pr create --head <project-id>/feature/<feature> --base main
+```
+
+## Cursorコマンド一覧
+
+| コマンド | 説明 |
+|---------|------|
+| `/kiro:spec-init <description>` | 仕様初期化 |
+| `/kiro:spec-requirements <feature>` | 要件定義生成 |
+| `/kiro:spec-design <feature>` | 設計生成 |
+| `/kiro:spec-tasks <feature>` | タスク分割 |
+| `/kiro:spec-impl <feature> <tasks>` | TDD実装 |
+| `/kiro:spec-status <feature>` | 進捗確認 |
+| `/kiro:steering` | Steering作成/更新 |
+| `/kiro:confluence-sync <feature> [type]` | Confluence同期 |
+| `/kiro:project-switch <project_id>` | プロジェクト切り替え |
+
+## Michi CLIコマンド一覧
+
+**使用方法**: `npx @michi/cli <command>` または `michi <command>`（グローバルインストール後）
+
+| コマンド | 説明 |
+|---------|------|
+| `michi jira:sync <feature>` | JIRA連携（tasks.md → Epic/Stories） |
+| `michi confluence:sync <feature> [type]` | Confluence同期（requirements/design） |
+| `michi phase:run <feature> <phase>` | フェーズ実行（requirements/design/tasks） |
+| `michi validate:phase <feature> <phase>` | フェーズ完了バリデーション |
+| `michi preflight [phase]` | プリフライトチェック |
+| `michi project:list` | プロジェクト一覧 |
+| `michi project:dashboard` | リソースダッシュボード生成 |
+| `michi workflow:run --feature <name>` | 統合ワークフロー実行 |
+| `michi --help` | ヘルプ表示 |
+| `michi --version` | バージョン表示 |
+
+**インストール方法**:
+- **npx実行（推奨）**: `npx @michi/cli <command>` - 常に最新版を使用
+- **グローバルインストール**: `npm install -g @michi/cli` 後、`michi <command>`
+- **ローカル開発**: `npm run michi <command>` または `tsx src/cli.ts <command>`
+
+## npmスクリプト一覧（michiリポジトリ内）
+
+| コマンド | 説明 |
+|---------|------|
+| `npm run setup:env` | .env テンプレート作成 |
+| `npm run create-project` | 新規プロジェクト作成 |
+| `npm run multi-estimate` | 見積もり集計 |
+| `npm run michi` | ローカルCLIツール実行 |
+
+## プロジェクト切り替え
+
+### 方法1: Cursorコマンド
+
+```
+/kiro:project-switch <project-id>
+```
+
+### 方法2: ターミナル
+
+```bash
+cd ~/work/projects/<project-name>
+cat .kiro/project.json
+```
+
+## プロジェクト横断操作
+
+### すべてのプロジェクトを確認
+
+```bash
+cd /path/to/michi
+npx @michi/cli project:list
+```
+
+### リソースダッシュボード
+
+```bash
+npx @michi/cli project:dashboard
+```
+
+### 見積もり集計
+
+```bash
+npm run multi-estimate
+```
+
+## Git/Jujutsuコマンド
+
+### 基本フロー
+
+```bash
+# 作業開始
+jj new main
+
+# コミット
+jj commit -m "message"
+
+# ブックマーク作成（PR用）
+jj bookmark create <project-id>/feature/<name> -r '@-'
+
+# プッシュ
+jj git push --bookmark <project-id>/feature/<name> --allow-new
+
+# PR作成
+gh pr create --head <bookmark> --base main
+```
+
+### ブランチ命名規則
+
+```
+<project-id>/feature/<feature-name>
+```
+
+例:
+- `michi/feature/user-auth`
+- `customer-a-service-1/feature/payment`
+- `customer-b-api/feature/user-endpoint`
+
+## トラブルシューティング
+
+### GitHub認証エラー
+
+```bash
+gh auth status
+gh auth login
+gh auth setup-git
+```
+
+### Confluence/JIRA認証エラー
+
+`.env` の認証情報を確認：
+```bash
+cat .env | grep ATLASSIAN
+```
+
+### MCP接続エラー
+
+1. Cursor 再起動
+2. `~/.cursor/mcp.json` 確認
+3. Atlassian API Token 再生成
+
+### npm installエラー
+
+```bash
+npm cache clean --force
+rm -rf node_modules package-lock.json
+npm install
+```
+
+## ファイルパス
+
+### プロジェクトメタデータ
+- `.kiro/project.json`
+
+### テンプレート
+- `.kiro/settings/templates/requirements.md`
+- `.kiro/settings/templates/design.md`
+- `.kiro/settings/templates/tasks.md`
+
+### 仕様書（GitHub SSoT）
+- `.kiro/specs/<feature>/requirements.md`
+- `.kiro/specs/<feature>/design.md`
+- `.kiro/specs/<feature>/tasks.md`
+
+### Steering
+- `.kiro/steering/product.md`
+- `.kiro/steering/tech.md`
+- `.kiro/steering/structure.md`
+
+## 参考リンク
+
+- [セットアップガイド](./setup.md)
+- [新規プロジェクトセットアップ](./new-project-setup.md)
+- [ワークフローガイド](./workflow.md)
+- [マルチプロジェクト管理](./multi-project.md)
+- [テスト・検証](./testing.md)
+

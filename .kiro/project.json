@@ -1,0 +1,13 @@
+{
+  "projectId": "michi",
+  "projectName": "Michi - Managed Intelligent Comprehensive Hub for Integration",
+  "customer": "Internal",
+  "jiraProjectKey": "MICHI",
+  "confluenceLabels": ["project:michi", "service:hub"],
+  "status": "active",
+  "team": ["@developer1"],
+  "stakeholders": ["@pm", "@director"],
+  "repository": "https://github.com/your-org/michi",
+  "description": "AI-driven development workflow automation hub"
+}
+
