@@ -219,7 +219,6 @@ cp mcp.json.example ~/.cursor/mcp.json
 {
   "projectId": "michi",
   "projectName": "Michi - Managed Intelligent Comprehensive Hub for Integration",
-  "customer": "Internal",
   "jiraProjectKey": "MICHI",
   "confluenceLabels": ["project:michi", "service:hub"],
   "status": "active",

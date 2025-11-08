@@ -14,14 +14,7 @@ cd /path/to/existing-repo
 bash /path/to/michi/scripts/setup-existing.sh
 ```
 
-プロジェクト名、JIRAキー、顧客名を入力するだけで完了！
-
-**顧客名の利用箇所**:
-- `.kiro/project.json`の`customer`フィールドに保存
-- Confluenceラベルの自動生成: `project:<顧客名>`（「社」を削除して小文字化）
-  - 例: 顧客名「A社」 → ラベル `project:a`
-  - 例: 顧客名「B社」 → ラベル `project:b`
-- プロジェクト管理・分類に使用（マルチプロジェクト管理時）
+プロジェクト名、JIRAキーを入力するだけで完了！
 
 ### パターンB: 新規リポジトリを作成してセットアップ
 
@@ -33,14 +26,12 @@ cd /path/to/michi
 npm run create-project -- \
   --name "<project-id>" \
   --project-name "<project-name>" \
-  --customer "<customer>" \
   --jira-key "<jira-key>"
 
 # 具体例
 npm run create-project -- \
   --name "customer-a-service-1" \
   --project-name "A社 サービス1" \
-  --customer "A社" \
   --jira-key "PRJA"
 ```
 

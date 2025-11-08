@@ -18,14 +18,12 @@ cd /path/to/michi
 npm run create-project -- \
   --name "<project-id>" \
   --project-name "<project-name>" \
-  --customer "<customer>" \
   --jira-key "<jira-key>"
 
 # 具体例
 npm run create-project -- \
   --name "customer-a-service-1" \
   --project-name "A社 サービス1" \
-  --customer "A社" \
   --jira-key "PRJA"
 ```
 
@@ -132,12 +130,11 @@ npx cc-sdd@latest --cursor --lang ja --yes
 {
   "projectId": "customer-a-service-1",
   "projectName": "A社 サービス1",
-  "customer": "A社",
   "jiraProjectKey": "PRJA",
-  "confluenceLabels": ["project:a", "service:s1"],
+  "confluenceLabels": ["project:customer-a-service-1", "service:s1"],
   "status": "active",
   "team": ["@dev1", "@dev2"],
-  "stakeholders": ["@企画", "@部長", "@A社担当"],
+  "stakeholders": ["@企画", "@部長"],
   "repository": "https://github.com/your-org/customer-a-service-1",
   "description": "A社向けサービス1の開発"
 }
@@ -146,7 +143,7 @@ npx cc-sdd@latest --cursor --lang ja --yes
 **重要なフィールド**:
 - `projectId`: リポジトリ名と一致させる
 - `jiraProjectKey`: JIRA プロジェクトキー（一意）
-- `confluenceLabels`: プロジェクト識別用ラベル
+- `confluenceLabels`: プロジェクト識別用ラベル（`project:{projectId}`形式で自動生成）
 
 ### Step 4: Michiから共通設定をコピー
 
@@ -481,8 +478,8 @@ npx cc-sdd@latest --cursor --lang ja --yes
 **JIRA プロジェクトキー**: 3-4文字、一意
 - 例: `PRJA`, `PRJB`, `PRJC`
 
-**Confluenceラベル**: `project:{customer}, service:{service}`
-- 例: `["project:a", "service:s1"]`
+**Confluenceラベル**: `project:{projectId}, service:{service}`
+- 例: `["project:customer-a-service-1", "service:s1"]`
 
 ### チーム構成
 

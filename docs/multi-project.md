@@ -63,12 +63,11 @@ npx cc-sdd@latest --cursor --lang ja --yes
 {
   "projectId": "customer-a-service-1",
   "projectName": "A社 サービス1",
-  "customer": "A社",
   "jiraProjectKey": "PRJA",
-  "confluenceLabels": ["project:a", "service:s1"],
+  "confluenceLabels": ["project:customer-a-service-1", "service:s1"],
   "status": "active",
   "team": ["@dev1", "@dev2"],
-  "stakeholders": ["@企画", "@部長", "@A社担当"],
+  "stakeholders": ["@企画", "@部長"],
   "repository": "https://github.com/org/customer-a-service-1",
   "description": "A社向けサービス1の開発"
 }
@@ -212,8 +211,8 @@ shared-infrastructure/
 **JIRA プロジェクトキー**: 3-4文字
 - 例: `PRJA`, `PRJB`, `MICHI`
 
-**Confluenceラベル**: `project:{customer}, service:{service}`
-- 例: `project:a, service:s1`
+**Confluenceラベル**: `project:{projectId}, service:{service}`
+- 例: `project:customer-a-service-1, service:s1`
 
 ### チーム構成の明確化
 

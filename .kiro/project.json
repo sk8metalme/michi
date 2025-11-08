@@ -1,7 +1,6 @@
 {
   "projectId": "michi",
   "projectName": "Michi - Managed Intelligent Comprehensive Hub for Integration",
-  "customer": "Internal",
   "jiraProjectKey": "MICHI",
   "confluenceLabels": ["project:michi", "service:hub"],
   "status": "active",
