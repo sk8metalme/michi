@@ -1,5 +1,7 @@
 # AI開発ワークフローガイド
 
+> **凡例について**: `<feature>` などの記号の意味は [README.md#凡例の記号説明](../README.md#凡例の記号説明) を参照してください。
+
 ## 概要
 
 このガイドでは、Michiを使用したAI駆動開発フローの全体像を説明します。
@@ -42,25 +44,38 @@
 #### Step 1: 仕様の初期化
 
 Cursorで実行：
-```
+```bash
+# 凡例
+/kiro:spec-init <機能説明>
+
+# 具体例
 /kiro:spec-init ユーザー認証機能を実装したい。OAuth 2.0とJWTを使用。
 ```
 
-AIが `.kiro/specs/user-auth/` ディレクトリを作成します。
+AIが `.kiro/specs/<feature>/` ディレクトリを作成します。
 
 #### Step 2: 要件定義の生成
 
-```
+```bash
+# 凡例
+/kiro:spec-requirements <feature>
+
+# 具体例
 /kiro:spec-requirements user-auth
 ```
 
 AIが以下を生成：
-- `.kiro/specs/user-auth/requirements.md`
+- `.kiro/specs/<feature>/requirements.md`
 - ビジネス要件、機能要件、非機能要件、リスク
 
 #### Step 3: GitHubにコミット
 
 ```bash
+# 凡例
+jj commit -m "docs: <feature> 要件定義追加"
+jj git push
+
+# 具体例
 jj commit -m "docs: ユーザー認証 要件定義追加"
 jj git push
 ```
@@ -68,12 +83,20 @@ jj git push
 #### Step 4: Confluenceに同期
 
 Cursorで実行：
-```
+```bash
+# 凡例
+/kiro:confluence-sync <feature> requirements
+
+# 具体例
 /kiro:confluence-sync user-auth requirements
 ```
 
 または：
 ```bash
+# 凡例
+npm run confluence:sync <feature> requirements
+
+# 具体例
 npm run confluence:sync user-auth requirements
 ```
 
@@ -93,7 +116,11 @@ AIが自動的に：
 
 #### Step 1: 設計書の生成
 
-```
+```bash
+# 凡例
+/kiro:spec-design <feature>
+
+# 具体例
 /kiro:spec-design user-auth
 ```
 
@@ -106,6 +133,11 @@ AIが以下を生成：
 #### Step 2: GitHubにコミット
 
 ```bash
+# 凡例
+jj commit -m "docs: <feature> 設計追加"
+jj git push
+
+# 具体例
 jj commit -m "docs: ユーザー認証 設計追加"
 jj git push
 ```
@@ -113,11 +145,16 @@ jj git push
 #### Step 3: Confluenceに同期 + 見積もり出力
 
 ```bash
+# 凡例
+npm run confluence:sync <feature> design
+npm run excel:sync <feature>
+
+# 具体例
 npm run confluence:sync user-auth design
 npm run excel:sync user-auth
 ```
 
-見積もりExcelファイルが `estimates/user-auth-estimate.xlsx` に出力されます。
+見積もりExcelファイルが `estimates/<feature>-estimate.xlsx` に出力されます。
 
 #### Step 4: 承認待ち
 
@@ -127,7 +164,11 @@ npm run excel:sync user-auth
 
 #### Step 1: タスク生成
 
-```
+```bash
+# 凡例
+/kiro:spec-tasks <feature>
+
+# 具体例
 /kiro:spec-tasks user-auth
 ```
 
@@ -136,6 +177,11 @@ AIが実装タスクをストーリーに分割します。
 #### Step 2: GitHubにコミット
 
 ```bash
+# 凡例
+jj commit -m "docs: <feature> タスク分割追加"
+jj git push
+
+# 具体例
 jj commit -m "docs: ユーザー認証 タスク分割追加"
 jj git push
 ```
@@ -143,11 +189,15 @@ jj git push
 #### Step 3: JIRAに同期
 
 ```bash
+# 凡例
+npm run jira:sync <feature>
+
+# 具体例
 npm run jira:sync user-auth
 ```
 
 自動的に：
-- Epic作成: `[Michi] user-auth`
+- Epic作成: `[<project-name>] <feature>`
 - Story作成: 各実装タスク
 - Subtask作成: テスト、レビュータスク
 
@@ -155,7 +205,11 @@ npm run jira:sync user-auth
 
 #### Step 1: TDD実装
 
-```
+```bash
+# 凡例
+/kiro:spec-impl <feature> <tasks>
+
+# 具体例
 /kiro:spec-impl user-auth FE-1,BE-1
 ```
 
@@ -167,6 +221,12 @@ AIがTDD（テスト駆動開発）で実装：
 #### Step 2: コミット
 
 ```bash
+# 凡例
+jj commit -m "feat: <feature> 実装 [JIRA-XXX]"
+jj bookmark create <project-id>/feature/<feature> -r '@-'
+jj git push --bookmark <project-id>/feature/<feature> --allow-new
+
+# 具体例
 jj commit -m "feat: ユーザー認証実装 [MICHI-123]"
 jj bookmark create michi/feature/user-auth -r '@-'
 jj git push --bookmark michi/feature/user-auth --allow-new
@@ -175,11 +235,21 @@ jj git push --bookmark michi/feature/user-auth --allow-new
 #### Step 3: PR作成
 
 ```bash
+# 凡例
+npm run github:create-pr <project-id>/feature/<feature> "[JIRA-XXX] <タイトル>"
+
+# 具体例
 npm run github:create-pr michi/feature/user-auth "[MICHI-123] ユーザー認証実装"
 ```
 
 または手動で：
 ```bash
+# 凡例
+gh pr create --head <project-id>/feature/<feature> --base main \
+  --title "[JIRA-XXX] <タイトル>" \
+  --body "<説明>"
+
+# 具体例
 gh pr create --head michi/feature/user-auth --base main \
   --title "[MICHI-123] ユーザー認証実装" \
   --body "実装内容..."
@@ -194,6 +264,10 @@ gh pr create --head michi/feature/user-auth --base main \
 すべてのフェーズを自動実行：
 
 ```bash
+# 凡例
+npm run workflow:run -- --feature <feature>
+
+# 具体例
 npm run workflow:run -- --feature user-auth
 ```
 

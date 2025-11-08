@@ -6,6 +6,7 @@
 import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
 import { loadProjectMeta } from './utils/project-meta.js';
+import { validateFeatureName } from './utils/feature-name-validator.js';
 
 type Phase = 'requirements' | 'design' | 'tasks';
 
@@ -35,6 +36,12 @@ function loadSpecJson(feature: string): any {
 function validateRequirements(feature: string): ValidationResult {
   const errors: string[] = [];
   const warnings: string[] = [];
+  
+  // 0. feature名のバリデーション
+  const nameValidation = validateFeatureName(feature);
+  if (!nameValidation.valid) {
+    errors.push(...nameValidation.errors);
+  }
   
   // 1. requirements.md存在チェック
   const requirementsPath = join(process.cwd(), '.kiro', 'specs', feature, 'requirements.md');
@@ -82,6 +89,12 @@ function validateDesign(feature: string): ValidationResult {
   const errors: string[] = [];
   const warnings: string[] = [];
   
+  // 0. feature名のバリデーション
+  const nameValidation = validateFeatureName(feature);
+  if (!nameValidation.valid) {
+    errors.push(...nameValidation.errors);
+  }
+  
   // 1. design.md存在チェック
   const designPath = join(process.cwd(), '.kiro', 'specs', feature, 'design.md');
   if (!existsSync(designPath)) {
@@ -127,6 +140,12 @@ function validateDesign(feature: string): ValidationResult {
 function validateTasks(feature: string): ValidationResult {
   const errors: string[] = [];
   const warnings: string[] = [];
+  
+  // 0. feature名のバリデーション
+  const nameValidation = validateFeatureName(feature);
+  if (!nameValidation.valid) {
+    errors.push(...nameValidation.errors);
+  }
   
   // 1. tasks.md存在チェック
   const tasksPath = join(process.cwd(), '.kiro', 'specs', feature, 'tasks.md');

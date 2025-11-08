@@ -22,6 +22,7 @@ import { resolve } from 'path';
 import axios from 'axios';
 import { config } from 'dotenv';
 import { loadProjectMeta } from './utils/project-meta.js';
+import { validateFeatureNameOrThrow } from './utils/feature-name-validator.js';
 
 config();
 
@@ -333,6 +334,10 @@ class JIRAClient {
 
 async function syncTasksToJIRA(featureName: string): Promise<void> {
   console.log(`Syncing tasks for feature: ${featureName}`);
+  
+  // feature名のバリデーション（必須）
+  validateFeatureNameOrThrow(featureName);
+  
   console.log(`⏳ Request delay: ${getRequestDelay()}ms (set ATLASSIAN_REQUEST_DELAY to adjust)`);
   
   const projectMeta = loadProjectMeta();
