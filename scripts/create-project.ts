@@ -129,15 +129,21 @@ async function createProject(config: ProjectConfig): Promise<void> {
   const labels = config.labels || (() => {
     // プロジェクトIDからプロジェクトラベル生成
     const projectLabel = repoName.toLowerCase().replace(/[^a-z0-9-]/g, '');
+    const labelSet = new Set([`project:${projectLabel}`]);
     
-    // リポジトリ名からサービスラベル生成（安全に）
+    // ハイフンが存在する場合のみサービスラベルを生成
+    if (repoName.includes('-')) {
     const parts = repoName.split('-');
-    const serviceLabel = parts.length > 0 ? parts[parts.length - 1] : repoName;
+      const servicePart = parts[parts.length - 1];
+      const serviceLabel = servicePart.toLowerCase().replace(/[^a-z0-9-]/g, '');
     
-    return [
-      `project:${projectLabel}`,
-      `service:${serviceLabel}`
-    ];
+      // サービスラベルがプロジェクトラベルと異なる場合のみ追加
+      if (serviceLabel !== projectLabel) {
+        labelSet.add(`service:${serviceLabel}`);
+      }
+    }
+    
+    return Array.from(labelSet);
   })();
   
   const projectJson = {

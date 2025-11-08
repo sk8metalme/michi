@@ -99,10 +99,25 @@ async function setupExistingProject(config: SetupConfig): Promise<void> {
     repoUrl = `https://github.com/org/${projectId}`;
   }
   
-  const labels = config.labels || [
-    `project:${projectId.toLowerCase().replace(/[^a-z0-9-]/g, '')}`,
-    `service:${projectId.split('-').pop()}`
-  ];
+  const labels = config.labels || (() => {
+    // プロジェクトIDからプロジェクトラベル生成
+    const projectLabel = projectId.toLowerCase().replace(/[^a-z0-9-]/g, '');
+    const labelSet = new Set([`project:${projectLabel}`]);
+    
+    // ハイフンが存在する場合のみサービスラベルを生成
+    if (projectId.includes('-')) {
+      const parts = projectId.split('-');
+      const servicePart = parts[parts.length - 1];
+      const serviceLabel = servicePart.toLowerCase().replace(/[^a-z0-9-]/g, '');
+      
+      // サービスラベルがプロジェクトラベルと異なる場合のみ追加
+      if (serviceLabel !== projectLabel) {
+        labelSet.add(`service:${serviceLabel}`);
+      }
+    }
+    
+    return Array.from(labelSet);
+  })();
   
   const projectJson = {
     projectId,
