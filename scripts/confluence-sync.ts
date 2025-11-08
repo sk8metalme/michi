@@ -9,6 +9,7 @@ import axios from 'axios';
 import { config } from 'dotenv';
 import { loadProjectMeta, type ProjectMetadata } from './utils/project-meta.js';
 import { convertMarkdownToConfluence, createConfluencePage } from './markdown-to-confluence.js';
+import { validateFeatureNameOrThrow } from './utils/feature-name-validator.js';
 
 // 環境変数読み込み
 config();
@@ -187,6 +188,10 @@ async function syncToConfluence(
   docType: 'requirements' | 'design' | 'tasks' = 'requirements'
 ): Promise<string> {
   console.log(`Syncing ${docType} for feature: ${featureName}`);
+  
+  // feature名のバリデーション（必須）
+  validateFeatureNameOrThrow(featureName);
+  
   console.log(`⏳ Request delay: ${getRequestDelay()}ms (set ATLASSIAN_REQUEST_DELAY to adjust)`);
   
   // プロジェクトメタデータ読み込み

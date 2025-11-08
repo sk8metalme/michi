@@ -240,12 +240,14 @@ cursor .
 
 Cursor のコマンドパネル（Cmd+Shift+P）で `/kiro:` と入力すると、以下のコマンドが表示されます：
 
-- `/kiro:spec-init` - 新機能の仕様を初期化
-- `/kiro:spec-requirements` - 要件定義を生成
-- `/kiro:spec-design` - 設計ドキュメントを生成
-- `/kiro:spec-tasks` - 実装タスクを生成
-- `/kiro:spec-impl` - TDDで実装
+- `/kiro:spec-init <機能説明>` - 新機能の仕様を初期化
+- `/kiro:spec-requirements <feature>` - 要件定義を生成
+- `/kiro:spec-design <feature>` - 設計ドキュメントを生成
+- `/kiro:spec-tasks <feature>` - 実装タスクを生成
+- `/kiro:spec-impl <feature> <tasks>` - TDDで実装
 - `/kiro:steering` - プロジェクトステアリングを作成/更新
+
+凡例の詳細は [README.md#凡例の記号説明](../README.md#凡例の記号説明) を参照してください。
 
 ## 8. 動作確認
 

@@ -9,6 +9,7 @@ import { syncToConfluence } from './confluence-sync.js';
 import { syncTasksToJIRA } from './jira-sync.js';
 import { validatePhase } from './validate-phase.js';
 import { runPreFlightCheck } from './pre-flight-check.js';
+import { validateFeatureNameOrThrow } from './utils/feature-name-validator.js';
 
 type Phase = 'requirements' | 'design' | 'tasks';
 
@@ -251,6 +252,9 @@ async function runTasksPhase(feature: string): Promise<PhaseRunResult> {
  * フェーズを実行
  */
 export async function runPhase(feature: string, phase: Phase): Promise<PhaseRunResult> {
+  // feature名のバリデーション（必須）
+  validateFeatureNameOrThrow(feature);
+  
   switch (phase) {
     case 'requirements':
       return await runRequirementsPhase(feature);

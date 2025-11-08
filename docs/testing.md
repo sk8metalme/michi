@@ -1,5 +1,7 @@
 # テスト・検証ガイド
 
+> **凡例について**: `<feature>` などの記号の意味は [README.md#凡例の記号説明](../README.md#凡例の記号説明) を参照してください。
+
 ## E2Eテストシナリオ
 
 ### シナリオ1: 単一機能の完全フロー
@@ -7,7 +9,15 @@
 新機能「ユーザー認証」を要件定義からリリースまで実行：
 
 #### Step 1: 要件定義
-```
+```bash
+# 凡例
+/kiro:spec-init <機能説明>
+/kiro:spec-requirements <feature>
+jj commit -m "docs: <feature> 要件定義"
+jj git push
+npm run confluence:sync <feature> requirements
+
+# 具体例
 /kiro:spec-init OAuth 2.0を使ったユーザー認証機能
 /kiro:spec-requirements user-auth
 jj commit -m "docs: ユーザー認証 要件定義"
@@ -22,7 +32,15 @@ npm run confluence:sync user-auth requirements
 - [ ] 企画・部長にメンション通知が届いた
 
 #### Step 2: 設計
-```
+```bash
+# 凡例
+/kiro:spec-design <feature>
+jj commit -m "docs: <feature> 設計"
+jj git push
+npm run confluence:sync <feature> design
+npm run excel:sync <feature>
+
+# 具体例
 /kiro:spec-design user-auth
 jj commit -m "docs: ユーザー認証 設計"
 jj git push
@@ -37,7 +55,14 @@ npm run excel:sync user-auth
 - [ ] Excelファイルが出力された
 
 #### Step 3: タスク分割
-```
+```bash
+# 凡例
+/kiro:spec-tasks <feature>
+jj commit -m "docs: <feature> タスク分割"
+jj git push
+npm run jira:sync <feature>
+
+# 具体例
 /kiro:spec-tasks user-auth
 jj commit -m "docs: ユーザー認証 タスク分割"
 jj git push
