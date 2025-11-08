@@ -6,7 +6,6 @@
  * npm run create-project -- \
  *   --name "customer-a-service-1" \
  *   --project-name "A社 サービス1" \
- *   --customer "A社" \
  *   --jira-key "PRJA"
  */
 
@@ -25,7 +24,6 @@ loadDotenv();
 interface ProjectConfig {
   name: string;           // リポジトリ名: customer-a-service-1
   projectName: string;    // 表示名: A社 サービス1
-  customer: string;       // 顧客名: A社
   jiraKey: string;        // JIRAキー: PRJA
   org?: string;           // GitHub組織名（デフォルト: .envから）
   labels?: string[];      // Confluenceラベル（デフォルト: 自動生成）
@@ -46,9 +44,6 @@ function parseArgs(): ProjectConfig {
       case 'project-name':
         config.projectName = value;
         break;
-      case 'customer':
-        config.customer = value;
-        break;
       case 'jira-key':
         config.jiraKey = value;
         break;
@@ -63,9 +58,9 @@ function parseArgs(): ProjectConfig {
   }
   
   // 必須フィールドチェック
-  if (!config.name || !config.projectName || !config.customer || !config.jiraKey) {
+  if (!config.name || !config.projectName || !config.jiraKey) {
     console.error('Missing required parameters');
-    console.error('Usage: npm run create-project -- --name <name> --project-name <display> --customer <customer> --jira-key <key>');
+    console.error('Usage: npm run create-project -- --name <name> --project-name <display> --jira-key <key>');
     process.exit(1);
   }
   
@@ -132,26 +127,28 @@ async function createProject(config: ProjectConfig): Promise<void> {
   
   // ラベル生成（安全なフォールバック付き）
   const labels = config.labels || (() => {
-    // 顧客名からプロジェクトラベル生成（安全に）
-    const customerLabel = config.customer
-      .toLowerCase()
-      .replace(/社$/, '')  // 「社」で終わる場合のみ削除
-      .replace(/[^a-z0-9-]/g, '') || 'unknown';  // 無効な文字を削除
+    // プロジェクトIDからプロジェクトラベル生成
+    const projectLabel = repoName.toLowerCase().replace(/[^a-z0-9-]/g, '');
+    const labelSet = new Set([`project:${projectLabel}`]);
     
-    // リポジトリ名からサービスラベル生成（安全に）
+    // ハイフンが存在する場合のみサービスラベルを生成
+    if (repoName.includes('-')) {
     const parts = repoName.split('-');
-    const serviceLabel = parts.length > 0 ? parts[parts.length - 1] : repoName;
+      const servicePart = parts[parts.length - 1];
+      const serviceLabel = servicePart.toLowerCase().replace(/[^a-z0-9-]/g, '');
     
-    return [
-      `project:${customerLabel}`,
-      `service:${serviceLabel}`
-    ];
+      // サービスラベルがプロジェクトラベルと異なる場合のみ追加
+      if (serviceLabel !== projectLabel) {
+        labelSet.add(`service:${serviceLabel}`);
+      }
+    }
+    
+    return Array.from(labelSet);
   })();
   
   const projectJson = {
     projectId: repoName,
     projectName: config.projectName,
-    customer: config.customer,
     jiraProjectKey: config.jiraKey,
     confluenceLabels: labels,
     status: 'active',

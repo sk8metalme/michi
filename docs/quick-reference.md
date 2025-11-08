@@ -14,14 +14,7 @@ cd /path/to/existing-repo
 bash /path/to/michi/scripts/setup-existing.sh
 ```
 
-プロジェクト名、JIRAキー、顧客名を入力するだけで完了！
-
-**顧客名の利用箇所**:
-- `.kiro/project.json`の`customer`フィールドに保存
-- Confluenceラベルの自動生成: `project:<顧客名>`（「社」を削除して小文字化）
-  - 例: 顧客名「A社」 → ラベル `project:a`
-  - 例: 顧客名「B社」 → ラベル `project:b`
-- プロジェクト管理・分類に使用（マルチプロジェクト管理時）
+プロジェクト名、JIRAキーを入力するだけで完了！
 
 ### パターンB: 新規リポジトリを作成してセットアップ
 
@@ -33,14 +26,12 @@ cd /path/to/michi
 npm run create-project -- \
   --name "<project-id>" \
   --project-name "<project-name>" \
-  --customer "<customer>" \
   --jira-key "<jira-key>"
 
 # 具体例
 npm run create-project -- \
   --name "customer-a-service-1" \
   --project-name "A社 サービス1" \
-  --customer "A社" \
   --jira-key "PRJA"
 ```
 
@@ -87,78 +78,39 @@ npx tsx /path/to/michi/scripts/setup-existing-project.ts \
 
 ## 開発フロー
 
-### 要件定義
+詳細なワークフローは [AI開発ワークフローガイド](./workflow.md) を参照してください。
 
+### クイックコマンド一覧
+
+**要件定義**:
 ```bash
-# 凡例
 /kiro:spec-init <機能説明>
 /kiro:spec-requirements <feature>
-jj commit -m "docs: 要件定義"
-jj git push
-# Confluenceページ作成＋バリデーション
+jj commit -m "docs: 要件定義" && jj git push
 npx @michi/cli phase:run <feature> requirements
-
-# 具体例
-/kiro:spec-init ユーザー認証機能
-/kiro:spec-requirements user-auth
-jj commit -m "docs: 要件定義"
-jj git push
-# Confluenceページ作成＋バリデーション
-npx @michi/cli phase:run user-auth requirements
 ```
 
-### 設計
-
+**設計**:
 ```bash
-# 凡例
 /kiro:spec-design <feature>
-jj commit -m "docs: 設計"
-jj git push
-# Confluenceページ作成＋バリデーション
+jj commit -m "docs: 設計" && jj git push
 npx @michi/cli phase:run <feature> design
-
-# 具体例
-/kiro:spec-design user-auth
-jj commit -m "docs: 設計"
-jj git push
-# Confluenceページ作成＋バリデーション
-npx @michi/cli phase:run user-auth design
 ```
 
-### タスク分割
-
+**タスク分割**:
 ```bash
-# 凡例
 /kiro:spec-tasks <feature>
-jj commit -m "docs: タスク分割"
-jj git push
-# JIRA Epic/Story作成＋バリデーション
+jj commit -m "docs: タスク分割" && jj git push
 npx @michi/cli phase:run <feature> tasks
-
-# 具体例
-/kiro:spec-tasks user-auth
-jj commit -m "docs: タスク分割"
-jj git push
-# JIRA Epic/Story作成＋バリデーション
-npx @michi/cli phase:run user-auth tasks
 ```
 
-### 実装
-
+**実装**:
 ```bash
-# 凡例
 /kiro:spec-impl <feature> <tasks>
-jj commit -m "feat: 実装 [JIRA-XXX]"
+jj commit -m "feat: 実装 [<jira-key>-XXX]"
 jj bookmark create <project-id>/feature/<feature> -r '@-'
 jj git push --bookmark <project-id>/feature/<feature> --allow-new
-gh pr create --head <project-id>/feature/<feature> --base main
-
-# 具体例
-/kiro:spec-impl user-auth FE-1,BE-1
-jj commit -m "feat: 実装 [MICHI-123]"
-jj bookmark create michi/feature/user-auth -r '@-'
-jj git push --bookmark michi/feature/user-auth --allow-new
-gh pr create --head michi/feature/user-auth --base main
+gh pr create --head <project-id>/feature/<feature> --base init
 ```
 
 ## Cursorコマンド一覧

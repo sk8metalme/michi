@@ -39,58 +39,33 @@ organization/
 
 ### 新規プロジェクト追加
 
-#### Step 1: リポジトリ作成
+詳細な手順は [新規プロジェクトセットアップガイド](./new-project-setup.md) を参照してください。
 
-```bash
-# GitHub で新しいリポジトリを作成
-gh repo create org/customer-a-service-1 --private
+**クイックスタート**:
+1. 既存リポジトリに追加: `bash /path/to/michi/scripts/setup-existing.sh`
+2. 新規リポジトリ作成: `npm run create-project -- --name <id> --project-name <name> --jira-key <key>`
 
-# ローカルにクローン
-jj git clone https://github.com/org/customer-a-service-1
-cd customer-a-service-1
-```
+**マルチプロジェクト特有の注意点**:
+- 各プロジェクトは独立したリポジトリで管理
+- `.kiro/project.json`でプロジェクトを識別
+- Confluenceラベルでプロジェクト横断検索が可能
 
-#### Step 2: cc-sdd 導入
+### 環境変数設定
 
-```bash
-npx cc-sdd@latest --cursor --lang ja --yes
-```
+各プロジェクトで`.env`ファイルを設定します。詳細は [新規プロジェクトセットアップガイド](./new-project-setup.md#step-5-環境変数設定) を参照してください。
 
-#### Step 3: プロジェクトメタデータ作成
+### 動作確認
 
-`.kiro/project.json`:
-```json
-{
-  "projectId": "customer-a-service-1",
-  "projectName": "A社 サービス1",
-  "customer": "A社",
-  "jiraProjectKey": "PRJA",
-  "confluenceLabels": ["project:a", "service:s1"],
-  "status": "active",
-  "team": ["@dev1", "@dev2"],
-  "stakeholders": ["@企画", "@部長", "@A社担当"],
-  "repository": "https://github.com/org/customer-a-service-1",
-  "description": "A社向けサービス1の開発"
-}
-```
-
-#### Step 4: 環境変数設定
-
-```bash
-npm run setup:env
-# .env を編集して認証情報を設定
-```
-
-#### Step 5: 動作確認
+セットアップ完了後、プロジェクト情報を確認します：
 
 ```bash
 # プロジェクト情報を表示
 cat .kiro/project.json
 
-# テスト機能で確認
+# テスト機能で確認（オプション）
 /kiro:spec-init テスト機能
 /kiro:spec-requirements test-feature
-npm run confluence:sync test-feature
+npx @michi/cli phase:run test-feature requirements
 ```
 
 ## プロジェクト切り替え
@@ -212,9 +187,10 @@ shared-infrastructure/
 **JIRA プロジェクトキー**: 3-4文字
 - 例: `PRJA`, `PRJB`, `MICHI`
 
-**Confluenceラベル**: `project:{customer}, service:{service}`
-- 例: `project:a, service:s1`
+**Confluenceラベル**: `project:{projectId}, service:{service}`
+- 例: `project:customer-a-service-1, service:s1`
 
+**ラベル生成ロジック**: 詳細は [新規プロジェクトセットアップガイド](./new-project-setup.md#ラベル生成ロジック) を参照してください。
 ### チーム構成の明確化
 
 各プロジェクトの `team` フィールドに担当者を記載：

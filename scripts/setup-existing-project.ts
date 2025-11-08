@@ -7,8 +7,7 @@
  * npx tsx /path/to/michi/scripts/setup-existing-project.ts \
  *   --michi-path /path/to/michi \
  *   --project-name "既存プロジェクト" \
- *   --jira-key "EXIST" \
- *   --customer "顧客名"
+ *   --jira-key "EXIST"
  */
 
 import { cpSync, existsSync, mkdirSync, writeFileSync, readFileSync } from 'fs';
@@ -19,7 +18,6 @@ interface SetupConfig {
   michiPath: string;      // Michiリポジトリのパス
   projectName: string;    // プロジェクト表示名
   jiraKey: string;        // JIRAプロジェクトキー
-  customer?: string;      // 顧客名（オプション）
   labels?: string[];      // Confluenceラベル（オプション）
 }
 
@@ -41,9 +39,6 @@ function parseArgs(): SetupConfig {
       case 'jira-key':
         config.jiraKey = value;
         break;
-      case 'customer':
-        config.customer = value;
-        break;
     }
   }
   
@@ -55,7 +50,7 @@ function parseArgs(): SetupConfig {
   // 必須フィールドチェック
   if (!config.projectName || !config.jiraKey) {
     console.error('Missing required parameters');
-    console.error('Usage: tsx setup-existing-project.ts --project-name <name> --jira-key <key> [--michi-path <path>] [--customer <customer>]');
+    console.error('Usage: tsx setup-existing-project.ts --project-name <name> --jira-key <key> [--michi-path <path>]');
     process.exit(1);
   }
   
@@ -104,15 +99,29 @@ async function setupExistingProject(config: SetupConfig): Promise<void> {
     repoUrl = `https://github.com/org/${projectId}`;
   }
   
-  const labels = config.labels || [
-    `project:${config.customer?.toLowerCase().replace(/社$/, '') || projectId}`,
-    `service:${projectId.split('-').pop()}`
-  ];
+  const labels = config.labels || (() => {
+    // プロジェクトIDからプロジェクトラベル生成
+    const projectLabel = projectId.toLowerCase().replace(/[^a-z0-9-]/g, '');
+    const labelSet = new Set([`project:${projectLabel}`]);
+    
+    // ハイフンが存在する場合のみサービスラベルを生成
+    if (projectId.includes('-')) {
+      const parts = projectId.split('-');
+      const servicePart = parts[parts.length - 1];
+      const serviceLabel = servicePart.toLowerCase().replace(/[^a-z0-9-]/g, '');
+      
+      // サービスラベルがプロジェクトラベルと異なる場合のみ追加
+      if (serviceLabel !== projectLabel) {
+        labelSet.add(`service:${serviceLabel}`);
+      }
+    }
+    
+    return Array.from(labelSet);
+  })();
   
   const projectJson = {
     projectId,
     projectName: config.projectName,
-    customer: config.customer || 'Unknown',
     jiraProjectKey: config.jiraKey,
     confluenceLabels: labels,
     status: 'active',

@@ -8,7 +8,6 @@ import { resolve } from 'path';
 export interface ProjectMetadata {
   projectId: string;
   projectName: string;
-  customer: string;
   jiraProjectKey: string;
   confluenceLabels: string[];
   status: 'active' | 'inactive' | 'completed';

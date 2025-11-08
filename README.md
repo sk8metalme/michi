@@ -320,7 +320,6 @@ Copyright (c) 2025 sk8metalme
 | `<phase>` | フェーズ名 | requirements, design, tasks |
 | `<tasks>` | タスクID | FE-1,BE-1, STORY-1 |
 | `<doc-type>` | ドキュメント種類 | requirements, design, tasks |
-| `<customer>` | 顧客名 | A社, Internal |
 | `<jira-key>` | JIRAプロジェクトキー | MICHI, PRJA |
 
 ### 凡例と具体例の読み方

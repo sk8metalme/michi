@@ -32,7 +32,6 @@ echo ""
 
 read -p "プロジェクト名（例: A社 サービス1）: " PROJECT_NAME
 read -p "JIRAプロジェクトキー（例: PRJA）: " JIRA_KEY
-read -p "顧客名（例: A社）[オプション]: " CUSTOMER
 
 # 入力値の検証
 if [[ -z "${PROJECT_NAME// /}" ]]; then
@@ -45,8 +44,6 @@ if [[ -z "${JIRA_KEY// /}" ]]; then
   exit 1
 fi
 
-# デフォルト値
-CUSTOMER=${CUSTOMER:-"Unknown"}
 PROJECT_ID=$(basename "$(pwd)")
 
 echo ""
@@ -54,7 +51,6 @@ echo -e "${GREEN}✅ 設定:${NC}"
 echo "   プロジェクトID: ${PROJECT_ID}"
 echo "   プロジェクト名: ${PROJECT_NAME}"
 echo "   JIRA: ${JIRA_KEY}"
-echo "   顧客: ${CUSTOMER}"
 echo ""
 
 read -p "この設定で続行しますか？ [Y/n]: " CONFIRM
@@ -78,8 +74,7 @@ echo -e "${BLUE}🔧 セットアップスクリプトを実行...${NC}"
 if ! npx tsx "${SETUP_SCRIPT}" \
   --michi-path "${MICHI_PATH}" \
   --project-name "${PROJECT_NAME}" \
-  --jira-key "${JIRA_KEY}" \
-  --customer "${CUSTOMER}"; then
+  --jira-key "${JIRA_KEY}"; then
   echo ""
   echo -e "${YELLOW}❌ セットアップスクリプトが失敗しました${NC}"
   exit 1
