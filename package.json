@@ -56,6 +56,8 @@
     "validate:phase": "tsx scripts/validate-phase.ts",
     "phase:run": "tsx scripts/phase-runner.ts",
     "preflight": "tsx scripts/pre-flight-check.ts",
+    "config:interactive": "tsx scripts/config-interactive.ts",
+    "config:validate": "tsx scripts/utils/config-validator.ts",
     "test": "vitest",
     "test:run": "vitest --run",
     "test:ui": "vitest --ui",

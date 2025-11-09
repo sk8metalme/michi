@@ -66,3 +66,7 @@ pnpm-lock.yaml
 # Project-specific specs (managed per repository)
 # Each project repository should manage its own specs
 .kiro/specs/
+
+# Project-specific configuration (team-specific settings)
+# Each project can customize workflow settings
+.kiro/config.json

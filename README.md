@@ -255,6 +255,7 @@ npm run create-project -- \
 - [クイックリファレンス](./docs/quick-reference.md) - コマンド一覧、チートシート ⭐
 - [フェーズ自動化ガイド](./docs/phase-automation.md) - Confluence/JIRA自動作成、抜け漏れ防止 ⭐
 - [新規プロジェクトセットアップ](./docs/new-project-setup.md) - 他リポジトリでの開始方法 ⭐
+- [カスタマイズガイド](./docs/customization-guide.md) - Confluence/JIRA階層構造のカスタマイズ ⭐
 - [セットアップガイド](./docs/setup.md) - インストール・設定手順
 - [ワークフローガイド](./docs/workflow.md) - AI開発フロー
 - [マルチプロジェクト管理](./docs/multi-project.md) - 複数プロジェクト管理

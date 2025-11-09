@@ -13,6 +13,8 @@ import { runPreFlightCheck } from '../scripts/pre-flight-check.js';
 import { listProjects } from '../scripts/list-projects.js';
 import { createResourceDashboard } from '../scripts/resource-dashboard.js';
 import { WorkflowOrchestrator } from '../scripts/workflow-orchestrator.js';
+import { configInteractive } from '../scripts/config-interactive.js';
+import { validateAndReport } from '../scripts/utils/config-validator.js';
 import { config } from 'dotenv';
 
 // 環境変数読み込み
@@ -195,6 +197,34 @@ export function createCLI(): Command {
         await orchestrator.run();
       } catch (error) {
         console.error('❌ Workflow failed:', error instanceof Error ? error.message : error);
+        process.exit(1);
+      }
+    });
+
+  // config:interactive コマンド
+  program
+    .command('config:interactive')
+    .alias('config:init')
+    .description('Interactive configuration setup for .kiro/config.json')
+    .action(async () => {
+      try {
+        await configInteractive();
+      } catch (error) {
+        console.error('❌ Configuration setup failed:', error instanceof Error ? error.message : error);
+        process.exit(1);
+      }
+    });
+
+  // config:validate コマンド
+  program
+    .command('config:validate')
+    .description('Validate .kiro/config.json')
+    .action(async () => {
+      try {
+        const valid = validateAndReport();
+        process.exit(valid ? 0 : 1);
+      } catch (error) {
+        console.error('❌ Validation failed:', error instanceof Error ? error.message : error);
         process.exit(1);
       }
     });
