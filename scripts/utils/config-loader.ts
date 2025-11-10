@@ -4,7 +4,7 @@
  */
 
 import { readFileSync, existsSync, statSync } from 'fs';
-import { resolve } from 'path';
+import { resolve, relative, isAbsolute } from 'path';
 import { fileURLToPath } from 'url';
 import { config } from 'dotenv';
 import { AppConfigSchema, type AppConfig } from '../config/config-schema.js';
@@ -128,9 +128,16 @@ function loadDefaultConfig(): AppConfig {
 function validateConfigPath(configPath: string, projectRoot: string): boolean {
   const resolvedPath = resolve(configPath);
   const resolvedRoot = resolve(projectRoot);
-  
-  // 設定ファイルはプロジェクトルート内に存在する必要がある
-  return resolvedPath.startsWith(resolvedRoot);
+  const relativePath = relative(resolvedRoot, resolvedPath);
+
+  // プロジェクトルート自体の場合は許可
+  if (!relativePath) {
+    return true;
+  }
+
+  // 相対パスが '..' で始まる、または絶対パスの場合は拒否
+  // これにより、プロジェクトルート外のパスを防ぐ
+  return !relativePath.startsWith('..') && !isAbsolute(relativePath);
 }
 
 /**
@@ -205,6 +212,16 @@ export function loadConfig(projectRoot: string = process.cwd()): AppConfig {
     mergedConfig.confluence.spaces.requirements = process.env.CONFLUENCE_PRD_SPACE;
     mergedConfig.confluence.spaces.design = process.env.CONFLUENCE_PRD_SPACE;
     mergedConfig.confluence.spaces.tasks = process.env.CONFLUENCE_PRD_SPACE;
+  }
+  
+  // JIRA issue type IDを環境変数から取得（インスタンス固有の値のため）
+  if (mergedConfig.jira && mergedConfig.jira.issueTypes) {
+    if (process.env.JIRA_ISSUE_TYPE_STORY) {
+      mergedConfig.jira.issueTypes.story = process.env.JIRA_ISSUE_TYPE_STORY;
+    }
+    if (process.env.JIRA_ISSUE_TYPE_SUBTASK) {
+      mergedConfig.jira.issueTypes.subtask = process.env.JIRA_ISSUE_TYPE_SUBTASK;
+    }
   }
   
   // スキーマで最終バリデーション

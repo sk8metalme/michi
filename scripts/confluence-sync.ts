@@ -70,12 +70,41 @@ class ConfluenceClient {
   
   /**
    * ページを検索
+   * @param spaceKey スペースキー
+   * @param title ページタイトル
+   * @param parentId 親ページID（オプション）。指定された場合、その親ページの子ページのみを検索
    */
-  async searchPage(spaceKey: string, title: string): Promise<any | null> {
+  async searchPage(spaceKey: string, title: string, parentId?: string): Promise<any | null> {
     // レートリミット対策: リクエスト前に待機
     await sleep(this.requestDelay);
     
     try {
+      // 親ページIDが指定されている場合、CQLクエリを使用して親ページの子ページのみを検索
+      if (parentId) {
+        // CQLクエリ: スペース、タイトル、親ページIDで検索
+        // タイトル内の特殊文字をエスケープ
+        const escapedTitle = title.replace(/"/g, '\\"');
+        const cql = `space = ${spaceKey} AND title = "${escapedTitle}" AND ancestor = ${parentId}`;
+        
+        const response = await axios.get(`${this.baseUrl}/content/search`, {
+          params: {
+            cql,
+            expand: 'version'
+          },
+          headers: {
+            'Authorization': `Basic ${this.auth}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (response.data.results && response.data.results.length > 0) {
+          return response.data.results[0];
+        }
+        
+        return null;
+      }
+      
+      // 親ページIDが指定されていない場合、従来の方法で検索
       const response = await axios.get(`${this.baseUrl}/content`, {
         params: {
           spaceKey,

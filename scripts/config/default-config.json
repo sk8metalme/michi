@@ -28,8 +28,8 @@
     ],
     "issueTypes": {
       "epic": "Epic",
-      "story": "10036",
-      "subtask": "10037"
+      "story": null,
+      "subtask": null
     }
   },
   "workflow": {

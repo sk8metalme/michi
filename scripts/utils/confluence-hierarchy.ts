@@ -242,8 +242,9 @@ export async function createSinglePage(
   docType: 'requirements' | 'design' | 'tasks',
   githubUrl: string
 ): Promise<HierarchyCreationResult> {
+  const pageTitleFormat = config.pageTitleFormat || '[{projectName}] {featureName} {docTypeLabel}';
   const pageTitle = expandTitleTemplate(
-    config.pageTitleFormat,
+    pageTitleFormat,
     projectMeta,
     featureName,
     docType
@@ -303,9 +304,17 @@ export async function createBySectionPages(
   const sections = splitMarkdownBySections(markdown);
   const pages: PageCreationResult[] = [];
   
+  const pageTitleFormat = config.pageTitleFormat || '[{projectName}] {featureName} {docTypeLabel}';
+  
   for (const section of sections) {
+    // sectionTitleを含む一意のタイトルを生成
+    // pageTitleFormatに{sectionTitle}が含まれていない場合は追加
+    const titleTemplate = pageTitleFormat.includes('{sectionTitle}')
+      ? pageTitleFormat
+      : `${pageTitleFormat} - {sectionTitle}`;
+    
     const pageTitle = expandTitleTemplate(
-      config.pageTitleFormat + ' - {sectionTitle}',
+      titleTemplate,
       projectMeta,
       featureName,
       docType,
@@ -381,14 +390,21 @@ export async function createByHierarchySimplePages(
     githubUrl
   );
   
-  // ドキュメントタイプの子ページを作成
-  const docTypeLabels: Record<string, string> = {
-    requirements: '要件定義',
-    design: '設計',
-    tasks: 'タスク分割'
-  };
+  // ドキュメントタイプの子ページを作成（featureNameを含む一意のタイトル）
+  const pageTitleFormat = config.pageTitleFormat || '[{projectName}] {featureName} {docTypeLabel}';
+  let childPageTitle = expandTitleTemplate(
+    pageTitleFormat,
+    projectMeta,
+    featureName,
+    docType
+  );
   
-  const childPageTitle = docTypeLabels[docType] || docType;
+  // タイトルに機能名が含まれていない場合、自動的に追加（重複を避けるため）
+  if (!childPageTitle.includes(featureName)) {
+    console.warn(`⚠️  Warning: pageTitleFormat does not include {featureName}. Adding feature name to ensure uniqueness.`);
+    childPageTitle = `[${featureName}] ${childPageTitle}`;
+  }
+  
   const confluenceContent = convertMarkdownToConfluence(markdown);
   const fullContent = createConfluencePage({
     title: childPageTitle,
@@ -400,8 +416,9 @@ export async function createByHierarchySimplePages(
   
   const labels = expandLabels(config.autoLabels, projectMeta, featureName, docType);
   
-  // 既存の子ページを検索
-  const existingChild = await client.searchPage(spaceKey, childPageTitle);
+  // 既存の子ページを検索（親ページIDで絞り込んで検索）
+  // これにより、同じタイトルでも別機能のページがヒットすることを防ぐ
+  const existingChild = await client.searchPage(spaceKey, childPageTitle, parentPageId);
   
   let childPage: any;
   if (existingChild) {
@@ -465,15 +482,23 @@ export async function createByHierarchyNestedPages(
     githubUrl
   );
   
-  // ドキュメントタイプの親ページを作成または取得
-  const docTypeLabels: Record<string, string> = {
-    requirements: '要件定義',
-    design: '設計',
-    tasks: 'タスク分割'
-  };
+  // ドキュメントタイプの親ページを作成または取得（featureNameを含む一意のタイトル）
+  const pageTitleFormat = config.pageTitleFormat || '[{projectName}] {featureName} {docTypeLabel}';
+  let docTypeParentTitle = expandTitleTemplate(
+    pageTitleFormat,
+    projectMeta,
+    featureName,
+    docType
+  );
   
-  const docTypeParentTitle = docTypeLabels[docType] || docType;
-  const existingDocTypeParent = await client.searchPage(spaceKey, docTypeParentTitle);
+  // タイトルに機能名が含まれていない場合、自動的に追加（重複を避けるため）
+  if (!docTypeParentTitle.includes(featureName)) {
+    console.warn(`⚠️  Warning: pageTitleFormat does not include {featureName}. Adding feature name to ensure uniqueness.`);
+    docTypeParentTitle = `[${featureName}] ${docTypeParentTitle}`;
+  }
+  
+  // 親ページIDで絞り込んで検索（同じタイトルでも別機能のページがヒットすることを防ぐ）
+  const existingDocTypeParent = await client.searchPage(spaceKey, docTypeParentTitle, parentPageId);
   
   let docTypeParentId: string;
   if (existingDocTypeParent) {
@@ -498,12 +523,25 @@ export async function createByHierarchyNestedPages(
     console.log(`✅ DocType parent page created: ${docTypeParentTitle}`);
   }
   
-  // セクションごとに子ページを作成
+  // セクションごとに子ページを作成（featureNameとsectionTitleを含む一意のタイトル）
   const sections = splitMarkdownBySections(markdown);
   const pages: PageCreationResult[] = [];
   
   for (const section of sections) {
-    const sectionPageTitle = section.title;
+    // セクションページのタイトルにfeatureNameとsectionTitleを含める
+    let sectionPageTitle = expandTitleTemplate(
+      pageTitleFormat,
+      projectMeta,
+      featureName,
+      docType,
+      section.title
+    );
+    
+    // タイトルに機能名が含まれていない場合、自動的に追加（重複を避けるため）
+    if (!sectionPageTitle.includes(featureName)) {
+      console.warn(`⚠️  Warning: pageTitleFormat does not include {featureName}. Adding feature name to ensure uniqueness.`);
+      sectionPageTitle = `[${featureName}] ${sectionPageTitle}`;
+    }
     const confluenceContent = convertMarkdownToConfluence(section.content);
     const fullContent = createConfluencePage({
       title: sectionPageTitle,
@@ -515,8 +553,9 @@ export async function createByHierarchyNestedPages(
     
     const labels = expandLabels(config.autoLabels, projectMeta, featureName, docType);
     
-    // 既存のセクションページを検索
-    const existingSectionPage = await client.searchPage(spaceKey, sectionPageTitle);
+    // 既存のセクションページを検索（docTypeParentIdで絞り込んで検索）
+    // これにより、同じタイトルでも別機能のページがヒットすることを防ぐ
+    const existingSectionPage = await client.searchPage(spaceKey, sectionPageTitle, docTypeParentId);
     
     let sectionPage: any;
     if (existingSectionPage) {
@@ -595,12 +634,42 @@ export async function createManualPages(
   // 設定ファイルで指定されたページを作成
   if (structure.pages) {
     for (const pageConfig of structure.pages) {
-      const pageTitle = expandTitleTemplate(
+      // セクションが指定されている場合、最初のセクション名を取得
+      let sectionTitleForTitle: string | undefined;
+      if (pageConfig.sections && pageConfig.sections.length > 0) {
+        // マークダウンからセクション名を抽出
+        const lines = markdown.split('\n');
+        for (const line of lines) {
+          for (const sectionPattern of pageConfig.sections) {
+            const escapedPattern = sectionPattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const regex = new RegExp(`^##+\\s+${escapedPattern}`);
+            if (regex.test(line)) {
+              // セクションタイトルを抽出（## を除く）
+              const match = line.match(/^##+\s+(.+)$/);
+              if (match) {
+                sectionTitleForTitle = match[1].trim();
+                break;
+              }
+            }
+          }
+          if (sectionTitleForTitle) break;
+        }
+      }
+      
+      // featureNameとsectionTitleを含む一意のタイトルを生成
+      let pageTitle = expandTitleTemplate(
         pageConfig.title,
         projectMeta,
         featureName,
-        docType
+        docType,
+        sectionTitleForTitle
       );
+      
+      // タイトルに機能名が含まれていない場合、自動的に追加（重複を避けるため）
+      if (!pageTitle.includes(featureName)) {
+        console.warn(`⚠️  Warning: Manual page title does not include {featureName}. Adding feature name to ensure uniqueness.`);
+        pageTitle = `[${featureName}] ${pageTitle}`;
+      }
       
       // 指定されたセクションを抽出
       let pageContent = '';
@@ -627,8 +696,8 @@ export async function createManualPages(
         ? expandLabels(pageConfig.labels, projectMeta, featureName, docType)
         : expandLabels(config.autoLabels, projectMeta, featureName, docType);
       
-      // 既存ページを検索
-      const existingPage = await client.searchPage(spaceKey, pageTitle);
+      // 既存ページを検索（親ページIDが指定されている場合は絞り込んで検索）
+      const existingPage = await client.searchPage(spaceKey, pageTitle, parentPageId);
       
       let page: any;
       if (existingPage) {

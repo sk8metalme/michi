@@ -86,11 +86,11 @@ export const JiraConfigSchema = z.object({
   createEpic: z.boolean().default(true),
   storyPoints: JiraStoryPointsSchema.default('auto'),
   autoLabels: z.array(z.string()).default(['{projectLabel}', '{featureName}', '{phaseLabel}']),
-  issueTypes: z.object({
-    epic: z.string().default('Epic'),
-    story: z.string().default('10036'),
-    subtask: z.string().default('10037')
-  }).optional(),
+    issueTypes: z.object({
+      epic: z.string().default('Epic'),
+      story: z.string().nullish().default(null),  // null | undefined | string
+      subtask: z.string().nullish().default(null)  // null | undefined | string
+    }).optional(),
   selectedPhases: z.array(z.string()).optional()
 });
 

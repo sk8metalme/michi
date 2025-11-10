@@ -58,6 +58,15 @@ npm install
 # 環境変数の設定
 cp env.example .env
 # .env ファイルを編集して認証情報を設定
+# 
+# 【重要】JIRA Issue Type IDの設定
+# JIRA_ISSUE_TYPE_STORY と JIRA_ISSUE_TYPE_SUBTASK は必須です。
+# これらの値はJIRAインスタンス固有のため、各デプロイメントで設定が必要です。
+# 
+# 確認方法:
+# 1. JIRA管理画面: Settings > Issues > Issue types で確認
+# 2. REST API: GET https://your-domain.atlassian.net/rest/api/3/issuetype
+#    レスポンスから "Story" と "Subtask" の "id" フィールドを取得
 
 # MCP設定（Cursor用）
 # mcp.json.example を参考に ~/.cursor/mcp.json を作成
