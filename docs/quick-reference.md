@@ -141,6 +141,8 @@ gh pr create --head <project-id>/feature/<feature> --base init
 | `michi project:list` | プロジェクト一覧 |
 | `michi project:dashboard` | リソースダッシュボード生成 |
 | `michi workflow:run --feature <name>` | 統合ワークフロー実行 |
+| `michi config:interactive` | 対話式設定ツール（.kiro/config.json作成） |
+| `michi config:validate` | 設定ファイルのバリデーション |
 | `michi --help` | ヘルプ表示 |
 | `michi --version` | バージョン表示 |
 

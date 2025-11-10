@@ -90,6 +90,17 @@ CONFLUENCE_RELEASE_SPACE=RELEASE
 # JIRA設定
 JIRA_PROJECT_KEYS=MICHI
 
+# JIRA Issue Type IDs（JIRAインスタンス固有の値 - 必須）
+# これらの値は各JIRAインスタンスで異なるため、必ず設定してください。
+# 
+# 確認方法:
+# 1. JIRA管理画面: Settings > Issues > Issue types で確認
+# 2. REST API: GET https://your-domain.atlassian.net/rest/api/3/issuetype
+#    レスポンスから "Story" と "Subtask" の "id" フィールドを取得
+#    例: {"id": "10036", "name": "Story", ...}
+JIRA_ISSUE_TYPE_STORY=10036
+JIRA_ISSUE_TYPE_SUBTASK=10037
+
 # Slack通知（オプション）
 SLACK_WEBHOOK_URL=<SlackWebhook URL>
 

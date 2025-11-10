@@ -23,6 +23,7 @@ import axios from 'axios';
 import { config } from 'dotenv';
 import { loadProjectMeta } from './utils/project-meta.js';
 import { validateFeatureNameOrThrow } from './utils/feature-name-validator.js';
+import { getConfig } from './utils/config-loader.js';
 
 config();
 
@@ -340,6 +341,20 @@ async function syncTasksToJIRA(featureName: string): Promise<void> {
   
   console.log(`⏳ Request delay: ${getRequestDelay()}ms (set ATLASSIAN_REQUEST_DELAY to adjust)`);
   
+  // 設定からissue type IDを取得（検索と作成の両方で使用）
+  const appConfig = getConfig();
+  const storyIssueTypeId = appConfig.jira?.issueTypes?.story;
+  const subtaskIssueTypeId = appConfig.jira?.issueTypes?.subtask;
+  
+  if (!storyIssueTypeId) {
+    throw new Error(
+      'JIRA Story issue type ID is not configured. ' +
+      'Please set JIRA_ISSUE_TYPE_STORY environment variable or configure it in .kiro/config.json. ' +
+      'You can find the issue type ID in JIRA UI (Settings > Issues > Issue types) or via REST API: ' +
+      'GET https://your-domain.atlassian.net/rest/api/3/issuetype'
+    );
+  }
+  
   const projectMeta = loadProjectMeta();
   const tasksPath = resolve(`.kiro/specs/${featureName}/tasks.md`);
   const tasksContent = readFileSync(tasksPath, 'utf-8');
@@ -403,7 +418,8 @@ async function syncTasksToJIRA(featureName: string): Promise<void> {
   
   // 既存のStoryを検索（重複防止）
   // ラベルで検索（summary検索では "Story: タイトル" 形式に一致しないため）
-  const jql = `project = ${projectMeta.jiraProjectKey} AND issuetype = Story AND labels = "${featureName}"`;
+  // issuetype検索にはIDを使用（名前は言語依存のため）
+  const jql = `project = ${projectMeta.jiraProjectKey} AND issuetype = ${storyIssueTypeId} AND labels = "${featureName}"`;
   let existingStories: any[] = [];
   try {
     existingStories = await client.searchIssues(jql);
@@ -504,13 +520,13 @@ async function syncTasksToJIRA(featureName: string): Promise<void> {
         }
       }
       
-      // JIRAペイロードを作成
+      // JIRAペイロードを作成（issue type IDは既に取得済み）
       const storyPayload: any = {
         fields: {
           project: { key: projectMeta.jiraProjectKey },
           summary: storySummary,
           description: richDescription,  // リッチなADF形式
-          issuetype: { id: '10036' },  // ストーリー（IDを使用して言語に依存しない）
+          issuetype: { id: storyIssueTypeId },
           labels: [...projectMeta.confluenceLabels, featureName, currentPhaseLabel],
           priority: { name: priority }
         }

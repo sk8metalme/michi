@@ -10,6 +10,8 @@ import { config } from 'dotenv';
 import { loadProjectMeta, type ProjectMetadata } from './utils/project-meta.js';
 import { convertMarkdownToConfluence, createConfluencePage } from './markdown-to-confluence.js';
 import { validateFeatureNameOrThrow } from './utils/feature-name-validator.js';
+import { getConfig } from './utils/config-loader.js';
+import { createPagesByGranularity } from './utils/confluence-hierarchy.js';
 
 // 環境変数読み込み
 config();
@@ -68,12 +70,41 @@ class ConfluenceClient {
   
   /**
    * ページを検索
+   * @param spaceKey スペースキー
+   * @param title ページタイトル
+   * @param parentId 親ページID（オプション）。指定された場合、その親ページの子ページのみを検索
    */
-  async searchPage(spaceKey: string, title: string): Promise<any | null> {
+  async searchPage(spaceKey: string, title: string, parentId?: string): Promise<any | null> {
     // レートリミット対策: リクエスト前に待機
     await sleep(this.requestDelay);
     
     try {
+      // 親ページIDが指定されている場合、CQLクエリを使用して親ページの子ページのみを検索
+      if (parentId) {
+        // CQLクエリ: スペース、タイトル、親ページIDで検索
+        // タイトル内の特殊文字をエスケープ
+        const escapedTitle = title.replace(/"/g, '\\"');
+        const cql = `space = ${spaceKey} AND title = "${escapedTitle}" AND ancestor = ${parentId}`;
+        
+        const response = await axios.get(`${this.baseUrl}/content/search`, {
+          params: {
+            cql,
+            expand: 'version'
+          },
+          headers: {
+            'Authorization': `Basic ${this.auth}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (response.data.results && response.data.results.length > 0) {
+          return response.data.results[0];
+        }
+        
+        return null;
+      }
+      
+      // 親ページIDが指定されていない場合、従来の方法で検索
       const response = await axios.get(`${this.baseUrl}/content`, {
         params: {
           spaceKey,
@@ -100,11 +131,11 @@ class ConfluenceClient {
   /**
    * ページを作成
    */
-  async createPage(spaceKey: string, title: string, content: string, labels: string[] = []): Promise<any> {
+  async createPage(spaceKey: string, title: string, content: string, labels: string[] = [], parentId?: string): Promise<any> {
     // レートリミット対策: リクエスト前に待機
     await sleep(this.requestDelay);
     
-    const payload = {
+    const payload: any = {
       type: 'page',
       title,
       space: { key: spaceKey },
@@ -119,6 +150,11 @@ class ConfluenceClient {
       }
     };
     
+    // 親ページが指定されている場合、ancestorsを追加
+    if (parentId) {
+      payload.ancestors = [{ id: parentId }];
+    }
+    
     const response = await axios.post(`${this.baseUrl}/content`, payload, {
       headers: {
         'Authorization': `Basic ${this.auth}`,
@@ -127,6 +163,19 @@ class ConfluenceClient {
     });
     
     return response.data;
+  }
+  
+  /**
+   * 親ページの下に子ページを作成
+   */
+  async createPageUnderParent(
+    spaceKey: string,
+    title: string,
+    content: string,
+    labels: string[] = [],
+    parentId: string
+  ): Promise<any> {
+    return this.createPage(spaceKey, title, content, labels, parentId);
   }
   
   /**
@@ -198,68 +247,60 @@ async function syncToConfluence(
   const projectMeta = loadProjectMeta();
   console.log(`Project: ${projectMeta.projectName} (${projectMeta.projectId})`);
   
+  // 設定を読み込み
+  const appConfig = getConfig();
+  const confluenceConfig = appConfig.confluence || {
+    pageCreationGranularity: 'single',
+    pageTitleFormat: '[{projectName}] {featureName} {docTypeLabel}',
+    autoLabels: ['{projectLabel}', '{docType}', '{featureName}', 'github-sync']
+  };
+  
+  console.log(`📋 Page creation granularity: ${confluenceConfig.pageCreationGranularity}`);
+  
   // Markdownファイル読み込み
   const markdownPath = resolve(`.kiro/specs/${featureName}/${docType}.md`);
   const markdown = readFileSync(markdownPath, 'utf-8');
   
-  // Confluenceに変換
-  const confluenceContent = convertMarkdownToConfluence(markdown);
-  
   // GitHub URL生成
   const githubUrl = `${projectMeta.repository}/blob/main/.kiro/specs/${featureName}/${docType}.md`;
   
-  // Confluenceページコンテンツ作成
-  const pageTitle = `[${projectMeta.projectName}] ${featureName} ${getDocTypeLabel(docType)}`;
-  const fullContent = createConfluencePage({
-    title: pageTitle,
-    githubUrl,
-    content: confluenceContent,
-    approvers: projectMeta.stakeholders,
-    projectName: projectMeta.projectName
-  });
+  // Confluence設定を取得
+  const confluenceApiConfig = getConfluenceConfig();
+  
+  // スペースを設定から取得（環境変数で上書き可能）
+  const spaceKey = confluenceConfig.spaces?.[docType] || confluenceApiConfig.space;
   
   // Confluenceクライアント初期化
-  const config = getConfluenceConfig();
-  const client = new ConfluenceClient(config);
+  const client = new ConfluenceClient(confluenceApiConfig);
   
-  // ページ検索
-  const existingPage = await client.searchPage(config.space, pageTitle);
-  
-  // ラベル準備
-  const labels = [
-    ...projectMeta.confluenceLabels,
-    docType,
+  // 階層構造に応じてページを作成
+  const result = await createPagesByGranularity(
+    client,
+    spaceKey,
+    markdown,
+    confluenceConfig,
+    projectMeta,
     featureName,
-    'github-sync'
-  ];
+    docType,
+    githubUrl
+  );
   
-  let pageUrl: string;
-  
-  if (existingPage) {
-    // 既存ページを更新
-    console.log(`Updating existing page: ${pageTitle}`);
-    const updated = await client.updatePage(
-      existingPage.id,
-      pageTitle,
-      fullContent,
-      existingPage.version.number
-    );
-    pageUrl = `${config.url}/wiki${updated._links.webui}`;
-    console.log(`✅ Page updated: ${pageUrl}`);
-  } else {
-    // 新規ページ作成
-    console.log(`Creating new page: ${pageTitle}`);
-    const created = await client.createPage(
-      config.space,
-      pageTitle,
-      fullContent,
-      labels
-    );
-    pageUrl = `${config.url}/wiki${created._links.webui}`;
-    console.log(`✅ Page created: ${pageUrl}`);
+  // 最初のページのURLを返す（後方互換性のため）
+  if (result.pages.length === 0) {
+    throw new Error('No pages were created');
   }
   
-  return pageUrl;
+  const firstPageUrl = result.pages[0].url;
+  console.log(`✅ Sync completed: ${result.pages.length} page(s) created/updated`);
+  
+  if (result.pages.length > 1) {
+    console.log(`📄 Created pages:`);
+    result.pages.forEach((page, index) => {
+      console.log(`   ${index + 1}. ${page.title} - ${page.url}`);
+    });
+  }
+  
+  return firstPageUrl;
 }
 
 /**
