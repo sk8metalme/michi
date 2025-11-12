@@ -134,14 +134,27 @@ class ConfluenceClient {
       if (error.response?.status === 404) {
         return null;
       }
-      // その他のエラーは詳細を表示
+      
+      // その他のエラーは詳細をログ出力
       console.error('Error searching page:', error.message);
       if (error.response) {
         console.error('  Status:', error.response.status);
         console.error('  Data:', JSON.stringify(error.response.data, null, 2));
       }
-      // エラーが発生しても、ページ作成を試みるためにnullを返す
-      return null;
+      
+      // 404以外のエラーは再スロー（認証、権限、ネットワーク、サーバーエラーなど）
+      // エラーの詳細情報を含めて再スロー
+      if (error.response) {
+        // HTTPレスポンスがある場合（4xx/5xxエラー）
+        const enhancedError = new Error(
+          `Confluence API error: ${error.message} (status: ${error.response.status})`
+        );
+        (enhancedError as any).response = error.response;
+        throw enhancedError;
+      } else {
+        // ネットワークエラーなど、レスポンスがない場合
+        throw error;
+      }
     }
   }
   
@@ -222,6 +235,59 @@ class ConfluenceClient {
     });
     
     return response.data;
+  }
+  
+  /**
+   * ページの親情報を取得
+   * @param pageId ページID
+   * @returns 親ページID（ルートページの場合はnull）
+   */
+  async getPageParentId(pageId: string): Promise<string | null> {
+    // レートリミット対策: リクエスト前に待機
+    await sleep(this.requestDelay);
+    
+    try {
+      const response = await axios.get(`${this.baseUrl}/content/${pageId}`, {
+        params: {
+          expand: 'ancestors'
+        },
+        headers: {
+          'Authorization': `Basic ${this.auth}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      // ancestors配列の最後の要素が直接の親ページ
+      const ancestors = response.data.ancestors;
+      if (ancestors && ancestors.length > 0) {
+        return ancestors[ancestors.length - 1].id;
+      }
+      
+      return null; // ルートページ
+    } catch (error: any) {
+      // 404エラーはページが存在しないことを意味する
+      if (error.response?.status === 404) {
+        return null;
+      }
+      
+      // その他のエラーは詳細をログ出力
+      console.error('Error getting page parent:', error.message);
+      if (error.response) {
+        console.error('  Status:', error.response.status);
+        console.error('  Data:', JSON.stringify(error.response.data, null, 2));
+      }
+      
+      // 404以外のエラーは再スロー
+      if (error.response) {
+        const enhancedError = new Error(
+          `Confluence API error: ${error.message} (status: ${error.response.status})`
+        );
+        (enhancedError as any).response = error.response;
+        throw enhancedError;
+      } else {
+        throw error;
+      }
+    }
   }
   
   /**
@@ -338,7 +404,7 @@ async function syncToConfluence(
   // spec.jsonを読み込み
   const specJson = loadSpecJson(featureName);
   
-  // スペースキーを決定（優先順位: spec.json → config.json → 環境変数 → デフォルト）
+  // スペースキーを決定（優先順位: spec.json → config.json → 環境変数/デフォルト）
   let spaceKey: string;
   let spaceKeySource: string;
   
@@ -348,12 +414,10 @@ async function syncToConfluence(
   } else if (confluenceConfig.spaces?.[docType]) {
     spaceKey = confluenceConfig.spaces[docType];
     spaceKeySource = 'config.json';
-  } else if (confluenceApiConfig.space) {
-    spaceKey = confluenceApiConfig.space;
-    spaceKeySource = process.env.CONFLUENCE_PRD_SPACE ? 'environment variable' : 'default';
   } else {
-    spaceKey = 'PRD';
-    spaceKeySource = 'hardcoded default';
+    // confluenceApiConfig.space は常に存在（getConfluenceConfig()で 'PRD' がデフォルト）
+    spaceKey = confluenceApiConfig.space;
+    spaceKeySource = process.env.CONFLUENCE_PRD_SPACE ? 'environment variable' : 'default from config';
   }
   
   console.log(`📌 Using Confluence space: ${spaceKey} (source: ${spaceKeySource})`);

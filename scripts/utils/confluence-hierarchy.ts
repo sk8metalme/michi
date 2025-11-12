@@ -426,8 +426,26 @@ export async function createByHierarchySimplePages(
     console.log(`  CQL search found nothing, trying search without parent filter`);
     existingChild = await client.searchPage(spaceKey, childPageTitle);
     if (existingChild) {
-      console.log(`  ⚠️  Found page with same title but different parent: ${existingChild.id}`);
-      // 既存ページが見つかったが、親ページが異なる場合は更新する
+      console.log(`  ⚠️  Found page with same title: ${existingChild.id}, verifying parent page ID`);
+      
+      // 見つかったページの実際の親ページIDを取得して検証
+      const actualParentId = await client.getPageParentId(existingChild.id);
+      
+      if (actualParentId === parentPageId) {
+        // 親ページIDが一致する場合、更新を続行
+        console.log(`  ✅ Parent page ID matches (${parentPageId}), proceeding with update`);
+      } else {
+        // 親ページIDが一致しない場合、エラーをスロー
+        console.error(`  ❌ Parent page ID mismatch!`);
+        console.error(`     Expected parent: ${parentPageId}`);
+        console.error(`     Actual parent: ${actualParentId || 'root (no parent)'}`);
+        console.error(`     Page ID: ${existingChild.id}`);
+        throw new Error(
+          `Page conflict: Found page "${childPageTitle}" (ID: ${existingChild.id}) ` +
+          `under different parent (expected: ${parentPageId}, actual: ${actualParentId || 'root'}). ` +
+          `Cannot update foreign page. Please rename or delete the conflicting page.`
+        );
+      }
     }
   }
   
