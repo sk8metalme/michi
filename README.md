@@ -43,13 +43,13 @@ JIRA ← タスク管理・進捗追跡
 
 ```bash
 # グローバルインストール
-npm install -g @sk8metalme/michi-cli
+npm install -g @sk8metal/michi-cli
 
 # または、プロジェクトにローカルインストール
-npm install --save-dev @sk8metalme/michi-cli
+npm install --save-dev @sk8metal/michi-cli
 
 # 使用方法
-npx @sk8metalme/michi-cli --help
+npx @sk8metal/michi-cli --help
 # または、グローバルインストール後
 michi --help
 ```
@@ -111,29 +111,29 @@ cp env.example .env
 # Phase 1: 要件定義
 # 凡例
 /kiro:spec-requirements <feature>                              # AIで requirements.md 作成
-npx @sk8metalme/michi-cli phase:run <feature> requirements     # Confluence作成＋バリデーション（必須）
+npx @sk8metal/michi-cli phase:run <feature> requirements     # Confluence作成＋バリデーション（必須）
 
 # 具体例
 /kiro:spec-requirements user-auth                              # AIで requirements.md 作成
-npx @sk8metalme/michi-cli phase:run user-auth requirements      # Confluence作成＋バリデーション（必須）
+npx @sk8metal/michi-cli phase:run user-auth requirements      # Confluence作成＋バリデーション（必須）
 
 # Phase 2: 設計
 # 凡例
 /kiro:spec-design <feature>                                     # AIで design.md 作成
-npx @sk8metalme/michi-cli phase:run <feature> design           # Confluence作成＋バリデーション（必須）
+npx @sk8metal/michi-cli phase:run <feature> design           # Confluence作成＋バリデーション（必須）
 
 # 具体例
 /kiro:spec-design user-auth                                     # AIで design.md 作成
-npx @sk8metalme/michi-cli phase:run user-auth design           # Confluence作成＋バリデーション（必須）
+npx @sk8metal/michi-cli phase:run user-auth design           # Confluence作成＋バリデーション（必須）
 
 # Phase 3: タスク分割（6フェーズすべて）
 # 凡例
 /kiro:spec-tasks <feature>                                      # AIで tasks.md 作成（要件定義～リリースまで）
-npx @sk8metalme/michi-cli phase:run <feature> tasks            # 全フェーズのJIRA作成＋バリデーション（必須）
+npx @sk8metal/michi-cli phase:run <feature> tasks            # 全フェーズのJIRA作成＋バリデーション（必須）
 
 # 具体例
 /kiro:spec-tasks user-auth                                      # AIで tasks.md 作成（要件定義～リリースまで）
-npx @sk8metalme/michi-cli phase:run user-auth tasks            # 全フェーズのJIRA作成＋バリデーション（必須）
+npx @sk8metal/michi-cli phase:run user-auth tasks            # 全フェーズのJIRA作成＋バリデーション（必須）
 
 # Phase 4: 実装
 # 凡例
@@ -149,39 +149,39 @@ npx @sk8metalme/michi-cli phase:run user-auth tasks            # 全フェーズ
 # tasks.mdのPhase 4-5に従ってリリース準備・本番リリース
 ```
 
-**重要**: 各フェーズで `npx @sk8metalme/michi-cli phase:run` を実行しないと、Confluence/JIRAが作成されず、PMや部長がレビューできません。
+**重要**: 各フェーズで `npx @sk8metal/michi-cli phase:run` を実行しないと、Confluence/JIRAが作成されず、PMや部長がレビューできません。
 
 **CLIツールの使用方法**:
-- **npx実行（推奨）**: `npx @sk8metalme/michi-cli <command>` - 常に最新版を使用
-- **グローバルインストール**: `npm install -g @sk8metalme/michi-cli` 後、`michi <command>` で実行
+- **npx実行（推奨）**: `npx @sk8metal/michi-cli <command>` - 常に最新版を使用
+- **グローバルインストール**: `npm install -g @sk8metal/michi-cli` 後、`michi <command>` で実行
 - **ローカル開発**: `npm run michi <command>` または `tsx src/cli.ts <command>`
 
 ### 2. バリデーション確認
 
 ```bash
 # 凡例
-npx @sk8metalme/michi-cli validate:phase <feature> <phase>
+npx @sk8metal/michi-cli validate:phase <feature> <phase>
 
 # 具体例
-npx @sk8metalme/michi-cli validate:phase user-auth requirements  # 要件定義チェック
-npx @sk8metalme/michi-cli validate:phase user-auth design         # 設計チェック
-npx @sk8metalme/michi-cli validate:phase user-auth tasks          # タスク分割チェック
+npx @sk8metal/michi-cli validate:phase user-auth requirements  # 要件定義チェック
+npx @sk8metal/michi-cli validate:phase user-auth design         # 設計チェック
+npx @sk8metal/michi-cli validate:phase user-auth tasks          # タスク分割チェック
 ```
 
 ### 3. 個別実行
 
 ```bash
 # 凡例
-npx @sk8metalme/michi-cli confluence:sync <feature> <doc-type>
-npx @sk8metalme/michi-cli jira:sync <feature>
-npx @sk8metalme/michi-cli workflow:run --feature <feature>
+npx @sk8metal/michi-cli confluence:sync <feature> <doc-type>
+npx @sk8metal/michi-cli jira:sync <feature>
+npx @sk8metal/michi-cli workflow:run --feature <feature>
 
 # 具体例
-npx @sk8metalme/michi-cli confluence:sync user-auth requirements  # Confluenceに同期
-npx @sk8metalme/michi-cli jira:sync user-auth                     # JIRAタスク作成
-npx @sk8metalme/michi-cli preflight                               # プリフライトチェック
-npx @sk8metalme/michi-cli project:list                            # プロジェクト一覧
-npx @sk8metalme/michi-cli workflow:run --feature user-auth       # ワークフロー実行
+npx @sk8metal/michi-cli confluence:sync user-auth requirements  # Confluenceに同期
+npx @sk8metal/michi-cli jira:sync user-auth                     # JIRAタスク作成
+npx @sk8metal/michi-cli preflight                               # プリフライトチェック
+npx @sk8metal/michi-cli project:list                            # プロジェクト一覧
+npx @sk8metal/michi-cli workflow:run --feature user-auth       # ワークフロー実行
 ```
 
 ## プロジェクト構造

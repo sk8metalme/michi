@@ -78,7 +78,7 @@ ATLASSIAN_EMAIL=your-email@company.com
 ATLASSIAN_API_TOKEN=<ATLASSIANトークン>
 
 # GitHub設定
-GITHUB_ORG=sk8metalme
+GITHUB_ORG=sk8metal
 GITHUB_TOKEN=<GitHubトークン>
 GITHUB_REPO=sk8metalme/michi
 
