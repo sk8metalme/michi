@@ -5,6 +5,7 @@
 import { existsSync, readFileSync } from 'fs';
 import { resolve } from 'path';
 import { AppConfigSchema } from '../config/config-schema.js';
+import type { ZodIssue } from 'zod';
 import type { AppConfig } from '../config/config-schema.js';
 import { getConfig } from './config-loader.js';
 
@@ -47,8 +48,8 @@ export function validateProjectConfig(projectRoot: string = process.cwd()): Vali
     const result = AppConfigSchema.safeParse(parsed);
     
     if (!result.success) {
-      result.error.errors.forEach(error => {
-        const path = error.path.join('.');
+      result.error.issues.forEach((error: ZodIssue) => {
+        const path = error.path.map(String).join('.');
         errors.push(`${path}: ${error.message}`);
       });
       
