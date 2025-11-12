@@ -1,6 +1,6 @@
 {
-  "name": "@sk8metalme/michi-cli",
-  "version": "1.0.0",
+  "name": "@sk8metal/michi-cli",
+  "version": "0.0.2",
   "description": "Managed Intelligent Comprehensive Hub for Integration - AI-driven development workflow automation",
   "license": "MIT",
   "type": "module",
@@ -36,6 +36,7 @@
     "scripts",
     "docs",
     "README.md",
+    "CHANGELOG.md",
     "LICENSE",
     "env.example",
     "mcp.json.example"
