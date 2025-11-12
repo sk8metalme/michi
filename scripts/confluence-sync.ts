@@ -12,6 +12,7 @@ import { convertMarkdownToConfluence, createConfluencePage } from './markdown-to
 import { validateFeatureNameOrThrow } from './utils/feature-name-validator.js';
 import { getConfig } from './utils/config-loader.js';
 import { createPagesByGranularity } from './utils/confluence-hierarchy.js';
+import { validateForConfluenceSync } from './utils/config-validator.js';
 
 // 環境変数読み込み
 config();
@@ -278,6 +279,26 @@ async function syncToConfluence(
   
   // feature名のバリデーション（必須）
   validateFeatureNameOrThrow(featureName);
+  
+  // 実行前の必須設定値チェック
+  const validation = validateForConfluenceSync(docType);
+  
+  if (validation.info.length > 0) {
+    validation.info.forEach(msg => console.log(`ℹ️  ${msg}`));
+  }
+  
+  if (validation.warnings.length > 0) {
+    console.warn('⚠️  Warnings:');
+    validation.warnings.forEach(warning => console.warn(`   ${warning}`));
+  }
+  
+  if (validation.errors.length > 0) {
+    console.error('❌ Configuration errors:');
+    validation.errors.forEach(error => console.error(`   ${error}`));
+    const configPath = resolve('.kiro/config.json');
+    console.error(`\n設定ファイル: ${configPath}`);
+    throw new Error('Confluence同期に必要な設定値が不足しています。上記のエラーを確認して設定を修正してください。');
+  }
   
   console.log(`⏳ Request delay: ${getRequestDelay()}ms (set ATLASSIAN_REQUEST_DELAY to adjust)`);
   
