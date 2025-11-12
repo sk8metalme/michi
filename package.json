@@ -92,13 +92,9 @@
     "prettier": "^3.1.1",
     "tsx": "^4.7.0",
     "typescript": "^5.3.3",
-<<<<<<< HEAD
+    "typescript-eslint": "^8.46.4",
     "vitest": "^4.0.8",
     "@vitest/coverage-v8": "^4.0.8"
-=======
-    "typescript-eslint": "^8.46.4",
-    "vitest": "^1.1.1"
->>>>>>> c7db579 (feat: ESLint 9への移行 - Flat Config形式に変更)
   },
   "engines": {
     "node": ">=20.0.0",
