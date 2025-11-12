@@ -3,6 +3,10 @@
 
 AI駆動開発ワークフロー自動化プラットフォーム
 
+[![CI](https://github.com/sk8metalme/michi/actions/workflows/ci.yml/badge.svg)](https://github.com/sk8metalme/michi/actions/workflows/ci.yml)
+[![Security](https://github.com/sk8metalme/michi/actions/workflows/security.yml/badge.svg)](https://github.com/sk8metalme/michi/actions/workflows/security.yml)
+[![codecov](https://codecov.io/gh/sk8metalme/michi/branch/main/graph/badge.svg)](https://codecov.io/gh/sk8metalme/michi)
+
 ## 概要
 
 Michiは、企業の開発フロー全体（要件定義→設計→タスク分割→実装→テスト→リリース）をAIで自動化するプラットフォームです。
@@ -297,6 +301,38 @@ npm run create-project -- \
 - [ワークフローガイド](./docs/workflow.md) - AI開発フロー
 - [マルチプロジェクト管理](./docs/multi-project.md) - 複数プロジェクト管理
 - [テスト・検証](./docs/testing.md) - E2Eテスト、フィードバック
+- [CI/CD整備計画](./docs/cicd-plan.md) - CI/CDパイプラインの計画と実装状況
+
+## CI/CD
+
+このプロジェクトでは、GitHub Actionsを使用してCI/CDパイプラインを構築しています。
+
+### 自動実行されるチェック
+
+- **テスト**: プッシュ・PR時に自動テスト実行（Node.js 20.x, 22.x）
+- **リント**: ESLintによるコード品質チェック
+- **型チェック**: TypeScriptの型チェック
+- **セキュリティスキャン**: 週1回の依存関係脆弱性スキャン
+- **カバレッジレポート**: テストカバレッジの自動生成・アップロード
+
+### リリース
+
+- **自動リリース**: `v*`タグ作成時に自動NPMパッケージ公開
+- **Dependabot**: 依存関係の自動更新プルリクエスト
+
+詳細は [CI/CD整備計画](./docs/cicd-plan.md) を参照してください。
+
+### NPM_TOKEN設定
+
+リリース自動化を有効にするには、NPM_TOKENの設定が必要です。
+
+**設定手順**: [NPM_TOKEN設定ガイド](./docs/npm-token-setup.md)
+
+**設定内容**:
+1. NPMアカウントでAutomation Tokenを生成
+2. GitHub Secretsに`NPM_TOKEN`を追加
+
+設定完了後、`v*`タグを作成すると自動的にNPMパッケージが公開されます。
 
 ## 技術スタック
 

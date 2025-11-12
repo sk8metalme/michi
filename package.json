@@ -1,6 +1,6 @@
 {
   "name": "@sk8metal/michi-cli",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Managed Intelligent Comprehensive Hub for Integration - AI-driven development workflow automation",
   "license": "MIT",
   "type": "module",
@@ -64,6 +64,7 @@
     "test": "vitest",
     "test:run": "vitest --run",
     "test:ui": "vitest --ui",
+    "test:coverage": "vitest --run --coverage",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "type-check": "tsc --noEmit"
@@ -90,7 +91,8 @@
     "prettier": "^3.1.1",
     "tsx": "^4.7.0",
     "typescript": "^5.3.3",
-    "vitest": "^1.1.1"
+    "vitest": "^1.1.1",
+    "@vitest/coverage-v8": "^1.1.1"
   },
   "engines": {
     "node": ">=20.0.0",
