@@ -1,10 +1,12 @@
 {
-  "name": "@michi/cli",
+  "name": "@sk8metalme/michi-cli",
   "version": "1.0.0",
   "description": "Managed Intelligent Comprehensive Hub for Integration - AI-driven development workflow automation",
   "license": "MIT",
-  "private": true,
   "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/sk8metalme/michi.git"

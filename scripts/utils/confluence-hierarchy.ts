@@ -418,10 +418,22 @@ export async function createByHierarchySimplePages(
   
   // 既存の子ページを検索（親ページIDで絞り込んで検索）
   // これにより、同じタイトルでも別機能のページがヒットすることを防ぐ
-  const existingChild = await client.searchPage(spaceKey, childPageTitle, parentPageId);
+  console.log(`🔍 Searching for existing child page: "${childPageTitle}" under parent ${parentPageId}`);
+  let existingChild = await client.searchPage(spaceKey, childPageTitle, parentPageId);
+  
+  // CQLクエリで見つからない場合、親ページIDなしで検索（既存ページが別の親の下にある可能性）
+  if (!existingChild) {
+    console.log(`  CQL search found nothing, trying search without parent filter`);
+    existingChild = await client.searchPage(spaceKey, childPageTitle);
+    if (existingChild) {
+      console.log(`  ⚠️  Found page with same title but different parent: ${existingChild.id}`);
+      // 既存ページが見つかったが、親ページが異なる場合は更新する
+    }
+  }
   
   let childPage: any;
   if (existingChild) {
+    console.log(`📄 Found existing child page: ${existingChild.id} (version ${existingChild.version.number})`);
     childPage = await client.updatePage(
       existingChild.id,
       childPageTitle,
