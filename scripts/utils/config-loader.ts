@@ -196,8 +196,8 @@ export function loadConfig(projectRoot: string = process.cwd()): AppConfig {
     ? deepMerge(defaultConfig, projectConfig)
     : defaultConfig;
   
-  // 環境変数で最終上書き（既存の動作を維持）
-  // 注意: 環境変数は既存のスクリプトで使用されているため、優先度を維持
+  // 環境変数で最終上書き（条件付き）
+  // 注意: config.jsonにspaces設定がある場合は環境変数を無視（config.jsonを優先）
   if (process.env.CONFLUENCE_PRD_SPACE) {
     if (!mergedConfig.confluence) {
       mergedConfig.confluence = {
@@ -206,12 +206,18 @@ export function loadConfig(projectRoot: string = process.cwd()): AppConfig {
         autoLabels: ['{projectLabel}', '{docType}', '{featureName}', 'github-sync']
       };
     }
-    if (!mergedConfig.confluence.spaces) {
-      mergedConfig.confluence.spaces = {};
+    // config.jsonにspaces設定がない場合のみ環境変数で上書き
+    if (!mergedConfig.confluence.spaces || 
+        (!mergedConfig.confluence.spaces.requirements && 
+         !mergedConfig.confluence.spaces.design && 
+         !mergedConfig.confluence.spaces.tasks)) {
+      if (!mergedConfig.confluence.spaces) {
+        mergedConfig.confluence.spaces = {};
+      }
+      mergedConfig.confluence.spaces.requirements = process.env.CONFLUENCE_PRD_SPACE;
+      mergedConfig.confluence.spaces.design = process.env.CONFLUENCE_PRD_SPACE;
+      mergedConfig.confluence.spaces.tasks = process.env.CONFLUENCE_PRD_SPACE;
     }
-    mergedConfig.confluence.spaces.requirements = process.env.CONFLUENCE_PRD_SPACE;
-    mergedConfig.confluence.spaces.design = process.env.CONFLUENCE_PRD_SPACE;
-    mergedConfig.confluence.spaces.tasks = process.env.CONFLUENCE_PRD_SPACE;
   }
   
   // JIRA issue type IDを環境変数から取得（インスタンス固有の値のため）

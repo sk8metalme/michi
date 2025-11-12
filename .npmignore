@@ -1,0 +1,90 @@
+# Environment Variables
+.env
+.env.local
+.env.*.local
+
+# Build Outputs (dist/は含める必要があるため除外しない)
+# dist/ は package.json の files フィールドで明示的に含める
+
+# Source Files (TypeScript)
+src/**/*.ts
+!src/**/*.d.ts
+scripts/**/*.ts
+!scripts/**/*.d.ts
+tsconfig.json
+
+# Development Files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Testing
+coverage/
+.nyc_output/
+.vitest/
+**/__tests__/
+**/*.test.ts
+**/*.spec.ts
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Temporary Files
+tmp/
+temp/
+*.tmp
+
+# OS Files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Project-specific specs (managed per repository)
+.kiro/specs/
+
+# Project-specific configuration (team-specific settings)
+.kiro/config.json
+
+# MCP Credentials (local only)
+~/.cursor/mcp.json
+
+# Backup Files
+*.backup.*
+*.bak
+.#*
+#*#
+
+# Package Manager Lock Files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+.circleci/
+
+# Documentation (README.md と LICENSE は含める)
+docs/
+*.md
+!README.md
+
+# Examples
+examples/
+*.example
+!mcp.json.example
+!env.example
+

@@ -3,7 +3,7 @@
  * GitHub の Markdown ファイルを Confluence に同期
  */
 
-import { readFileSync } from 'fs';
+import { readFileSync, existsSync } from 'fs';
 import { resolve, join } from 'path';
 import axios from 'axios';
 import { config } from 'dotenv';
@@ -12,6 +12,7 @@ import { convertMarkdownToConfluence, createConfluencePage } from './markdown-to
 import { validateFeatureNameOrThrow } from './utils/feature-name-validator.js';
 import { getConfig } from './utils/config-loader.js';
 import { createPagesByGranularity } from './utils/confluence-hierarchy.js';
+import { validateForConfluenceSync } from './utils/config-validator.js';
 
 // 環境変数読み込み
 config();
@@ -84,7 +85,9 @@ class ConfluenceClient {
         // CQLクエリ: スペース、タイトル、親ページIDで検索
         // タイトル内の特殊文字をエスケープ
         const escapedTitle = title.replace(/"/g, '\\"');
-        const cql = `space = ${spaceKey} AND title = "${escapedTitle}" AND ancestor = ${parentId}`;
+        // ancestorの代わりにparentを使用（Confluence CQLの正しい構文）
+        const cql = `space = ${spaceKey} AND title = "${escapedTitle}" AND parent = ${parentId}`;
+        console.log(`  CQL Query: ${cql}`);
         
         const response = await axios.get(`${this.baseUrl}/content/search`, {
           params: {
@@ -97,10 +100,14 @@ class ConfluenceClient {
           }
         });
         
+        console.log(`  CQL Search results: ${response.data.results?.length || 0} pages found`);
+        
         if (response.data.results && response.data.results.length > 0) {
           return response.data.results[0];
         }
         
+        // CQLクエリで見つからない場合、従来の方法で検索（親ページIDでフィルタリング）
+        console.log(`  Falling back to standard search (may find pages in different parent)`);
         return null;
       }
       
@@ -122,8 +129,18 @@ class ConfluenceClient {
       }
       
       return null;
-    } catch (error) {
-      console.error('Error searching page:', error);
+    } catch (error: any) {
+      // 404エラーは既存ページがないことを意味するので、nullを返す
+      if (error.response?.status === 404) {
+        return null;
+      }
+      // その他のエラーは詳細を表示
+      console.error('Error searching page:', error.message);
+      if (error.response) {
+        console.error('  Status:', error.response.status);
+        console.error('  Data:', JSON.stringify(error.response.data, null, 2));
+      }
+      // エラーが発生しても、ページ作成を試みるためにnullを返す
       return null;
     }
   }
@@ -230,6 +247,28 @@ class ConfluenceClient {
 }
 
 /**
+ * spec.jsonを読み込む
+ * @param featureName 機能名
+ * @param projectRoot プロジェクトルート（デフォルト: process.cwd()）
+ * @returns spec.jsonの内容、存在しない場合はnull
+ */
+function loadSpecJson(featureName: string, projectRoot: string = process.cwd()): any | null {
+  const specPath = resolve(projectRoot, `.kiro/specs/${featureName}/spec.json`);
+  
+  if (!existsSync(specPath)) {
+    return null;
+  }
+  
+  try {
+    const content = readFileSync(specPath, 'utf-8');
+    return JSON.parse(content);
+  } catch (error) {
+    console.warn(`⚠️  Failed to load spec.json from ${specPath}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    return null;
+  }
+}
+
+/**
  * Markdownファイルを Confluence に同期
  */
 async function syncToConfluence(
@@ -240,6 +279,26 @@ async function syncToConfluence(
   
   // feature名のバリデーション（必須）
   validateFeatureNameOrThrow(featureName);
+  
+  // 実行前の必須設定値チェック
+  const validation = validateForConfluenceSync(docType);
+  
+  if (validation.info.length > 0) {
+    validation.info.forEach(msg => console.log(`ℹ️  ${msg}`));
+  }
+  
+  if (validation.warnings.length > 0) {
+    console.warn('⚠️  Warnings:');
+    validation.warnings.forEach(warning => console.warn(`   ${warning}`));
+  }
+  
+  if (validation.errors.length > 0) {
+    console.error('❌ Configuration errors:');
+    validation.errors.forEach(error => console.error(`   ${error}`));
+    const configPath = resolve('.kiro/config.json');
+    console.error(`\n設定ファイル: ${configPath}`);
+    throw new Error('Confluence同期に必要な設定値が不足しています。上記のエラーを確認して設定を修正してください。');
+  }
   
   console.log(`⏳ Request delay: ${getRequestDelay()}ms (set ATLASSIAN_REQUEST_DELAY to adjust)`);
   
@@ -257,6 +316,15 @@ async function syncToConfluence(
   
   console.log(`📋 Page creation granularity: ${confluenceConfig.pageCreationGranularity}`);
   
+  // 設定ソースのログ出力
+  if (confluenceConfig.spaces?.[docType]) {
+    console.log(`📝 Config source: config.json (spaces.${docType} = ${confluenceConfig.spaces[docType]})`);
+  } else if (process.env.CONFLUENCE_PRD_SPACE) {
+    console.log(`📝 Config source: environment variable (CONFLUENCE_PRD_SPACE = ${process.env.CONFLUENCE_PRD_SPACE})`);
+  } else {
+    console.log(`📝 Config source: default config`);
+  }
+  
   // Markdownファイル読み込み
   const markdownPath = resolve(`.kiro/specs/${featureName}/${docType}.md`);
   const markdown = readFileSync(markdownPath, 'utf-8');
@@ -267,8 +335,28 @@ async function syncToConfluence(
   // Confluence設定を取得
   const confluenceApiConfig = getConfluenceConfig();
   
-  // スペースを設定から取得（環境変数で上書き可能）
-  const spaceKey = confluenceConfig.spaces?.[docType] || confluenceApiConfig.space;
+  // spec.jsonを読み込み
+  const specJson = loadSpecJson(featureName);
+  
+  // スペースキーを決定（優先順位: spec.json → config.json → 環境変数 → デフォルト）
+  let spaceKey: string;
+  let spaceKeySource: string;
+  
+  if (specJson?.confluence?.spaceKey) {
+    spaceKey = specJson.confluence.spaceKey;
+    spaceKeySource = 'spec.json';
+  } else if (confluenceConfig.spaces?.[docType]) {
+    spaceKey = confluenceConfig.spaces[docType];
+    spaceKeySource = 'config.json';
+  } else if (confluenceApiConfig.space) {
+    spaceKey = confluenceApiConfig.space;
+    spaceKeySource = process.env.CONFLUENCE_PRD_SPACE ? 'environment variable' : 'default';
+  } else {
+    spaceKey = 'PRD';
+    spaceKeySource = 'hardcoded default';
+  }
+  
+  console.log(`📌 Using Confluence space: ${spaceKey} (source: ${spaceKeySource})`);
   
   // Confluenceクライアント初期化
   const client = new ConfluenceClient(confluenceApiConfig);
@@ -335,6 +423,14 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     })
     .catch((error) => {
       console.error('❌ Sync failed:', error.message);
+      if (error.response) {
+        console.error('Response status:', error.response.status);
+        console.error('Response data:', JSON.stringify(error.response.data, null, 2));
+      }
+      if (error.config) {
+        console.error('Request URL:', error.config.url);
+        console.error('Request params:', JSON.stringify(error.config.params, null, 2));
+      }
       process.exit(1);
     });
 }
