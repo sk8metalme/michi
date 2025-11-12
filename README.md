@@ -301,6 +301,7 @@ npm run create-project -- \
 - [ワークフローガイド](./docs/workflow.md) - AI開発フロー
 - [マルチプロジェクト管理](./docs/multi-project.md) - 複数プロジェクト管理
 - [テスト・検証](./docs/testing.md) - E2Eテスト、フィードバック
+- [リリース手順](./docs/release.md) - バージョンアップ・NPM公開手順
 - [CI/CD整備計画](./docs/cicd-plan.md) - CI/CDパイプラインの計画と実装状況
 
 ## CI/CD
