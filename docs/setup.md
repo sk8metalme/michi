@@ -238,6 +238,77 @@ cp mcp.json.example ~/.cursor/mcp.json
 }
 ```
 
+## 6-2. プロジェクト固有設定ファイル（オプション）
+
+`.kiro/config.json` を作成することで、Confluence/JIRAの動作をカスタマイズできます。
+
+### 設定ファイルの作成
+
+プロジェクトルートに `.kiro/config.json` を作成：
+
+```json
+{
+  "confluence": {
+    "pageCreationGranularity": "by-hierarchy",
+    "spaces": {
+      "requirements": "Michi",
+      "design": "Michi",
+      "tasks": "Michi"
+    },
+    "hierarchy": {
+      "mode": "simple",
+      "parentPageTitle": "[{projectName}] {featureName}"
+    }
+  },
+  "jira": {
+    "createEpic": true,
+    "storyCreationGranularity": "all",
+    "storyPoints": "auto",
+    "issueTypes": {
+      "story": "10036",
+      "subtask": "10037"
+    }
+  },
+  "workflow": {
+    "enabledPhases": ["requirements", "design", "tasks"],
+    "approvalGates": {
+      "requirements": ["leader", "director"],
+      "design": ["leader", "director"],
+      "release": ["service-manager", "director"]
+    }
+  }
+}
+```
+
+### 設定値の詳細
+
+すべての設定値の詳細は [設定値リファレンス](./config-reference.md) を参照してください。
+
+### 設定の優先順位
+
+設定値は以下の優先順位で決定されます：
+
+1. **`spec.json`**: 機能固有の設定（最優先）
+2. **`.kiro/config.json`**: プロジェクト固有の設定
+3. **環境変数**: システム環境変数または`.env`ファイル
+4. **デフォルト値**: スキーマで定義されたデフォルト値
+
+### 設定のバリデーション
+
+設定ファイルは実行前に自動的にバリデーションされます。手動でバリデーションを実行する場合：
+
+```bash
+# Michiプロジェクトディレクトリで実行
+npx tsx scripts/utils/config-validator.ts
+
+# または、別のプロジェクトディレクトリで実行
+npx tsx /path/to/michi/scripts/utils/config-validator.ts /path/to/project
+```
+
+### よくある設定パターン
+
+詳細は [カスタマイズガイド](./customization-guide.md) を参照してください。
+
 ## 7. Cursor IDE の設定
 
 ### 7-1. Cursor でプロジェクトを開く
