@@ -256,14 +256,14 @@ export async function runPhase(feature: string, phase: Phase): Promise<PhaseRunR
   validateFeatureNameOrThrow(feature);
   
   switch (phase) {
-    case 'requirements':
-      return await runRequirementsPhase(feature);
-    case 'design':
-      return await runDesignPhase(feature);
-    case 'tasks':
-      return await runTasksPhase(feature);
-    default:
-      throw new Error(`Unknown phase: ${phase}`);
+  case 'requirements':
+    return await runRequirementsPhase(feature);
+  case 'design':
+    return await runDesignPhase(feature);
+  case 'tasks':
+    return await runTasksPhase(feature);
+  default:
+    throw new Error(`Unknown phase: ${phase}`);
   }
 }
 

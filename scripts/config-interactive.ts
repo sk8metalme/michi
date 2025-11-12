@@ -102,7 +102,7 @@ async function multiSelect(
     console.log(`  ${checked} ${index + 1}. ${choice.label}`);
   });
   
-  const answer = await question(rl, `\n選択してください（カンマ区切り、例: 1,2,3）: `);
+  const answer = await question(rl, '\n選択してください（カンマ区切り、例: 1,2,3）: ');
   
   if (!answer && defaults.length > 0) {
     return defaults;
@@ -204,13 +204,13 @@ async function getConfluenceConfig(rl: readline.Interface, projectMeta: any): Pr
     
     const parentTitle = await question(
       rl,
-      `親ページのタイトル形式を入力してください（例: [{projectName}] {featureName}）: `
+      '親ページのタイトル形式を入力してください（例: [{projectName}] {featureName}）: '
     );
     
     if (parentTitle) {
       config.hierarchy.parentPageTitle = parentTitle;
     } else {
-      config.hierarchy.parentPageTitle = `[{projectName}] {featureName}`;
+      config.hierarchy.parentPageTitle = '[{projectName}] {featureName}';
     }
     
     if (granularity === 'manual') {

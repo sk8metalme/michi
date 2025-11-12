@@ -401,7 +401,7 @@ export async function createByHierarchySimplePages(
   
   // タイトルに機能名が含まれていない場合、自動的に追加（重複を避けるため）
   if (!childPageTitle.includes(featureName)) {
-    console.warn(`⚠️  Warning: pageTitleFormat does not include {featureName}. Adding feature name to ensure uniqueness.`);
+    console.warn('⚠️  Warning: pageTitleFormat does not include {featureName}. Adding feature name to ensure uniqueness.');
     childPageTitle = `[${featureName}] ${childPageTitle}`;
   }
   
@@ -423,7 +423,7 @@ export async function createByHierarchySimplePages(
   
   // CQLクエリで見つからない場合、親ページIDなしで検索（既存ページが別の親の下にある可能性）
   if (!existingChild) {
-    console.log(`  CQL search found nothing, trying search without parent filter`);
+    console.log('  CQL search found nothing, trying search without parent filter');
     existingChild = await client.searchPage(spaceKey, childPageTitle);
     if (existingChild) {
       console.log(`  ⚠️  Found page with same title: ${existingChild.id}, verifying parent page ID`);
@@ -436,14 +436,14 @@ export async function createByHierarchySimplePages(
         console.log(`  ✅ Parent page ID matches (${parentPageId}), proceeding with update`);
       } else {
         // 親ページIDが一致しない場合、エラーをスロー
-        console.error(`  ❌ Parent page ID mismatch!`);
+        console.error('  ❌ Parent page ID mismatch!');
         console.error(`     Expected parent: ${parentPageId}`);
         console.error(`     Actual parent: ${actualParentId || 'root (no parent)'}`);
         console.error(`     Page ID: ${existingChild.id}`);
         throw new Error(
           `Page conflict: Found page "${childPageTitle}" (ID: ${existingChild.id}) ` +
           `under different parent (expected: ${parentPageId}, actual: ${actualParentId || 'root'}). ` +
-          `Cannot update foreign page. Please rename or delete the conflicting page.`
+          'Cannot update foreign page. Please rename or delete the conflicting page.'
         );
       }
     }
@@ -523,7 +523,7 @@ export async function createByHierarchyNestedPages(
   
   // タイトルに機能名が含まれていない場合、自動的に追加（重複を避けるため）
   if (!docTypeParentTitle.includes(featureName)) {
-    console.warn(`⚠️  Warning: pageTitleFormat does not include {featureName}. Adding feature name to ensure uniqueness.`);
+    console.warn('⚠️  Warning: pageTitleFormat does not include {featureName}. Adding feature name to ensure uniqueness.');
     docTypeParentTitle = `[${featureName}] ${docTypeParentTitle}`;
   }
   
@@ -569,7 +569,7 @@ export async function createByHierarchyNestedPages(
     
     // タイトルに機能名が含まれていない場合、自動的に追加（重複を避けるため）
     if (!sectionPageTitle.includes(featureName)) {
-      console.warn(`⚠️  Warning: pageTitleFormat does not include {featureName}. Adding feature name to ensure uniqueness.`);
+      console.warn('⚠️  Warning: pageTitleFormat does not include {featureName}. Adding feature name to ensure uniqueness.');
       sectionPageTitle = `[${featureName}] ${sectionPageTitle}`;
     }
     const confluenceContent = convertMarkdownToConfluence(section.content);
@@ -697,7 +697,7 @@ export async function createManualPages(
       
       // タイトルに機能名が含まれていない場合、自動的に追加（重複を避けるため）
       if (!pageTitle.includes(featureName)) {
-        console.warn(`⚠️  Warning: Manual page title does not include {featureName}. Adding feature name to ensure uniqueness.`);
+        console.warn('⚠️  Warning: Manual page title does not include {featureName}. Adding feature name to ensure uniqueness.');
         pageTitle = `[${featureName}] ${pageTitle}`;
       }
       
@@ -785,8 +785,34 @@ export async function createPagesByGranularity(
   const granularity = config.pageCreationGranularity || 'single';
   
   switch (granularity) {
-    case 'single':
-      return await createSinglePage(
+  case 'single':
+    return await createSinglePage(
+      client,
+      spaceKey,
+      markdown,
+      config,
+      projectMeta,
+      featureName,
+      docType,
+      githubUrl
+    );
+    
+  case 'by-section':
+    return await createBySectionPages(
+      client,
+      spaceKey,
+      markdown,
+      config,
+      projectMeta,
+      featureName,
+      docType,
+      githubUrl
+    );
+    
+  case 'by-hierarchy': {
+    const hierarchyMode = config.hierarchy?.mode || 'simple';
+    if (hierarchyMode === 'nested') {
+      return await createByHierarchyNestedPages(
         client,
         spaceKey,
         markdown,
@@ -796,9 +822,8 @@ export async function createPagesByGranularity(
         docType,
         githubUrl
       );
-    
-    case 'by-section':
-      return await createBySectionPages(
+    } else {
+      return await createByHierarchySimplePages(
         client,
         spaceKey,
         markdown,
@@ -808,48 +833,23 @@ export async function createPagesByGranularity(
         docType,
         githubUrl
       );
-    
-    case 'by-hierarchy': {
-      const hierarchyMode = config.hierarchy?.mode || 'simple';
-      if (hierarchyMode === 'nested') {
-        return await createByHierarchyNestedPages(
-          client,
-          spaceKey,
-          markdown,
-          config,
-          projectMeta,
-          featureName,
-          docType,
-          githubUrl
-        );
-      } else {
-        return await createByHierarchySimplePages(
-          client,
-          spaceKey,
-          markdown,
-          config,
-          projectMeta,
-          featureName,
-          docType,
-          githubUrl
-        );
-      }
     }
+  }
     
-    case 'manual':
-      return await createManualPages(
-        client,
-        spaceKey,
-        markdown,
-        config,
-        projectMeta,
-        featureName,
-        docType,
-        githubUrl
-      );
+  case 'manual':
+    return await createManualPages(
+      client,
+      spaceKey,
+      markdown,
+      config,
+      projectMeta,
+      featureName,
+      docType,
+      githubUrl
+    );
     
-    default:
-      throw new Error(`Unknown page creation granularity: ${granularity}`);
+  default:
+    throw new Error(`Unknown page creation granularity: ${granularity}`);
   }
 }
 

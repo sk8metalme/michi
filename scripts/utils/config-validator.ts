@@ -196,15 +196,15 @@ export function validateForConfluenceSync(
       if (!process.env.CONFLUENCE_PRD_SPACE) {
         warnings.push(
           `confluence.spaces.${docType}が設定されていません。` +
-          `環境変数CONFLUENCE_PRD_SPACEも設定されていないため、デフォルト値（PRD）を使用します。` +
-          `\n  推奨: .kiro/config.jsonに以下を追加してください:\n` +
-          `  {\n` +
-          `    "confluence": {\n` +
-          `      "spaces": {\n` +
+          '環境変数CONFLUENCE_PRD_SPACEも設定されていないため、デフォルト値（PRD）を使用します。' +
+          '\n  推奨: .kiro/config.jsonに以下を追加してください:\n' +
+          '  {\n' +
+          '    "confluence": {\n' +
+          '      "spaces": {\n' +
           `        "${docType}": "YOUR_SPACE_KEY"\n` +
-          `      }\n` +
-          `    }\n` +
-          `  }`
+          '      }\n' +
+          '    }\n' +
+          '  }'
         );
       } else {
         info.push(`confluence.spaces.${docType}が設定されていませんが、環境変数CONFLUENCE_PRD_SPACE（${process.env.CONFLUENCE_PRD_SPACE}）を使用します。`);
@@ -215,29 +215,29 @@ export function validateForConfluenceSync(
     if (confluence.pageCreationGranularity === 'by-hierarchy' || confluence.pageCreationGranularity === 'manual') {
       if (!confluence.hierarchy) {
         errors.push(
-          `confluence.hierarchyが設定されていません。` +
+          'confluence.hierarchyが設定されていません。' +
           `pageCreationGranularityが"${confluence.pageCreationGranularity}"の場合、hierarchy設定が必須です。` +
-          `\n  解決方法: .kiro/config.jsonに以下を追加してください:\n` +
-          `  {\n` +
-          `    "confluence": {\n` +
-          `      "hierarchy": {\n` +
-          `        "mode": "simple",\n` +
-          `        "parentPageTitle": "[{projectName}] {featureName}"\n` +
-          `      }\n` +
-          `    }\n` +
-          `  }`
+          '\n  解決方法: .kiro/config.jsonに以下を追加してください:\n' +
+          '  {\n' +
+          '    "confluence": {\n' +
+          '      "hierarchy": {\n' +
+          '        "mode": "simple",\n' +
+          '        "parentPageTitle": "[{projectName}] {featureName}"\n' +
+          '      }\n' +
+          '    }\n' +
+          '  }'
         );
       } else if (confluence.pageCreationGranularity === 'by-hierarchy' && confluence.hierarchy && !confluence.hierarchy.parentPageTitle) {
         warnings.push(
-          `confluence.hierarchy.parentPageTitleが設定されていません。` +
-          `by-hierarchyモードでは推奨されます。`
+          'confluence.hierarchy.parentPageTitleが設定されていません。' +
+          'by-hierarchyモードでは推奨されます。'
         );
       }
       
       if (confluence.pageCreationGranularity === 'manual' && confluence.hierarchy && !confluence.hierarchy.structure) {
         errors.push(
-          `confluence.hierarchy.structureが設定されていません。` +
-          `pageCreationGranularityが"manual"の場合、structure設定が必須です。`
+          'confluence.hierarchy.structureが設定されていません。' +
+          'pageCreationGranularityが"manual"の場合、structure設定が必須です。'
         );
       }
     }
@@ -274,20 +274,20 @@ export function validateForJiraSync(projectRoot: string = process.cwd()): Valida
     if (!jira.issueTypes) {
       if (!process.env.JIRA_ISSUE_TYPE_STORY) {
         errors.push(
-          `jira.issueTypes.storyが設定されていません。` +
-          `環境変数JIRA_ISSUE_TYPE_STORYも設定されていないため、JIRA同期を実行できません。` +
-          `\n  解決方法1: 環境変数を設定:\n` +
-          `  export JIRA_ISSUE_TYPE_STORY=10036  # JIRAインスタンス固有のID\n` +
-          `\n  解決方法2: .kiro/config.jsonに以下を追加:\n` +
-          `  {\n` +
-          `    "jira": {\n` +
-          `      "issueTypes": {\n` +
-          `        "story": "10036",\n` +
-          `        "subtask": "10037"\n` +
-          `      }\n` +
-          `    }\n` +
-          `  }` +
-          `\n  確認方法: JIRA管理画面（Settings > Issues > Issue types）またはREST API: GET /rest/api/3/issuetype`
+          'jira.issueTypes.storyが設定されていません。' +
+          '環境変数JIRA_ISSUE_TYPE_STORYも設定されていないため、JIRA同期を実行できません。' +
+          '\n  解決方法1: 環境変数を設定:\n' +
+          '  export JIRA_ISSUE_TYPE_STORY=10036  # JIRAインスタンス固有のID\n' +
+          '\n  解決方法2: .kiro/config.jsonに以下を追加:\n' +
+          '  {\n' +
+          '    "jira": {\n' +
+          '      "issueTypes": {\n' +
+          '        "story": "10036",\n' +
+          '        "subtask": "10037"\n' +
+          '      }\n' +
+          '    }\n' +
+          '  }' +
+          '\n  確認方法: JIRA管理画面（Settings > Issues > Issue types）またはREST API: GET /rest/api/3/issuetype'
         );
       } else {
         info.push(`jira.issueTypes.storyが設定されていませんが、環境変数JIRA_ISSUE_TYPE_STORY（${process.env.JIRA_ISSUE_TYPE_STORY}）を使用します。`);
@@ -296,10 +296,10 @@ export function validateForJiraSync(projectRoot: string = process.cwd()): Valida
       if (!jira.issueTypes.story) {
         if (!process.env.JIRA_ISSUE_TYPE_STORY) {
           errors.push(
-            `jira.issueTypes.storyが設定されていません。` +
-            `環境変数JIRA_ISSUE_TYPE_STORYも設定されていないため、JIRA同期を実行できません。` +
-            `\n  解決方法: .kiro/config.jsonのjira.issueTypes.storyに値を設定するか、` +
-            `環境変数JIRA_ISSUE_TYPE_STORYを設定してください。`
+            'jira.issueTypes.storyが設定されていません。' +
+            '環境変数JIRA_ISSUE_TYPE_STORYも設定されていないため、JIRA同期を実行できません。' +
+            '\n  解決方法: .kiro/config.jsonのjira.issueTypes.storyに値を設定するか、' +
+            '環境変数JIRA_ISSUE_TYPE_STORYを設定してください。'
           );
         } else {
           info.push(`jira.issueTypes.storyが設定されていませんが、環境変数JIRA_ISSUE_TYPE_STORY（${process.env.JIRA_ISSUE_TYPE_STORY}）を使用します。`);
@@ -309,8 +309,8 @@ export function validateForJiraSync(projectRoot: string = process.cwd()): Valida
       if (!jira.issueTypes.subtask) {
         if (!process.env.JIRA_ISSUE_TYPE_SUBTASK) {
           warnings.push(
-            `jira.issueTypes.subtaskが設定されていません。` +
-            `環境変数JIRA_ISSUE_TYPE_SUBTASKも設定されていないため、サブタスクは作成されません。`
+            'jira.issueTypes.subtaskが設定されていません。' +
+            '環境変数JIRA_ISSUE_TYPE_SUBTASKも設定されていないため、サブタスクは作成されません。'
           );
         } else {
           info.push(`jira.issueTypes.subtaskが設定されていませんが、環境変数JIRA_ISSUE_TYPE_SUBTASK（${process.env.JIRA_ISSUE_TYPE_SUBTASK}）を使用します。`);
@@ -321,8 +321,8 @@ export function validateForJiraSync(projectRoot: string = process.cwd()): Valida
     // selectedPhases設定のチェック
     if (jira.storyCreationGranularity === 'selected-phases' && !jira.selectedPhases) {
       errors.push(
-        `jira.selectedPhasesが設定されていません。` +
-        `storyCreationGranularityが"selected-phases"の場合、selectedPhases設定が必須です。`
+        'jira.selectedPhasesが設定されていません。' +
+        'storyCreationGranularityが"selected-phases"の場合、selectedPhases設定が必須です。'
       );
     }
     

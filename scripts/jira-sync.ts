@@ -600,13 +600,13 @@ async function syncTasksToJIRA(featureName: string): Promise<void> {
       
       // JIRA APIエラーの詳細を表示
       if (error.response?.data) {
-        console.error(`  📋 JIRA API Error Details:`, JSON.stringify(error.response.data, null, 2));
+        console.error('  📋 JIRA API Error Details:', JSON.stringify(error.response.data, null, 2));
         
         // Story Pointsフィールドのエラーの場合、警告を表示
         if (error.response.data.errors && Object.keys(error.response.data.errors).some(key => key.includes('customfield'))) {
-          console.error(`  ⚠️  Story Pointsフィールドの設定に失敗しました。`);
-          console.error(`  💡 環境変数 JIRA_STORY_POINTS_FIELD を正しいカスタムフィールドIDに設定してください。`);
-          console.error(`  💡 JIRA管理画面でStory PointsのカスタムフィールドIDを確認してください。`);
+          console.error('  ⚠️  Story Pointsフィールドの設定に失敗しました。');
+          console.error('  💡 環境変数 JIRA_STORY_POINTS_FIELD を正しいカスタムフィールドIDに設定してください。');
+          console.error('  💡 JIRA管理画面でStory PointsのカスタムフィールドIDを確認してください。');
         }
       }
       
@@ -618,7 +618,7 @@ async function syncTasksToJIRA(featureName: string): Promise<void> {
   const newStoryCount = createdStories.filter(key => !existingStoryKeys.has(key)).length;
   const reusedStoryCount = createdStories.filter(key => existingStoryKeys.has(key)).length;
   
-  console.log(`\n✅ JIRA sync completed`);
+  console.log('\n✅ JIRA sync completed');
   console.log(`   Epic: ${epic.key}`);
   console.log(`   Stories: ${createdStories.length} processed (${newStoryCount} new, ${reusedStoryCount} reused)`);
 }

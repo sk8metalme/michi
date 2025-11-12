@@ -30,15 +30,15 @@ function parseArgs(): SetupConfig {
     const value = args[i + 1];
     
     switch (key) {
-      case 'michi-path':
-        config.michiPath = value;
-        break;
-      case 'project-name':
-        config.projectName = value;
-        break;
-      case 'jira-key':
-        config.jiraKey = value;
-        break;
+    case 'michi-path':
+      config.michiPath = value;
+      break;
+    case 'project-name':
+      config.projectName = value;
+      break;
+    case 'jira-key':
+      config.jiraKey = value;
+      break;
     }
   }
   

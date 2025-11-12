@@ -82,17 +82,28 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.1",
     "@types/markdown-it": "^14.1.2",
     "@types/node": "^24.10.1",
     "@types/turndown": "^5.0.4",
     "@typescript-eslint/eslint-plugin": "^8.46.4",
+<<<<<<< HEAD
     "@typescript-eslint/parser": "^6.17.0",
+=======
+    "@typescript-eslint/parser": "^8.46.4",
+    "@vitest/coverage-v8": "^1.1.1",
+>>>>>>> c7db579 (feat: ESLint 9への移行 - Flat Config形式に変更)
     "eslint": "^9.39.1",
     "prettier": "^3.1.1",
     "tsx": "^4.7.0",
     "typescript": "^5.3.3",
+<<<<<<< HEAD
     "vitest": "^4.0.8",
     "@vitest/coverage-v8": "^4.0.8"
+=======
+    "typescript-eslint": "^8.46.4",
+    "vitest": "^1.1.1"
+>>>>>>> c7db579 (feat: ESLint 9への移行 - Flat Config形式に変更)
   },
   "engines": {
     "node": ">=20.0.0",
