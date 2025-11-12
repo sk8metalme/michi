@@ -206,16 +206,19 @@ export function loadConfig(projectRoot: string = process.cwd()): AppConfig {
         autoLabels: ['{projectLabel}', '{docType}', '{featureName}', 'github-sync']
       };
     }
-    // config.jsonにspaces設定がない場合のみ環境変数で上書き
-    if (!mergedConfig.confluence.spaces || 
-        (!mergedConfig.confluence.spaces.requirements && 
-         !mergedConfig.confluence.spaces.design && 
-         !mergedConfig.confluence.spaces.tasks)) {
-      if (!mergedConfig.confluence.spaces) {
-        mergedConfig.confluence.spaces = {};
-      }
+    // spacesオブジェクトを確実に作成
+    if (!mergedConfig.confluence.spaces) {
+      mergedConfig.confluence.spaces = {};
+    }
+    // 各フィールドを個別にチェックし、未定義のフィールドのみ環境変数で設定
+    // 既に定義されている値は変更しない
+    if (!mergedConfig.confluence.spaces.requirements) {
       mergedConfig.confluence.spaces.requirements = process.env.CONFLUENCE_PRD_SPACE;
+    }
+    if (!mergedConfig.confluence.spaces.design) {
       mergedConfig.confluence.spaces.design = process.env.CONFLUENCE_PRD_SPACE;
+    }
+    if (!mergedConfig.confluence.spaces.tasks) {
       mergedConfig.confluence.spaces.tasks = process.env.CONFLUENCE_PRD_SPACE;
     }
   }
