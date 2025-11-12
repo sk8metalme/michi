@@ -215,17 +215,17 @@ export function validatePhase(feature: string, phase: Phase): ValidationResult {
   let result: ValidationResult;
   
   switch (phase) {
-    case 'requirements':
-      result = validateRequirements(feature);
-      break;
-    case 'design':
-      result = validateDesign(feature);
-      break;
-    case 'tasks':
-      result = validateTasks(feature);
-      break;
-    default:
-      throw new Error(`Unknown phase: ${phase}`);
+  case 'requirements':
+    result = validateRequirements(feature);
+    break;
+  case 'design':
+    result = validateDesign(feature);
+    break;
+  case 'tasks':
+    result = validateTasks(feature);
+    break;
+  default:
+    throw new Error(`Unknown phase: ${phase}`);
   }
   
   // 結果表示

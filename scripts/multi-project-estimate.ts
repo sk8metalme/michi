@@ -153,7 +153,7 @@ function parseEstimateFromContent(content: string, featureName: string): Estimat
     
     return estimate;
   } catch (error) {
-    console.warn(`  ⚠️  Failed to parse estimate:`, error instanceof Error ? error.message : error);
+    console.warn('  ⚠️  Failed to parse estimate:', error instanceof Error ? error.message : error);
     return null;
   } finally {
     // 一時ファイルをクリーンアップ

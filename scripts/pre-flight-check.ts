@@ -178,7 +178,7 @@ async function checkJiraProject(projectKey: string): Promise<{ errors: string[],
       errors.push(`      現在の設定: "${projectKey}" → 実際に存在するキーに変更`);
     } else if (error.response?.status === 401) {
       errors.push('❌ JIRA認証エラー（.envの認証情報を確認）');
-      errors.push(`   → API Token管理: https://id.atlassian.com/manage-profile/security/api-tokens`);
+      errors.push('   → API Token管理: https://id.atlassian.com/manage-profile/security/api-tokens');
     } else {
       warnings.push(`⚠️  JIRAプロジェクトチェック失敗: ${error.message}`);
     }

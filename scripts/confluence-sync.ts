@@ -107,7 +107,7 @@ class ConfluenceClient {
         }
         
         // CQLクエリで見つからない場合、従来の方法で検索（親ページIDでフィルタリング）
-        console.log(`  Falling back to standard search (may find pages in different parent)`);
+        console.log('  Falling back to standard search (may find pages in different parent)');
         return null;
       }
       
@@ -388,7 +388,7 @@ async function syncToConfluence(
   } else if (process.env.CONFLUENCE_PRD_SPACE) {
     console.log(`📝 Config source: environment variable (CONFLUENCE_PRD_SPACE = ${process.env.CONFLUENCE_PRD_SPACE})`);
   } else {
-    console.log(`📝 Config source: default config`);
+    console.log('📝 Config source: default config');
   }
   
   // Markdownファイル読み込み
@@ -446,7 +446,7 @@ async function syncToConfluence(
   console.log(`✅ Sync completed: ${result.pages.length} page(s) created/updated`);
   
   if (result.pages.length > 1) {
-    console.log(`📄 Created pages:`);
+    console.log('📄 Created pages:');
     result.pages.forEach((page, index) => {
       console.log(`   ${index + 1}. ${page.title} - ${page.url}`);
     });

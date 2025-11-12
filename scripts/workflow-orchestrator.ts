@@ -72,35 +72,35 @@ export class WorkflowOrchestrator {
    */
   private async executeStage(stage: WorkflowStage): Promise<void> {
     switch (stage) {
-      case 'requirements':
-        console.log('  Syncing requirements to Confluence...');
-        await syncToConfluence(this.config.feature, 'requirements');
-        break;
+    case 'requirements':
+      console.log('  Syncing requirements to Confluence...');
+      await syncToConfluence(this.config.feature, 'requirements');
+      break;
         
-      case 'design':
-        console.log('  Syncing design to Confluence...');
-        await syncToConfluence(this.config.feature, 'design');
-        break;
+    case 'design':
+      console.log('  Syncing design to Confluence...');
+      await syncToConfluence(this.config.feature, 'design');
+      break;
         
-      case 'tasks':
-        console.log('  Creating JIRA tasks...');
-        await syncTasksToJIRA(this.config.feature);
-        break;
+    case 'tasks':
+      console.log('  Creating JIRA tasks...');
+      await syncTasksToJIRA(this.config.feature);
+      break;
         
-      case 'implement':
-        console.log('  Implementation phase - manual step');
-        console.log('  Use: /kiro:spec-impl <feature> <tasks>');
-        break;
+    case 'implement':
+      console.log('  Implementation phase - manual step');
+      console.log('  Use: /kiro:spec-impl <feature> <tasks>');
+      break;
         
-      case 'test':
-        console.log('  Test phase - execute tests');
-        // TODO: テスト実行とレポート生成
-        break;
+    case 'test':
+      console.log('  Test phase - execute tests');
+      // TODO: テスト実行とレポート生成
+      break;
         
-      case 'release':
-        console.log('  Release preparation');
-        // TODO: リリースノート生成とJIRA Release作成
-        break;
+    case 'release':
+      console.log('  Release preparation');
+      // TODO: リリースノート生成とJIRA Release作成
+      break;
     }
   }
   
@@ -113,9 +113,9 @@ export class WorkflowOrchestrator {
     
     const gateList =
       stage === 'requirements' ? gates.requirements :
-      stage === 'design' ? gates.design :
-      stage === 'release' ? gates.release :
-      undefined;
+        stage === 'design' ? gates.design :
+          stage === 'release' ? gates.release :
+            undefined;
 
     return Array.isArray(gateList) && gateList.length > 0;
   }

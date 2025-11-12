@@ -38,22 +38,22 @@ function parseArgs(): ProjectConfig {
     const value = args[i + 1];
     
     switch (key) {
-      case 'name':
-        config.name = value;
-        break;
-      case 'project-name':
-        config.projectName = value;
-        break;
-      case 'jira-key':
-        config.jiraKey = value;
-        break;
-      case 'org':
-        config.org = value;
-        break;
-      case 'labels':
-        // カンマ区切りでラベル配列に変換
-        config.labels = value.split(',').map(l => l.trim());
-        break;
+    case 'name':
+      config.name = value;
+      break;
+    case 'project-name':
+      config.projectName = value;
+      break;
+    case 'jira-key':
+      config.jiraKey = value;
+      break;
+    case 'org':
+      config.org = value;
+      break;
+    case 'labels':
+      // カンマ区切りでラベル配列に変換
+      config.labels = value.split(',').map(l => l.trim());
+      break;
     }
   }
   
@@ -133,7 +133,7 @@ async function createProject(config: ProjectConfig): Promise<void> {
     
     // ハイフンが存在する場合のみサービスラベルを生成
     if (repoName.includes('-')) {
-    const parts = repoName.split('-');
+      const parts = repoName.split('-');
       const servicePart = parts[parts.length - 1];
       const serviceLabel = servicePart.toLowerCase().replace(/[^a-z0-9-]/g, '');
     
