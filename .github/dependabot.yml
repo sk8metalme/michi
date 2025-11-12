@@ -1,0 +1,25 @@
+version: 2
+updates:
+  # npm依存関係の更新
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "sunday"
+      time: "09:00"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "sk8metalme"
+    labels:
+      - "dependencies"
+      - "automated"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    # セキュリティ更新は即座にプルリクエストを作成
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch", "version-update:semver-minor"]
+    # セキュリティ更新のみ自動マージ（オプション）
+    # 注意: 自動マージを有効にする場合は、十分なテストが必要です
+

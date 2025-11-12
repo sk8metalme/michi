@@ -192,7 +192,7 @@ export function loadConfig(projectRoot: string = process.cwd()): AppConfig {
   const projectConfig = loadProjectConfig(projectRoot);
   
   // マージ（プロジェクト設定がデフォルトを上書き）
-  let mergedConfig: AppConfig = projectConfig
+  const mergedConfig: AppConfig = projectConfig
     ? deepMerge(defaultConfig, projectConfig)
     : defaultConfig;
   

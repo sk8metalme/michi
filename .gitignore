@@ -33,6 +33,7 @@ pnpm-debug.log*
 coverage/
 .nyc_output/
 .vitest/
+*.lcov
 
 # IDE
 .vscode/*
@@ -54,9 +55,10 @@ Desktop.ini
 tmp/
 temp/
 *.tmp
+docs/tmp/
 
 # Package Manager
-package-lock.json
+# package-lock.json  # OSSプロジェクトではリポジトリに含める（npm ciに必要）
 yarn.lock
 pnpm-lock.yaml
 

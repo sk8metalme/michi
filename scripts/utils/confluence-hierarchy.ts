@@ -809,7 +809,7 @@ export async function createPagesByGranularity(
         githubUrl
       );
     
-    case 'by-hierarchy':
+    case 'by-hierarchy': {
       const hierarchyMode = config.hierarchy?.mode || 'simple';
       if (hierarchyMode === 'nested') {
         return await createByHierarchyNestedPages(
@@ -834,6 +834,7 @@ export async function createPagesByGranularity(
           githubUrl
         );
       }
+    }
     
     case 'manual':
       return await createManualPages(
