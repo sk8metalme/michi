@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/sk8metalme/michi.git"
+    "url": "git+https://github.com/sk8metalme/michi.git"
   },
   "homepage": "https://github.com/sk8metalme/michi#readme",
   "bugs": {
@@ -29,7 +29,7 @@
     "github"
   ],
   "bin": {
-    "michi": "./dist/src/cli.js"
+    "michi": "dist/src/cli.js"
   },
   "files": [
     "dist",
