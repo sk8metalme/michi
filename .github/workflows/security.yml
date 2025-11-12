@@ -26,14 +26,4 @@ jobs:
 
       - name: Run npm audit
         run: npm audit --audit-level=moderate
-        continue-on-error: true
-
-      - name: Check for vulnerabilities
-        run: |
-          if npm audit --audit-level=moderate 2>&1 | grep -q "found"; then
-            echo "⚠️ Security vulnerabilities found. Please review and update dependencies."
-            exit 1
-          else
-            echo "✅ No security vulnerabilities found."
-          fi
 
