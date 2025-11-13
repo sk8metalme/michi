@@ -12,6 +12,7 @@ import {
   validateForJiraSync,
   validateAndReport
 } from '../config-validator.js';
+import { clearConfigCache } from '../config-loader.js';
 
 describe('config-validator', () => {
   let testProjectRoot: string;
@@ -25,6 +26,9 @@ describe('config-validator', () => {
 
     // 環境変数をバックアップ
     originalEnv = { ...process.env };
+    
+    // キャッシュをクリア
+    clearConfigCache();
   });
 
   afterEach(() => {
@@ -49,6 +53,12 @@ describe('config-validator', () => {
 
   describe('validateProjectConfig', () => {
     it('設定ファイルが存在しない場合は情報メッセージを返す', () => {
+      // .michi/config.jsonが存在しないことを確認
+      const michiConfigPath = join(testProjectRoot, '.michi/config.json');
+      if (existsSync(michiConfigPath)) {
+        unlinkSync(michiConfigPath);
+      }
+
       const result = validateProjectConfig(testProjectRoot);
 
       expect(result.valid).toBe(true);
@@ -59,6 +69,12 @@ describe('config-validator', () => {
     });
 
     it('有効な設定ファイルの場合は成功', () => {
+      // .michiディレクトリが存在することを確認
+      const michiDir = join(testProjectRoot, '.michi');
+      if (!existsSync(michiDir)) {
+        mkdirSync(michiDir, { recursive: true });
+      }
+
       const configPath = join(testProjectRoot, '.michi/config.json');
       writeFileSync(configPath, JSON.stringify({
         confluence: {
