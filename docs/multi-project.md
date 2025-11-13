@@ -8,21 +8,29 @@ Michiは、複数プロジェクト（3-5案件）を同時並行で管理でき
 
 ## アーキテクチャ
 
-### マイクロサービス構成
+### プロジェクト構成
+
+**構成**: 1つのリポジトリ内で複数プロジェクトを管理します。各プロジェクトは独立したディレクトリに配置され、それぞれに`.kiro/project.json`を持ちます。
 
 ```
-organization/
-├── customer-a-service-1/  ← A社 サービス1
-│   └── .kiro/
-│       ├── project.json
-│       └── specs/
-├── customer-a-service-2/  ← A社 サービス2
-│   └── .kiro/
-├── customer-b-api/        ← B社 API
-│   └── .kiro/
-└── michi/                 ← 統合ハブ（本プロジェクト）
+repository/  ← 1つのGitHubリポジトリ
+├── projects/
+│   ├── 20240115-payment-api/  ← プロジェクトA
+│   │   └── .kiro/
+│   │       ├── project.json
+│   │       └── specs/
+│   ├── 20240201-user-management/  ← プロジェクトB
+│   │   └── .kiro/
+│   └── 20240310-analytics-api/  ← プロジェクトC
+│       └── .kiro/
+└── michi/  ← 統合ハブ（オプション）
     └── .kiro/
 ```
+
+**プロジェクト識別方法**:
+- 各プロジェクトディレクトリに`.kiro/project.json`を配置
+- 作業ディレクトリ（`process.cwd()`）から`.kiro/project.json`を読み込んでプロジェクトを識別
+- プロジェクト切り替えは、該当ディレクトリに移動するだけ
 
 ### 統合管理
 
@@ -31,8 +39,8 @@ organization/
 - プロジェクト横断ダッシュボード
 
 **JIRA**: プロジェクトキー別
-- PRJA（A社案件）
-- PRJB（B社案件）
+- PRJA（プロジェクトA）
+- PRJB（プロジェクトB）
 - MICHI（統合ハブ）
 
 ## プロジェクトのセットアップ
@@ -46,9 +54,11 @@ organization/
 2. 新規リポジトリ作成: `npm run create-project -- --name <id> --project-name <name> --jira-key <key>`
 
 **マルチプロジェクト特有の注意点**:
-- 各プロジェクトは独立したリポジトリで管理
+- 1つのリポジトリ内で複数プロジェクトを管理
+- 各プロジェクトは独立したディレクトリに配置
 - `.kiro/project.json`でプロジェクトを識別
 - Confluenceラベルでプロジェクト横断検索が可能
+- プロジェクト切り替えは、該当ディレクトリに移動するだけ
 
 ### 環境変数設定
 
@@ -70,18 +80,137 @@ npx @michi/cli phase:run test-feature requirements
 
 ## プロジェクト切り替え
 
+### 現在のプロジェクトを確認
+
+作業中のプロジェクトを確認するには：
+
+```bash
+# 現在のディレクトリを確認
+pwd
+
+# プロジェクト情報を表示
+cat .kiro/project.json
+
+# プロジェクトIDのみ表示
+cat .kiro/project.json | grep projectId
+```
+
 ### Cursorで切り替え
 
+Cursor IDE内でプロジェクトを切り替える場合：
+
+**対話式切り替え（推奨）**:
 ```
-/kiro:project-switch customer-a-service-1
+/kiro:project-switch
 ```
+
+パラメータを指定しない場合、リポジトリ内のプロジェクトリストが表示され、対話的に選択できます：
+
+```
+📋 利用可能なプロジェクト:
+1. 20240115-payment-api (プロジェクトA サービス1) [active]
+2. 20240201-user-management (プロジェクトA サービス2) [active]
+3. 20240310-analytics-api (プロジェクトB API) [active]
+
+選択してください (1-3): 1
+
+✅ プロジェクト切り替え: 20240115-payment-api
+📁 ディレクトリ: projects/20240115-payment-api
+
+プロジェクト情報:
+  名前: プロジェクトA サービス1
+  JIRA: PRJA
+  Confluence Labels: project:20240115-payment-api, service:payment
+  ステータス: active
+```
+
+**直接指定**:
+```
+/kiro:project-switch 20240115-payment-api
+```
+
+**実行内容**:
+1. プロジェクトIDに対応するディレクトリを特定（`projects/20240115-payment-api`）
+2. 該当ディレクトリに移動（Cursorの作業ディレクトリを変更）
+3. `.kiro/project.json` を読み込んで表示
+4. プロジェクト情報を表示
 
 ### ターミナルで切り替え
 
+ターミナルでプロジェクトを切り替える場合：
+
 ```bash
-cd ~/work/projects/customer-a-service-1
+# リポジトリルートに移動
+cd /path/to/repository
+
+# プロジェクトAに切り替え
+cd projects/20240115-payment-api
+
+# プロジェクト情報を確認
+cat .kiro/project.json
+
+# プロジェクトBに切り替え
+cd ../20240310-analytics-api
+
+# プロジェクト情報を確認
 cat .kiro/project.json
 ```
+
+**ショートカット**:
+```bash
+# プロジェクトディレクトリへのエイリアスを設定（.zshrc または .bashrc）
+alias pj-a='cd /path/to/repository/projects/20240115-payment-api'
+alias pj-b='cd /path/to/repository/projects/20240310-analytics-api'
+
+# 使用例
+pj-a
+cat .kiro/project.json
+```
+
+### 切り替え後の確認
+
+プロジェクト切り替え後、以下のコマンドで正しく切り替わったか確認：
+
+```bash
+# 現在のディレクトリを確認
+pwd
+
+# プロジェクト情報を表示
+cat .kiro/project.json
+
+# プロジェクトIDを確認
+cat .kiro/project.json | jq .projectId
+
+# 仕様書の一覧を確認
+ls -la .kiro/specs/
+```
+
+### よくあるトラブル
+
+#### プロジェクトが見つからない
+
+**症状**: `/kiro:project-switch`でエラーが発生する
+
+**原因と解決方法**:
+1. プロジェクトディレクトリが存在するか確認
+   ```bash
+   ls -la projects/
+   ```
+
+2. プロジェクトIDが正しいか確認
+   ```bash
+   cat projects/20240115-payment-api/.kiro/project.json | grep projectId
+   ```
+
+3. パスが正しいか確認（絶対パスまたはリポジトリルートからの相対パス）
+
+#### `.kiro/project.json`が見つからない
+
+**症状**: プロジェクトディレクトリに移動したが、`.kiro/project.json`が存在しない
+
+**解決方法**:
+1. プロジェクトディレクトリが正しいか確認
+2. `.kiro/project.json`を作成（[新規プロジェクトセットアップガイド](./new-project-setup.md)を参照）
 
 ## プロジェクト横断操作
 
@@ -98,8 +227,8 @@ npm run project:list
 | プロジェクト | ID | ステータス | JIRA | チーム |
 |------------|-------|----------|------|--------|
 | Michi | michi | active | MICHI | @developer1 |
-| A社 サービス1 | customer-a-service-1 | active | PRJA | @dev1, @dev2 |
-| B社 API | customer-b-api | active | PRJB | @dev3 |
+| プロジェクトA サービス1 | 20240115-payment-api | active | PRJA | @dev1, @dev2 |
+| プロジェクトB API | 20240310-analytics-api | active | PRJB | @dev3 |
 
 合計: 3 プロジェクト
 ```
@@ -134,7 +263,7 @@ Confluenceで作成：
 ```
 
 **フィルタ例**:
-- A社案件のみ: `label = "project:a"`
+- プロジェクトAのみ: `label = "project:20240115-payment-api"`
 - レビュー待ち: `status = "レビュー待ち"`
 - 設計フェーズ: `label = "design"`
 
@@ -173,7 +302,7 @@ shared-infrastructure/
 ```json
 {
   "dependencies": ["shared-infra"],
-  "dependents": ["customer-a-service-1", "customer-b-api"]
+  "dependents": ["20240115-payment-api", "20240310-analytics-api"]
 }
 ```
 
@@ -181,14 +310,17 @@ shared-infrastructure/
 
 ### 命名規則の統一
 
-**プロジェクトID**: `customer-{id}-{service}`
-- 例: `customer-a-service-1`, `customer-b-api`
+**プロジェクトID**: `{YYYYMMDD}-{PJ名}`
+- 例: `20240115-payment-api`, `20240201-user-management`
+- 形式: `YYYYMMDD-{kebab-case-name}`
+- 開始日はプロジェクト開始日（YYYYMMDD形式、ハイフンなし）
+- プロジェクトディレクトリ名としても使用
 
 **JIRA プロジェクトキー**: 3-4文字
 - 例: `PRJA`, `PRJB`, `MICHI`
 
 **Confluenceラベル**: `project:{projectId}, service:{service}`
-- 例: `project:customer-a-service-1, service:s1`
+- 例: `project:20240115-payment-api, service:payment`
 
 **ラベル生成ロジック**: 詳細は [新規プロジェクトセットアップガイド](./new-project-setup.md#ラベル生成ロジック) を参照してください。
 ### チーム構成の明確化
