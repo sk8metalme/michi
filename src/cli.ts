@@ -205,7 +205,7 @@ export function createCLI(): Command {
   program
     .command('config:interactive')
     .alias('config:init')
-    .description('Interactive configuration setup for .kiro/config.json')
+    .description('Interactive configuration setup for .michi/config.json')
     .action(async () => {
       try {
         await configInteractive();
@@ -218,7 +218,7 @@ export function createCLI(): Command {
   // config:validate コマンド
   program
     .command('config:validate')
-    .description('Validate .kiro/config.json')
+    .description('Validate .michi/config.json')
     .action(async () => {
       try {
         const valid = validateAndReport();

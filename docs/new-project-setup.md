@@ -22,8 +22,8 @@ npm run create-project -- \
 
 # 具体例
 npm run create-project -- \
-  --name "customer-a-service-1" \
-  --project-name "A社 サービス1" \
+  --name "20240115-payment-api" \
+  --project-name "プロジェクトA" \
   --jira-key "PRJA"
 ```
 
@@ -91,24 +91,24 @@ cursor .
 
 ```bash
 # GitHub CLI で新規リポジトリ作成
-gh repo create your-org/customer-a-service-1 --private --description "A社 サービス1"
+gh repo create your-org/20240115-payment-api --private --description "プロジェクトA"
 
 # ローカルにクローン
 cd ~/work/projects
-jj git clone https://github.com/your-org/customer-a-service-1
-cd customer-a-service-1
+jj git clone https://github.com/your-org/20240115-payment-api
+cd 20240115-payment-api
 ```
 
 #### Git を使用する場合
 
 ```bash
 # GitHub CLI で新規リポジトリ作成
-gh repo create your-org/customer-a-service-1 --private --description "A社 サービス1"
+gh repo create your-org/20240115-payment-api --private --description "プロジェクトA"
 
 # ローカルにクローン
 cd ~/work/projects
-git clone https://github.com/your-org/customer-a-service-1
-cd customer-a-service-1
+git clone https://github.com/your-org/20240115-payment-api
+cd 20240115-payment-api
 ```
 
 ### Step 2: cc-sdd 導入
@@ -128,15 +128,15 @@ npx cc-sdd@latest --cursor --lang ja --yes
 
 ```json
 {
-  "projectId": "customer-a-service-1",
-  "projectName": "A社 サービス1",
+  "projectId": "20240115-payment-api",
+  "projectName": "プロジェクトA",
   "jiraProjectKey": "PRJA",
-  "confluenceLabels": ["project:customer-a-service-1", "service:s1"],
+  "confluenceLabels": ["project:20240115-payment-api", "service:payment"],
   "status": "active",
   "team": ["@dev1", "@dev2"],
   "stakeholders": ["@企画", "@部長"],
-  "repository": "https://github.com/your-org/customer-a-service-1",
-  "description": "A社向けサービス1の開発"
+  "repository": "https://github.com/your-org/20240115-payment-api",
+  "description": "プロジェクトA向け決済APIの開発"
 }
 ```
 
@@ -152,12 +152,12 @@ npx cc-sdd@latest --cursor --lang ja --yes
 - **プロジェクトラベル**: `project:{projectId}` を常に生成
 - **サービスラベル**: ハイフン（`-`）が含まれる場合のみ生成
   - ハイフンがない場合: `project:michi` のみ（サービスラベルなし）
-  - ハイフンがある場合: `project:customer-a-service-1, service:s1`
+  - ハイフンがある場合: `project:20240115-payment-api, service:payment`
   - 重複防止: サービスラベルがプロジェクトラベルと同一の場合は追加しない
 
 **動作例**:
 - `projectId: 'michi'` → `['project:michi']`（サービスラベルなし）
-- `projectId: 'customer-a-service-1'` → `['project:customer-a-service-1', 'service:s1']`
+- `projectId: '20240115-payment-api'` → `['project:20240115-payment-api', 'service:payment']`
 - `projectId: 'michi-service'` → `['project:michi-service']`（サービスラベルがプロジェクトラベルと同一のため追加しない）
 ### Step 4: Michiから共通設定をコピー
 
@@ -198,7 +198,7 @@ ATLASSIAN_API_TOKEN=your-token-here
 # GitHub設定
 GITHUB_ORG=your-org
 GITHUB_TOKEN=ghp_xxx
-GITHUB_REPO=your-org/customer-a-service-1
+GITHUB_REPO=your-org/20240115-payment-api
 
 # Confluence共有スペース
 CONFLUENCE_PRD_SPACE=PRD
@@ -248,7 +248,7 @@ npm run type-check
 # Git初期化（まだの場合）
 git init
 git branch -M main
-git remote add origin https://github.com/your-org/customer-a-service-1.git
+git remote add origin https://github.com/your-org/20240115-payment-api.git
 ```
 
 ### Step 8: 初期コミット
@@ -344,9 +344,9 @@ gh pr create --head <project-id>/feature/<feature> --base main
 # 具体例
 /kiro:spec-impl user-auth FE-1,BE-1
 jj commit -m "feat: 実装 [PRJA-123]"
-jj bookmark create customer-a-service-1/feature/user-auth -r '@-'
-jj git push --bookmark customer-a-service-1/feature/user-auth --allow-new
-gh pr create --head customer-a-service-1/feature/user-auth --base main
+jj bookmark create 20240115-payment-api/feature/user-auth -r '@-'
+jj git push --bookmark 20240115-payment-api/feature/user-auth --allow-new
+gh pr create --head 20240115-payment-api/feature/user-auth --base main
 ```
 
 #### Git を使用する場合
@@ -410,11 +410,11 @@ gh pr create --head <project-id>/feature/<feature> --base main
 
 # 具体例
 /kiro:spec-impl user-auth FE-1,BE-1
-git checkout -b customer-a-service-1/feature/user-auth
+git checkout -b 20240115-payment-api/feature/user-auth
 git add .
 git commit -m "feat: 実装 [PRJA-123]"
-git push -u origin customer-a-service-1/feature/user-auth
-gh pr create --head customer-a-service-1/feature/user-auth --base main
+git push -u origin 20240115-payment-api/feature/user-auth
+gh pr create --head 20240115-payment-api/feature/user-auth --base main
 ```
 
 ## プロジェクト間の切り替え
@@ -422,17 +422,17 @@ gh pr create --head customer-a-service-1/feature/user-auth --base main
 ### Cursor で切り替え
 
 ```text
-/kiro:project-switch customer-a-service-1
+/kiro:project-switch 20240115-payment-api
 ```
 
 ### ターミナルで切り替え
 
 ```bash
 # プロジェクトAに切り替え
-cd ~/work/projects/customer-a-service-1
+cd ~/work/projects/20240115-payment-api
 
 # プロジェクトBに切り替え
-cd ~/work/projects/customer-b-api
+cd ~/work/projects/20240201-user-management
 
 # Michiハブに戻る
 cd ~/work/projects/michi
@@ -455,8 +455,8 @@ npm run project:list
 | プロジェクト | ID | ステータス | JIRA | チーム |
 |------------|-------|----------|------|--------|
 | Michi | michi | active | MICHI | @developer1 |
-| A社 サービス1 | customer-a-service-1 | active | PRJA | @dev1, @dev2 |
-| B社 API | customer-b-api | active | PRJB | @dev3 |
+| プロジェクトA | 20240115-payment-api | active | PRJA | @dev1, @dev2 |
+| プロジェクトC | 20240310-analytics-api | active | PRJB | @dev3 |
 ```
 
 ## トラブルシューティング
@@ -483,17 +483,17 @@ npx cc-sdd@latest --cursor --lang ja --yes
 
 ### プロジェクト命名規則
 
-**リポジトリ名**: `customer-{id}-{service}`
-- 例: `customer-a-service-1`, `customer-b-api`, `customer-c-poc`
+**リポジトリ名**: `{YYYYMMDD}-{PJ名}`
+- 例: `20240115-payment-api`, `20240201-user-management`, `20240310-analytics-api`
 
 **プロジェクトID**: リポジトリ名と同じ
-- 例: `customer-a-service-1`
+- 例: `20240115-payment-api`
 
 **JIRA プロジェクトキー**: 3-4文字、一意
 - 例: `PRJA`, `PRJB`, `PRJC`
 
 **Confluenceラベル**: `project:{projectId}, service:{service}`
-- 例: `["project:customer-a-service-1", "service:s1"]`
+- 例: `["project:20240115-payment-api", "service:payment"]`
 
 ### チーム構成
 
@@ -522,10 +522,10 @@ npx cc-sdd@latest --cursor --lang ja --yes
 
 ```bash
 # ターミナル1: プロジェクトA
-cd ~/work/projects/customer-a-service-1
+cd ~/work/projects/20240115-payment-api
 
 # ターミナル2: プロジェクトB
-cd ~/work/projects/customer-b-api
+cd ~/work/projects/20240201-user-management
 
 # ターミナル3: Michiハブ（横断操作用）
 cd ~/work/projects/michi
@@ -539,8 +539,8 @@ cd ~/work/projects/michi
 {
   "folders": [
     { "path": "../michi" },
-    { "path": "../customer-a-service-1" },
-    { "path": "../customer-b-api" }
+    { "path": "../20240115-payment-api" },
+    { "path": "../20240201-user-management" }
   ],
   "settings": {
     "files.associations": {
