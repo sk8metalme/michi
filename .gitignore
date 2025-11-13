@@ -74,3 +74,7 @@ pnpm-lock.yaml
 # Users should run setup-existing.sh or cc-sdd to generate these
 # Includes: specs/, config.json, settings/, steering/, project.json, etc.
 .kiro/
+
+# Michi-specific project settings (user/machine-specific configuration)
+# Contains config.json with user credentials, project-specific settings
+.michi/
