@@ -5,6 +5,8 @@
  */
 
 import { Command } from 'commander';
+import { fileURLToPath } from 'url';
+import { realpathSync } from 'fs';
 import { syncTasksToJIRA } from '../scripts/jira-sync.js';
 import { syncToConfluence } from '../scripts/confluence-sync.js';
 import { runPhase } from '../scripts/phase-runner.js';
@@ -16,14 +18,17 @@ import { WorkflowOrchestrator } from '../scripts/workflow-orchestrator.js';
 import { configInteractive } from '../scripts/config-interactive.js';
 import { validateAndReport } from '../scripts/utils/config-validator.js';
 import { config } from 'dotenv';
+import { readFileSync } from 'fs';
+import { dirname, join } from 'path';
+
+// package.jsonからバージョンを読み込む
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const packageJsonPath = join(__dirname, '..', 'package.json');
+const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
 
 // 環境変数読み込み
 config();
-
-const packageJson = {
-  name: '@michi/cli',
-  version: '1.0.0'
-};
 
 /**
  * 環境変数から承認ゲートのロールリストを取得
@@ -233,8 +238,21 @@ export function createCLI(): Command {
 }
 
 // CLI実行（直接実行時）
-if (import.meta.url === `file://${process.argv[1]}`) {
-  const program = createCLI();
-  program.parse();
+// import.meta.urlとprocess.argv[1]を正規化して比較（シンボリックリンク対応）
+if (process.argv[1]) {
+  try {
+    const currentFile = fileURLToPath(import.meta.url);
+    const executedFile = realpathSync(process.argv[1]);
+    if (currentFile === executedFile) {
+      const program = createCLI();
+      program.parse();
+    }
+  } catch {
+    // realpathSyncが失敗した場合は、直接比較を試みる
+    if (fileURLToPath(import.meta.url) === process.argv[1]) {
+      const program = createCLI();
+      program.parse();
+    }
+  }
 }
 
