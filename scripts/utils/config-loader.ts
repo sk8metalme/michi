@@ -141,10 +141,31 @@ function validateConfigPath(configPath: string, projectRoot: string): boolean {
 }
 
 /**
+ * 設定ファイルのパスを解決
+ * 新規パス: .michi/config.json
+ * legacyパス（.kiro/config.json）が存在する場合は警告のみ表示
+ */
+function resolveConfigPath(projectRoot: string): string {
+  const michiConfigPath = resolve(projectRoot, '.michi/config.json');
+  const legacyConfigPath = resolve(projectRoot, '.kiro/config.json');
+  
+  // legacyパスが存在する場合は警告（移行推奨）
+  if (existsSync(legacyConfigPath) && !existsSync(michiConfigPath)) {
+    console.warn(
+      '⚠️  Deprecated: .kiro/config.json is deprecated.\n' +
+      '   Please migrate to .michi/config.json\n' +
+      '   The legacy path will not be supported in future versions.\n'
+    );
+  }
+  
+  return michiConfigPath;
+}
+
+/**
  * プロジェクト固有設定を読み込む
  */
 function loadProjectConfig(projectRoot: string = process.cwd()): Partial<AppConfig> | null {
-  const projectConfigPath = resolve(projectRoot, '.kiro/config.json');
+  const projectConfigPath = resolveConfigPath(projectRoot);
   
   // パストラバーサル対策: パスを検証
   if (!validateConfigPath(projectConfigPath, projectRoot)) {
@@ -247,7 +268,7 @@ let cachedConfigMtime: number | null = null;
 let cachedDefaultConfigMtime: number | null = null;
 
 export function getConfig(projectRoot: string = process.cwd()): AppConfig {
-  const projectConfigPath = resolve(projectRoot, '.kiro/config.json');
+  const projectConfigPath = resolveConfigPath(projectRoot);
   const currentFileUrl = import.meta.url;
   const currentFilePath = fileURLToPath(currentFileUrl);
   const currentDir = resolve(currentFilePath, '..');
@@ -322,5 +343,12 @@ export function clearConfigCache(): void {
   cachedProjectRoot = null;
   cachedConfigMtime = null;
   cachedDefaultConfigMtime = null;
+}
+
+/**
+ * 設定ファイルのパスを解決（外部から使用可能）
+ */
+export function getConfigPath(projectRoot: string = process.cwd()): string {
+  return resolveConfigPath(projectRoot);
 }
 

@@ -30,15 +30,15 @@ npm run create-project -- \
 
 # 具体例
 npm run create-project -- \
-  --name "customer-a-service-1" \
-  --project-name "A社 サービス1" \
+  --name "20240115-payment-api" \
+  --project-name "プロジェクトA" \
   --jira-key "PRJA"
 ```
 
 **リポジトリ名**: `--name`で指定した値がそのままGitHubリポジトリ名として使用されます。
 
 **例**:
-- `--name "customer-a-service-1"` → GitHubリポジトリ: `org/customer-a-service-1`
+- `--name "20240115-payment-api"` → GitHubリポジトリ: `org/20240115-payment-api`
 - `--name "payment-api"` → GitHubリポジトリ: `org/payment-api`
 
 **注意**: リポジトリ名はkebab-case（小文字、ハイフン区切り）を推奨します。
@@ -113,19 +113,22 @@ jj git push --bookmark <project-id>/feature/<feature> --allow-new
 gh pr create --head <project-id>/feature/<feature> --base init
 ```
 
-## Cursorコマンド一覧
+## コマンド一覧
 
-| コマンド | 説明 |
-|---------|------|
-| `/kiro:spec-init <description>` | 仕様初期化 |
-| `/kiro:spec-requirements <feature>` | 要件定義生成 |
-| `/kiro:spec-design <feature>` | 設計生成 |
-| `/kiro:spec-tasks <feature>` | タスク分割 |
-| `/kiro:spec-impl <feature> <tasks>` | TDD実装 |
-| `/kiro:spec-status <feature>` | 進捗確認 |
-| `/kiro:steering` | Steering作成/更新 |
-| `/kiro:confluence-sync <feature> [type]` | Confluence同期 |
-| `/kiro:project-switch <project_id>` | プロジェクト切り替え |
+| コマンド | 説明 | 分類 |
+|---------|------|------|
+| `/kiro:spec-init <description>` | 仕様初期化 | cc-sdd |
+| `/kiro:spec-requirements <feature>` | 要件定義生成 | cc-sdd |
+| `/kiro:spec-design <feature>` | 設計生成 | cc-sdd |
+| `/kiro:spec-tasks <feature>` | タスク分割 | cc-sdd |
+| `/kiro:spec-impl <feature> <tasks>` | TDD実装 | cc-sdd |
+| `/kiro:spec-status <feature>` | 進捗確認 | cc-sdd |
+| `/kiro:steering` | Steering作成/更新 | cc-sdd |
+| `/kiro:steering-custom` | カスタムSteering作成 | cc-sdd |
+| `/kiro:validate-gap <feature>` | 既存コードと要件の差異分析 | cc-sdd |
+| `/kiro:validate-design <feature>` | 設計の品質レビューと検証 | cc-sdd |
+| `/kiro:confluence-sync <feature> [type]` | Confluence同期 | Michi only |
+| `/kiro:project-switch <project_id>` | プロジェクト切り替え | Michi only |
 
 ## Michi CLIコマンド一覧
 
@@ -141,7 +144,7 @@ gh pr create --head <project-id>/feature/<feature> --base init
 | `michi project:list` | プロジェクト一覧 |
 | `michi project:dashboard` | リソースダッシュボード生成 |
 | `michi workflow:run --feature <name>` | 統合ワークフロー実行 |
-| `michi config:interactive` | 対話式設定ツール（.kiro/config.json作成） |
+| `michi config:interactive` | 対話式設定ツール（.michi/config.json作成） |
 | `michi config:validate` | 設定ファイルのバリデーション |
 | `michi --help` | ヘルプ表示 |
 | `michi --version` | バージョン表示 |
@@ -149,7 +152,7 @@ gh pr create --head <project-id>/feature/<feature> --base init
 **インストール方法**:
 - **npx実行（推奨）**: `npx @michi/cli <command>` - 常に最新版を使用
 - **グローバルインストール**: `npm install -g @michi/cli` 後、`michi <command>`
-- **ローカル開発**: `npm run michi <command>` または `tsx src/cli.ts <command>`
+- **ローカル開発**: `npm run michi <command>` または `npx tsx src/cli.ts <command>`
 
 ## npmスクリプト一覧（michiリポジトリ内）
 
@@ -227,8 +230,8 @@ gh pr create --head <bookmark> --base main
 
 例:
 - `michi/feature/user-auth`
-- `customer-a-service-1/feature/payment`
-- `customer-b-api/feature/user-endpoint`
+- `20240115-payment-api/feature/payment`
+- `20240310-analytics-api/feature/user-endpoint`
 
 ## トラブルシューティング
 

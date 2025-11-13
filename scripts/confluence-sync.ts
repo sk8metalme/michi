@@ -10,7 +10,7 @@ import { config } from 'dotenv';
 import { loadProjectMeta, type ProjectMetadata } from './utils/project-meta.js';
 import { convertMarkdownToConfluence, createConfluencePage } from './markdown-to-confluence.js';
 import { validateFeatureNameOrThrow } from './utils/feature-name-validator.js';
-import { getConfig } from './utils/config-loader.js';
+import { getConfig, getConfigPath } from './utils/config-loader.js';
 import { createPagesByGranularity } from './utils/confluence-hierarchy.js';
 import { validateForConfluenceSync } from './utils/config-validator.js';
 
@@ -361,7 +361,7 @@ async function syncToConfluence(
   if (validation.errors.length > 0) {
     console.error('❌ Configuration errors:');
     validation.errors.forEach(error => console.error(`   ${error}`));
-    const configPath = resolve('.kiro/config.json');
+    const configPath = getConfigPath();
     console.error(`\n設定ファイル: ${configPath}`);
     throw new Error('Confluence同期に必要な設定値が不足しています。上記のエラーを確認して設定を修正してください。');
   }

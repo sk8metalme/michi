@@ -12,6 +12,7 @@ import {
   validateForJiraSync,
   validateAndReport
 } from '../config-validator.js';
+import { clearConfigCache } from '../config-loader.js';
 
 describe('config-validator', () => {
   let testProjectRoot: string;
@@ -21,10 +22,13 @@ describe('config-validator', () => {
     // テスト用の一時ディレクトリを作成
     testProjectRoot = resolve(tmpdir(), `michi-test-${Date.now()}`);
     mkdirSync(testProjectRoot, { recursive: true });
-    mkdirSync(join(testProjectRoot, '.kiro'), { recursive: true });
+    mkdirSync(join(testProjectRoot, '.michi'), { recursive: true });
 
     // 環境変数をバックアップ
     originalEnv = { ...process.env };
+    
+    // キャッシュをクリア
+    clearConfigCache();
   });
 
   afterEach(() => {
@@ -34,7 +38,7 @@ describe('config-validator', () => {
     // テスト用ディレクトリを削除
     if (existsSync(testProjectRoot)) {
       // ファイルを削除
-      const configPath = join(testProjectRoot, '.kiro/config.json');
+      const configPath = join(testProjectRoot, '.michi/config.json');
       if (existsSync(configPath)) {
         unlinkSync(configPath);
       }
@@ -49,6 +53,12 @@ describe('config-validator', () => {
 
   describe('validateProjectConfig', () => {
     it('設定ファイルが存在しない場合は情報メッセージを返す', () => {
+      // .michi/config.jsonが存在しないことを確認
+      const michiConfigPath = join(testProjectRoot, '.michi/config.json');
+      if (existsSync(michiConfigPath)) {
+        unlinkSync(michiConfigPath);
+      }
+
       const result = validateProjectConfig(testProjectRoot);
 
       expect(result.valid).toBe(true);
@@ -59,7 +69,13 @@ describe('config-validator', () => {
     });
 
     it('有効な設定ファイルの場合は成功', () => {
-      const configPath = join(testProjectRoot, '.kiro/config.json');
+      // .michiディレクトリが存在することを確認
+      const michiDir = join(testProjectRoot, '.michi');
+      if (!existsSync(michiDir)) {
+        mkdirSync(michiDir, { recursive: true });
+      }
+
+      const configPath = join(testProjectRoot, '.michi/config.json');
       writeFileSync(configPath, JSON.stringify({
         confluence: {
           pageCreationGranularity: 'single',
@@ -76,7 +92,7 @@ describe('config-validator', () => {
     });
 
     it('無効なJSONの場合はエラーを返す', () => {
-      const configPath = join(testProjectRoot, '.kiro/config.json');
+      const configPath = join(testProjectRoot, '.michi/config.json');
       writeFileSync(configPath, '{ invalid json }');
 
       const result = validateProjectConfig(testProjectRoot);
@@ -87,7 +103,7 @@ describe('config-validator', () => {
     });
 
     it('by-hierarchyモードでhierarchy設定がない場合はエラー', () => {
-      const configPath = join(testProjectRoot, '.kiro/config.json');
+      const configPath = join(testProjectRoot, '.michi/config.json');
       writeFileSync(configPath, JSON.stringify({
         confluence: {
           pageCreationGranularity: 'by-hierarchy'
@@ -102,7 +118,7 @@ describe('config-validator', () => {
     });
 
     it('selected-phasesモードでselectedPhases設定がない場合はエラー', () => {
-      const configPath = join(testProjectRoot, '.kiro/config.json');
+      const configPath = join(testProjectRoot, '.michi/config.json');
       writeFileSync(configPath, JSON.stringify({
         jira: {
           storyCreationGranularity: 'selected-phases'
@@ -122,7 +138,7 @@ describe('config-validator', () => {
       // 環境変数をクリア
       delete process.env.CONFLUENCE_PRD_SPACE;
       
-      const configPath = join(testProjectRoot, '.kiro/config.json');
+      const configPath = join(testProjectRoot, '.michi/config.json');
       writeFileSync(configPath, JSON.stringify({
         confluence: {
           pageCreationGranularity: 'single'
@@ -140,7 +156,7 @@ describe('config-validator', () => {
     });
 
     it('spaces設定がある場合は成功', () => {
-      const configPath = join(testProjectRoot, '.kiro/config.json');
+      const configPath = join(testProjectRoot, '.michi/config.json');
       writeFileSync(configPath, JSON.stringify({
         confluence: {
           spaces: {
@@ -158,7 +174,7 @@ describe('config-validator', () => {
     it('by-hierarchyモードでhierarchy設定がない場合はエラー', () => {
       // デフォルト設定を上書きするため、hierarchyキーを削除
       // デフォルト設定にhierarchyがあるため、実際にはエラーにならない可能性がある
-      const configPath = join(testProjectRoot, '.kiro/config.json');
+      const configPath = join(testProjectRoot, '.michi/config.json');
       writeFileSync(configPath, JSON.stringify({
         confluence: {
           pageCreationGranularity: 'by-hierarchy',
@@ -177,7 +193,7 @@ describe('config-validator', () => {
     });
 
     it('manualモードでstructure設定がない場合はエラー', () => {
-      const configPath = join(testProjectRoot, '.kiro/config.json');
+      const configPath = join(testProjectRoot, '.michi/config.json');
       writeFileSync(configPath, JSON.stringify({
         confluence: {
           pageCreationGranularity: 'manual',
@@ -196,7 +212,7 @@ describe('config-validator', () => {
 
     it('環境変数CONFLUENCE_PRD_SPACEがある場合は情報メッセージ', () => {
       process.env.CONFLUENCE_PRD_SPACE = 'Michi';
-      const configPath = join(testProjectRoot, '.kiro/config.json');
+      const configPath = join(testProjectRoot, '.michi/config.json');
       writeFileSync(configPath, JSON.stringify({
         confluence: {
           pageCreationGranularity: 'single'
@@ -216,7 +232,7 @@ describe('config-validator', () => {
 
   describe('validateForJiraSync', () => {
     it('issueTypes.story設定がない場合はエラー', () => {
-      const configPath = join(testProjectRoot, '.kiro/config.json');
+      const configPath = join(testProjectRoot, '.michi/config.json');
       writeFileSync(configPath, JSON.stringify({
         jira: {}
       }));
@@ -229,7 +245,7 @@ describe('config-validator', () => {
     });
 
     it('issueTypes.story設定がある場合は成功', () => {
-      const configPath = join(testProjectRoot, '.kiro/config.json');
+      const configPath = join(testProjectRoot, '.michi/config.json');
       writeFileSync(configPath, JSON.stringify({
         jira: {
           issueTypes: {
@@ -246,7 +262,7 @@ describe('config-validator', () => {
 
     it('環境変数JIRA_ISSUE_TYPE_STORYがある場合は情報メッセージ', () => {
       process.env.JIRA_ISSUE_TYPE_STORY = '10036';
-      const configPath = join(testProjectRoot, '.kiro/config.json');
+      const configPath = join(testProjectRoot, '.michi/config.json');
       writeFileSync(configPath, JSON.stringify({
         jira: {
           createEpic: true
@@ -264,7 +280,7 @@ describe('config-validator', () => {
     });
 
     it('issueTypes.subtask設定がない場合は警告', () => {
-      const configPath = join(testProjectRoot, '.kiro/config.json');
+      const configPath = join(testProjectRoot, '.michi/config.json');
       writeFileSync(configPath, JSON.stringify({
         jira: {
           issueTypes: {
@@ -281,7 +297,7 @@ describe('config-validator', () => {
     });
 
     it('selected-phasesモードでselectedPhases設定がない場合はエラー', () => {
-      const configPath = join(testProjectRoot, '.kiro/config.json');
+      const configPath = join(testProjectRoot, '.michi/config.json');
       writeFileSync(configPath, JSON.stringify({
         jira: {
           storyCreationGranularity: 'selected-phases',

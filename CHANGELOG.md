@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.5] - 2025-11-13
+
+### Changed
+- 設定ファイルパスを`.kiro/config.json`から`.michi/config.json`に変更（Michi専用設定として明確化）
+- プロジェクト命名規則を`customer-{id}-{service}`から`{YYYYMMDD}-{PJ名}`形式に変更
+- マルチプロジェクト構成を1リポジトリ内で複数プロジェクト管理に変更
+- ドキュメント内の「A社」「B社」表記を「プロジェクトA」「プロジェクトB」に統一
+- `config-reference.md`の設定値説明を表形式に変更（可読性向上）
+- `env.example`のJIRA Issue Type ID例を現実的な値（10036, 10037）に更新
+
+### Added
+- `/kiro:project-switch`コマンドに対話式選択機能を追加（パラメータなし実行時）
+- プロジェクト検出条件の明確化（`.kiro/project.json`の存在を必須条件として明記）
+
+### Fixed
+- Zod v4対応の型エラーを修正（`config-loader.test.ts`の型アサーションを更新）
+
+
 ## [0.0.4] - 2025-11-13
 
 ### Changed
