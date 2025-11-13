@@ -18,14 +18,17 @@ import { WorkflowOrchestrator } from '../scripts/workflow-orchestrator.js';
 import { configInteractive } from '../scripts/config-interactive.js';
 import { validateAndReport } from '../scripts/utils/config-validator.js';
 import { config } from 'dotenv';
-import { readFileSync } from 'fs';
+import { readFileSync, existsSync } from 'fs';
 import { dirname, join } from 'path';
 
 // package.jsonからバージョンを読み込む
 // コンパイル後は dist/src/cli.js から実行されるため、2階層上がる必要がある
+// テスト環境では src/cli.ts から直接実行されるため、process.cwd()も考慮する
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const packageJsonPath = join(__dirname, '..', '..', 'package.json');
+// まず、コンパイル後のパス（dist/src/cli.js）を試す
+const distPath = join(__dirname, '..', '..', 'package.json');
+const packageJsonPath = existsSync(distPath) ? distPath : join(process.cwd(), 'package.json');
 const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
 
 // 環境変数読み込み
