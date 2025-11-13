@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Zod v4対応の型エラーを修正（`config-loader.test.ts`の型アサーションを更新）
 
+
 ## [0.0.4] - 2025-11-13
 
 ### Changed
