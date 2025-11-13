@@ -571,6 +571,6 @@ npm run multi-estimate
 ## 参考ドキュメント
 
 - [セットアップガイド](./setup.md)
-- [ワークフローガイド](./workflow.md)
-- [マルチプロジェクト管理](./multi-project.md)
+- [ワークフローガイド](../guides/workflow.md)
+- [マルチプロジェクト管理](../guides/multi-project.md)
 

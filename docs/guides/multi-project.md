@@ -47,7 +47,7 @@ repository/  ← 1つのGitHubリポジトリ
 
 ### 新規プロジェクト追加
 
-詳細な手順は [新規プロジェクトセットアップガイド](./new-project-setup.md) を参照してください。
+詳細な手順は [新規プロジェクトセットアップガイド](../getting-started/new-project-setup.md) を参照してください。
 
 **クイックスタート**:
 1. 既存リポジトリに追加: `bash /path/to/michi/scripts/setup-existing.sh`
@@ -62,7 +62,7 @@ repository/  ← 1つのGitHubリポジトリ
 
 ### 環境変数設定
 
-各プロジェクトで`.env`ファイルを設定します。詳細は [新規プロジェクトセットアップガイド](./new-project-setup.md#step-5-環境変数設定) を参照してください。
+各プロジェクトで`.env`ファイルを設定します。詳細は [新規プロジェクトセットアップガイド](../getting-started/new-project-setup.md#step-5-環境変数設定) を参照してください。
 
 ### 動作確認
 
@@ -210,7 +210,7 @@ ls -la .kiro/specs/
 
 **解決方法**:
 1. プロジェクトディレクトリが正しいか確認
-2. `.kiro/project.json`を作成（[新規プロジェクトセットアップガイド](./new-project-setup.md)を参照）
+2. `.kiro/project.json`を作成（[新規プロジェクトセットアップガイド](../getting-started/new-project-setup.md)を参照）
 
 ## プロジェクト横断操作
 
@@ -322,7 +322,7 @@ shared-infrastructure/
 **Confluenceラベル**: `project:{projectId}, service:{service}`
 - 例: `project:20240115-payment-api, service:payment`
 
-**ラベル生成ロジック**: 詳細は [新規プロジェクトセットアップガイド](./new-project-setup.md#ラベル生成ロジック) を参照してください。
+**ラベル生成ロジック**: 詳細は [新規プロジェクトセットアップガイド](../getting-started/new-project-setup.md#ラベル生成ロジック) を参照してください。
 ### チーム構成の明確化
 
 各プロジェクトの `team` フィールドに担当者を記載：

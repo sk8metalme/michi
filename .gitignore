@@ -78,3 +78,6 @@ pnpm-lock.yaml
 # Michi-specific project settings (user/machine-specific configuration)
 # Contains config.json with user credentials, project-specific settings
 .michi/
+
+# AI Context
+AGENTS.md
