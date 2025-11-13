@@ -28,6 +28,7 @@ export default tseslint.config(
       'dist/',
       'node_modules/',
       '*.js',
+      'scripts/set-permissions.js',
       '*.d.ts',
       'coverage/',
       'vitest.config.ts',

@@ -1,6 +1,6 @@
 {
   "name": "@sk8metal/michi-cli",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Managed Intelligent Comprehensive Hub for Integration - AI-driven development workflow automation",
   "license": "MIT",
   "type": "module",
@@ -43,6 +43,7 @@
   ],
   "scripts": {
     "build": "tsc",
+    "postbuild": "node scripts/set-permissions.js",
     "prepare": "npm run build",
     "setup:env": "bash scripts/setup-env.sh",
     "create-project": "tsx scripts/create-project.ts",
@@ -67,6 +68,7 @@
     "test:coverage": "vitest --run --coverage",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {

@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.6] - 2025-11-14
+
+### Fixed
+- NPM公開パッケージのCLIコマンドが実行権限不足で動作しない問題を修正
+  - Windows互換のNode.jsスクリプト（`scripts/set-permissions.js`）を追加
+  - `postbuild`を`chmod`コマンドから`node scripts/set-permissions.js`に変更
+  - Windows環境では権限設定をスキップし、Unix系OSでのみ実行権限を付与
+  - これにより`npm install -g @sk8metal/michi-cli`後、すべてのプラットフォームで`michi --version`や`michi --help`が正常に動作するようになります
+
+### Changed
+- ドキュメント構造を大幅に再編成（目的別カテゴリに分類）
+  - `docs/getting-started/`: 初めてMichiを使う方向けのガイド
+  - `docs/guides/`: 実践的な開発ガイド
+  - `docs/reference/`: コマンド・設定値リファレンス
+  - `docs/contributing/`: コントリビューター向けガイド
+- `setup.md`を利用者向け（`docs/getting-started/setup.md`）と開発者向け（`docs/contributing/development.md`）に分離
+- ルートに`CONTRIBUTING.md`を追加（コントリビューションガイドラインの明確化）
+- `docs/README.md`を追加（ドキュメントハブとして機能）
+
+### Added
+- `docs/getting-started/quick-start.md`: 5分で始めるクイックスタートガイド
+- 39箇所以上のドキュメント内リンクを新しい構造に合わせて更新
+- `npm run format`コマンドを追加（Prettierによるコードフォーマット）
+
 ## [0.0.5] - 2025-11-13
 
 ### Changed
