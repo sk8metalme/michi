@@ -4,7 +4,50 @@
 
 ## 概要
 
-Michiでは、チームごとに異なる開発フローに対応するため、Confluence/JIRAの作成粒度やワークフロー設定をカスタマイズ可能にしています。
+Michiでは、チームやPJごとに異なる開発フローに対応するため、Confluence/JIRAの作成粒度やワークフロー設定をカスタマイズ可能にしています。
+
+## cc-sddのカスタマイズとの関係
+
+Michiは[cc-sdd](https://github.com/gotalab/cc-sdd)をベースとしており、カスタマイズには2つの種類があります：
+
+### 1. cc-sddのカスタマイズ（テンプレート・ルール）
+
+**対象**: AIが生成するドキュメントの構造や判断基準
+- **templates/**: `requirements.md`, `design.md`, `tasks.md`の構造・フォーマット
+- **rules/**: AIの判断基準・生成原則
+- **steering/**: プロジェクトメモリ（`/kiro:steering-custom`で作成）
+
+**詳細**: [cc-sdd カスタマイズガイド](https://github.com/gotalab/cc-sdd/blob/main/docs/guides/ja/customization-guide.md)
+
+**主なカスタマイズ内容**:
+- 要件定義書の見出し形式（日本語/英語/カスタム）
+- 設計ドキュメントのセクション構造
+- タスク分解の粒度と形式
+- EARS形式の要件記述ルール
+- カスタムSteeringドキュメント（API標準、セキュリティポリシーなど）
+
+### 2. Michiのカスタマイズ（設定ファイル）
+
+**対象**: Confluence/JIRAの作成方法やワークフロー設定
+- **`.michi/config.json`**: Confluence階層構造、JIRA Story作成粒度、承認ゲート設定
+
+**詳細**: 本ドキュメント（以下を参照）
+
+**主なカスタマイズ内容**:
+- Confluenceページの階層構造（フラット/階層/セクション分割）
+- JIRA Story作成粒度（全作成/フェーズごと/選択フェーズのみ）
+- ワークフロー承認ゲート設定
+
+### 使い分け
+
+| カスタマイズ種類 | 対象 | 設定場所 | コマンド |
+|----------------|------|---------|---------|
+| **cc-sdd** | ドキュメント構造・AI判断基準 | `.kiro/settings/templates/`, `.kiro/settings/rules/`, `.kiro/steering/` | `/kiro:steering-custom` |
+| **Michi** | Confluence/JIRA作成方法 | `.michi/config.json` | `michi config:interactive` |
+
+**例**: 
+- 要件定義書の見出しを「要件 N:」から「REQ-N:」に変更 → **cc-sddのカスタマイズ**（`templates/requirements.md`を編集）
+- Confluenceページを階層構造にする → **Michiのカスタマイズ**（`.michi/config.json`で設定）
 
 ## 設定ファイルの構造
 
@@ -14,9 +57,11 @@ Michiでは、チームごとに異なる開発フローに対応するため、
 
 ### プロジェクト固有設定
 
-`.kiro/config.json` - プロジェクトルートに配置（オプション）
+`.michi/config.json` - プロジェクトルートに配置（オプション）
 
-**重要**: `.kiro/config.json`は`.gitignore`に追加することを推奨します（チーム固有設定のため）
+**重要**: `.michi/config.json`は`.gitignore`に追加することを推奨します（チーム固有設定のため）
+
+**注意**: 以前は `.kiro/config.json` を使用していましたが、Michi専用の設定ファイルとして `.michi/config.json` に変更されました。
 
 ### 設定のマージ順序
 
@@ -297,14 +342,14 @@ Confluenceスペース
 }
 ```
 
-### 承認ゲートの設定
+### 承認者の設定
 
 **設定例: 日本語ロール名を使用**
 ```json
 {
   "workflow": {
     "approvalGates": {
-      "requirements": ["企画", "部長"],
+      "requirements": ["PL", "部長"],
       "design": ["アーキテクト", "部長"],
       "release": ["SM", "部長"]
     }
@@ -314,7 +359,7 @@ Confluenceスペース
 
 ## 対話式設定ツール
 
-`.kiro/config.json`を対話的に作成・更新できます：
+`.michi/config.json`を対話的に作成・更新できます：
 
 ```bash
 # 対話式設定ツールを実行
@@ -333,7 +378,7 @@ npm run config:interactive
    - ワークフロー設定のカスタマイズ
 3. **各設定を対話的に入力**: プロンプトに従って選択・入力
 4. **設定を確認**: 最終的な設定内容を確認
-5. **保存**: 設定ファイルを`.kiro/config.json`に保存
+5. **保存**: 設定ファイルを`.michi/config.json`に保存
 
 ### 設定項目
 
@@ -341,7 +386,7 @@ npm run config:interactive
 - **ページタイトル形式**: カスタマイズ可能
 - **JIRA Story作成粒度**: 全作成/フェーズごと/選択フェーズのみ
 - **ワークフロー有効化フェーズ**: 要件定義/設計/タスク分割から選択
-- **承認ゲート**: 各フェーズの承認者を設定
+- **承認者**: 各フェーズの承認者を設定
 
 ## 設定ファイルのバリデーション
 
@@ -408,7 +453,7 @@ npm run config:validate
 
 ### 設定ファイルが読み込まれない
 
-1. `.kiro/config.json`がプロジェクトルートに存在するか確認
+1. `.michi/config.json`がプロジェクトルートに存在するか確認
 2. JSONの構文エラーがないか確認
 3. 設定ファイルのパスが正しいか確認
 
@@ -426,7 +471,14 @@ npm run config:validate
 
 ## 参考リンク
 
+### Michi関連
 - [セットアップガイド](./setup.md)
 - [ワークフローガイド](./workflow.md)
 - [新規プロジェクトセットアップ](./new-project-setup.md)
+- [設定値リファレンス](./config-reference.md)
+
+### cc-sdd関連
+- [cc-sdd カスタマイズガイド](https://github.com/gotalab/cc-sdd/blob/main/docs/guides/ja/customization-guide.md) - テンプレート・ルール・Steeringのカスタマイズ方法
+- [cc-sdd コマンドリファレンス](https://github.com/gotalab/cc-sdd/blob/main/docs/guides/ja/command-reference.md) - `/kiro:steering-custom`などのコマンド詳細
+- [cc-sdd Spec-Driven Guide](https://github.com/gotalab/cc-sdd/blob/main/docs/guides/ja/spec-driven.md) - 仕様駆動開発のワークフロー
 

@@ -30,7 +30,7 @@ echo ""
 echo -e "${YELLOW}プロジェクト情報を入力してください:${NC}"
 echo ""
 
-read -p "プロジェクト名（例: A社 サービス1）: " PROJECT_NAME
+read -p "プロジェクト名（例: プロジェクトA）: " PROJECT_NAME
 read -p "JIRAプロジェクトキー（例: PRJA）: " JIRA_KEY
 
 # 入力値の検証

@@ -7,7 +7,7 @@ import { resolve } from 'path';
 import { AppConfigSchema } from '../config/config-schema.js';
 import type { ZodIssue } from 'zod';
 import type { AppConfig } from '../config/config-schema.js';
-import { getConfig } from './config-loader.js';
+import { getConfig, getConfigPath } from './config-loader.js';
 
 /**
  * バリデーション結果
@@ -27,7 +27,7 @@ export function validateProjectConfig(projectRoot: string = process.cwd()): Vali
   const warnings: string[] = [];
   const info: string[] = [];
   
-  const configPath = resolve(projectRoot, '.kiro/config.json');
+  const configPath = getConfigPath(projectRoot);
   
   if (!existsSync(configPath)) {
     // 設定ファイルが存在しない場合は情報メッセージ（デフォルト設定を使用）
@@ -184,7 +184,7 @@ export function validateForConfluenceSync(
   const info: string[] = [];
   
   const config = getConfig(projectRoot);
-  const configPath = resolve(projectRoot, '.kiro/config.json');
+  const configPath = getConfigPath(projectRoot);
   
   // Confluence設定のチェック
   if (!config.confluence) {
@@ -198,7 +198,7 @@ export function validateForConfluenceSync(
         warnings.push(
           `confluence.spaces.${docType}が設定されていません。` +
           '環境変数CONFLUENCE_PRD_SPACEも設定されていないため、デフォルト値（PRD）を使用します。' +
-          '\n  推奨: .kiro/config.jsonに以下を追加してください:\n' +
+          '\n  推奨: .michi/config.jsonに以下を追加してください:\n' +
           '  {\n' +
           '    "confluence": {\n' +
           '      "spaces": {\n' +
@@ -218,7 +218,7 @@ export function validateForConfluenceSync(
         errors.push(
           'confluence.hierarchyが設定されていません。' +
           `pageCreationGranularityが"${confluence.pageCreationGranularity}"の場合、hierarchy設定が必須です。` +
-          '\n  解決方法: .kiro/config.jsonに以下を追加してください:\n' +
+          '\n  解決方法: .michi/config.jsonに以下を追加してください:\n' +
           '  {\n' +
           '    "confluence": {\n' +
           '      "hierarchy": {\n' +
@@ -263,7 +263,7 @@ export function validateForJiraSync(projectRoot: string = process.cwd()): Valida
   const info: string[] = [];
   
   const config = getConfig(projectRoot);
-  const configPath = resolve(projectRoot, '.kiro/config.json');
+  const configPath = getConfigPath(projectRoot);
   
   // JIRA設定のチェック
   if (!config.jira) {
@@ -279,7 +279,7 @@ export function validateForJiraSync(projectRoot: string = process.cwd()): Valida
           '環境変数JIRA_ISSUE_TYPE_STORYも設定されていないため、JIRA同期を実行できません。' +
           '\n  解決方法1: 環境変数を設定:\n' +
           '  export JIRA_ISSUE_TYPE_STORY=10036  # JIRAインスタンス固有のID\n' +
-          '\n  解決方法2: .kiro/config.jsonに以下を追加:\n' +
+          '\n  解決方法2: .michi/config.jsonに以下を追加:\n' +
           '  {\n' +
           '    "jira": {\n' +
           '      "issueTypes": {\n' +
@@ -299,7 +299,7 @@ export function validateForJiraSync(projectRoot: string = process.cwd()): Valida
           errors.push(
             'jira.issueTypes.storyが設定されていません。' +
             '環境変数JIRA_ISSUE_TYPE_STORYも設定されていないため、JIRA同期を実行できません。' +
-            '\n  解決方法: .kiro/config.jsonのjira.issueTypes.storyに値を設定するか、' +
+            '\n  解決方法: .michi/config.jsonのjira.issueTypes.storyに値を設定するか、' +
             '環境変数JIRA_ISSUE_TYPE_STORYを設定してください。'
           );
         } else {

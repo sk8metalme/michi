@@ -240,11 +240,13 @@ cp mcp.json.example ~/.cursor/mcp.json
 
 ## 6-2. プロジェクト固有設定ファイル（オプション）
 
-`.kiro/config.json` を作成することで、Confluence/JIRAの動作をカスタマイズできます。
+`.michi/config.json` を作成することで、Confluence/JIRAの動作をカスタマイズできます。
 
 ### 設定ファイルの作成
 
-プロジェクトルートに `.kiro/config.json` を作成：
+プロジェクトルートに `.michi/config.json` を作成：
+
+**注意**: 以前は `.kiro/config.json` を使用していましたが、Michi専用の設定ファイルとして `.michi/config.json` に変更されました。
 
 ```json
 {
@@ -289,7 +291,7 @@ cp mcp.json.example ~/.cursor/mcp.json
 設定値は以下の優先順位で決定されます：
 
 1. **`spec.json`**: 機能固有の設定（最優先）
-2. **`.kiro/config.json`**: プロジェクト固有の設定
+2. **`.michi/config.json`**: プロジェクト固有の設定
 3. **環境変数**: システム環境変数または`.env`ファイル
 4. **デフォルト値**: スキーマで定義されたデフォルト値
 

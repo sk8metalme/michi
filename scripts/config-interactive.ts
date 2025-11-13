@@ -1,6 +1,6 @@
 /**
  * 対話式設定ツール
- * .kiro/config.json を対話的に作成・更新
+ * .michi/config.json を対話的に作成・更新
  */
 
 import { readFileSync, writeFileSync, existsSync } from 'fs';
@@ -373,7 +373,7 @@ async function main(): Promise<void> {
   try {
     console.log('🎨 Michi カスタマイズ設定ツール');
     console.log('='.repeat(60));
-    console.log('このツールで .kiro/config.json を作成・更新できます。\n');
+    console.log('このツールで .michi/config.json を作成・更新できます。\n');
     
     // プロジェクトメタデータを読み込み
     let projectMeta;
@@ -387,7 +387,8 @@ async function main(): Promise<void> {
     }
     
     // 既存の設定ファイルを確認
-    const configPath = resolve(process.cwd(), '.kiro/config.json');
+    const { getConfigPath } = await import('./utils/config-loader.js');
+    const configPath = getConfigPath();
     let existingConfig: any = null;
     
     if (existsSync(configPath)) {

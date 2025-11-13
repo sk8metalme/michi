@@ -23,7 +23,7 @@ import axios from 'axios';
 import { config } from 'dotenv';
 import { loadProjectMeta } from './utils/project-meta.js';
 import { validateFeatureNameOrThrow } from './utils/feature-name-validator.js';
-import { getConfig } from './utils/config-loader.js';
+import { getConfig, getConfigPath } from './utils/config-loader.js';
 import { validateForJiraSync } from './utils/config-validator.js';
 
 config();
@@ -355,7 +355,7 @@ async function syncTasksToJIRA(featureName: string): Promise<void> {
   if (validation.errors.length > 0) {
     console.error('❌ Configuration errors:');
     validation.errors.forEach(error => console.error(`   ${error}`));
-    const configPath = resolve('.kiro/config.json');
+    const configPath = getConfigPath();
     console.error(`\n設定ファイル: ${configPath}`);
     throw new Error('JIRA同期に必要な設定値が不足しています。上記のエラーを確認して設定を修正してください。');
   }
@@ -370,7 +370,7 @@ async function syncTasksToJIRA(featureName: string): Promise<void> {
   if (!storyIssueTypeId) {
     throw new Error(
       'JIRA Story issue type ID is not configured. ' +
-      'Please set JIRA_ISSUE_TYPE_STORY environment variable or configure it in .kiro/config.json. ' +
+      'Please set JIRA_ISSUE_TYPE_STORY environment variable or configure it in .michi/config.json. ' +
       'You can find the issue type ID in JIRA UI (Settings > Issues > Issue types) or via REST API: ' +
       'GET https://your-domain.atlassian.net/rest/api/3/issuetype'
     );

@@ -4,8 +4,8 @@
  * 
  * 使い方:
  * npm run create-project -- \
- *   --name "customer-a-service-1" \
- *   --project-name "A社 サービス1" \
+ *   --name "20240115-payment-api" \
+ *   --project-name "プロジェクトA" \
  *   --jira-key "PRJA"
  */
 
@@ -22,8 +22,8 @@ const __dirname = dirname(__filename);
 loadDotenv();
 
 interface ProjectConfig {
-  name: string;           // リポジトリ名: customer-a-service-1
-  projectName: string;    // 表示名: A社 サービス1
+  name: string;           // リポジトリ名: 20240115-payment-api
+  projectName: string;    // 表示名: プロジェクトA
   jiraKey: string;        // JIRAキー: PRJA
   org?: string;           // GitHub組織名（デフォルト: .envから）
   labels?: string[];      // Confluenceラベル（デフォルト: 自動生成）
