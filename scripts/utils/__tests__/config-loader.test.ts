@@ -18,13 +18,22 @@ describe('config-loader', () => {
   let originalEnv: NodeJS.ProcessEnv;
 
   beforeEach(() => {
-    // テスト用の一時ディレクトリを作成
-    testProjectRoot = resolve(tmpdir(), `michi-test-${Date.now()}`);
+    // テスト用の一時ディレクトリを作成（ランダム要素を追加して衝突を防ぐ）
+    testProjectRoot = resolve(tmpdir(), `michi-test-${Date.now()}-${Math.random().toString(36).substring(7)}`);
+
+    // 既存のディレクトリがあれば削除
+    if (existsSync(testProjectRoot)) {
+      rmSync(testProjectRoot, { recursive: true, force: true });
+    }
+
     mkdirSync(testProjectRoot, { recursive: true });
     mkdirSync(join(testProjectRoot, '.michi'), { recursive: true });
 
     // 環境変数をバックアップ
     originalEnv = { ...process.env };
+
+    // キャッシュをクリア（クリーンな状態から開始）
+    clearConfigCache();
   });
 
   afterEach(() => {
@@ -123,6 +132,13 @@ describe('config-loader', () => {
 
     it('同じ設定ファイルを2回読み込む場合はキャッシュが使用される', () => {
       clearConfigCache(); // テスト開始時にクリア
+
+      // .kiro/が存在しないことを確認（legacy警告を防ぐ）
+      const legacyDir = join(testProjectRoot, '.kiro');
+      if (existsSync(legacyDir)) {
+        rmSync(legacyDir, { recursive: true, force: true });
+      }
+
       const configPath = join(testProjectRoot, '.michi/config.json');
       writeFileSync(configPath, JSON.stringify({
         confluence: {
