@@ -5,12 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.0.6] - 2025-11-13
+## [0.0.6] - 2025-11-14
 
 ### Fixed
 - NPM公開パッケージのCLIコマンドが実行権限不足で動作しない問題を修正
-  - `postbuild`スクリプトを追加してビルド後に`dist/src/cli.js`に実行権限を付与
-  - これにより`npm install -g @sk8metal/michi-cli`後、`michi --version`や`michi --help`が正常に動作するようになります
+  - Windows互換のNode.jsスクリプト（`scripts/set-permissions.js`）を追加
+  - `postbuild`を`chmod`コマンドから`node scripts/set-permissions.js`に変更
+  - Windows環境では権限設定をスキップし、Unix系OSでのみ実行権限を付与
+  - これにより`npm install -g @sk8metal/michi-cli`後、すべてのプラットフォームで`michi --version`や`michi --help`が正常に動作するようになります
 
 ### Changed
 - ドキュメント構造を大幅に再編成（目的別カテゴリに分類）
@@ -25,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - `docs/getting-started/quick-start.md`: 5分で始めるクイックスタートガイド
 - 39箇所以上のドキュメント内リンクを新しい構造に合わせて更新
+- `npm run format`コマンドを追加（Prettierによるコードフォーマット）
 
 ## [0.0.5] - 2025-11-13
 
