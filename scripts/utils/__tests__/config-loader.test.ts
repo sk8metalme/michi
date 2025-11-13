@@ -72,7 +72,7 @@ describe('config-loader', () => {
       
       expect(config).toBeDefined();
       expect(config.confluence).toBeDefined();
-      expect(config.confluence.pageCreationGranularity).toBe('single');
+      expect(config.confluence?.pageCreationGranularity).toBe('single');
     });
 
     it('設定ファイルが存在する場合はマージされた設定を返す', () => {
@@ -88,8 +88,8 @@ describe('config-loader', () => {
 
       const config = loadConfig(testProjectRoot);
       
-      expect(config.confluence.pageCreationGranularity).toBe('by-hierarchy');
-      expect(config.confluence.spaces?.requirements).toBe('TestSpace');
+      expect(config.confluence?.pageCreationGranularity).toBe('by-hierarchy');
+      expect(config.confluence?.spaces?.requirements).toBe('TestSpace');
     });
 
     it('無効なJSONの場合はエラーをスロー', () => {
@@ -134,7 +134,7 @@ describe('config-loader', () => {
       }));
 
       const config1 = getConfig(testProjectRoot);
-      expect(config1.confluence.pageCreationGranularity).toBe('single');
+      expect(config1.confluence?.pageCreationGranularity).toBe('single');
 
       // 設定ファイルを更新
       writeFileSync(configPath, JSON.stringify({
@@ -144,7 +144,7 @@ describe('config-loader', () => {
       }));
 
       const config2 = getConfig(testProjectRoot);
-      expect(config2.confluence.pageCreationGranularity).toBe('by-hierarchy');
+      expect(config2.confluence?.pageCreationGranularity).toBe('by-hierarchy');
     });
   });
 
