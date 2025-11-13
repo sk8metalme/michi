@@ -22,9 +22,10 @@ import { readFileSync } from 'fs';
 import { dirname, join } from 'path';
 
 // package.jsonからバージョンを読み込む
+// コンパイル後は dist/src/cli.js から実行されるため、2階層上がる必要がある
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const packageJsonPath = join(__dirname, '..', 'package.json');
+const packageJsonPath = join(__dirname, '..', '..', 'package.json');
 const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
 
 // 環境変数読み込み
