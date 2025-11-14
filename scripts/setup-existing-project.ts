@@ -166,6 +166,10 @@ async function setupExistingProject(config: SetupConfig): Promise<void> {
     // Step 4: Michiから共通ルールをコピー
     console.log('\n📋 Step 4: Copying common rules from Michi...');
   
+    // ディレクトリを事前に作成
+    mkdirSync(join(projectDir, '.cursor/rules'), { recursive: true });
+    mkdirSync(join(projectDir, '.cursor/commands/kiro'), { recursive: true });
+  
     const rulesToCopy = [
       'multi-project.mdc',
       'github-ssot.mdc',
@@ -223,12 +227,12 @@ async function setupExistingProject(config: SetupConfig): Promise<void> {
     console.log('   ✅ Michi CLI setup complete!');
     console.log('');
     console.log('   📋 使用方法:');
-    console.log('      npx @michi/cli jira:sync <feature>');
-    console.log('      npx @michi/cli confluence:sync <feature> requirements');
-    console.log('      npx @michi/cli phase:run <feature> tasks');
+    console.log('      npx @sk8metal/michi-cli jira:sync <feature>');
+    console.log('      npx @sk8metal/michi-cli confluence:sync <feature> requirements');
+    console.log('      npx @sk8metal/michi-cli phase:run <feature> tasks');
     console.log('');
     console.log('   または、グローバルインストール:');
-    console.log('      npm install -g @michi/cli');
+    console.log('      npm install -g @sk8metal/michi-cli');
     console.log('      michi jira:sync <feature>');
   
     // Step 9: package.json と tsconfig.json をリポジトリルートにコピー
@@ -251,14 +255,14 @@ async function setupExistingProject(config: SetupConfig): Promise<void> {
       console.log('   📝 手動で以下のスクリプトを追加してください:');
       console.log('');
       console.log('   "scripts": {');
-      console.log('     "jira:sync": "npx @michi/cli jira:sync",');
-      console.log('     "confluence:sync": "npx @michi/cli confluence:sync",');
-      console.log('     "phase:run": "npx @michi/cli phase:run",');
-      console.log('     "validate:phase": "npx @michi/cli validate:phase",');
-      console.log('     "preflight": "npx @michi/cli preflight",');
-      console.log('     "project:list": "npx @michi/cli project:list",');
-      console.log('     "project:dashboard": "npx @michi/cli project:dashboard",');
-      console.log('     "workflow:run": "npx @michi/cli workflow:run"');
+      console.log('     "jira:sync": "npx @sk8metal/michi-cli jira:sync",');
+      console.log('     "confluence:sync": "npx @sk8metal/michi-cli confluence:sync",');
+      console.log('     "phase:run": "npx @sk8metal/michi-cli phase:run",');
+      console.log('     "validate:phase": "npx @sk8metal/michi-cli validate:phase",');
+      console.log('     "preflight": "npx @sk8metal/michi-cli preflight",');
+      console.log('     "project:list": "npx @sk8metal/michi-cli project:list",');
+      console.log('     "project:dashboard": "npx @sk8metal/michi-cli project:dashboard",');
+      console.log('     "workflow:run": "npx @sk8metal/michi-cli workflow:run"');
       console.log('   }');
       console.log('');
     }
@@ -399,7 +403,6 @@ npm run github:create-pr <branch>   # PR作成
     console.log(`  - ${projectDir}/.cursor/commands/kiro/ (2ファイル)`);
     console.log(`  - ${projectDir}/.kiro/steering/ (3ファイル)`);
     console.log(`  - ${projectDir}/.kiro/settings/templates/ (3ファイル)`);
-    console.log(`  - ${projectDir}/scripts/ (7+ ファイル)`);
     console.log(`  - ${repoRoot}/package.json (新規の場合)`);
     console.log(`  - ${repoRoot}/tsconfig.json (新規の場合)`);
     console.log(`  - ${projectDir}/.env (テンプレート)`);

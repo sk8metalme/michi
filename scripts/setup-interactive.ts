@@ -74,10 +74,15 @@ async function getProjectMetadata(
   
   // projectId
   const projectIdDefault = existingMeta?.projectId || basename(projectPath);
-  const projectId = await question(
+  let projectId = await question(
     rl,
     `プロジェクトID [${projectIdDefault}]: `
   ) || projectIdDefault;
+  
+  // バリデーション
+  if (!validateProjectId(projectId)) {
+    throw new Error('無効なプロジェクトIDです。英数字、ハイフン、アンダースコアのみ使用できます。');
+  }
   
   // projectName
   const projectName = await question(
@@ -357,7 +362,7 @@ function saveEnvFile(envPath: string, env: Record<string, string>): void {
 /**
  * メイン処理
  */
-async function main(): Promise<void> {
+async function main(): Promise<number> {
   const rl = createInterface();
   
   try {
@@ -424,7 +429,7 @@ async function main(): Promise<void> {
       const selected = await selectProject(allProjects, question.bind(null, rl));
       if (!selected) {
         console.log('プロジェクトが選択されませんでした。');
-        process.exit(0);
+        return 0;
       }
       
       projectPath = selected.path;
@@ -449,7 +454,7 @@ async function main(): Promise<void> {
     
     if (!configureProject && !configureEnv) {
       console.log('設定する項目がありません。');
-      process.exit(0);
+      return 0;
     }
     
     let projectMeta: ProjectMetadata | null = null;
@@ -501,7 +506,7 @@ async function main(): Promise<void> {
     
     if (!confirmSave) {
       console.log('保存をキャンセルしました。');
-      process.exit(0);
+      return 0;
     }
     
     // 保存
@@ -534,10 +539,11 @@ async function main(): Promise<void> {
     }
     
     console.log('\n🎉 設定が完了しました！');
+    return 0;
     
   } catch (error) {
     console.error('❌ エラーが発生しました:', error instanceof Error ? error.message : error);
-    process.exit(1);
+    return 1;
   } finally {
     rl.close();
   }
@@ -545,10 +551,14 @@ async function main(): Promise<void> {
 
 // CLI実行
 if (import.meta.url === `file://${process.argv[1]}`) {
-  main().catch(error => {
-    console.error('❌ 予期しないエラー:', error);
-    process.exit(1);
-  });
+  main()
+    .then(exitCode => {
+      process.exit(exitCode);
+    })
+    .catch(error => {
+      console.error('❌ 予期しないエラー:', error);
+      process.exit(1);
+    });
 }
 
 export { main as setupInteractive };

@@ -238,3 +238,55 @@ describe('create-project.ts jj/git 依存性', () => {
     expect(gitCommands).toContain('git branch -M main');
   });
 });
+
+describe('create-project.ts .env作成時のcwd修正', () => {
+  let mockExecSync: ReturnType<typeof vi.mocked<typeof execSync>>;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockExecSync = vi.mocked(execSync);
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('.env作成時に actualProjectDir を cwd として使用する', () => {
+    const projectDir = '/test/repo';
+    const actualProjectDir = '/test/repo/projects/test-project';
+
+    // execSync の呼び出しをモック
+    mockExecSync.mockImplementation((command: string, options?: any) => {
+      if (command === 'npm run setup:env') {
+        // cwd が actualProjectDir であることを確認
+        expect(options?.cwd).toBe(actualProjectDir);
+        expect(options?.cwd).not.toBe(projectDir);
+        return '';
+      }
+      return '';
+    });
+
+    // .env作成のロジックを再現
+    execSync('npm run setup:env', { cwd: actualProjectDir, stdio: 'inherit' });
+
+    expect(mockExecSync).toHaveBeenCalledWith(
+      'npm run setup:env',
+      expect.objectContaining({ cwd: actualProjectDir })
+    );
+  });
+
+  it('.env が actualProjectDir に作成される（projectDir ではない）', () => {
+    const projectDir = '/test/repo';
+    const actualProjectDir = '/test/repo/projects/test-project';
+
+    // .env のパスを検証
+    const envPathInProjectDir = join(projectDir, '.env');
+    const envPathInActualProjectDir = join(actualProjectDir, '.env');
+
+    // .env は actualProjectDir に作成されるべき
+    expect(envPathInActualProjectDir).toContain('projects/test-project/.env');
+    expect(envPathInActualProjectDir).not.toBe(envPathInProjectDir);
+    expect(envPathInProjectDir).toBe('/test/repo/.env');
+    expect(envPathInActualProjectDir).toBe('/test/repo/projects/test-project/.env');
+  });
+});

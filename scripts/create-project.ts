@@ -302,10 +302,10 @@ async function createProject(config: ProjectConfig): Promise<void> {
     execSync('npm install', { stdio: 'inherit' });
     console.log('   ✅ Dependencies installed');
 
-    // Step 10: .env テンプレート作成（リポジトリルートで実行）
+    // Step 10: .env テンプレート作成（プロジェクトディレクトリで実行）
     console.log('\n🔐 Step 10: Creating .env template...');
     // package.jsonはprojectDirにあるため、そこで実行
-    execSync('npm run setup:env', { cwd: projectDir, stdio: 'inherit' });
+    execSync('npm run setup:env', { cwd: actualProjectDir, stdio: 'inherit' });
     console.log('   ✅ .env created');
 
     // Step 11: 初期コミット
