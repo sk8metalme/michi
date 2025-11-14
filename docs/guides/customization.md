@@ -474,7 +474,7 @@ npm run config:validate
 ### Michi関連
 - [セットアップガイド](../getting-started/setup.md)
 - [ワークフローガイド](./workflow.md)
-- [新規プロジェクトセットアップ](../getting-started/new-project-setup.md)
+- [新規リポジトリセットアップ](../getting-started/new-repository-setup.md)
 - [設定値リファレンス](../reference/config.md)
 
 ### cc-sdd関連

@@ -288,14 +288,14 @@ npm run create-project -- \
   --jira-key "PRJA"
 ```
 
-詳細: [新規プロジェクトセットアップガイド](./docs/getting-started/new-project-setup.md)
+詳細: [新規リポジトリセットアップガイド](./docs/getting-started/new-repository-setup.md)
 
 ## ドキュメント
 
 ### はじめに
 - [クイックスタート](./docs/getting-started/quick-start.md) - 5分で始める ⭐
 - [セットアップガイド](./docs/getting-started/setup.md) - インストール・設定手順
-- [新規プロジェクトセットアップ](./docs/getting-started/new-project-setup.md) - 他リポジトリでの開始方法
+- [新規リポジトリセットアップ](./docs/getting-started/new-repository-setup.md) - 新規リポジトリでの開始方法
 
 ### 実践ガイド
 - [ワークフローガイド](./docs/guides/workflow.md) - AI開発フロー ⭐

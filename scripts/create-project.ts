@@ -281,7 +281,7 @@ async function createProject(config: ProjectConfig): Promise<void> {
   console.log('  4. Cursor で開く: cursor .');
   console.log('  5. /kiro:spec-init <機能説明> で開発開始');
   console.log('');
-  console.log('詳細: docs/new-project-setup.md');
+  console.log('詳細: docs/new-repository-setup.md');
 }
 
 // 実行

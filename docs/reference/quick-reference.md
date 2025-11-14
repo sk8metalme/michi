@@ -74,7 +74,7 @@ npx tsx /path/to/michi/scripts/setup-existing-project.ts \
 # 6. 初期コミット
 ```
 
-詳細: [新規プロジェクトセットアップガイド](./new-project-setup.md)
+詳細: [新規リポジトリセットアップガイド](../getting-started/new-repository-setup.md)
 
 ## 開発フロー
 
@@ -287,7 +287,7 @@ npm install
 ## 参考リンク
 
 - [セットアップガイド](./setup.md)
-- [新規プロジェクトセットアップ](./new-project-setup.md)
+- [新規リポジトリセットアップ](../getting-started/new-repository-setup.md)
 - [ワークフローガイド](./workflow.md)
 - [マルチプロジェクト管理](./multi-project.md)
 - [テスト・検証](./testing.md)
