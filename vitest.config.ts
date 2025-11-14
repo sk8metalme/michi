@@ -19,6 +19,7 @@ export default defineConfig({
         '**/*.config.ts',
         '**/scripts/setup-*.ts',
         '**/scripts/setup-*.sh',
+        '**/scripts/setup-interactive.ts',
       ],
       thresholds: {
         // 段階的に引き上げる計画（Phase 1: 10% → Phase 2: 30% → Phase 3: 60% → Phase 4: 80%）
