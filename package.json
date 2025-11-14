@@ -1,6 +1,6 @@
 {
   "name": "@sk8metal/michi-cli",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Managed Intelligent Comprehensive Hub for Integration - AI-driven development workflow automation",
   "license": "MIT",
   "type": "module",
@@ -42,10 +42,11 @@
     "mcp.json.example"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && node scripts/copy-static-assets.js",
     "postbuild": "node scripts/set-permissions.js",
-    "prepare": "npm run build",
+    "prepare": "husky",
     "setup:env": "bash scripts/setup-env.sh",
+    "setup:interactive": "tsx scripts/setup-interactive.ts",
     "create-project": "tsx scripts/create-project.ts",
     "setup-existing": "tsx scripts/setup-existing-project.ts",
     "confluence:sync": "tsx scripts/confluence-sync.ts",
@@ -90,16 +91,27 @@
     "@types/turndown": "^5.0.4",
     "@typescript-eslint/eslint-plugin": "^8.46.4",
     "@typescript-eslint/parser": "^8.46.4",
+    "@vitest/coverage-v8": "^4.0.8",
     "eslint": "^9.39.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.6",
     "prettier": "^3.1.1",
     "tsx": "^4.7.0",
     "typescript": "^5.3.3",
     "typescript-eslint": "^8.46.4",
-    "vitest": "^4.0.8",
-    "@vitest/coverage-v8": "^4.0.8"
+    "vitest": "^4.0.8"
   },
   "engines": {
     "node": ">=20.0.0",
     "npm": ">=10.0.0"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,yml,yaml}": [
+      "prettier --write"
+    ]
   }
 }

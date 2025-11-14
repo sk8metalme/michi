@@ -14,7 +14,7 @@ Michiのドキュメントは、目的別に以下のカテゴリに整理され
 |------------|------|
 | [セットアップガイド](./getting-started/setup.md) | Michiのインストールと設定手順 |
 | [クイックスタート](./getting-started/quick-start.md) | 5分で始めるMichi |
-| [新規プロジェクト作成](./getting-started/new-project-setup.md) | 他のリポジトリでMichiを使い始める方法 |
+| [新規リポジトリ作成](./getting-started/new-repository-setup.md) | 新規リポジトリを作成してMichiを使い始める方法 |
 
 ### 📖 実践ガイド ([guides/](./guides/))
 
@@ -61,7 +61,7 @@ Michiプロジェクトに貢献したい開発者向けのガイドです。
 
 ### Michiを別のプロジェクトで使う場合
 
-1. [新規プロジェクト作成](./getting-started/new-project-setup.md) - 他のリポジトリでの始め方
+1. [新規リポジトリ作成](./getting-started/new-repository-setup.md) - 新規リポジトリでの始め方
 2. [クイックリファレンス](./reference/quick-reference.md) - コマンド一覧を確認
 
 ### Confluence/JIRAの設定をカスタマイズする場合

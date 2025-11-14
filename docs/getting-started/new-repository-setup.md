@@ -1,8 +1,8 @@
-# 新規プロジェクトセットアップガイド
+# 新規リポジトリセットアップガイド
 
 > **凡例について**: `<feature>` などの記号の意味は [README.md#凡例の記号説明](../README.md#凡例の記号説明) を参照してください。
 
-別のリポジトリで新しいプロジェクトを開始する手順です。
+新規リポジトリを作成してMichiを使い始める手順です。
 
 ## クイックスタート
 
@@ -29,12 +29,15 @@ npm run create-project -- \
 
 スクリプトが自動的に：
 1. GitHub リポジトリ作成
-2. cc-sdd 導入
-3. `.kiro/project.json` 作成
-4. 共通ファイルコピー
-5. `.env` テンプレート作成
-6. npm install
-7. 初期コミット・プッシュ
+2. `projects/{project-id}/`ディレクトリ作成
+3. cc-sdd 導入
+4. `projects/{project-id}/.kiro/project.json` 作成
+5. 共通ファイルコピー
+6. `projects/{project-id}/.env` テンプレート作成
+7. npm install（リポジトリルートで実行）
+8. 初期コミット・プッシュ
+
+**重要**: すべてのプロジェクトは`projects/{project-id}/`配下に配置されます。
 
 ### 方法2: 既存プロジェクトにMichiワークフローを追加（推奨 - 既存リポジトリ）
 
@@ -49,12 +52,16 @@ bash /path/to/michi/scripts/setup-existing.sh
 ```
 
 対話式でプロジェクト情報を入力すると、自動的に：
-1. ✅ cc-sdd 導入確認・インストール
-2. ✅ `.kiro/project.json` 作成
-3. ✅ Michiから共通ファイルコピー（ルール、コマンド、テンプレート）
-4. ✅ `.env` テンプレート作成
-5. ✅ README.md と .gitignore 更新
-6. ✅ CLIツールのセットアップ案内
+1. ✅ リポジトリルートを検出
+2. ✅ `projects/{project-id}/`ディレクトリ作成
+3. ✅ cc-sdd 導入確認・インストール
+4. ✅ `projects/{project-id}/.kiro/project.json` 作成
+5. ✅ Michiから共通ファイルコピー（ルール、コマンド、テンプレート）
+6. ✅ `projects/{project-id}/.env` テンプレート作成
+7. ✅ README.md と .gitignore 更新（リポジトリルート）
+8. ✅ CLIツールのセットアップ案内
+
+**重要**: すべてのプロジェクトは`projects/{project-id}/`配下に配置されます。
 
 **完了後**:
 ```bash
@@ -159,7 +166,7 @@ npx cc-sdd@latest --cursor --lang ja --yes
 - `projectId: 'michi'` → `['project:michi']`（サービスラベルなし）
 - `projectId: '20240115-payment-api'` → `['project:20240115-payment-api', 'service:payment']`
 - `projectId: 'michi-service'` → `['project:michi-service']`（サービスラベルがプロジェクトラベルと同一のため追加しない）
-### Step 4: Michiから共通設定をコピー
+### Step 5: Michiから共通設定をコピー
 
 Michiリポジトリから必要なファイルをコピー：
 
@@ -185,9 +192,40 @@ cp $MICHI_PATH/.kiro/steering/*.md .kiro/steering/
 cp $MICHI_PATH/tsconfig.json .
 ```
 
-### Step 5: 環境変数設定
+### Step 6: 環境変数設定
+
+**重要**: `.env`ファイルは`projects/{project-id}/`配下に作成します。
+
+#### 方法A: 対話的設定ツールを使用（推奨）
+
+対話的設定ツールを使用すると、`project.json`と`.env`を一度に設定できます：
 
 ```bash
+# リポジトリルートから実行
+cd /path/to/repository
+npm run setup:interactive
+
+# または直接実行
+npx tsx /path/to/michi/scripts/setup-interactive.ts
+```
+
+**機能**:
+- `project.json`と`.env`を対話的に設定
+- 既存の設定値を読み込んで編集可能
+- 複数プロジェクトが存在する場合、プロジェクトを選択可能
+- 必須項目のバリデーション
+- 新規プロジェクトの場合、`projects/{project-id}/`配下に自動作成
+
+詳細は [セットアップガイド](./setup.md#対話的設定ツール) を参照してください。
+
+#### 方法B: 手動で.envファイルを作成
+
+対話的設定ツールを使用しない場合は、手動で`.env`ファイルを作成します：
+
+```bash
+# プロジェクトディレクトリに移動
+cd projects/20240115-payment-api
+
 # .env テンプレート作成
 cat > .env << 'EOF'
 # Atlassian設定（MCP + REST API共通）
@@ -213,17 +251,26 @@ EOF
 # .env ファイルを編集してください
 ```
 
-### Step 6: 依存関係インストール
+### Step 7: 依存関係インストール
+
+**重要**: `package.json`と`tsconfig.json`はリポジトリルートに配置します。`npm install`はリポジトリルートで実行してください。
 
 ```bash
+# リポジトリルートに移動
+cd /path/to/repository
+
+# 依存関係をインストール
 npm install
 ```
 
-### Step 7: 動作確認
+### Step 8: 動作確認
 
 #### Jujutsu (jj) を使用する場合
 
 ```bash
+# プロジェクトディレクトリに移動
+cd projects/20240115-payment-api
+
 # プロジェクト情報を表示
 cat .kiro/project.json
 
@@ -251,7 +298,7 @@ git branch -M main
 git remote add origin https://github.com/your-org/20240115-payment-api.git
 ```
 
-### Step 8: 初期コミット
+### Step 9: 初期コミット
 
 #### Jujutsu (jj) を使用する場合
 

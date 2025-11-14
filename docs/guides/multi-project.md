@@ -10,7 +10,7 @@ Michiは、複数プロジェクト（3-5案件）を同時並行で管理でき
 
 ### プロジェクト構成
 
-**構成**: 1つのリポジトリ内で複数プロジェクトを管理します。各プロジェクトは独立したディレクトリに配置され、それぞれに`.kiro/project.json`を持ちます。
+**構成**: 1つのリポジトリ内で複数プロジェクトを管理します。**すべてのプロジェクト（単一プロジェクトも含む）は`projects/`ディレクトリ配下に配置され、それぞれに`.kiro/project.json`を持ちます。**
 
 ```
 repository/  ← 1つのGitHubリポジトリ
@@ -23,14 +23,17 @@ repository/  ← 1つのGitHubリポジトリ
 │   │   └── .kiro/
 │   └── 20240310-analytics-api/  ← プロジェクトC
 │       └── .kiro/
-└── michi/  ← 統合ハブ（オプション）
-    └── .kiro/
+├── package.json  ← リポジトリルート（共有）
+├── tsconfig.json  ← リポジトリルート（共有）
+└── .gitignore  ← リポジトリルート（共有）
 ```
 
-**プロジェクト識別方法**:
+**重要な原則**:
+- **統一されたディレクトリ構成**: 単一プロジェクトも`projects/{project-id}/`配下に配置
 - 各プロジェクトディレクトリに`.kiro/project.json`を配置
 - 作業ディレクトリ（`process.cwd()`）から`.kiro/project.json`を読み込んでプロジェクトを識別
 - プロジェクト切り替えは、該当ディレクトリに移動するだけ
+- `package.json`や`tsconfig.json`はリポジトリルートに配置（複数プロジェクトで共有）
 
 ### 統合管理
 
@@ -47,7 +50,7 @@ repository/  ← 1つのGitHubリポジトリ
 
 ### 新規プロジェクト追加
 
-詳細な手順は [新規プロジェクトセットアップガイド](../getting-started/new-project-setup.md) を参照してください。
+詳細な手順は [新規リポジトリセットアップガイド](../getting-started/new-repository-setup.md) を参照してください。
 
 **クイックスタート**:
 1. 既存リポジトリに追加: `bash /path/to/michi/scripts/setup-existing.sh`
@@ -62,7 +65,7 @@ repository/  ← 1つのGitHubリポジトリ
 
 ### 環境変数設定
 
-各プロジェクトで`.env`ファイルを設定します。詳細は [新規プロジェクトセットアップガイド](../getting-started/new-project-setup.md#step-5-環境変数設定) を参照してください。
+各プロジェクトで`.env`ファイルを設定します。詳細は [新規リポジトリセットアップガイド](../getting-started/new-repository-setup.md#step-5-環境変数設定) を参照してください。
 
 ### 動作確認
 
@@ -210,7 +213,7 @@ ls -la .kiro/specs/
 
 **解決方法**:
 1. プロジェクトディレクトリが正しいか確認
-2. `.kiro/project.json`を作成（[新規プロジェクトセットアップガイド](../getting-started/new-project-setup.md)を参照）
+2. `.kiro/project.json`を作成（[新規リポジトリセットアップガイド](../getting-started/new-repository-setup.md)を参照）
 
 ## プロジェクト横断操作
 
@@ -322,7 +325,7 @@ shared-infrastructure/
 **Confluenceラベル**: `project:{projectId}, service:{service}`
 - 例: `project:20240115-payment-api, service:payment`
 
-**ラベル生成ロジック**: 詳細は [新規プロジェクトセットアップガイド](../getting-started/new-project-setup.md#ラベル生成ロジック) を参照してください。
+**ラベル生成ロジック**: 詳細は [新規リポジトリセットアップガイド](../getting-started/new-repository-setup.md#ラベル生成ロジック) を参照してください。
 ### チーム構成の明確化
 
 各プロジェクトの `team` フィールドに担当者を記載：

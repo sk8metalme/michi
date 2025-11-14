@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.8] - 2025-11-14
+
+### Fixed
+- `create-project.ts`: `.env`ファイルがリポジトリルートではなくプロジェクトディレクトリ（`projects/{id}/`）に作成されるように修正
+  - `npm run setup:env`実行時の`cwd`を`projectDir`から`actualProjectDir`に変更
+- `setup-existing-project.ts`: `.cursor/rules`と`.cursor/commands/kiro`ディレクトリが存在しない場合のエラーを修正
+  - ファイルコピー前に`mkdirSync`でディレクトリを事前作成するように変更
+- `setup-existing-project.ts`: パッケージ名の表記を統一
+  - すべての`@michi/cli`参照を`@sk8metal/michi-cli`に修正（使用例、package.jsonスクリプト例、グローバルインストール例）
+- `setup-existing-project.ts`: 完了メッセージの不整合を修正
+  - 実際には作成されない`scripts/`ディレクトリの記述を削除
+- `setup-interactive.ts`: プロジェクトIDのバリデーションを強化
+  - `getProjectMetadata`内で`validateProjectId`を呼び出し、パストラバーサル攻撃を防止
+- `setup-interactive.ts`: `process.exit`の直接呼び出しを削除
+  - `main`関数が`Promise<number>`を返すように変更し、CLIエントリーポイントでのみ`process.exit`を呼び出すように改善
+  - これにより、関数のテスト容易性と再利用性が向上
+
+### Added
+- `setup-existing-project.test.ts`: 既存プロジェクトセットアップスクリプトのテストを追加（3テスト）
+- `setup-interactive.test.ts`: 対話式設定ツールのテストを追加（11テスト）
+- `create-project.test.ts`: `.env`作成時の`cwd`修正をテストするケースを追加（2テスト）
+
 ## [0.0.7] - 2025-11-14
 
 ### Fixed

@@ -14,8 +14,9 @@ import type { ConfluenceConfig, ConfluencePageCreationGranularity } from '../con
  * ページ作成結果
  */
 export interface PageCreationResult {
+  id: string;      // ページID（idとpageIdの両方をサポート）
+  pageId: string;  // ページID（後方互換性のため）
   url: string;
-  pageId: string;
   title: string;
 }
 
@@ -281,6 +282,7 @@ export async function createSinglePage(
   const baseUrl = process.env.ATLASSIAN_URL || '';
   return {
     pages: [{
+      id: page.id,
       url: `${baseUrl}/wiki${page._links.webui}`,
       pageId: page.id,
       title: pageTitle
@@ -351,6 +353,7 @@ export async function createBySectionPages(
     
     const baseUrl = process.env.ATLASSIAN_URL || '';
     pages.push({
+      id: page.id,
       url: `${baseUrl}/wiki${page._links.webui}`,
       pageId: page.id,
       title: pageTitle
@@ -474,6 +477,7 @@ export async function createByHierarchySimplePages(
   const baseUrl = process.env.ATLASSIAN_URL || '';
   return {
     pages: [{
+      id: childPage.id,
       url: `${baseUrl}/wiki${childPage._links.webui}`,
       pageId: childPage.id,
       title: childPageTitle
@@ -609,6 +613,7 @@ export async function createByHierarchyNestedPages(
     
     const baseUrl = process.env.ATLASSIAN_URL || '';
     pages.push({
+      id: sectionPage.id,
       url: `${baseUrl}/wiki${sectionPage._links.webui}`,
       pageId: sectionPage.id,
       title: sectionPageTitle
@@ -756,6 +761,7 @@ export async function createManualPages(
       
       const baseUrl = process.env.ATLASSIAN_URL || '';
       pages.push({
+        id: page.id,
         url: `${baseUrl}/wiki${page._links.webui}`,
         pageId: page.id,
         title: pageTitle

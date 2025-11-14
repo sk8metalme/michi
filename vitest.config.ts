@@ -19,14 +19,16 @@ export default defineConfig({
         '**/*.config.ts',
         '**/scripts/setup-*.ts',
         '**/scripts/setup-*.sh',
+        '**/scripts/setup-interactive.ts',
       ],
       thresholds: {
-        // 段階的に引き上げる計画（Phase 1: 10%, Phase 2: 60%, Phase 3: 80%）
-        // Vitest 4移行後、一時的に10%に下げる（CI失敗を防ぐため）
-        lines: 10,
-        functions: 10,
-        branches: 15, // Vitest 4移行後、一時的に15%に下げる
-        statements: 10,
+        // 段階的に引き上げる計画（Phase 1: 10% → Phase 2: 30% → Phase 3: 60% → Phase 4: 80%）
+        // 主要機能のテスト追加により30%を目標
+        // 新機能追加時は一時的に閾値を下げる（Issue #33対応）
+        lines: 20,
+        functions: 15,
+        branches: 15,
+        statements: 20,
       },
     },
   },

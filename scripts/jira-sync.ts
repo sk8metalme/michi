@@ -25,6 +25,7 @@ import { loadProjectMeta } from './utils/project-meta.js';
 import { validateFeatureNameOrThrow } from './utils/feature-name-validator.js';
 import { getConfig, getConfigPath } from './utils/config-loader.js';
 import { validateForJiraSync } from './utils/config-validator.js';
+import { updateSpecJsonAfterJiraSync } from './utils/spec-updater.js';
 
 config();
 
@@ -617,10 +618,24 @@ async function syncTasksToJIRA(featureName: string): Promise<void> {
   // 新規作成数と再利用数を正確に計算
   const newStoryCount = createdStories.filter(key => !existingStoryKeys.has(key)).length;
   const reusedStoryCount = createdStories.filter(key => existingStoryKeys.has(key)).length;
-  
+
   console.log('\n✅ JIRA sync completed');
   console.log(`   Epic: ${epic.key}`);
   console.log(`   Stories: ${createdStories.length} processed (${newStoryCount} new, ${reusedStoryCount} reused)`);
+
+  // spec.json を更新
+  const jiraBaseUrl = process.env.ATLASSIAN_URL || '';
+  try {
+    updateSpecJsonAfterJiraSync(featureName, {
+      projectKey: projectMeta.jiraProjectKey,
+      epicKey: epic.key,
+      epicUrl: `${jiraBaseUrl}/browse/${epic.key}`,
+      storyKeys: createdStories
+    });
+  } catch (error) {
+    console.warn(`⚠️  Failed to update spec.json after JIRA sync: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    // spec.json更新の失敗はスクリプト全体の失敗とはしない（JIRA同期は成功しているため）
+  }
 }
 
 // CLI実行
