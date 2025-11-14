@@ -41,7 +41,6 @@ describe('create-project.ts パス問題', () => {
 
   it('package.json と tsconfig.json は projectDir (リポジトリルート) にコピーされる', () => {
     const projectDir = '/test/repo';
-    const actualProjectDir = '/test/repo/projects/test-project';
 
     // package.json はリポジトリルート
     const packageJsonPath = join(projectDir, 'package.json');
@@ -74,7 +73,7 @@ describe('create-project.ts パス問題', () => {
 });
 
 describe('create-project.ts jj/git 依存性', () => {
-  let mockExecSync: any;
+  let mockExecSync: ReturnType<typeof vi.mocked<typeof execSync>>;
 
   beforeEach(() => {
     vi.clearAllMocks();

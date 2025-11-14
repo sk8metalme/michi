@@ -77,6 +77,9 @@ export function loadSpecJson(featureName: string, projectRoot: string = process.
 
 /**
  * spec.json を保存する
+ * @param featureName 機能名
+ * @param spec 保存する spec オブジェクト（lastUpdated フィールドが更新されます）
+ * @param projectRoot プロジェクトルート（デフォルト: process.cwd()）
  */
 export function saveSpecJson(featureName: string, spec: SpecJson, projectRoot: string = process.cwd()): void {
   const specDir = resolve(projectRoot, `.kiro/specs/${featureName}`);

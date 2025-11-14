@@ -238,9 +238,6 @@ describe('config-validator', () => {
     });
 
     it('issueTypes.story設定がない場合はエラー', () => {
-      // 環境変数を確実にクリア
-      delete process.env.JIRA_ISSUE_TYPE_STORY;
-      
       const configPath = join(testProjectRoot, '.michi/config.json');
       writeFileSync(configPath, JSON.stringify({
         jira: {}
@@ -289,9 +286,6 @@ describe('config-validator', () => {
     });
 
     it('issueTypes.subtask設定がない場合は警告', () => {
-      // 環境変数を確実にクリア
-      delete process.env.JIRA_ISSUE_TYPE_SUBTASK;
-      
       const configPath = join(testProjectRoot, '.michi/config.json');
       writeFileSync(configPath, JSON.stringify({
         jira: {

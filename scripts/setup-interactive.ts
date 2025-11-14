@@ -172,7 +172,7 @@ async function getProjectMetadata(
     projectName,
     jiraProjectKey,
     confluenceLabels,
-    status: status as 'active' | 'inactive' | 'completed',
+    status: status as ProjectMetadata['status'],
     team,
     stakeholders,
     repository,

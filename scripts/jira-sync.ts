@@ -625,12 +625,17 @@ async function syncTasksToJIRA(featureName: string): Promise<void> {
 
   // spec.json を更新
   const jiraBaseUrl = process.env.ATLASSIAN_URL || '';
-  updateSpecJsonAfterJiraSync(featureName, {
-    projectKey: projectMeta.jiraProjectKey,
-    epicKey: epic.key,
-    epicUrl: `${jiraBaseUrl}/browse/${epic.key}`,
-    storyKeys: createdStories
-  });
+  try {
+    updateSpecJsonAfterJiraSync(featureName, {
+      projectKey: projectMeta.jiraProjectKey,
+      epicKey: epic.key,
+      epicUrl: `${jiraBaseUrl}/browse/${epic.key}`,
+      storyKeys: createdStories
+    });
+  } catch (error) {
+    console.warn(`⚠️  Failed to update spec.json after JIRA sync: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    // spec.json更新の失敗はスクリプト全体の失敗とはしない（JIRA同期は成功しているため）
+  }
 }
 
 // CLI実行

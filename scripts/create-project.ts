@@ -116,7 +116,7 @@ async function createProject(config: ProjectConfig): Promise<void> {
       { stdio: 'inherit' }
     );
     console.log('   ✅ Repository created');
-  } catch (error) {
+  } catch {
     console.log('   ⚠️  Repository may already exist');
   }
   
@@ -293,17 +293,20 @@ async function createProject(config: ProjectConfig): Promise<void> {
       }
     });
 
-    // Step 9: .env テンプレート作成（リポジトリルートで実行）
-    console.log('\n🔐 Step 9: Creating .env template...');
-    // package.jsonはprojectDirにあるため、そこで実行
-    execSync('npm run setup:env', { cwd: projectDir, stdio: 'inherit' });
-    console.log('   ✅ .env created');
-
-    // Step 10: npm install（リポジトリルートで実行）
-    console.log('\n📦 Step 10: Installing dependencies...');
+    // Step 9: npm install（リポジトリルートで実行）
+    // 注意: setup:env は bash スクリプトなので依存関係不要だが、
+    // 将来的に setup:env が tsx やローカルスクリプトに依存する場合は
+    // npm install を先に実行する必要があるため、順序を入れ替え
+    console.log('\n📦 Step 9: Installing dependencies...');
     process.chdir(projectDir);
     execSync('npm install', { stdio: 'inherit' });
     console.log('   ✅ Dependencies installed');
+
+    // Step 10: .env テンプレート作成（リポジトリルートで実行）
+    console.log('\n🔐 Step 10: Creating .env template...');
+    // package.jsonはprojectDirにあるため、そこで実行
+    execSync('npm run setup:env', { cwd: projectDir, stdio: 'inherit' });
+    console.log('   ✅ .env created');
 
     // Step 11: 初期コミット
     console.log('\n💾 Step 11: Creating initial commit...');

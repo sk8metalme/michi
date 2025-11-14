@@ -174,6 +174,43 @@ npm run lint:fix
 npm run format
 ```
 
+## 8-1. Pre-commitフック（自動リント・テスト）
+
+このプロジェクトでは、**husky**と**lint-staged**を使用して、コミット前に自動的にリントとテストを実行します。
+
+### 動作
+
+コミットを実行すると、以下の処理が自動的に実行されます：
+
+1. **lint-staged**: ステージングされたファイルに対して自動リント・フォーマット
+   - TypeScript/JavaScriptファイル: ESLint自動修正 + Prettierフォーマット
+   - JSON/Markdown/YAMLファイル: Prettierフォーマット
+2. **テスト実行**: すべてのテストを実行（`npm run test:run`）
+
+### フックをスキップする場合（非推奨）
+
+緊急時のみ、以下の方法でフックをスキップできます：
+
+```bash
+# Gitの場合
+git commit --no-verify -m "緊急修正"
+
+# Jujutsuの場合
+jj commit --no-verify -m "緊急修正"
+```
+
+**注意**: フックをスキップしたコミットは、CI/CDで失敗する可能性があります。
+
+### フックの設定確認
+
+```bash
+# pre-commitフックの内容を確認
+cat .husky/pre-commit
+
+# lint-stagedの設定を確認
+cat package.json | grep -A 10 "lint-staged"
+```
+
 ## 9. ビルドとパッケージング
 
 ### TypeScriptビルド

@@ -72,15 +72,17 @@ async function listProjects(): Promise<void> {
                   team: projectMeta.team
                 });
               }
-            } catch {
+            } catch (error) {
               // プロジェクトディレクトリに.kiro/project.jsonがない場合はスキップ
+              console.warn(`⚠️  Skipping project ${(projectEntry as any).name} in ${repo.name}:`, error instanceof Error ? error.message : 'Unknown error');
               continue;
             }
           }
         }
       }
     } catch (error) {
-      // projects/ディレクトリが存在しない場合はスキップ
+      // projects/ディレクトリが存在しない、または API エラーの場合はスキップ
+      console.warn(`⚠️  Skipping ${repo.name}:`, error instanceof Error ? error.message : 'Unknown error');
       continue;
     }
   }

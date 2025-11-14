@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# lint-stagedでステージングされたファイルをリント
+npx lint-staged
+
+# すべてのテストを実行
+npm run test:run

@@ -3,17 +3,16 @@
  * GitHub の Markdown ファイルを Confluence に同期
  */
 
-import { readFileSync, existsSync } from 'fs';
-import { resolve, join } from 'path';
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
 import axios from 'axios';
 import { config } from 'dotenv';
-import { loadProjectMeta, type ProjectMetadata } from './utils/project-meta.js';
-import { convertMarkdownToConfluence, createConfluencePage } from './markdown-to-confluence.js';
+import { loadProjectMeta } from './utils/project-meta.js';
 import { validateFeatureNameOrThrow } from './utils/feature-name-validator.js';
 import { getConfig, getConfigPath } from './utils/config-loader.js';
 import { createPagesByGranularity } from './utils/confluence-hierarchy.js';
 import { validateForConfluenceSync } from './utils/config-validator.js';
-import { updateSpecJsonAfterConfluenceSync } from './utils/spec-updater.js';
+import { updateSpecJsonAfterConfluenceSync, loadSpecJson } from './utils/spec-updater.js';
 
 // 環境変数読み込み
 config();
@@ -313,27 +312,6 @@ class ConfluenceClient {
   }
 }
 
-/**
- * spec.jsonを読み込む
- * @param featureName 機能名
- * @param projectRoot プロジェクトルート（デフォルト: process.cwd()）
- * @returns spec.jsonの内容、存在しない場合はnull
- */
-function loadSpecJson(featureName: string, projectRoot: string = process.cwd()): any | null {
-  const specPath = resolve(projectRoot, `.kiro/specs/${featureName}/spec.json`);
-  
-  if (!existsSync(specPath)) {
-    return null;
-  }
-  
-  try {
-    const content = readFileSync(specPath, 'utf-8');
-    return JSON.parse(content);
-  } catch (error) {
-    console.warn(`⚠️  Failed to load spec.json from ${specPath}: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    return null;
-  }
-}
 
 /**
  * Markdownファイルを Confluence に同期
@@ -409,7 +387,7 @@ async function syncToConfluence(
   let spaceKey: string;
   let spaceKeySource: string;
   
-  if (specJson?.confluence?.spaceKey) {
+  if (specJson.confluence?.spaceKey) {
     spaceKey = specJson.confluence.spaceKey;
     spaceKeySource = 'spec.json';
   } else if (confluenceConfig.spaces?.[docType]) {
