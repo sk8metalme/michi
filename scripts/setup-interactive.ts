@@ -206,7 +206,7 @@ async function getEnvConfig(
   
   env.ATLASSIAN_API_TOKEN = await question(
     rl,
-    `Atlassian API Token${existingEnv?.ATLASSIAN_API_TOKEN ? ` [***]` : ''}: `
+    `Atlassian API Token${existingEnv?.ATLASSIAN_API_TOKEN ? ' [***]' : ''}: `
   ) || existingEnv?.ATLASSIAN_API_TOKEN || '';
   
   // GitHub設定
@@ -218,7 +218,7 @@ async function getEnvConfig(
   
   env.GITHUB_TOKEN = await question(
     rl,
-    `GitHub Token${existingEnv?.GITHUB_TOKEN ? ` [***]` : ''}: `
+    `GitHub Token${existingEnv?.GITHUB_TOKEN ? ' [***]' : ''}: `
   ) || existingEnv?.GITHUB_TOKEN || '';
   
   env.GITHUB_REPO = await question(
@@ -265,7 +265,7 @@ async function getEnvConfig(
   if (configureSlack) {
     env.SLACK_WEBHOOK_URL = await question(
       rl,
-      `Slack Webhook URL${existingEnv?.SLACK_WEBHOOK_URL ? ` [***]` : ''}: `
+      `Slack Webhook URL${existingEnv?.SLACK_WEBHOOK_URL ? ' [***]' : ''}: `
     ) || existingEnv?.SLACK_WEBHOOK_URL || '';
   }
   

@@ -129,7 +129,7 @@ async function createProject(config: ProjectConfig): Promise<void> {
       execSync(`git clone ${repoUrl} ${projectDir}`, { stdio: 'inherit' });
     }
     console.log('   ✅ Repository cloned');
-  } catch (error) {
+  } catch {
     console.log('   ⚠️  Clone failed, checking if directory exists...');
   }
   
@@ -158,146 +158,146 @@ async function createProject(config: ProjectConfig): Promise<void> {
     process.chdir(actualProjectDir);
     console.log(`   📂 Working directory: ${actualProjectDir}`);
 
-  // Step 6: cc-sdd導入
-  console.log('\n⚙️  Step 6: Installing cc-sdd...');
-  execSync('npx cc-sdd@latest --cursor --lang ja --yes', { stdio: 'inherit' });
-  console.log('   ✅ cc-sdd installed');
+    // Step 6: cc-sdd導入
+    console.log('\n⚙️  Step 6: Installing cc-sdd...');
+    execSync('npx cc-sdd@latest --cursor --lang ja --yes', { stdio: 'inherit' });
+    console.log('   ✅ cc-sdd installed');
 
-  // Step 7: .kiro/project.json 作成
-  console.log('\n📝 Step 7: Creating project metadata...');
-  mkdirSync('.kiro', { recursive: true });
-  
-  // ラベル生成（安全なフォールバック付き）
-  const labels = config.labels || (() => {
-    // プロジェクトIDからプロジェクトラベル生成
-    const projectLabel = repoName.toLowerCase().replace(/[^a-z0-9-]/g, '');
-    const labelSet = new Set([`project:${projectLabel}`]);
+    // Step 7: .kiro/project.json 作成
+    console.log('\n📝 Step 7: Creating project metadata...');
+    mkdirSync('.kiro', { recursive: true });
     
-    // ハイフンが存在する場合のみサービスラベルを生成
-    if (repoName.includes('-')) {
-      const parts = repoName.split('-');
-      const servicePart = parts[parts.length - 1];
-      const serviceLabel = servicePart.toLowerCase().replace(/[^a-z0-9-]/g, '');
-    
-      // サービスラベルがプロジェクトラベルと異なる場合のみ追加
-      if (serviceLabel !== projectLabel) {
-        labelSet.add(`service:${serviceLabel}`);
+    // ラベル生成（安全なフォールバック付き）
+    const labels = config.labels || (() => {
+      // プロジェクトIDからプロジェクトラベル生成
+      const projectLabel = repoName.toLowerCase().replace(/[^a-z0-9-]/g, '');
+      const labelSet = new Set([`project:${projectLabel}`]);
+      
+      // ハイフンが存在する場合のみサービスラベルを生成
+      if (repoName.includes('-')) {
+        const parts = repoName.split('-');
+        const servicePart = parts[parts.length - 1];
+        const serviceLabel = servicePart.toLowerCase().replace(/[^a-z0-9-]/g, '');
+        
+        // サービスラベルがプロジェクトラベルと異なる場合のみ追加
+        if (serviceLabel !== projectLabel) {
+          labelSet.add(`service:${serviceLabel}`);
+        }
       }
-    }
+      
+      return Array.from(labelSet);
+    })();
     
-    return Array.from(labelSet);
-  })();
-  
-  const projectJson = {
-    projectId: repoName,
-    projectName: config.projectName,
-    jiraProjectKey: config.jiraKey,
-    confluenceLabels: labels,
-    status: 'active',
-    team: [],
-    stakeholders: ['@企画', '@部長'],
-    repository: repoUrl,
-    description: `${config.projectName}の開発`
-  };
-  
-  writeFileSync('.kiro/project.json', JSON.stringify(projectJson, null, 2));
-  console.log('   ✅ project.json created');
+    const projectJson = {
+      projectId: repoName,
+      projectName: config.projectName,
+      jiraProjectKey: config.jiraKey,
+      confluenceLabels: labels,
+      status: 'active',
+      team: [],
+      stakeholders: ['@企画', '@部長'],
+      repository: repoUrl,
+      description: `${config.projectName}の開発`
+    };
+    
+    writeFileSync('.kiro/project.json', JSON.stringify(projectJson, null, 2));
+    console.log('   ✅ project.json created');
 
-  // Step 8: Michiから共通ファイルをコピー
-  console.log('\n📋 Step 8: Copying common files from Michi...');
-  const michiPath = resolve(__dirname, '..');
-  
-  // コピー先ディレクトリを事前に作成（actualProjectDir 配下に作成）
-  console.log(`   📂 Copying to: ${actualProjectDir}`);
-  mkdirSync(join(actualProjectDir, '.cursor/rules'), { recursive: true });
-  mkdirSync(join(actualProjectDir, '.cursor/commands/kiro'), { recursive: true });
-  mkdirSync(join(actualProjectDir, '.kiro/steering'), { recursive: true });
-  mkdirSync(join(actualProjectDir, '.kiro/settings/templates'), { recursive: true });
-  mkdirSync(join(actualProjectDir, 'scripts/utils'), { recursive: true });
-  
-  // ルールファイル
-  const rulesToCopy = [
-    'multi-project.mdc',
-    'github-ssot.mdc',
-    'atlassian-mcp.mdc'
-  ];
-  
-  for (const rule of rulesToCopy) {
-    const src = join(michiPath, '.cursor/rules', rule);
-    const dest = join(actualProjectDir, '.cursor/rules', rule);
-    if (existsSync(src)) {
-      cpSync(src, dest);
-      console.log(`   ✅ Copied: .cursor/rules/${rule}`);
-    }
-  }
-  
-  // カスタムコマンド
-  const commandsToCopy = [
-    'confluence-sync.md',
-    'project-switch.md'
-  ];
-  
-  for (const cmd of commandsToCopy) {
-    const src = join(michiPath, '.cursor/commands/kiro', cmd);
-    const dest = join(actualProjectDir, '.cursor/commands/kiro', cmd);
-    if (existsSync(src)) {
-      cpSync(src, dest);
-      console.log(`   ✅ Copied: .cursor/commands/kiro/${cmd}`);
-    }
-  }
-  
-  // Steering
-  const steeringDir = join(michiPath, '.kiro/steering');
-  if (existsSync(steeringDir)) {
-    const destSteeringDir = join(actualProjectDir, '.kiro/steering');
-    mkdirSync(destSteeringDir, { recursive: true });
-    cpSync(steeringDir, destSteeringDir, { recursive: true });
-    console.log('   ✅ Copied: .kiro/steering/');
-  }
-  
-  // Scripts（必要なスクリプトのみコピー）
-  const scriptsDir = join(michiPath, 'scripts');
-  if (existsSync(scriptsDir)) {
-    const scriptsToCopy = [
-      'confluence-sync.ts',
-      'jira-sync.ts',
-      'pr-automation.ts',
-      'markdown-to-confluence.ts',
-      'workflow-orchestrator.ts',
-      'list-projects.ts',
-      'resource-dashboard.ts',
-      'multi-project-estimate.ts',
-      'utils/project-meta.ts'
+    // Step 8: Michiから共通ファイルをコピー
+    console.log('\n📋 Step 8: Copying common files from Michi...');
+    const michiPath = resolve(__dirname, '..');
+    
+    // コピー先ディレクトリを事前に作成（actualProjectDir 配下に作成）
+    console.log(`   📂 Copying to: ${actualProjectDir}`);
+    mkdirSync(join(actualProjectDir, '.cursor/rules'), { recursive: true });
+    mkdirSync(join(actualProjectDir, '.cursor/commands/kiro'), { recursive: true });
+    mkdirSync(join(actualProjectDir, '.kiro/steering'), { recursive: true });
+    mkdirSync(join(actualProjectDir, '.kiro/settings/templates'), { recursive: true });
+    mkdirSync(join(actualProjectDir, 'scripts/utils'), { recursive: true });
+    
+    // ルールファイル
+    const rulesToCopy = [
+      'multi-project.mdc',
+      'github-ssot.mdc',
+      'atlassian-mcp.mdc'
     ];
     
-    for (const script of scriptsToCopy) {
-      const src = join(scriptsDir, script);
-      const dest = join(actualProjectDir, 'scripts', script);
+    for (const rule of rulesToCopy) {
+      const src = join(michiPath, '.cursor/rules', rule);
+      const dest = join(actualProjectDir, '.cursor/rules', rule);
       if (existsSync(src)) {
-        // ディレクトリが必要な場合は作成
-        const destDir = dirname(dest);
-        mkdirSync(destDir, { recursive: true });
         cpSync(src, dest);
-        console.log(`   ✅ Copied: scripts/${script}`);
+        console.log(`   ✅ Copied: .cursor/rules/${rule}`);
       }
     }
-  }
-  
-  // package.json, tsconfig.jsonをリポジトリルートにコピー
-  ['package.json', 'tsconfig.json'].forEach(file => {
-    const src = join(michiPath, file);
-    const dest = join(projectDir, file); // リポジトリルートにコピー
-    if (existsSync(src)) {
-      cpSync(src, dest);
-      console.log(`   ✅ Copied: ${file} (to repository root)`);
+    
+    // カスタムコマンド
+    const commandsToCopy = [
+      'confluence-sync.md',
+      'project-switch.md'
+    ];
+    
+    for (const cmd of commandsToCopy) {
+      const src = join(michiPath, '.cursor/commands/kiro', cmd);
+      const dest = join(actualProjectDir, '.cursor/commands/kiro', cmd);
+      if (existsSync(src)) {
+        cpSync(src, dest);
+        console.log(`   ✅ Copied: .cursor/commands/kiro/${cmd}`);
+      }
     }
-  });
+    
+    // Steering
+    const steeringDir = join(michiPath, '.kiro/steering');
+    if (existsSync(steeringDir)) {
+      const destSteeringDir = join(actualProjectDir, '.kiro/steering');
+      mkdirSync(destSteeringDir, { recursive: true });
+      cpSync(steeringDir, destSteeringDir, { recursive: true });
+      console.log('   ✅ Copied: .kiro/steering/');
+    }
+    
+    // Scripts（必要なスクリプトのみコピー）
+    const scriptsDir = join(michiPath, 'scripts');
+    if (existsSync(scriptsDir)) {
+      const scriptsToCopy = [
+        'confluence-sync.ts',
+        'jira-sync.ts',
+        'pr-automation.ts',
+        'markdown-to-confluence.ts',
+        'workflow-orchestrator.ts',
+        'list-projects.ts',
+        'resource-dashboard.ts',
+        'multi-project-estimate.ts',
+        'utils/project-meta.ts'
+      ];
+      
+      for (const script of scriptsToCopy) {
+        const src = join(scriptsDir, script);
+        const dest = join(actualProjectDir, 'scripts', script);
+        if (existsSync(src)) {
+          // ディレクトリが必要な場合は作成
+          const destDir = dirname(dest);
+          mkdirSync(destDir, { recursive: true });
+          cpSync(src, dest);
+          console.log(`   ✅ Copied: scripts/${script}`);
+        }
+      }
+    }
+    
+    // package.json, tsconfig.jsonをリポジトリルートにコピー
+    ['package.json', 'tsconfig.json'].forEach(file => {
+      const src = join(michiPath, file);
+      const dest = join(projectDir, file); // リポジトリルートにコピー
+      if (existsSync(src)) {
+        cpSync(src, dest);
+        console.log(`   ✅ Copied: ${file} (to repository root)`);
+      }
+    });
 
-  // Step 9: .env テンプレート作成（リポジトリルートで実行）
-  console.log('\n🔐 Step 9: Creating .env template...');
-  // package.jsonはprojectDirにあるため、そこで実行
-  execSync('npm run setup:env', { cwd: projectDir, stdio: 'inherit' });
-  console.log('   ✅ .env created');
+    // Step 9: .env テンプレート作成（リポジトリルートで実行）
+    console.log('\n🔐 Step 9: Creating .env template...');
+    // package.jsonはprojectDirにあるため、そこで実行
+    execSync('npm run setup:env', { cwd: projectDir, stdio: 'inherit' });
+    console.log('   ✅ .env created');
 
     // Step 10: npm install（リポジトリルートで実行）
     console.log('\n📦 Step 10: Installing dependencies...');
@@ -305,25 +305,25 @@ async function createProject(config: ProjectConfig): Promise<void> {
     execSync('npm install', { stdio: 'inherit' });
     console.log('   ✅ Dependencies installed');
 
-  // Step 11: 初期コミット
-  console.log('\n💾 Step 11: Creating initial commit...');
+    // Step 11: 初期コミット
+    console.log('\n💾 Step 11: Creating initial commit...');
 
-  const commitMessage = `chore: プロジェクト初期化
+    const commitMessage = `chore: プロジェクト初期化
 
 - cc-sdd導入
 - プロジェクトメタデータ設定（${config.jiraKey}）
 - 自動化スクリプト追加
 - Confluence/JIRA連携設定`;
 
-  if (deps.vcs === 'jj') {
-    execSync(`jj commit -m "${commitMessage}"`, { stdio: 'inherit' });
-    execSync('jj bookmark create main -r "@-"', { stdio: 'inherit' });
-  } else {
-    execSync('git add .', { stdio: 'inherit' });
-    execSync(`git commit -m "${commitMessage}"`, { stdio: 'inherit' });
-    execSync('git branch -M main', { stdio: 'inherit' });
-  }
-  console.log('   ✅ Initial commit created');
+    if (deps.vcs === 'jj') {
+      execSync(`jj commit -m "${commitMessage}"`, { stdio: 'inherit' });
+      execSync('jj bookmark create main -r "@-"', { stdio: 'inherit' });
+    } else {
+      execSync('git add .', { stdio: 'inherit' });
+      execSync(`git commit -m "${commitMessage}"`, { stdio: 'inherit' });
+      execSync('git branch -M main', { stdio: 'inherit' });
+    }
+    console.log('   ✅ Initial commit created');
     
     // 完了メッセージ
     console.log('\n');
