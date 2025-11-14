@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { mkdirSync, rmSync, existsSync, readFileSync } from 'fs';
+import { mkdirSync, rmSync, existsSync, readFileSync, writeFileSync } from 'fs';
 import { resolve } from 'path';
 import {
   loadSpecJson,
@@ -56,7 +56,7 @@ describe('spec-updater', () => {
         milestones: {}
       };
 
-      require('fs').writeFileSync(specPath, JSON.stringify(testSpec, null, 2));
+      writeFileSync(specPath, JSON.stringify(testSpec, null, 2));
 
       const spec = loadSpecJson(testFeatureName, testDir);
       expect(spec).toEqual(testSpec);
