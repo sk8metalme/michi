@@ -23,7 +23,7 @@ describe('setup-interactive.ts 修正内容のテスト', () => {
   describe('validateProjectId の呼び出し', () => {
     it('getProjectMetadata 内で validateProjectId が呼び出される', () => {
       const projectIdDefault = 'test-project';
-      let projectId = projectIdDefault;
+      const projectId = projectIdDefault;
       
       // バリデーション（getProjectMetadata内のロジックを再現）
       if (!validateProjectId(projectId)) {

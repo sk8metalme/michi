@@ -74,7 +74,7 @@ async function getProjectMetadata(
   
   // projectId
   const projectIdDefault = existingMeta?.projectId || basename(projectPath);
-  let projectId = await question(
+  const projectId = await question(
     rl,
     `プロジェクトID [${projectIdDefault}]: `
   ) || projectIdDefault;
