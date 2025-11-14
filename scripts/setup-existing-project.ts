@@ -13,6 +13,7 @@
 import { cpSync, existsSync, mkdirSync, writeFileSync, readFileSync } from 'fs';
 import { resolve, join, basename } from 'path';
 import { execSync } from 'child_process';
+import { findRepositoryRoot } from './utils/project-finder.js';
 
 interface SetupConfig {
   michiPath: string;      // Michiリポジトリのパス
@@ -67,8 +68,36 @@ async function setupExistingProject(config: SetupConfig): Promise<void> {
   console.log(`   Michiパス: ${config.michiPath}`);
   console.log('');
   
-  // Step 1: cc-sdd導入確認
-  console.log('📦 Step 1: Checking cc-sdd installation...');
+  // リポジトリルートを検出
+  const repoRoot = findRepositoryRoot(currentDir);
+  
+  // projects/{project-id}/配下にプロジェクトを作成
+  const projectsDir = join(repoRoot, 'projects');
+  const projectDir = join(projectsDir, projectId);
+  
+  console.log(`📁 リポジトリルート: ${repoRoot}`);
+  console.log(`📁 プロジェクトディレクトリ: ${projectDir}`);
+  console.log('');
+  
+  // projects/ディレクトリとプロジェクトディレクトリを作成
+  if (!existsSync(projectsDir)) {
+    mkdirSync(projectsDir, { recursive: true });
+    console.log(`   ✅ Created: ${projectsDir}`);
+  }
+  if (!existsSync(projectDir)) {
+    mkdirSync(projectDir, { recursive: true });
+    console.log(`   ✅ Created: ${projectDir}`);
+  }
+  
+  // 元の作業ディレクトリを保存
+  const originalCwd = process.cwd();
+  
+  try {
+    // プロジェクトディレクトリに移動
+    process.chdir(projectDir);
+    
+    // Step 1: cc-sdd導入確認
+  console.log('\n📦 Step 1: Checking cc-sdd installation...');
   if (!existsSync('.cursor/commands/kiro')) {
     console.log('   Installing cc-sdd...');
     execSync('npx cc-sdd@latest --cursor --lang ja --yes', { stdio: 'inherit' });
@@ -83,14 +112,14 @@ async function setupExistingProject(config: SetupConfig): Promise<void> {
   mkdirSync('.kiro/steering', { recursive: true });
   mkdirSync('.kiro/specs', { recursive: true });
   console.log('   ✅ Directory structure created');
-  
+
   // Step 3: プロジェクトメタデータ作成
   console.log('\n📝 Step 3: Creating project metadata...');
   
   // GitHub URLを取得（既存リポジトリから）
   let repoUrl = '';
   try {
-    repoUrl = execSync('git config --get remote.origin.url', { encoding: 'utf-8' }).trim();
+    repoUrl = execSync('git config --get remote.origin.url', { encoding: 'utf-8', cwd: repoRoot }).trim();
     // SSH形式をHTTPS形式に変換
     if (repoUrl.startsWith('git@github.com:')) {
       repoUrl = repoUrl.replace('git@github.com:', 'https://github.com/').replace('.git', '');
@@ -145,7 +174,7 @@ async function setupExistingProject(config: SetupConfig): Promise<void> {
   
   for (const rule of rulesToCopy) {
     const src = join(config.michiPath, '.cursor/rules', rule);
-    const dest = join(currentDir, '.cursor/rules', rule);
+    const dest = join(projectDir, '.cursor/rules', rule);
     if (existsSync(src)) {
       cpSync(src, dest);
       console.log(`   ✅ ${rule}`);
@@ -164,7 +193,7 @@ async function setupExistingProject(config: SetupConfig): Promise<void> {
   
   for (const cmd of commandsToCopy) {
     const src = join(config.michiPath, '.cursor/commands/kiro', cmd);
-    const dest = join(currentDir, '.cursor/commands/kiro', cmd);
+    const dest = join(projectDir, '.cursor/commands/kiro', cmd);
     if (existsSync(src)) {
       cpSync(src, dest);
       console.log(`   ✅ ${cmd}`);
@@ -176,7 +205,7 @@ async function setupExistingProject(config: SetupConfig): Promise<void> {
   
   const steeringDir = join(config.michiPath, '.kiro/steering');
   if (existsSync(steeringDir)) {
-    cpSync(steeringDir, '.kiro/steering', { recursive: true });
+    cpSync(steeringDir, join(projectDir, '.kiro/steering'), { recursive: true });
     console.log('   ✅ product.md, tech.md, structure.md');
   }
   
@@ -185,7 +214,7 @@ async function setupExistingProject(config: SetupConfig): Promise<void> {
   
   const templatesDir = join(config.michiPath, '.kiro/settings/templates');
   if (existsSync(templatesDir)) {
-    cpSync(templatesDir, '.kiro/settings/templates', { recursive: true });
+    cpSync(templatesDir, join(projectDir, '.kiro/settings/templates'), { recursive: true });
     console.log('   ✅ requirements.md, design.md, tasks.md');
   }
   
@@ -202,18 +231,19 @@ async function setupExistingProject(config: SetupConfig): Promise<void> {
   console.log('      npm install -g @michi/cli');
   console.log('      michi jira:sync <feature>');
   
-  // Step 9: package.json と tsconfig.json をコピー
+  // Step 9: package.json と tsconfig.json をリポジトリルートにコピー
   console.log('\n📦 Step 9: Setting up package.json and TypeScript...');
   
-  // 既存の package.json があるかチェック
-  const hasPackageJson = existsSync('package.json');
+  // 既存の package.json があるかチェック（リポジトリルート）
+  const hasPackageJson = existsSync(join(repoRoot, 'package.json'));
   
   if (!hasPackageJson) {
-    // package.json がない場合はコピー
+    // package.json がない場合はリポジトリルートにコピー
     const src = join(config.michiPath, 'package.json');
+    const dest = join(repoRoot, 'package.json');
     if (existsSync(src)) {
-      cpSync(src, 'package.json');
-      console.log('   ✅ package.json created');
+      cpSync(src, dest);
+      console.log('   ✅ package.json created (in repository root)');
     }
   } else {
     // 既存の package.json にスクリプトを追加
@@ -233,18 +263,19 @@ async function setupExistingProject(config: SetupConfig): Promise<void> {
     console.log('');
   }
   
-  // tsconfig.json をコピー
-  if (!existsSync('tsconfig.json')) {
+  // tsconfig.json をリポジトリルートにコピー
+  if (!existsSync(join(repoRoot, 'tsconfig.json'))) {
     const src = join(config.michiPath, 'tsconfig.json');
+    const dest = join(repoRoot, 'tsconfig.json');
     if (existsSync(src)) {
-      cpSync(src, 'tsconfig.json');
-      console.log('   ✅ tsconfig.json created');
+      cpSync(src, dest);
+      console.log('   ✅ tsconfig.json created (in repository root)');
     }
   } else {
     console.log('   ℹ️  Existing tsconfig.json found (kept)');
   }
   
-  // Step 10: .env テンプレート作成
+  // Step 10: .env テンプレート作成（プロジェクトディレクトリに）
   console.log('\n🔐 Step 10: Creating .env template...');
   
   const envTemplate = `# Atlassian設定（MCP + REST API共通）
@@ -266,17 +297,17 @@ CONFLUENCE_RELEASE_SPACE=RELEASE
 JIRA_PROJECT_KEYS=${config.jiraKey}
 `;
   
-  if (!existsSync('.env')) {
-    writeFileSync('.env', envTemplate);
+  if (!existsSync(join(projectDir, '.env'))) {
+    writeFileSync(join(projectDir, '.env'), envTemplate);
     console.log('   ✅ .env template created');
   } else {
     console.log('   ℹ️  .env already exists (kept)');
   }
   
-  // Step 11: README.md を更新（オプション）
+  // Step 11: README.md を更新（オプション、プロジェクトディレクトリに）
   console.log('\n📖 Step 11: Updating documentation...');
   
-  const readmePath = 'README.md';
+  const readmePath = join(projectDir, 'README.md');
   if (existsSync(readmePath)) {
     const currentReadme = readFileSync(readmePath, 'utf-8');
     
@@ -316,7 +347,7 @@ npm run github:create-pr <branch>   # PR作成
     }
   }
   
-  // Step 12: .gitignore 更新
+  // Step 12: .gitignore 更新（リポジトリルートに）
   console.log('\n🚫 Step 12: Updating .gitignore...');
   
   const gitignoreEntries = [
@@ -328,9 +359,10 @@ npm run github:create-pr <branch>   # PR作成
     '*.log'
   ];
   
+  const gitignorePath = join(repoRoot, '.gitignore');
   let gitignore = '';
-  if (existsSync('.gitignore')) {
-    gitignore = readFileSync('.gitignore', 'utf-8');
+  if (existsSync(gitignorePath)) {
+    gitignore = readFileSync(gitignorePath, 'utf-8');
   }
   
   let updated = false;
@@ -342,8 +374,8 @@ npm run github:create-pr <branch>   # PR作成
   }
   
   if (updated) {
-    writeFileSync('.gitignore', gitignore);
-    console.log('   ✅ .gitignore updated');
+    writeFileSync(gitignorePath, gitignore);
+    console.log('   ✅ .gitignore updated (in repository root)');
   } else {
     console.log('   ℹ️  .gitignore already up to date');
   }
@@ -353,23 +385,29 @@ npm run github:create-pr <branch>   # PR作成
   console.log('🎉 セットアップ完了！');
   console.log('');
   console.log('次のステップ:');
-  console.log('  1. .env ファイルを編集して認証情報を設定');
-  console.log('  2. package.json が既存の場合、スクリプトを手動追加');
-  console.log('  3. npm install で依存関係をインストール');
-  console.log('  4. jj commit でセットアップをコミット');
-  console.log('  5. Cursor で開く: cursor .');
-  console.log('  6. /kiro:spec-init <機能説明> で開発開始');
+  console.log(`  1. cd ${projectDir}`);
+  console.log('  2. .env ファイルを編集して認証情報を設定');
+  console.log('  3. package.json が既存の場合、スクリプトを手動追加');
+  console.log('  4. npm install で依存関係をインストール（リポジトリルートで実行）');
+  console.log('  5. jj commit でセットアップをコミット');
+  console.log('  6. Cursor で開く: cursor .');
+  console.log('  7. /kiro:spec-init <機能説明> で開発開始');
   console.log('');
   console.log('作成されたファイル:');
-  console.log('  - .kiro/project.json');
-  console.log('  - .cursor/rules/ (3ファイル)');
-  console.log('  - .cursor/commands/kiro/ (2ファイル)');
-  console.log('  - .kiro/steering/ (3ファイル)');
-  console.log('  - .kiro/settings/templates/ (3ファイル)');
-  console.log('  - scripts/ (7+ ファイル)');
-  console.log('  - package.json (新規の場合)');
-  console.log('  - tsconfig.json (新規の場合)');
-  console.log('  - .env (テンプレート)');
+  console.log(`  - ${projectDir}/.kiro/project.json`);
+  console.log(`  - ${projectDir}/.cursor/rules/ (3ファイル)`);
+  console.log(`  - ${projectDir}/.cursor/commands/kiro/ (2ファイル)`);
+  console.log(`  - ${projectDir}/.kiro/steering/ (3ファイル)`);
+  console.log(`  - ${projectDir}/.kiro/settings/templates/ (3ファイル)`);
+  console.log(`  - ${projectDir}/scripts/ (7+ ファイル)`);
+  console.log(`  - ${repoRoot}/package.json (新規の場合)`);
+  console.log(`  - ${repoRoot}/tsconfig.json (新規の場合)`);
+  console.log(`  - ${projectDir}/.env (テンプレート)`);
+  
+  } finally {
+    // 元の作業ディレクトリに戻る
+    process.chdir(originalCwd);
+  }
 }
 
 // 実行

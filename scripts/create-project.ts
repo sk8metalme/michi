@@ -67,6 +67,25 @@ function parseArgs(): ProjectConfig {
   return config as ProjectConfig;
 }
 
+/**
+ * jj/git の依存性をチェックし、利用可能なVCSを返す
+ */
+function checkDependencies(): { vcs: 'jj' | 'git'; version: string } {
+  try {
+    const jjVersion = execSync('jj --version', { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] }).trim();
+    return { vcs: 'jj', version: jjVersion };
+  } catch {
+    try {
+      const gitVersion = execSync('git --version', { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] }).trim();
+      return { vcs: 'git', version: gitVersion };
+    } catch {
+      console.error('❌ Neither jj nor git is installed');
+      console.error('   Please install jj (https://github.com/martinvonz/jj) or git');
+      process.exit(1);
+    }
+  }
+}
+
 async function createProject(config: ProjectConfig): Promise<void> {
   const org = config.org || process.env.GITHUB_ORG;
   
@@ -79,10 +98,14 @@ async function createProject(config: ProjectConfig): Promise<void> {
   const repoName = config.name;
   const repoUrl = `https://github.com/${org}/${repoName}`;
   const projectDir = resolve(`../${repoName}`);
-  
+
+  // VCS依存性チェック
+  const deps = checkDependencies();
+
   console.log(`🚀 Creating new project: ${config.projectName}`);
   console.log(`   Repository: ${org}/${repoName}`);
   console.log(`   JIRA: ${config.jiraKey}`);
+  console.log(`   VCS: ${deps.vcs} (${deps.version})`);
   console.log('');
   
   // Step 1: GitHubリポジトリ作成
@@ -100,7 +123,11 @@ async function createProject(config: ProjectConfig): Promise<void> {
   // Step 2: リポジトリクローン
   console.log('\n📥 Step 2: Cloning repository...');
   try {
-    execSync(`jj git clone ${repoUrl} ${projectDir}`, { stdio: 'inherit' });
+    if (deps.vcs === 'jj') {
+      execSync(`jj git clone ${repoUrl} ${projectDir}`, { stdio: 'inherit' });
+    } else {
+      execSync(`git clone ${repoUrl} ${projectDir}`, { stdio: 'inherit' });
+    }
     console.log('   ✅ Repository cloned');
   } catch (error) {
     console.log('   ⚠️  Clone failed, checking if directory exists...');
@@ -113,16 +140,31 @@ async function createProject(config: ProjectConfig): Promise<void> {
     process.exit(1);
   }
   
-  process.chdir(projectDir);
-  console.log(`   📂 Working directory: ${projectDir}`);
+  // 元の作業ディレクトリを保存
+  const originalCwd = process.cwd();
   
-  // Step 4: cc-sdd導入
-  console.log('\n⚙️  Step 4: Installing cc-sdd...');
+  try {
+    process.chdir(projectDir);
+    console.log(`   📂 Working directory: ${projectDir}`);
+
+    // Step 4: projects/ディレクトリとプロジェクトディレクトリを作成
+    console.log('\n📁 Step 4: Creating project directory structure...');
+    const projectsDir = join(projectDir, 'projects');
+    const actualProjectDir = join(projectsDir, repoName);
+    mkdirSync(actualProjectDir, { recursive: true });
+    console.log(`   ✅ Project directory created: ${actualProjectDir}`);
+
+    // Step 5: プロジェクトディレクトリに移動
+    process.chdir(actualProjectDir);
+    console.log(`   📂 Working directory: ${actualProjectDir}`);
+
+  // Step 6: cc-sdd導入
+  console.log('\n⚙️  Step 6: Installing cc-sdd...');
   execSync('npx cc-sdd@latest --cursor --lang ja --yes', { stdio: 'inherit' });
   console.log('   ✅ cc-sdd installed');
-  
-  // Step 5: .kiro/project.json 作成
-  console.log('\n📝 Step 5: Creating project metadata...');
+
+  // Step 7: .kiro/project.json 作成
+  console.log('\n📝 Step 7: Creating project metadata...');
   mkdirSync('.kiro', { recursive: true });
   
   // ラベル生成（安全なフォールバック付き）
@@ -160,17 +202,18 @@ async function createProject(config: ProjectConfig): Promise<void> {
   
   writeFileSync('.kiro/project.json', JSON.stringify(projectJson, null, 2));
   console.log('   ✅ project.json created');
-  
-  // Step 6: Michiから共通ファイルをコピー
-  console.log('\n📋 Step 6: Copying common files from Michi...');
+
+  // Step 8: Michiから共通ファイルをコピー
+  console.log('\n📋 Step 8: Copying common files from Michi...');
   const michiPath = resolve(__dirname, '..');
   
-  // コピー先ディレクトリを事前に作成
-  mkdirSync('.cursor/rules', { recursive: true });
-  mkdirSync('.cursor/commands/kiro', { recursive: true });
-  mkdirSync('.kiro/steering', { recursive: true });
-  mkdirSync('.kiro/settings/templates', { recursive: true });
-  mkdirSync('scripts/utils', { recursive: true });
+  // コピー先ディレクトリを事前に作成（actualProjectDir 配下に作成）
+  console.log(`   📂 Copying to: ${actualProjectDir}`);
+  mkdirSync(join(actualProjectDir, '.cursor/rules'), { recursive: true });
+  mkdirSync(join(actualProjectDir, '.cursor/commands/kiro'), { recursive: true });
+  mkdirSync(join(actualProjectDir, '.kiro/steering'), { recursive: true });
+  mkdirSync(join(actualProjectDir, '.kiro/settings/templates'), { recursive: true });
+  mkdirSync(join(actualProjectDir, 'scripts/utils'), { recursive: true });
   
   // ルールファイル
   const rulesToCopy = [
@@ -181,7 +224,7 @@ async function createProject(config: ProjectConfig): Promise<void> {
   
   for (const rule of rulesToCopy) {
     const src = join(michiPath, '.cursor/rules', rule);
-    const dest = join(projectDir, '.cursor/rules', rule);
+    const dest = join(actualProjectDir, '.cursor/rules', rule);
     if (existsSync(src)) {
       cpSync(src, dest);
       console.log(`   ✅ Copied: .cursor/rules/${rule}`);
@@ -196,7 +239,7 @@ async function createProject(config: ProjectConfig): Promise<void> {
   
   for (const cmd of commandsToCopy) {
     const src = join(michiPath, '.cursor/commands/kiro', cmd);
-    const dest = join(projectDir, '.cursor/commands/kiro', cmd);
+    const dest = join(actualProjectDir, '.cursor/commands/kiro', cmd);
     if (existsSync(src)) {
       cpSync(src, dest);
       console.log(`   ✅ Copied: .cursor/commands/kiro/${cmd}`);
@@ -206,8 +249,9 @@ async function createProject(config: ProjectConfig): Promise<void> {
   // Steering
   const steeringDir = join(michiPath, '.kiro/steering');
   if (existsSync(steeringDir)) {
-    mkdirSync('.kiro/steering', { recursive: true });
-    cpSync(steeringDir, '.kiro/steering', { recursive: true });
+    const destSteeringDir = join(actualProjectDir, '.kiro/steering');
+    mkdirSync(destSteeringDir, { recursive: true });
+    cpSync(steeringDir, destSteeringDir, { recursive: true });
     console.log('   ✅ Copied: .kiro/steering/');
   }
   
@@ -228,7 +272,7 @@ async function createProject(config: ProjectConfig): Promise<void> {
     
     for (const script of scriptsToCopy) {
       const src = join(scriptsDir, script);
-      const dest = join(projectDir, 'scripts', script);
+      const dest = join(actualProjectDir, 'scripts', script);
       if (existsSync(src)) {
         // ディレクトリが必要な場合は作成
         const destDir = dirname(dest);
@@ -239,49 +283,65 @@ async function createProject(config: ProjectConfig): Promise<void> {
     }
   }
   
-  // package.json, tsconfig.json
+  // package.json, tsconfig.jsonをリポジトリルートにコピー
   ['package.json', 'tsconfig.json'].forEach(file => {
     const src = join(michiPath, file);
+    const dest = join(projectDir, file); // リポジトリルートにコピー
     if (existsSync(src)) {
-      cpSync(src, file);
-      console.log(`   ✅ Copied: ${file}`);
+      cpSync(src, dest);
+      console.log(`   ✅ Copied: ${file} (to repository root)`);
     }
   });
-  
-  // Step 7: .env テンプレート作成
-  console.log('\n🔐 Step 7: Creating .env template...');
-  execSync('npm run setup:env', { stdio: 'inherit' });
+
+  // Step 9: .env テンプレート作成（リポジトリルートで実行）
+  console.log('\n🔐 Step 9: Creating .env template...');
+  // package.jsonはprojectDirにあるため、そこで実行
+  execSync('npm run setup:env', { cwd: projectDir, stdio: 'inherit' });
   console.log('   ✅ .env created');
-  
-  // Step 8: npm install
-  console.log('\n📦 Step 8: Installing dependencies...');
-  execSync('npm install', { stdio: 'inherit' });
-  console.log('   ✅ Dependencies installed');
-  
-  // Step 9: 初期コミット
-  console.log('\n💾 Step 9: Creating initial commit...');
-  execSync(`jj commit -m "chore: プロジェクト初期化
+
+    // Step 10: npm install（リポジトリルートで実行）
+    console.log('\n📦 Step 10: Installing dependencies...');
+    process.chdir(projectDir);
+    execSync('npm install', { stdio: 'inherit' });
+    console.log('   ✅ Dependencies installed');
+
+  // Step 11: 初期コミット
+  console.log('\n💾 Step 11: Creating initial commit...');
+
+  const commitMessage = `chore: プロジェクト初期化
 
 - cc-sdd導入
 - プロジェクトメタデータ設定（${config.jiraKey}）
 - 自動化スクリプト追加
-- Confluence/JIRA連携設定"`, { stdio: 'inherit' });
-  
-  execSync('jj bookmark create main -r "@-"', { stdio: 'inherit' });
+- Confluence/JIRA連携設定`;
+
+  if (deps.vcs === 'jj') {
+    execSync(`jj commit -m "${commitMessage}"`, { stdio: 'inherit' });
+    execSync('jj bookmark create main -r "@-"', { stdio: 'inherit' });
+  } else {
+    execSync('git add .', { stdio: 'inherit' });
+    execSync(`git commit -m "${commitMessage}"`, { stdio: 'inherit' });
+    execSync('git branch -M main', { stdio: 'inherit' });
+  }
   console.log('   ✅ Initial commit created');
-  
-  // 完了メッセージ
-  console.log('\n');
-  console.log('🎉 プロジェクトセットアップ完了！');
-  console.log('');
-  console.log('次のステップ:');
-  console.log(`  1. cd ${projectDir}`);
-  console.log('  2. .env ファイルを編集して認証情報を設定');
-  console.log('  3. jj git push --bookmark main --allow-new');
-  console.log('  4. Cursor で開く: cursor .');
-  console.log('  5. /kiro:spec-init <機能説明> で開発開始');
-  console.log('');
-  console.log('詳細: docs/new-repository-setup.md');
+    
+    // 完了メッセージ
+    console.log('\n');
+    console.log('🎉 プロジェクトセットアップ完了！');
+    console.log('');
+    console.log('次のステップ:');
+    console.log(`  1. cd ${actualProjectDir}`);
+    console.log('  2. .env ファイルを編集して認証情報を設定');
+    console.log('  3. jj git push --bookmark main --allow-new');
+    console.log('  4. Cursor で開く: cursor .');
+    console.log('  5. /kiro:spec-init <機能説明> で開発開始');
+    console.log('');
+    console.log('詳細: docs/new-repository-setup.md');
+    
+  } finally {
+    // 元の作業ディレクトリに戻る
+    process.chdir(originalCwd);
+  }
 }
 
 // 実行

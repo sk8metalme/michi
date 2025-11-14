@@ -1,7 +1,7 @@
 # Michi セットアップガイド
 
-> **このガイドについて**: 既存のリポジトリにMichiを導入する手順です。  
-> 新規リポジトリを作成する場合は [新規リポジトリセットアップガイド](./new-repository-setup.md) を参照してください。  
+> **このガイドについて**: 既存のプロジェクトにMichiを導入する手順です。  
+> 新規プロジェクトを作成する場合は [新規リポジトリセットアップガイド](./new-project-setup.md) を参照してください。  
 > Michiの開発に貢献する場合は [開発環境セットアップガイド](../contributing/development.md) を参照してください。
 
 ## 前提条件
@@ -274,7 +274,9 @@ wget -O ~/.cursor/mcp.json https://raw.githubusercontent.com/sk8metalme/michi/ma
 
 `.kiro/project.json` は、プロジェクトのメタデータ（プロジェクトID、JIRAキー、Confluenceラベルなど）を管理するファイルです。
 
-> **補足**: 新規リポジトリを作成する場合や、既存リポジトリにMichiを自動導入する場合は [新規リポジトリセットアップガイド](./new-repository-setup.md) を参照してください。
+**重要**: すべてのプロジェクト（単一プロジェクトも含む）は`projects/{project-id}/`配下に配置されます。
+
+> **補足**: 新規プロジェクトを作成する場合や、既存プロジェクトにMichiを自動導入する場合は [新規プロジェクトセットアップガイド](./new-project-setup.md) を参照してください。
 
 ### 5-1. `.kiro/project.json` の作成
 
@@ -313,8 +315,8 @@ EOF
   "jiraProjectKey": "MICHI",
   "confluenceLabels": ["project:michi", "service:hub"],
   "status": "active",
-  "team": ["@bob", "@john"],
-  "stakeholders": ["leader", "@director"],
+  "team": ["@developer1"],
+  "stakeholders": ["@pm", "@director"],
   "repository": "https://github.com/your-org/your-repo",
   "description": "プロジェクトの説明"
 }

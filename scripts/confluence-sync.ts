@@ -13,6 +13,7 @@ import { validateFeatureNameOrThrow } from './utils/feature-name-validator.js';
 import { getConfig, getConfigPath } from './utils/config-loader.js';
 import { createPagesByGranularity } from './utils/confluence-hierarchy.js';
 import { validateForConfluenceSync } from './utils/config-validator.js';
+import { updateSpecJsonAfterConfluenceSync } from './utils/spec-updater.js';
 
 // 環境変数読み込み
 config();
@@ -42,7 +43,7 @@ interface ConfluenceConfig {
 /**
  * Confluence設定を環境変数から取得
  */
-function getConfluenceConfig(): ConfluenceConfig {
+export function getConfluenceConfig(): ConfluenceConfig {
   const url = process.env.ATLASSIAN_URL;
   const email = process.env.ATLASSIAN_EMAIL;
   const apiToken = process.env.ATLASSIAN_API_TOKEN;
@@ -444,14 +445,23 @@ async function syncToConfluence(
   
   const firstPageUrl = result.pages[0].url;
   console.log(`✅ Sync completed: ${result.pages.length} page(s) created/updated`);
-  
+
   if (result.pages.length > 1) {
     console.log('📄 Created pages:');
     result.pages.forEach((page, index) => {
       console.log(`   ${index + 1}. ${page.title} - ${page.url}`);
     });
   }
-  
+
+  // spec.json を更新
+  const firstPage = result.pages[0];
+  updateSpecJsonAfterConfluenceSync(featureName, docType, {
+    pageId: firstPage.id,
+    url: firstPage.url,
+    title: firstPage.title,
+    spaceKey: spaceKey
+  });
+
   return firstPageUrl;
 }
 

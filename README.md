@@ -311,6 +311,7 @@ npm run create-project -- \
 - [コントリビューションガイド](./CONTRIBUTING.md) - 貢献方法
 - [開発環境セットアップ](./docs/contributing/development.md) - 開発者向けセットアップ
 - [リリース手順](./docs/contributing/release.md) - バージョンアップ・NPM公開手順
+- [テスト戦略](./docs/testing-strategy.md) - テストカバレッジ目標と段階的計画 ⭐
 
 すべてのドキュメントは [docs/README.md](./docs/README.md) から参照できます。
 

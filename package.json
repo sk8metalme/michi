@@ -42,10 +42,11 @@
     "mcp.json.example"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && node scripts/copy-static-assets.js",
     "postbuild": "node scripts/set-permissions.js",
     "prepare": "npm run build",
     "setup:env": "bash scripts/setup-env.sh",
+    "setup:interactive": "tsx scripts/setup-interactive.ts",
     "create-project": "tsx scripts/create-project.ts",
     "setup-existing": "tsx scripts/setup-existing-project.ts",
     "confluence:sync": "tsx scripts/confluence-sync.ts",

@@ -179,50 +179,86 @@ async function aggregateEstimates(): Promise<void> {
   const estimates: EstimateData[] = [];
   
   console.log('Aggregating estimates from all projects...');
-  
-  const { data: repos } = await octokit.repos.listForOrg({ org });
+
+  // pagination対応: 100リポジトリ以上でも全件取得
+  const repos = await octokit.paginate(octokit.repos.listForOrg, {
+    org,
+    per_page: 100
+  });
+
+  console.log(`Found ${repos.length} repositories`);
   
   for (const repo of repos) {
     try {
-      // .kiro/specs/ ディレクトリを取得
-      const { data: specs } = await octokit.repos.getContent({
+      // projects/ディレクトリを取得（pagination対応）
+      const projectsDir = await octokit.paginate('GET /repos/{owner}/{repo}/contents/{path}', {
         owner: org,
         repo: repo.name,
-        path: '.kiro/specs'
+        path: 'projects',
+        per_page: 100
       });
       
-      if (Array.isArray(specs)) {
-        for (const spec of specs) {
-          if (spec.type === 'dir') {
-            // design.md を取得
+      if (Array.isArray(projectsDir)) {
+        // projects/配下の各プロジェクトディレクトリを処理
+        for (const projectEntry of projectsDir) {
+          // 型ガード: projectEntry が必要なプロパティを持つことを確認
+          if (typeof projectEntry === 'object' && projectEntry !== null &&
+              'type' in projectEntry && projectEntry.type === 'dir' &&
+              'name' in projectEntry) {
             try {
-              const { data: designFile } = await octokit.repos.getContent({
+              // projects/{project-id}/.kiro/specs/ ディレクトリを取得（pagination対応）
+              const specs = await octokit.paginate('GET /repos/{owner}/{repo}/contents/{path}', {
                 owner: org,
                 repo: repo.name,
-                path: `.kiro/specs/${spec.name}/design.md`
+                path: `projects/${(projectEntry as any).name}/.kiro/specs`,
+                per_page: 100
               });
               
-              if ('content' in designFile) {
-                const content = Buffer.from(designFile.content, 'base64').toString('utf-8');
-                
-                // コンテンツから見積もりを抽出
-                try {
-                  const estimateData = parseEstimateFromContent(content, `${repo.name}/${spec.name}`);
-                  if (estimateData) {
-                    estimates.push(estimateData);
-                    console.log(`  ✅ Parsed: ${repo.name}/${spec.name} (${estimateData.totalDays}日)`);
+              if (Array.isArray(specs)) {
+                for (const spec of specs) {
+                  // 型ガード: spec が必要なプロパティを持つことを確認
+                  if (typeof spec === 'object' && spec !== null &&
+                      'type' in spec && spec.type === 'dir' &&
+                      'name' in spec) {
+                    // design.md を取得
+                    try {
+                      const projectName = (projectEntry as any).name;
+                      const specName = (spec as any).name;
+                      const { data: designFile } = await octokit.repos.getContent({
+                        owner: org,
+                        repo: repo.name,
+                        path: `projects/${projectName}/.kiro/specs/${specName}/design.md`
+                      });
+
+                      if ('content' in designFile) {
+                        const content = Buffer.from(designFile.content, 'base64').toString('utf-8');
+
+                        // コンテンツから見積もりを抽出
+                        try {
+                          const estimateData = parseEstimateFromContent(content, `${repo.name}/${projectName}/${specName}`);
+                          if (estimateData) {
+                            estimates.push(estimateData);
+                            console.log(`  ✅ Parsed: ${repo.name}/${projectName}/${specName} (${estimateData.totalDays}日)`);
+                          }
+                        } catch (error) {
+                          console.warn(`  ⚠️  Failed to parse ${repo.name}/${projectName}/${specName}:`, error instanceof Error ? error.message : error);
+                        }
+                      }
+                    } catch {
+                      continue;
+                    }
                   }
-                } catch (error) {
-                  console.warn(`  ⚠️  Failed to parse ${repo.name}/${spec.name}:`, error instanceof Error ? error.message : error);
                 }
               }
             } catch {
+              // プロジェクトディレクトリに.kiro/specsがない場合はスキップ
               continue;
             }
           }
         }
       }
     } catch {
+      // projects/ディレクトリが存在しない場合はスキップ
       continue;
     }
   }
