@@ -198,12 +198,68 @@ michi/
 │   ├── settings/     # テンプレート
 │   ├── specs/        # 機能仕様書（GitHub SSoT）
 │   └── steering/     # AIガイダンス
+├── templates/        # cc-sdd準拠のマルチ環境テンプレート（Issue #35）
+│   ├── cursor/       # Cursor IDE用テンプレート
+│   │   ├── rules/    # ルールファイル（.mdc）
+│   │   └── commands/
+│   │       └── michi/ # Michi専用コマンド
+│   ├── claude/       # Claude Code用テンプレート（プレースホルダー含む）
+│   │   ├── rules/    # ルールファイル（.md、統合版）
+│   │   └── commands/
+│   │       └── michi/ # Michi専用コマンド（言語指示含む）
+│   └── claude-agent/ # Claude Agentテンプレート
 ├── scripts/          # 自動化スクリプト
 ├── docs/             # ドキュメント
 ├── env.example       # 環境変数テンプレート
 ├── mcp.json.example  # MCP設定テンプレート
 └── package.json      # 依存関係
 ```
+
+### テンプレートアーキテクチャ
+
+Michiは**cc-sdd準拠の多環境対応**を目指しています：
+
+#### 設計原則
+
+1. **単一の英語テンプレート**: 言語別ファイルを作らない
+2. **プレースホルダー使用**: `{{LANG_CODE}}`, `{{DEV_GUIDELINES}}` 等
+3. **AI駆動の多言語生成**: 実行時にAIが指定言語で出力
+4. **セットアップ時は置換しない**: テンプレートをそのままコピー、AIが実行時に解釈
+
+#### プレースホルダー一覧
+
+| プレースホルダー | 説明 | 例 |
+|----------------|------|-----|
+| `{{LANG_CODE}}` | 言語コード | ja, en |
+| `{{DEV_GUIDELINES}}` | 言語別AI指示 | "Think in English, generate in Japanese" |
+| `{{KIRO_DIR}}` | 仕様書ルート | .kiro |
+| `{{AGENT_DIR}}` | エージェント設定 | .claude |
+| `{{PROJECT_ID}}` | プロジェクトID | michi |
+| `{{FEATURE_NAME}}` | 機能名 | user-auth |
+
+#### テンプレート例
+
+```markdown
+# Michi Core Principles
+
+## Development Guidelines
+{{DEV_GUIDELINES}}
+
+## Language
+All generated documents should be in: **{{LANG_CODE}}**
+
+## Project Metadata
+- Project ID: {{PROJECT_ID}}
+- Kiro directory: {{KIRO_DIR}}
+- Agent directory: {{AGENT_DIR}}
+```
+
+**利点:**
+- ✅ 静的翻訳ファイル不要（メンテナンスコスト削減）
+- ✅ cc-sddとの完全互換
+- ✅ Cursor/Claude両環境で動作
+- ✅ プロジェクト固有値の動的生成
+
 
 ### 設定ファイル
 
@@ -260,22 +316,26 @@ APPROVAL_GATES_RELEASE=SM,部長
 
 ## 他のリポジトリでプロジェクトを進める
 
-### 既存リポジトリにMichiワークフローを追加（最も簡単）
+### 既存リポジトリにMichi共通ルール・コマンドを追加（最も簡単）
 
 ```bash
 # 既存プロジェクトのディレクトリに移動
 cd /path/to/existing-repo
 
-# Michiのセットアップスクリプトを実行（対話式）
+# Michiの共通ルール・コマンド・テンプレートをコピー
 bash /path/to/michi/scripts/setup-existing.sh
 ```
 
-対話式で以下を入力：
-- プロジェクト名
-- JIRAプロジェクトキー
-- 顧客名
+このスクリプトが自動的に：
+- 共通ルール（`.cursor/rules/`）をコピー
+- Michi専用コマンド（`.cursor/commands/michi/`）をコピー
+- Steeringテンプレート（`.kiro/steering/`）をコピー
+- Specテンプレート（`.kiro/settings/templates/`）をコピー
 
-自動的にcc-sdd、ルール、スクリプトなどがセットアップされます。
+**次のステップ**:
+1. cc-sddを導入: `npx cc-sdd@latest --lang ja --cursor`
+2. 設定を対話的に作成: `npm run setup:interactive`
+
 
 ### 新規リポジトリを作成してセットアップ
 

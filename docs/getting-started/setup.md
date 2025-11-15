@@ -1,7 +1,7 @@
 # Michi セットアップガイド
 
 > **このガイドについて**: 既存のプロジェクトにMichiを導入する手順です。  
-> 新規プロジェクトを作成する場合は [新規リポジトリセットアップガイド](./new-project-setup.md) を参照してください。  
+> 新規プロジェクトを作成する場合は [新規リポジトリセットアップガイド](./new-repository-setup.md) を参照してください。  
 > Michiの開発に貢献する場合は [開発環境セットアップガイド](../contributing/development.md) を参照してください。
 
 ## 前提条件
@@ -62,7 +62,14 @@ npx cc-sdd@next --lang ja --windsurf
 - `.cursor/commands/kiro/` または `.claude/commands/kiro/` にコマンド作成
 - `AGENTS.md` または `CLAUDE.md` にプロジェクト設定追加
 
+**cc-sdd準拠アーキテクチャ（Issue #35）:**
+- Michiは**単一の英語テンプレート + プレースホルダー**でcc-sdd準拠を実現
+- `templates/` ディレクトリからCursor/Claude両環境に対応
+- プレースホルダー（`{{LANG_CODE}}`, `{{DEV_GUIDELINES}}` 等）をAIが実行時に解釈
+
+
 詳細: [cc-sdd公式ドキュメント](https://github.com/gotalab/cc-sdd/blob/main/tools/cc-sdd/README_ja.md)
+
 
 ## Step 3: 環境変数の設定
 
@@ -276,7 +283,7 @@ wget -O ~/.cursor/mcp.json https://raw.githubusercontent.com/sk8metalme/michi/ma
 
 **重要**: すべてのプロジェクト（単一プロジェクトも含む）は`projects/{project-id}/`配下に配置されます。
 
-> **補足**: 新規プロジェクトを作成する場合や、既存プロジェクトにMichiを自動導入する場合は [新規プロジェクトセットアップガイド](./new-project-setup.md) を参照してください。
+> **補足**: 新規プロジェクトを作成する場合や、既存プロジェクトにMichiを自動導入する場合は [新規リポジトリセットアップガイド](./new-repository-setup.md) を参照してください。
 
 ### 5-1. `.kiro/project.json` の作成
 
