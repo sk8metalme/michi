@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# 既存プロジェクトにMichiワークフローを追加（簡易版）
+# 既存プロジェクトにMichi共通ルール・コマンド・テンプレートをコピー
 #
 # 使い方:
 #   cd /path/to/existing-repo
@@ -15,7 +15,7 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-echo -e "${BLUE}🚀 既存プロジェクトにMichiワークフローを追加${NC}"
+echo -e "${BLUE}🚀 Michi共通ルール・コマンド・テンプレートをコピー${NC}"
 echo ""
 
 # Michiリポジトリのパスを推測
@@ -26,34 +26,12 @@ echo -e "${BLUE}📂 Michiパス: ${MICHI_PATH}${NC}"
 echo -e "${BLUE}📂 現在のディレクトリ: $(pwd)${NC}"
 echo ""
 
-# プロジェクト情報を入力
-echo -e "${YELLOW}プロジェクト情報を入力してください:${NC}"
-echo ""
-
-read -p "プロジェクト名（例: プロジェクトA）: " PROJECT_NAME
-read -p "JIRAプロジェクトキー（例: PRJA）: " JIRA_KEY
-
-# 入力値の検証
-if [[ -z "${PROJECT_NAME// /}" ]]; then
-  echo -e "${YELLOW}⚠️  プロジェクト名が空です${NC}"
-  exit 1
-fi
-
-if [[ -z "${JIRA_KEY// /}" ]]; then
-  echo -e "${YELLOW}⚠️  JIRAプロジェクトキーが空です${NC}"
-  exit 1
-fi
-
 PROJECT_ID=$(basename "$(pwd)")
 
-echo ""
-echo -e "${GREEN}✅ 設定:${NC}"
-echo "   プロジェクトID: ${PROJECT_ID}"
-echo "   プロジェクト名: ${PROJECT_NAME}"
-echo "   JIRA: ${JIRA_KEY}"
+echo -e "${GREEN}✅ プロジェクトID: ${PROJECT_ID}${NC}"
 echo ""
 
-read -p "この設定で続行しますか？ [Y/n]: " CONFIRM
+read -p "このプロジェクトにMichi共通ルール・コマンドをコピーしますか？ [Y/n]: " CONFIRM
 if [[ "$CONFIRM" =~ ^[Nn] ]]; then
     echo "中止しました"
     exit 0
@@ -72,30 +50,31 @@ echo ""
 echo -e "${BLUE}🔧 セットアップスクリプトを実行...${NC}"
 
 if ! npx tsx "${SETUP_SCRIPT}" \
-  --michi-path "${MICHI_PATH}" \
-  --project-name "${PROJECT_NAME}" \
-  --jira-key "${JIRA_KEY}"; then
+  --michi-path "${MICHI_PATH}"; then
   echo ""
   echo -e "${YELLOW}❌ セットアップスクリプトが失敗しました${NC}"
   exit 1
 fi
 
 echo ""
-echo -e "${GREEN}🎉 セットアップ完了！${NC}"
+echo -e "${GREEN}🎉 共通ルール・コマンド・テンプレートのコピー完了！${NC}"
 echo ""
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo -e "${YELLOW}📋 次のステップ（重要）${NC}"
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo ""
-echo -e "${YELLOW}Step 1: 認証情報の設定${NC}"
+echo -e "${YELLOW}Step 1: cc-sddを導入${NC}"
+echo "   ${GREEN}$ npx cc-sdd@latest --lang ja --cursor${NC}"
+echo "   ※ 使用する環境に合わせて --cursor / --claude / --gemini などを指定"
 echo ""
+echo -e "${YELLOW}Step 2: 設定を対話的に作成${NC}"
 echo "   ${BLUE}方法A: 対話的設定ツールを使用（推奨）${NC}"
 echo "      ${GREEN}$ npm run setup:interactive${NC}"
 echo "      または"
-echo "      ${GREEN}$ npx tsx ${MICHI_PATH}/scripts/setup-interactive.ts${NC}"
+echo "      ${GREEN}$ npx @sk8metal/michi-cli setup:interactive${NC}"
 echo ""
 echo "   ${BLUE}方法B: 手動で.envファイルを編集${NC}"
-echo "      ファイル: $(pwd)/.env"
+echo "      ファイル: projects/${PROJECT_ID}/.env"
 echo ""
 echo "      ${BLUE}🔑 Atlassian API トークンの取得:${NC}"
 echo "         1. Atlassian アカウントにログイン"
@@ -111,28 +90,12 @@ echo "         3. 「Generate new token (classic)」をクリック"
 echo "         4. スコープを選択: repo, workflow, read:org"
 echo "         5. 「Generate token」をクリックしてトークンをコピー"
 echo ""
-echo "      ${GREEN}編集例:${NC}"
-echo "         ATLASSIAN_URL=https://your-domain.atlassian.net"
-echo "         ATLASSIAN_EMAIL=your-email@company.com"
-echo "         ATLASSIAN_API_TOKEN=<上記で取得したトークン>"
-echo "         GITHUB_TOKEN=ghp_xxxxxxxxxxxxx"
-echo ""
-echo -e "${YELLOW}Step 2: 依存パッケージのインストール${NC}"
-echo "   ${GREEN}$ npm install${NC}"
-echo "   ※ package.json が新規作成された場合のみ実行"
-echo ""
-echo -e "${YELLOW}Step 3: 変更をコミット${NC}"
-echo "   ${GREEN}$ jj status${NC}                                    # 変更確認"
-echo "   ${GREEN}$ jj commit -m 'chore: Michiワークフロー追加'${NC}  # コミット"
-echo "   ※ Michiプロジェクトは Jujutsu (jj) を使用しています"
-echo "   ※ Gitのみ使用する場合: git add . && git commit -m 'message'"
-echo ""
-echo -e "${YELLOW}Step 4: Cursor IDE で開く${NC}"
+echo -e "${YELLOW}Step 3: Cursor IDE で開く${NC}"
 echo "   ${GREEN}$ cursor .${NC}"
 echo "   ※ Cursor がインストールされていない場合:"
 echo "      https://cursor.sh からダウンロード"
 echo ""
-echo -e "${YELLOW}Step 5: 開発開始${NC}"
+echo -e "${YELLOW}Step 4: 開発開始${NC}"
 echo "   Cursor で以下のコマンドを実行（Cmd+K または Ctrl+K）:"
 echo "   ${GREEN}/kiro:spec-init <機能の説明>${NC}"
 echo ""
@@ -143,9 +106,9 @@ echo ""
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo -e "${YELLOW}📚 参考ドキュメント${NC}"
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-echo "   - セットアップガイド: ${MICHI_PATH}/docs/setup.md"
-echo "   - ワークフロー: ${MICHI_PATH}/docs/workflow.md"
-echo "   - クイックリファレンス: ${MICHI_PATH}/docs/quick-reference.md"
+echo "   - セットアップガイド: ${MICHI_PATH}/docs/getting-started/setup.md"
+echo "   - ワークフロー: ${MICHI_PATH}/docs/guides/workflow.md"
+echo "   - クイックリファレンス: ${MICHI_PATH}/docs/reference/quick-reference.md"
 echo ""
 echo -e "${GREEN}✨ 準備完了！開発を始めましょう！${NC}"
 echo ""

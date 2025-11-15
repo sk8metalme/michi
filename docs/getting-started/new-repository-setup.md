@@ -35,31 +35,44 @@ npm run create-project -- \
 5. 共通ファイルコピー
 6. `projects/{project-id}/.env` テンプレート作成
 7. npm install（リポジトリルートで実行）
-8. 初期コミット・プッシュ
+8. 初期コミット（`main`ブランチ作成）
+
+**注意**: プッシュは手動で実行する必要があります。スクリプト完了後、以下のコマンドを実行してください：
+
+```bash
+# Jujutsu (jj) を使用する場合
+jj git push --bookmark main --allow-new
+
+# Git を使用する場合
+git push -u origin main
+```
 
 **重要**: すべてのプロジェクトは`projects/{project-id}/`配下に配置されます。
 
-### 方法2: 既存プロジェクトにMichiワークフローを追加（推奨 - 既存リポジトリ）
+### 方法2: 既存プロジェクトにMichi共通ルール・コマンドを追加（推奨 - 既存リポジトリ）
 
-既存のリポジトリにAI開発フローを導入：
+既存のリポジトリにMichi共通ルール・コマンド・テンプレートをコピー：
 
 ```bash
 # 既存プロジェクトのディレクトリに移動
 cd /path/to/existing-repo
 
-# Michiのセットアップスクリプトを実行（対話式）
+# Michiの共通ルール・コマンド・テンプレートをコピー
 bash /path/to/michi/scripts/setup-existing.sh
 ```
 
-対話式でプロジェクト情報を入力すると、自動的に：
+このスクリプトが自動的に：
 1. ✅ リポジトリルートを検出
 2. ✅ `projects/{project-id}/`ディレクトリ作成
-3. ✅ cc-sdd 導入確認・インストール
-4. ✅ `projects/{project-id}/.kiro/project.json` 作成
-5. ✅ Michiから共通ファイルコピー（ルール、コマンド、テンプレート）
-6. ✅ `projects/{project-id}/.env` テンプレート作成
-7. ✅ README.md と .gitignore 更新（リポジトリルート）
-8. ✅ CLIツールのセットアップ案内
+3. ✅ 共通ルール（`.cursor/rules/`）をコピー
+4. ✅ カスタムコマンド（`.cursor/commands/kiro/`）をコピー
+5. ✅ Steeringテンプレート（`.kiro/steering/`）をコピー
+6. ✅ Specテンプレート（`.kiro/settings/templates/`）をコピー
+
+**次のステップ**:
+1. cc-sddを導入: `npx cc-sdd@latest --lang ja --cursor`
+2. 設定を対話的に作成: `npm run setup:interactive`
+3. Cursorで開く: `cursor .`
 
 **重要**: すべてのプロジェクトは`projects/{project-id}/`配下に配置されます。
 
@@ -345,40 +358,40 @@ git push -u origin main
 /kiro:spec-requirements <feature>
 jj commit -m "docs: 要件定義追加"
 jj git push
-npx @michi/cli phase:run <feature> requirements
+npx @sk8metal/michi-cli phase:run <feature> requirements
 
 # 具体例
 /kiro:spec-init ユーザー認証機能
 /kiro:spec-requirements user-auth
 jj commit -m "docs: 要件定義追加"
 jj git push
-npx @michi/cli phase:run user-auth requirements
+npx @sk8metal/michi-cli phase:run user-auth requirements
 
 # 2. 設計
 # 凡例
 /kiro:spec-design <feature>
 jj commit -m "docs: 設計追加"
 jj git push
-npx @michi/cli phase:run <feature> design
+npx @sk8metal/michi-cli phase:run <feature> design
 
 # 具体例
 /kiro:spec-design user-auth
 jj commit -m "docs: 設計追加"
 jj git push
-npx @michi/cli phase:run user-auth design
+npx @sk8metal/michi-cli phase:run user-auth design
 
 # 3. タスク分割
 # 凡例
 /kiro:spec-tasks <feature>
 jj commit -m "docs: タスク分割追加"
 jj git push
-npx @michi/cli phase:run <feature> tasks
+npx @sk8metal/michi-cli phase:run <feature> tasks
 
 # 具体例
 /kiro:spec-tasks user-auth
 jj commit -m "docs: タスク分割追加"
 jj git push
-npx @michi/cli phase:run user-auth tasks
+npx @sk8metal/michi-cli phase:run user-auth tasks
 
 # 4. 実装
 # 凡例
@@ -406,7 +419,7 @@ gh pr create --head 20240115-payment-api/feature/user-auth --base main
 git add .
 git commit -m "docs: 要件定義追加"
 git push
-npx @michi/cli phase:run <feature> requirements
+npx @sk8metal/michi-cli phase:run <feature> requirements
 
 # 具体例
 /kiro:spec-init ユーザー認証機能
@@ -414,7 +427,7 @@ npx @michi/cli phase:run <feature> requirements
 git add .
 git commit -m "docs: 要件定義追加"
 git push
-npx @michi/cli phase:run user-auth requirements
+npx @sk8metal/michi-cli phase:run user-auth requirements
 
 # 2. 設計
 # 凡例
@@ -422,14 +435,14 @@ npx @michi/cli phase:run user-auth requirements
 git add .
 git commit -m "docs: 設計追加"
 git push
-npx @michi/cli phase:run <feature> design
+npx @sk8metal/michi-cli phase:run <feature> design
 
 # 具体例
 /kiro:spec-design user-auth
 git add .
 git commit -m "docs: 設計追加"
 git push
-npx @michi/cli phase:run user-auth design
+npx @sk8metal/michi-cli phase:run user-auth design
 
 # 3. タスク分割
 # 凡例
@@ -437,14 +450,14 @@ npx @michi/cli phase:run user-auth design
 git add .
 git commit -m "docs: タスク分割追加"
 git push
-npx @michi/cli phase:run <feature> tasks
+npx @sk8metal/michi-cli phase:run <feature> tasks
 
 # 具体例
 /kiro:spec-tasks user-auth
 git add .
 git commit -m "docs: タスク分割追加"
 git push
-npx @michi/cli phase:run user-auth tasks
+npx @sk8metal/michi-cli phase:run user-auth tasks
 
 # 4. 実装
 # 凡例
@@ -602,8 +615,8 @@ cd ~/work/projects/michi
 ```bash
 # Michiから全プロジェクトの状況を確認
 cd /path/to/michi
-npx @michi/cli project:list
-npx @michi/cli project:dashboard
+npx @sk8metal/michi-cli project:list
+npx @sk8metal/michi-cli project:dashboard
 npm run multi-estimate
 ```
 

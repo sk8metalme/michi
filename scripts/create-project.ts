@@ -2,6 +2,10 @@
 /**
  * 新規プロジェクト自動セットアップスクリプト
  * 
+ * Issue #35: cc-sdd準拠の多環境対応基盤
+ * - templates/ディレクトリから読み込み
+ * - プレースホルダーはそのまま（実行時にAIが解釈）
+ * 
  * 使い方:
  * npm run create-project -- \
  *   --name "20240115-payment-api" \
@@ -11,9 +15,10 @@
 
 import { execSync } from 'child_process';
 import { writeFileSync, mkdirSync, cpSync, existsSync } from 'fs';
-import { resolve, join, dirname } from 'path';
+import { resolve, join, dirname, basename } from 'path';
 import { fileURLToPath } from 'url';
 import { config as loadDotenv } from 'dotenv';
+import { findTemplateFile, validateRequiredTemplates } from './utils/template-finder.js';
 
 // ESモジュール対応: __dirnameの代替
 const __filename = fileURLToPath(import.meta.url);
@@ -203,46 +208,71 @@ async function createProject(config: ProjectConfig): Promise<void> {
     writeFileSync('.kiro/project.json', JSON.stringify(projectJson, null, 2));
     console.log('   ✅ project.json created');
 
-    // Step 8: Michiから共通ファイルをコピー
-    console.log('\n📋 Step 8: Copying common files from Michi...');
+    // Step 8: Michiから共通ファイルをコピー（templates/から）
+    console.log('\n📋 Step 8: Copying common files from Michi templates...');
+    console.log('   ℹ️  Issue #35: cc-sdd compliant approach (placeholders preserved)');
     const michiPath = resolve(__dirname, '..');
+    
+    // 必須テンプレートのバリデーション
+    const requiredTemplates = [
+      'rules/github-ssot.mdc',
+      'rules/multi-project.mdc',
+      'commands/michi/confluence-sync.md',
+      'commands/michi/project-switch.md'
+    ];
+    
+    try {
+      validateRequiredTemplates(michiPath, requiredTemplates);
+    } catch (error) {
+      console.error('\n❌ Template validation failed:');
+      console.error(`   ${error instanceof Error ? error.message : String(error)}`);
+      process.exit(1);
+    }
     
     // コピー先ディレクトリを事前に作成（actualProjectDir 配下に作成）
     console.log(`   📂 Copying to: ${actualProjectDir}`);
     mkdirSync(join(actualProjectDir, '.cursor/rules'), { recursive: true });
-    mkdirSync(join(actualProjectDir, '.cursor/commands/kiro'), { recursive: true });
+    mkdirSync(join(actualProjectDir, '.cursor/commands/michi'), { recursive: true });
     mkdirSync(join(actualProjectDir, '.kiro/steering'), { recursive: true });
     mkdirSync(join(actualProjectDir, '.kiro/settings/templates'), { recursive: true });
     mkdirSync(join(actualProjectDir, 'scripts/utils'), { recursive: true });
     
-    // ルールファイル
+    // ルールファイル（templates/から）
     const rulesToCopy = [
-      'multi-project.mdc',
-      'github-ssot.mdc',
-      'atlassian-mcp.mdc'
+      'rules/multi-project.mdc',
+      'rules/github-ssot.mdc',
+      'rules/atlassian-mcp.mdc'
     ];
     
-    for (const rule of rulesToCopy) {
-      const src = join(michiPath, '.cursor/rules', rule);
-      const dest = join(actualProjectDir, '.cursor/rules', rule);
-      if (existsSync(src)) {
+    for (const rulePath of rulesToCopy) {
+      const src = findTemplateFile(michiPath, rulePath);
+      const fileName = basename(rulePath);
+      const dest = join(actualProjectDir, '.cursor/rules', fileName);
+      
+      if (src) {
         cpSync(src, dest);
-        console.log(`   ✅ Copied: .cursor/rules/${rule}`);
+        console.log(`   ✅ Copied: .cursor/rules/${fileName} (from templates/)`);
+      } else {
+        console.log(`   ⚠️  ${fileName} not found in templates/`);
       }
     }
     
-    // カスタムコマンド
+    // カスタムコマンド（templates/から）
     const commandsToCopy = [
-      'confluence-sync.md',
-      'project-switch.md'
+      'commands/michi/confluence-sync.md',
+      'commands/michi/project-switch.md'
     ];
     
-    for (const cmd of commandsToCopy) {
-      const src = join(michiPath, '.cursor/commands/kiro', cmd);
-      const dest = join(actualProjectDir, '.cursor/commands/kiro', cmd);
-      if (existsSync(src)) {
+    for (const cmdPath of commandsToCopy) {
+      const src = findTemplateFile(michiPath, cmdPath);
+      const fileName = basename(cmdPath);
+      const dest = join(actualProjectDir, '.cursor/commands/michi', fileName);
+      
+      if (src) {
         cpSync(src, dest);
-        console.log(`   ✅ Copied: .cursor/commands/kiro/${cmd}`);
+        console.log(`   ✅ Copied: .cursor/commands/michi/${fileName} (from templates/)`);
+      } else {
+        console.log(`   ⚠️  ${fileName} not found in templates/`);
       }
     }
     
@@ -339,7 +369,7 @@ async function createProject(config: ProjectConfig): Promise<void> {
     console.log('  4. Cursor で開く: cursor .');
     console.log('  5. /kiro:spec-init <機能説明> で開発開始');
     console.log('');
-    console.log('詳細: docs/new-repository-setup.md');
+    console.log('詳細: docs/getting-started/new-repository-setup.md');
     
   } finally {
     // 元の作業ディレクトリに戻る
