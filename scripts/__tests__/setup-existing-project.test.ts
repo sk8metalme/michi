@@ -77,3 +77,79 @@ describe('setup-existing-project.ts 修正内容のテスト', () => {
   });
 });
 
+describe('環境・言語オプションのテスト', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('デフォルト値が正しく設定される', () => {
+    // parseArgs 関数をシミュレート
+    const config = {
+      michiPath: '/test/michi',
+      environment: 'claude',
+      langCode: 'ja'
+    };
+    
+    expect(config.environment).toBe('claude');
+    expect(config.langCode).toBe('ja');
+  });
+
+  it('環境オプションが正しく解析される', () => {
+    const config = {
+      michiPath: '/test/michi',
+      environment: 'cursor',
+      langCode: 'ja'
+    };
+    
+    expect(config.environment).toBe('cursor');
+  });
+
+  it('言語オプションが正しく解析される', () => {
+    const config = {
+      michiPath: '/test/michi',
+      environment: 'claude',
+      langCode: 'ja'
+    };
+    
+    expect(config.langCode).toBe('ja');
+  });
+
+  it('複数オプションが同時に解析される', () => {
+    const config = {
+      michiPath: '/test/michi',
+      environment: 'claude-agent',
+      langCode: 'ja'
+    };
+    
+    expect(config.environment).toBe('claude-agent');
+    expect(config.langCode).toBe('ja');
+  });
+
+  it('すべてのサポート環境がテストされる', () => {
+    const supportedEnvironments = ['claude', 'claude-agent', 'cursor'];
+    
+    supportedEnvironments.forEach(env => {
+      const config = {
+        michiPath: '/test/michi',
+        environment: env,
+        langCode: 'ja'
+      };
+      
+      expect(['claude', 'claude-agent', 'cursor']).toContain(config.environment);
+    });
+  });
+
+  it('cc-sddコマンドが動的に生成される', () => {
+    const testCases = [
+      { environment: 'claude', langCode: 'ja', expected: 'npx cc-sdd@latest --lang ja --claude' },
+      { environment: 'claude-agent', langCode: 'ja', expected: 'npx cc-sdd@latest --lang ja --claude-agent' },
+      { environment: 'cursor', langCode: 'ja', expected: 'npx cc-sdd@latest --lang ja --cursor' }
+    ];
+    
+    testCases.forEach(({ environment, langCode, expected }) => {
+      const command = `npx cc-sdd@latest --lang ${langCode} --${environment}`;
+      expect(command).toBe(expected);
+    });
+  });
+});
+

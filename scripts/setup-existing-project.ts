@@ -18,6 +18,8 @@ import { findTemplateFile, validateRequiredTemplates } from './utils/template-fi
 
 interface SetupConfig {
   michiPath: string;      // Michiリポジトリのパス
+  environment?: string;   // cc-sdd環境: 'claude' | 'claude-agent' | 'cursor'
+  langCode?: string;      // 言語コード: 'ja'
 }
 
 function parseArgs(): SetupConfig {
@@ -30,12 +32,22 @@ function parseArgs(): SetupConfig {
     
     if (key === 'michi-path') {
       config.michiPath = value;
+    } else if (key === 'environment') {
+      config.environment = value;
+    } else if (key === 'lang') {
+      config.langCode = value;
     }
   }
   
   // デフォルト値
   if (!config.michiPath) {
     config.michiPath = resolve(__dirname, '..');
+  }
+  if (!config.environment) {
+    config.environment = 'claude';
+  }
+  if (!config.langCode) {
+    config.langCode = 'ja';
   }
   
   return config as SetupConfig;
@@ -49,6 +61,8 @@ async function setupExistingProject(config: SetupConfig): Promise<void> {
   console.log(`   プロジェクトID: ${projectId}`);
   console.log(`   ディレクトリ: ${currentDir}`);
   console.log(`   Michiパス: ${config.michiPath}`);
+  console.log(`   環境: ${config.environment}`);
+  console.log(`   言語: ${config.langCode}`);
   console.log('');
   
   // リポジトリルートを検出
@@ -173,8 +187,7 @@ async function setupExistingProject(config: SetupConfig): Promise<void> {
     console.log('');
     console.log('次のステップ:');
     console.log(`  1. cd ${projectDir}`);
-    console.log('  2. cc-sddを導入: npx cc-sdd@latest --lang ja --cursor');
-    console.log('     （使用する環境に合わせて --cursor / --claude / --gemini などを指定）');
+    console.log(`  2. cc-sddを導入: npx cc-sdd@latest --lang ${config.langCode} --${config.environment}`);
     console.log('  3. 設定を対話的に作成: npm run setup:interactive');
     console.log('     （または: npx @sk8metal/michi-cli setup:interactive）');
     console.log('  4. Cursor で開く: cursor .');

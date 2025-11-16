@@ -4,7 +4,14 @@
 #
 # 使い方:
 #   cd /path/to/existing-repo
-#   bash /path/to/michi/scripts/setup-existing.sh
+#   bash /path/to/michi/scripts/setup-existing.sh [options]
+#
+# オプション:
+#   --claude        Claude Code環境を使用（デフォルト）
+#   --claude-agent  Claude Code Subagents環境を使用
+#   --cursor        Cursor IDE環境を使用
+#   --lang <code>   言語コード（デフォルト: ja）
+#   --help          ヘルプメッセージを表示
 #
 
 set -e
@@ -13,7 +20,101 @@ set -e
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
+RED='\033[0;31m'
 NC='\033[0m' # No Color
+
+# デフォルト値
+ENVIRONMENT="claude"
+LANG_CODE="ja"
+
+# v0.0.9 サポート環境
+SUPPORTED_ENVIRONMENTS=("claude" "claude-agent" "cursor")
+# v0.0.9 サポート言語
+SUPPORTED_LANGUAGES=("ja")
+
+# ヘルプメッセージを表示
+show_help() {
+  echo "Usage: bash setup-existing.sh [options]"
+  echo ""
+  echo "Options:"
+  echo "  --claude        Use Claude Code environment (default)"
+  echo "  --claude-agent  Use Claude Code Subagents environment"
+  echo "  --cursor        Use Cursor IDE environment"
+  echo "  --lang <code>   Language code (default: ja)"
+  echo "  --help          Show this help message"
+  echo ""
+  echo "Supported in v0.0.9:"
+  echo "  Environments: claude, claude-agent, cursor"
+  echo "  Languages: ja"
+  echo ""
+  echo "Examples:"
+  echo "  bash setup-existing.sh                      # Default (Claude Code, Japanese)"
+  echo "  bash setup-existing.sh --cursor             # Cursor IDE, Japanese"
+  echo "  bash setup-existing.sh --claude-agent --lang ja  # Claude Subagents, Japanese"
+}
+
+# 環境のバリデーション
+validate_environment() {
+  local env=$1
+  for supported in "${SUPPORTED_ENVIRONMENTS[@]}"; do
+    if [[ "$env" == "$supported" ]]; then
+      return 0
+    fi
+  done
+  
+  echo -e "${RED}❌ Error: Environment '${env}' is not yet supported in v0.0.9${NC}"
+  echo "Supported environments: ${SUPPORTED_ENVIRONMENTS[*]}"
+  exit 1
+}
+
+# 言語のバリデーション
+validate_language() {
+  local lang=$1
+  for supported in "${SUPPORTED_LANGUAGES[@]}"; do
+    if [[ "$lang" == "$supported" ]]; then
+      return 0
+    fi
+  done
+  
+  echo -e "${RED}❌ Error: Language '${lang}' is not yet supported in v0.0.9${NC}"
+  echo "Supported languages: ${SUPPORTED_LANGUAGES[*]}"
+  exit 1
+}
+
+# 引数解析
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --claude)
+      ENVIRONMENT="claude"
+      shift
+      ;;
+    --claude-agent)
+      ENVIRONMENT="claude-agent"
+      shift
+      ;;
+    --cursor)
+      ENVIRONMENT="cursor"
+      shift
+      ;;
+    --lang)
+      LANG_CODE="$2"
+      shift 2
+      ;;
+    --help)
+      show_help
+      exit 0
+      ;;
+    *)
+      echo -e "${RED}❌ Unknown option: $1${NC}"
+      echo "Run 'bash setup-existing.sh --help' for usage information."
+      exit 1
+      ;;
+  esac
+done
+
+# バリデーション
+validate_environment "$ENVIRONMENT"
+validate_language "$LANG_CODE"
 
 echo -e "${BLUE}🚀 Michi共通ルール・コマンド・テンプレートをコピー${NC}"
 echo ""
@@ -24,6 +125,8 @@ MICHI_PATH="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
 echo -e "${BLUE}📂 Michiパス: ${MICHI_PATH}${NC}"
 echo -e "${BLUE}📂 現在のディレクトリ: $(pwd)${NC}"
+echo -e "${BLUE}🔧 環境: ${ENVIRONMENT}${NC}"
+echo -e "${BLUE}🌐 言語: ${LANG_CODE}${NC}"
 echo ""
 
 PROJECT_ID=$(basename "$(pwd)")
@@ -50,7 +153,9 @@ echo ""
 echo -e "${BLUE}🔧 セットアップスクリプトを実行...${NC}"
 
 if ! npx tsx "${SETUP_SCRIPT}" \
-  --michi-path "${MICHI_PATH}"; then
+  --michi-path "${MICHI_PATH}" \
+  --environment "${ENVIRONMENT}" \
+  --lang "${LANG_CODE}"; then
   echo ""
   echo -e "${YELLOW}❌ セットアップスクリプトが失敗しました${NC}"
   exit 1
@@ -64,8 +169,7 @@ echo -e "${YELLOW}📋 次のステップ（重要）${NC}"
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo ""
 echo -e "${YELLOW}Step 1: cc-sddを導入${NC}"
-echo "   ${GREEN}$ npx cc-sdd@latest --lang ja --cursor${NC}"
-echo "   ※ 使用する環境に合わせて --cursor / --claude / --gemini などを指定"
+echo "   ${GREEN}$ npx cc-sdd@latest --lang ${LANG_CODE} --${ENVIRONMENT}${NC}"
 echo ""
 echo -e "${YELLOW}Step 2: 設定を対話的に作成${NC}"
 echo "   ${BLUE}方法A: 対話的設定ツールを使用（推奨）${NC}"
