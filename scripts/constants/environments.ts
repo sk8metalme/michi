@@ -16,17 +16,17 @@ export const ENV_CONFIG: Record<Environment, EnvironmentConfig> = {
   'claude': {
     rulesDir: '.claude/rules',
     commandsDir: '.claude/commands/kiro',
-    templateSource: 'templates/claude'
+    templateSource: 'claude'
   },
   'claude-agent': {
     rulesDir: '.claude/rules',
     commandsDir: '.claude/commands/kiro',
-    templateSource: 'templates/claude-agent'
+    templateSource: 'claude-agent'
   },
   'cursor': {
     rulesDir: '.cursor/rules',
     commandsDir: '.cursor/commands/kiro',
-    templateSource: 'templates/cursor'
+    templateSource: 'cursor'
   }
 };
 

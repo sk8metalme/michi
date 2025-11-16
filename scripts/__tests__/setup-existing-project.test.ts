@@ -22,7 +22,7 @@ vi.mock('../constants/environments.js', () => ({
   getEnvironmentConfig: vi.fn(() => ({
     rulesDir: '.cursor/rules',
     commandsDir: '.cursor/commands/kiro',
-    templateSource: 'templates/cursor'
+    templateSource: 'cursor'
   })),
   isSupportedEnvironment: vi.fn(() => true)
 }));
@@ -122,12 +122,12 @@ describe('setup-existing-project.ts 修正内容のテスト', () => {
     const envConfig = {
       rulesDir: '.cursor/rules',
       commandsDir: '.cursor/commands/kiro',
-      templateSource: 'templates/cursor'
+      templateSource: 'cursor'
     };
 
     expect(envConfig.rulesDir).toBe('.cursor/rules');
     expect(envConfig.commandsDir).toBe('.cursor/commands/kiro');
-    expect(envConfig.templateSource).toBe('templates/cursor');
+    expect(envConfig.templateSource).toBe('cursor');
   });
 
   it('テンプレートコンテキストが正しく作成される', () => {

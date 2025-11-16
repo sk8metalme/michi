@@ -256,7 +256,7 @@ async function setupExistingProject(config: SetupConfig): Promise<void> {
     );
   
     // テンプレートソースディレクトリ
-    const templateSourceDir = join(config.michiPath, envConfig.templateSource);
+    const templateSourceDir = join(config.michiPath, 'templates', envConfig.templateSource);
   
     if (!existsSync(templateSourceDir)) {
       console.log(`   ⚠️  Template source not found: ${templateSourceDir}`);
