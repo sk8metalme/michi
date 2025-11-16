@@ -12,18 +12,36 @@
  *   --lang ja
  */
 
-import { cpSync, existsSync, mkdirSync, writeFileSync, readFileSync } from 'fs';
-import { resolve, join, basename } from 'path';
+import { cpSync, existsSync, mkdirSync, writeFileSync, readFileSync, readdirSync, statSync } from 'fs';
+import { resolve, join, basename, dirname } from 'path';
+import { fileURLToPath } from 'url';
 import { execSync } from 'child_process';
 import { findRepositoryRoot } from './utils/project-finder.js';
+import { 
+  type Environment, 
+  getEnvironmentConfig, 
+  isSupportedEnvironment 
+} from './constants/environments.js';
+import { 
+  type SupportedLanguage, 
+  isSupportedLanguage 
+} from './constants/languages.js';
+import { 
+  createTemplateContext, 
+  renderTemplate 
+} from './template/renderer.js';
+
+// ES module で __dirname を取得
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 interface SetupConfig {
   michiPath: string;      // Michiリポジトリのパス
   projectName: string;    // プロジェクト表示名
   jiraKey: string;        // JIRAプロジェクトキー
   labels?: string[];      // Confluenceラベル（オプション）
-  environment?: string;   // cc-sdd環境: 'claude' | 'claude-agent' | 'cursor'
-  langCode?: string;      // 言語コード: 'ja'
+  environment: Environment;   // cc-sdd環境: 'claude' | 'claude-agent' | 'cursor'
+  langCode: SupportedLanguage;      // 言語コード: 'ja'
 }
 
 function parseArgs(): SetupConfig {
@@ -45,10 +63,10 @@ function parseArgs(): SetupConfig {
       config.jiraKey = value;
       break;
     case 'environment':
-      config.environment = value;
+      config.environment = value as Environment;
       break;
     case 'lang':
-      config.langCode = value;
+      config.langCode = value as SupportedLanguage;
       break;
     }
   }
@@ -71,7 +89,52 @@ function parseArgs(): SetupConfig {
     process.exit(1);
   }
   
+  // 環境バリデーション
+  if (!isSupportedEnvironment(config.environment)) {
+    console.error(`Unsupported environment: ${config.environment}`);
+    console.error('Supported environments: claude, claude-agent, cursor');
+    process.exit(1);
+  }
+  
+  // 言語バリデーション
+  if (!isSupportedLanguage(config.langCode)) {
+    console.error(`Unsupported language: ${config.langCode}`);
+    console.error('Supported languages: ja, en, zh-TW, zh, es, pt, de, fr, ru, it, ko, ar');
+    process.exit(1);
+  }
+  
   return config as SetupConfig;
+}
+
+/**
+ * Copy and render templates recursively
+ * 
+ * @param sourceDir - Source directory containing templates
+ * @param destDir - Destination directory for rendered files
+ * @param context - Template context for rendering
+ */
+function copyAndRenderTemplates(
+  sourceDir: string,
+  destDir: string,
+  context: ReturnType<typeof createTemplateContext>
+): void {
+  const entries = readdirSync(sourceDir, { withFileTypes: true });
+  
+  for (const entry of entries) {
+    const sourcePath = join(sourceDir, entry.name);
+    const destPath = join(destDir, entry.name);
+    
+    if (entry.isDirectory()) {
+      // ディレクトリは再帰的にコピー
+      mkdirSync(destPath, { recursive: true });
+      copyAndRenderTemplates(sourcePath, destPath, context);
+    } else if (entry.isFile()) {
+      // ファイルはレンダリングしてコピー
+      const content = readFileSync(sourcePath, 'utf-8');
+      const rendered = renderTemplate(content, context);
+      writeFileSync(destPath, rendered, 'utf-8');
+    }
+  }
 }
 
 async function setupExistingProject(config: SetupConfig): Promise<void> {
@@ -169,6 +232,7 @@ async function setupExistingProject(config: SetupConfig): Promise<void> {
     const projectJson = {
       projectId,
       projectName: config.projectName,
+      language: config.langCode,
       jiraProjectKey: config.jiraKey,
       confluenceLabels: labels,
       status: 'active',
@@ -181,49 +245,46 @@ async function setupExistingProject(config: SetupConfig): Promise<void> {
     writeFileSync('.kiro/project.json', JSON.stringify(projectJson, null, 2));
     console.log('   ✅ project.json created');
   
-    // Step 4: Michiから共通ルールをコピー
-    console.log('\n📋 Step 4: Copying common rules from Michi...');
+    // Step 4: 環境別テンプレートのコピーとレンダリング
+    console.log('\n📋 Step 4: Copying and rendering templates from Michi...');
   
-    // ディレクトリを事前に作成
-    mkdirSync(join(projectDir, '.cursor/rules'), { recursive: true });
-    mkdirSync(join(projectDir, '.cursor/commands/kiro'), { recursive: true });
+    const envConfig = getEnvironmentConfig(config.environment);
+    const templateContext = createTemplateContext(
+      config.langCode,
+      '.kiro',
+      envConfig.rulesDir.startsWith('.') ? envConfig.rulesDir.substring(1, envConfig.rulesDir.indexOf('/', 1)) : envConfig.rulesDir.split('/')[0]
+    );
   
-    const rulesToCopy = [
-      'multi-project.mdc',
-      'github-ssot.mdc',
-      'atlassian-mcp.mdc'
-    ];
+    // テンプレートソースディレクトリ
+    const templateSourceDir = join(config.michiPath, envConfig.templateSource);
   
-    for (const rule of rulesToCopy) {
-      const src = join(config.michiPath, '.cursor/rules', rule);
-      const dest = join(projectDir, '.cursor/rules', rule);
-      if (existsSync(src)) {
-        cpSync(src, dest);
-        console.log(`   ✅ ${rule}`);
-      } else {
-        console.log(`   ⚠️  ${rule} not found in Michi`);
+    if (!existsSync(templateSourceDir)) {
+      console.log(`   ⚠️  Template source not found: ${templateSourceDir}`);
+      console.log('   Skipping template copy');
+    } else {
+      // rulesディレクトリのコピーとレンダリング
+      const rulesTemplateDir = join(templateSourceDir, 'rules');
+      const rulesDestDir = join(projectDir, envConfig.rulesDir);
+      
+      if (existsSync(rulesTemplateDir)) {
+        mkdirSync(rulesDestDir, { recursive: true });
+        copyAndRenderTemplates(rulesTemplateDir, rulesDestDir, templateContext);
+        console.log(`   ✅ Rules copied and rendered to ${envConfig.rulesDir}`);
+      }
+  
+      // commandsディレクトリのコピーとレンダリング
+      const commandsTemplateDir = join(templateSourceDir, 'commands');
+      const commandsDestDir = join(projectDir, envConfig.commandsDir);
+      
+      if (existsSync(commandsTemplateDir)) {
+        mkdirSync(commandsDestDir, { recursive: true });
+        copyAndRenderTemplates(commandsTemplateDir, commandsDestDir, templateContext);
+        console.log(`   ✅ Commands copied and rendered to ${envConfig.commandsDir}`);
       }
     }
   
-    // Step 5: カスタムコマンドをコピー
-    console.log('\n🔧 Step 5: Copying custom commands...');
-  
-    const commandsToCopy = [
-      'confluence-sync.md',
-      'project-switch.md'
-    ];
-  
-    for (const cmd of commandsToCopy) {
-      const src = join(config.michiPath, '.cursor/commands/kiro', cmd);
-      const dest = join(projectDir, '.cursor/commands/kiro', cmd);
-      if (existsSync(src)) {
-        cpSync(src, dest);
-        console.log(`   ✅ ${cmd}`);
-      }
-    }
-  
-    // Step 6: Steeringテンプレートをコピー
-    console.log('\n📚 Step 6: Copying steering templates...');
+    // Step 5: Steeringテンプレートをコピー
+    console.log('\n📚 Step 5: Copying steering templates...');
   
     const steeringDir = join(config.michiPath, '.kiro/steering');
     if (existsSync(steeringDir)) {
@@ -231,8 +292,8 @@ async function setupExistingProject(config: SetupConfig): Promise<void> {
       console.log('   ✅ product.md, tech.md, structure.md');
     }
   
-    // Step 7: テンプレートをコピー
-    console.log('\n📄 Step 7: Copying spec templates...');
+    // Step 6: テンプレートをコピー
+    console.log('\n📄 Step 6: Copying spec templates...');
   
     const templatesDir = join(config.michiPath, '.kiro/settings/templates');
     if (existsSync(templatesDir)) {
@@ -240,8 +301,8 @@ async function setupExistingProject(config: SetupConfig): Promise<void> {
       console.log('   ✅ requirements.md, design.md, tasks.md');
     }
   
-    // Step 8: CLIツールのセットアップ案内
-    console.log('\n⚙️  Step 8: Setting up Michi CLI...');
+    // Step 7: CLIツールのセットアップ案内
+    console.log('\n⚙️  Step 7: Setting up Michi CLI...');
     console.log('   ✅ Michi CLI setup complete!');
     console.log('');
     console.log('   📋 使用方法:');
@@ -253,8 +314,8 @@ async function setupExistingProject(config: SetupConfig): Promise<void> {
     console.log('      npm install -g @sk8metal/michi-cli');
     console.log('      michi jira:sync <feature>');
   
-    // Step 9: package.json と tsconfig.json をリポジトリルートにコピー
-    console.log('\n📦 Step 9: Setting up package.json and TypeScript...');
+    // Step 8: package.json と tsconfig.json をリポジトリルートにコピー
+    console.log('\n📦 Step 8: Setting up package.json and TypeScript...');
   
     // 既存の package.json があるかチェック（リポジトリルート）
     const hasPackageJson = existsSync(join(repoRoot, 'package.json'));
@@ -297,8 +358,8 @@ async function setupExistingProject(config: SetupConfig): Promise<void> {
       console.log('   ℹ️  Existing tsconfig.json found (kept)');
     }
   
-    // Step 10: .env テンプレート作成（プロジェクトディレクトリに）
-    console.log('\n🔐 Step 10: Creating .env template...');
+    // Step 9: .env テンプレート作成（プロジェクトディレクトリに）
+    console.log('\n🔐 Step 9: Creating .env template...');
   
     const envTemplate = `# Atlassian設定（MCP + REST API共通）
 ATLASSIAN_URL=https://your-domain.atlassian.net
@@ -326,8 +387,8 @@ JIRA_PROJECT_KEYS=${config.jiraKey}
       console.log('   ℹ️  .env already exists (kept)');
     }
   
-    // Step 11: README.md を更新（オプション、プロジェクトディレクトリに）
-    console.log('\n📖 Step 11: Updating documentation...');
+    // Step 10: README.md を更新（オプション、プロジェクトディレクトリに）
+    console.log('\n📖 Step 10: Updating documentation...');
   
     const readmePath = join(projectDir, 'README.md');
     if (existsSync(readmePath)) {
@@ -369,8 +430,8 @@ npm run github:create-pr <branch>   # PR作成
       }
     }
   
-    // Step 12: .gitignore 更新（リポジトリルートに）
-    console.log('\n🚫 Step 12: Updating .gitignore...');
+    // Step 11: .gitignore 更新（リポジトリルートに）
+    console.log('\n🚫 Step 11: Updating .gitignore...');
   
     const gitignoreEntries = [
       '# AI Development Workflow',
@@ -418,8 +479,8 @@ npm run github:create-pr <branch>   # PR作成
     console.log('');
     console.log('作成されたファイル:');
     console.log(`  - ${projectDir}/.kiro/project.json`);
-    console.log(`  - ${projectDir}/.cursor/rules/ (3ファイル)`);
-    console.log(`  - ${projectDir}/.cursor/commands/kiro/ (2ファイル)`);
+    console.log(`  - ${projectDir}/${envConfig.rulesDir}/`);
+    console.log(`  - ${projectDir}/${envConfig.commandsDir}/`);
     console.log(`  - ${projectDir}/.kiro/steering/ (3ファイル)`);
     console.log(`  - ${projectDir}/.kiro/settings/templates/ (3ファイル)`);
     console.log(`  - ${repoRoot}/package.json (新規の場合)`);

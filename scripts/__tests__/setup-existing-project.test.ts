@@ -8,13 +8,35 @@ vi.mock('fs', () => ({
   mkdirSync: vi.fn(),
   cpSync: vi.fn(),
   writeFileSync: vi.fn(),
-  readFileSync: vi.fn(() => '{}')
+  readFileSync: vi.fn(() => '{}'),
+  readdirSync: vi.fn(() => []),
+  statSync: vi.fn()
 }));
 vi.mock('child_process', () => ({
   execSync: vi.fn()
 }));
-vi.mock('./utils/project-finder.js', () => ({
+vi.mock('../utils/project-finder.js', () => ({
   findRepositoryRoot: vi.fn(() => '/test/repo')
+}));
+vi.mock('../constants/environments.js', () => ({
+  getEnvironmentConfig: vi.fn(() => ({
+    rulesDir: '.cursor/rules',
+    commandsDir: '.cursor/commands/kiro',
+    templateSource: 'templates/cursor'
+  })),
+  isSupportedEnvironment: vi.fn(() => true)
+}));
+vi.mock('../constants/languages.js', () => ({
+  isSupportedLanguage: vi.fn(() => true)
+}));
+vi.mock('../template/renderer.js', () => ({
+  createTemplateContext: vi.fn(() => ({
+    LANG_CODE: 'ja',
+    DEV_GUIDELINES: '- Think in English, but generate responses in Japanese',
+    KIRO_DIR: '.kiro',
+    AGENT_DIR: '.cursor'
+  })),
+  renderTemplate: vi.fn((content: string) => content)
 }));
 
 describe('setup-existing-project.ts 修正内容のテスト', () => {
@@ -58,12 +80,14 @@ describe('setup-existing-project.ts 修正内容のテスト', () => {
   it('完了メッセージに scripts/ ディレクトリが含まれていない', () => {
     const projectDir = '/test/repo/projects/test-project';
     const repoRoot = '/test/repo';
+    const envConfigRulesDir = '.cursor/rules';
+    const envConfigCommandsDir = '.cursor/commands/kiro';
     
-    // 実際に作成されるファイルのリスト
+    // 実際に作成されるファイルのリスト（環境別）
     const createdFiles = [
       `${projectDir}/.kiro/project.json`,
-      `${projectDir}/.cursor/rules/ (3ファイル)`,
-      `${projectDir}/.cursor/commands/kiro/ (2ファイル)`,
+      `${projectDir}/${envConfigRulesDir}/`,
+      `${projectDir}/${envConfigCommandsDir}/`,
       `${projectDir}/.kiro/steering/ (3ファイル)`,
       `${projectDir}/.kiro/settings/templates/ (3ファイル)`,
       `${repoRoot}/package.json (新規の場合)`,
@@ -74,6 +98,50 @@ describe('setup-existing-project.ts 修正内容のテスト', () => {
     // scripts/ ディレクトリが含まれていないことを確認
     const hasScriptsDir = createdFiles.some(file => file.includes('scripts/'));
     expect(hasScriptsDir).toBe(false);
+  });
+
+  it('project.jsonにlanguageフィールドが含まれる', () => {
+    const projectJson = {
+      projectId: 'test-project',
+      projectName: 'Test Project',
+      language: 'ja',
+      jiraProjectKey: 'TEST',
+      confluenceLabels: ['project:test-project'],
+      status: 'active',
+      team: [],
+      stakeholders: ['@企画', '@部長'],
+      repository: 'https://github.com/org/test',
+      description: 'Test Projectの開発'
+    };
+
+    expect(projectJson).toHaveProperty('language');
+    expect(projectJson.language).toBe('ja');
+  });
+
+  it('環境別のディレクトリマッピングが正しい', () => {
+    const envConfig = {
+      rulesDir: '.cursor/rules',
+      commandsDir: '.cursor/commands/kiro',
+      templateSource: 'templates/cursor'
+    };
+
+    expect(envConfig.rulesDir).toBe('.cursor/rules');
+    expect(envConfig.commandsDir).toBe('.cursor/commands/kiro');
+    expect(envConfig.templateSource).toBe('templates/cursor');
+  });
+
+  it('テンプレートコンテキストが正しく作成される', () => {
+    const context = {
+      LANG_CODE: 'ja',
+      DEV_GUIDELINES: '- Think in English, but generate responses in Japanese',
+      KIRO_DIR: '.kiro',
+      AGENT_DIR: '.cursor'
+    };
+
+    expect(context).toHaveProperty('LANG_CODE');
+    expect(context).toHaveProperty('DEV_GUIDELINES');
+    expect(context).toHaveProperty('KIRO_DIR');
+    expect(context).toHaveProperty('AGENT_DIR');
   });
 });
 

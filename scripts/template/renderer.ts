@@ -1,0 +1,109 @@
+/**
+ * Template renderer with placeholder replacement
+ * 
+ * Issue #37: 環境別コピー実装
+ */
+
+import { SupportedLanguage, getDevGuidelines } from '../constants/languages.js';
+
+export interface TemplateContext {
+  LANG_CODE: SupportedLanguage;
+  DEV_GUIDELINES: string;
+  KIRO_DIR: string;
+  AGENT_DIR: string;
+  PROJECT_ID?: string;
+  FEATURE_NAME?: string;
+  TIMESTAMP?: string;
+}
+
+/**
+ * Create template context for rendering
+ * 
+ * @param lang - Language code
+ * @param kiroDir - .kiro directory name
+ * @param agentDir - Agent directory name (e.g., .cursor, .claude)
+ * @returns Template context object
+ */
+export const createTemplateContext = (
+  lang: SupportedLanguage,
+  kiroDir: string,
+  agentDir: string
+): TemplateContext => ({
+  LANG_CODE: lang,
+  DEV_GUIDELINES: getDevGuidelines(lang),
+  KIRO_DIR: kiroDir,
+  AGENT_DIR: agentDir,
+});
+
+/**
+ * Render template with placeholder replacement
+ * 
+ * Replaces {{KEY}} patterns with values from context
+ * 
+ * @param template - Template string with {{PLACEHOLDER}} patterns
+ * @param context - Template context with replacement values
+ * @returns Rendered template string
+ * 
+ * @example
+ * ```typescript
+ * const template = "Hello {{NAME}}, welcome to {{PLACE}}!";
+ * const context = { NAME: "Alice", PLACE: "Wonderland" };
+ * const result = renderTemplate(template, context);
+ * // Result: "Hello Alice, welcome to Wonderland!"
+ * ```
+ */
+export const renderTemplate = (
+  template: string,
+  context: TemplateContext
+): string => {
+  return template.replace(/\{\{([A-Z_]+)\}\}/g, (match, key) => {
+    const value = context[key as keyof TemplateContext];
+    return value !== undefined ? String(value) : match;
+  });
+};
+
+/**
+ * Render JSON template with placeholder replacement
+ * 
+ * Parses the template as JSON after placeholder replacement
+ * 
+ * @param template - JSON template string with {{PLACEHOLDER}} patterns
+ * @param context - Template context with replacement values
+ * @returns Parsed JSON object
+ * 
+ * @example
+ * ```typescript
+ * const template = '{"lang": "{{LANG_CODE}}", "dir": "{{KIRO_DIR}}"}';
+ * const context = { LANG_CODE: "ja", KIRO_DIR: ".kiro" };
+ * const result = renderJsonTemplate(template, context);
+ * // Result: { lang: "ja", dir: ".kiro" }
+ * ```
+ */
+export const renderJsonTemplate = <T = any>(
+  template: string,
+  context: TemplateContext
+): T => {
+  const rendered = renderTemplate(template, context);
+  return JSON.parse(rendered);
+};
+
+/**
+ * Batch render multiple templates
+ * 
+ * @param templates - Map of template names to template strings
+ * @param context - Template context with replacement values
+ * @returns Map of template names to rendered strings
+ */
+export const renderTemplates = (
+  templates: Record<string, string>,
+  context: TemplateContext
+): Record<string, string> => {
+  const rendered: Record<string, string> = {};
+  
+  for (const [name, template] of Object.entries(templates)) {
+    rendered[name] = renderTemplate(template, context);
+  }
+  
+  return rendered;
+};
+
