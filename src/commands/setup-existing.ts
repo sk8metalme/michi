@@ -34,10 +34,10 @@ const __dirname = dirname(__filename);
 interface SetupOptions {
   cursor?: boolean;
   claude?: boolean;
-  'claude-agent'?: boolean;
+  claudeAgent?: boolean; // camelCase
   lang?: string;
-  'project-name'?: string;
-  'jira-key'?: string;
+  projectName?: string; // camelCase
+  jiraKey?: string; // camelCase
 }
 
 interface SetupConfig {
@@ -120,7 +120,7 @@ async function prompt(question: string): Promise<string> {
 async function determineEnvironment(options: SetupOptions): Promise<Environment> {
   if (options.cursor) return 'cursor';
   if (options.claude) return 'claude';
-  if (options['claude-agent']) return 'claude-agent';
+  if (options.claudeAgent) return 'claude-agent';
 
   console.log('');
   console.log('環境を選択してください:');
@@ -158,7 +158,7 @@ async function buildConfig(options: SetupOptions): Promise<SetupConfig> {
   }
 
   // プロジェクト名（対話的プロンプト）
-  let projectName = options['project-name'];
+  let projectName = options.projectName;
   if (!projectName) {
     console.log('');
     projectName = await prompt('プロジェクト名（例: プロジェクトA）: ');
@@ -172,7 +172,7 @@ async function buildConfig(options: SetupOptions): Promise<SetupConfig> {
   }
 
   // JIRAキー（対話的プロンプト）
-  let jiraKey = options['jira-key'];
+  let jiraKey = options.jiraKey;
   if (!jiraKey) {
     jiraKey = await prompt('JIRAプロジェクトキー（例: PRJA）: ');
   }
