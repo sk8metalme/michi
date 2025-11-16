@@ -5,6 +5,39 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.9] - 2025-11-17
+
+### Added
+- **統合テストスイート**: `setup-existing`コマンドの統合テスト42個を追加（#39）
+  - 環境別テスト（Cursor, Claude, Claude Agent）
+  - バリデーションテスト（プロジェクト名、JIRAキー、言語サポート）
+  - テストヘルパー作成（`test-project.ts`, `fs-assertions.ts`）
+  - テストドキュメント（`docs/testing/integration-tests.md`）
+- **CI/CDワークフロー**: 統合テスト用のGitHub Actionsワークフロー（`.github/workflows/test-setup.yml`）を追加
+  - Node.js 20.x, 22.xでのマトリックステスト
+  - カバレッジレポート（Codecov統合）
+
+### Changed
+- **Node.jsサポート範囲を変更**: Node.js 18.xのサポートを削除
+  - 理由: Vitest v4が使用する`node:inspector/promises`がNode.js 18.xで利用不可
+  - サポート対象: Node.js 20.x, 22.x
+
+### Fixed
+- **テンプレートパス解決のバグ修正**: `scripts/setup-existing-project.ts`がテンプレートを正しく見つけられない問題を修正
+  - `join(michiPath, templateSource)`から`join(michiPath, 'templates', templateSource)`に変更
+  - 影響: スクリプト直接実行時にテンプレートファイルがコピーされなかった
+- **環境定数のテスト修正**: `scripts/constants/__tests__/environments.test.ts`の期待値を更新
+  - `templateSource`の値を`'templates/cursor'`から`'cursor'`に修正
+- **誤解を招くテスト記述を修正**: テスト名とコメントを実装と一致させるよう改善
+  - JIRA key conversionテスト: 「拒否」から「変換」に記述を変更
+  - Cursor flagテスト: 「デフォルト」から「明示的フラグ」に記述を変更
+- **親ディレクトリ取得の実装を修正**: `test-project.ts`の`writeFile`メソッドを改善
+  - 不正確な`join(filePath, '..')`から正しい`dirname(filePath)`に変更
+
+### Tests
+- **テスト成功率**: 82.4% (42/51テスト成功、9テストスキップ)
+- **スキップされたテスト**: Issue #55（バリデーションエラーハンドリング）とIssue #56（Claude-agentテンプレート構造）で対応予定
+
 ## [0.0.8] - 2025-11-14
 
 ### Fixed
