@@ -70,6 +70,7 @@ export const renderTemplate = (
  * @param template - JSON template string with {{PLACEHOLDER}} patterns
  * @param context - Template context with replacement values
  * @returns Parsed JSON object
+ * @throws {Error} If the rendered template is not valid JSON
  * 
  * @example
  * ```typescript
@@ -84,7 +85,30 @@ export const renderJsonTemplate = <T = any>(
   context: TemplateContext
 ): T => {
   const rendered = renderTemplate(template, context);
-  return JSON.parse(rendered);
+  
+  try {
+    return JSON.parse(rendered);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    const errorStack = error instanceof Error ? error.stack : undefined;
+    
+    // Create descriptive error with context for debugging
+    const debugInfo = [
+      'Failed to parse rendered JSON template',
+      `Original error: ${errorMessage}`,
+      `Rendered output (first 500 chars): ${rendered.substring(0, 500)}${rendered.length > 500 ? '...' : ''}`,
+      `Template context: LANG_CODE=${context.LANG_CODE}, KIRO_DIR=${context.KIRO_DIR}, AGENT_DIR=${context.AGENT_DIR}`
+    ].join('\n');
+    
+    const detailedError = new Error(debugInfo);
+    
+    // Preserve original error stack for diagnostics
+    if (errorStack) {
+      detailedError.stack = `${detailedError.stack}\n\nOriginal error stack:\n${errorStack}`;
+    }
+    
+    throw detailedError;
+  }
 };
 
 /**

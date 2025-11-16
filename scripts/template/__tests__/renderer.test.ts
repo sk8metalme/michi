@@ -139,6 +139,43 @@ Line 3: .cursor`);
       
       expect(() => renderJsonTemplate(template, context)).toThrow();
     });
+
+    it('should throw with descriptive error for invalid JSON', () => {
+      const template = '{"incomplete": {{LANG_CODE}}';
+      const context = createTemplateContext('ja', '.kiro', '.cursor');
+      
+      try {
+        renderJsonTemplate(template, context);
+        expect.fail('Should have thrown an error');
+      } catch (error) {
+        expect(error).toBeInstanceOf(Error);
+        const errorMessage = (error as Error).message;
+        
+        // Should contain descriptive information
+        expect(errorMessage).toContain('Failed to parse rendered JSON template');
+        expect(errorMessage).toContain('Original error:');
+        expect(errorMessage).toContain('Rendered output');
+        expect(errorMessage).toContain('Template context');
+        expect(errorMessage).toContain('LANG_CODE=ja');
+        expect(errorMessage).toContain('KIRO_DIR=.kiro');
+      }
+    });
+
+    it('should preserve original error stack', () => {
+      const template = '{invalid json}';
+      const context = createTemplateContext('en', '.kiro', '.cursor');
+      
+      try {
+        renderJsonTemplate(template, context);
+        expect.fail('Should have thrown an error');
+      } catch (error) {
+        expect(error).toBeInstanceOf(Error);
+        const errorStack = (error as Error).stack;
+        
+        // Should contain original error stack
+        expect(errorStack).toContain('Original error stack:');
+      }
+    });
   });
 
   describe('renderTemplates', () => {
