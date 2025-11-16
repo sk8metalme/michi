@@ -88,11 +88,31 @@ Cursor/VS CodeでAIコマンドを実行：
 /kiro:spec-tasks user-authentication
 ```
 
-これにより、以下が自動実行されます：
+これにより、`tasks.md`が生成されます。
 
-- `tasks.md`の生成
+**重要**: `/kiro:spec-tasks` はローカルで `tasks.md` を生成するだけです。Confluence/JIRAに同期するには、以下のCLIコマンドを実行する必要があります：
+
+```bash
+npx @sk8metal/michi-cli phase:run user-authentication tasks
+```
+
+このコマンドにより、以下が自動実行されます：
+
 - Confluenceページの自動作成（要件・設計）
-- JIRA Epicとストーリーの自動作成
+- JIRA Epicとストーリーの自動作成（全6フェーズ）
+- バリデーション実行
+
+**注意**: 要件定義・設計フェーズでも同様に、`/kiro:spec-requirements` や `/kiro:spec-design` の後に `phase:run` を実行する必要があります：
+
+```bash
+# 要件定義フェーズ
+/kiro:spec-requirements user-authentication
+npx @sk8metal/michi-cli phase:run user-authentication requirements
+
+# 設計フェーズ
+/kiro:spec-design user-authentication
+npx @sk8metal/michi-cli phase:run user-authentication design
+```
 
 ## 7. 実装を開始
 

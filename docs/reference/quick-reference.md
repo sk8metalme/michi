@@ -4,17 +4,25 @@
 
 ## 新規プロジェクト作成
 
-### パターンA: 既存リポジトリにMichiワークフローを追加（最も簡単 ⭐）
+### パターンA: 既存リポジトリにMichi共通ルール・コマンドを追加（最も簡単 ⭐）
 
 ```bash
 # 既存プロジェクトに移動
 cd /path/to/existing-repo
 
-# 対話式セットアップスクリプト実行
+# Michiの共通ルール・コマンド・テンプレートをコピー
 bash /path/to/michi/scripts/setup-existing.sh
 ```
 
-プロジェクト名、JIRAキーを入力するだけで完了！
+このスクリプトが自動的に：
+- 共通ルール（`.cursor/rules/`）をコピー
+- カスタムコマンド（`.cursor/commands/kiro/`）をコピー
+- Steeringテンプレート（`.kiro/steering/`）をコピー
+- Specテンプレート（`.kiro/settings/templates/`）をコピー
+
+**次のステップ**:
+1. cc-sddを導入: `npx cc-sdd@latest --lang ja --cursor`
+2. 設定を対話的に作成: `npm run setup:interactive`
 
 ### パターンB: 新規リポジトリを作成してセットアップ
 
@@ -64,11 +72,12 @@ cat > .kiro/project.json << 'EOF'
 }
 EOF
 
-# 4. Michiから共通ファイルコピー（自動スクリプト推奨）
+# 4. Michiから共通ルール・コマンド・テンプレートをコピー（自動スクリプト推奨）
+bash /path/to/michi/scripts/setup-existing.sh
+
+# または直接実行
 npx tsx /path/to/michi/scripts/setup-existing-project.ts \
-  --michi-path /path/to/michi \
-  --project-name "プロジェクト名" \
-  --jira-key "PRJX"
+  --michi-path /path/to/michi
 
 # 5. npm install
 # 6. 初期コミット
@@ -87,21 +96,21 @@ npx tsx /path/to/michi/scripts/setup-existing-project.ts \
 /kiro:spec-init <機能説明>
 /kiro:spec-requirements <feature>
 jj commit -m "docs: 要件定義" && jj git push
-npx @michi/cli phase:run <feature> requirements
+npx @sk8metal/michi-cli phase:run <feature> requirements
 ```
 
 **設計**:
 ```bash
 /kiro:spec-design <feature>
 jj commit -m "docs: 設計" && jj git push
-npx @michi/cli phase:run <feature> design
+npx @sk8metal/michi-cli phase:run <feature> design
 ```
 
 **タスク分割**:
 ```bash
 /kiro:spec-tasks <feature>
 jj commit -m "docs: タスク分割" && jj git push
-npx @michi/cli phase:run <feature> tasks
+npx @sk8metal/michi-cli phase:run <feature> tasks
 ```
 
 **実装**:
@@ -110,7 +119,7 @@ npx @michi/cli phase:run <feature> tasks
 jj commit -m "feat: 実装 [<jira-key>-XXX]"
 jj bookmark create <project-id>/feature/<feature> -r '@-'
 jj git push --bookmark <project-id>/feature/<feature> --allow-new
-gh pr create --head <project-id>/feature/<feature> --base init
+gh pr create --head <project-id>/feature/<feature> --base main
 ```
 
 ## コマンド一覧
@@ -132,7 +141,7 @@ gh pr create --head <project-id>/feature/<feature> --base init
 
 ## Michi CLIコマンド一覧
 
-**使用方法**: `npx @michi/cli <command>` または `michi <command>`（グローバルインストール後）
+**使用方法**: `npx @sk8metal/michi-cli <command>` または `michi <command>`（グローバルインストール後）
 
 | コマンド | 説明 |
 |---------|------|
@@ -150,8 +159,8 @@ gh pr create --head <project-id>/feature/<feature> --base init
 | `michi --version` | バージョン表示 |
 
 **インストール方法**:
-- **npx実行（推奨）**: `npx @michi/cli <command>` - 常に最新版を使用
-- **グローバルインストール**: `npm install -g @michi/cli` 後、`michi <command>`
+- **npx実行（推奨）**: `npx @sk8metal/michi-cli <command>` - 常に最新版を使用
+- **グローバルインストール**: `npm install -g @sk8metal/michi-cli` 後、`michi <command>`
 - **ローカル開発**: `npm run michi <command>` または `npx tsx src/cli.ts <command>`
 
 ## npmスクリプト一覧（michiリポジトリ内）
@@ -185,14 +194,14 @@ cat .kiro/project.json
 ```bash
 cd /path/to/michi
 # 全プロジェクトの一覧を表示
-npx @michi/cli project:list
+npx @sk8metal/michi-cli project:list
 ```
 
 ### リソースダッシュボード
 
 ```bash
 # Confluenceにプロジェクト横断ダッシュボードを作成
-npx @michi/cli project:dashboard
+npx @sk8metal/michi-cli project:dashboard
 ```
 
 ### 見積もり集計

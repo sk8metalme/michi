@@ -78,7 +78,7 @@ cat .kiro/project.json
 # テスト機能で確認（オプション）
 /kiro:spec-init テスト機能
 /kiro:spec-requirements test-feature
-npx @michi/cli phase:run test-feature requirements
+npx @sk8metal/michi-cli phase:run test-feature requirements
 ```
 
 ## プロジェクト切り替え
