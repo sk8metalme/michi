@@ -2,6 +2,10 @@
 #
 # 既存プロジェクトにMichiワークフローを追加（簡易版）
 #
+# ⚠️  非推奨: このスクリプトは非推奨です
+#    代わりに以下を使用してください:
+#    npx @sk8metal/michi-cli setup-existing --cursor --lang ja
+#
 # 使い方:
 #   cd /path/to/existing-repo
 #   bash /path/to/michi/scripts/setup-existing.sh [options]
@@ -15,6 +19,25 @@
 #
 
 set -e
+
+# 非推奨警告を表示
+echo ""
+echo "⚠️  Warning: This script is deprecated."
+echo "   Please use: npx @sk8metal/michi-cli setup-existing --cursor --lang ja"
+echo ""
+echo "   Benefits of the new command:"
+echo "   - No git clone required"
+echo "   - Always uses the latest version"
+echo "   - Cross-platform support"
+echo "   - Templates included in NPM package"
+echo ""
+read -p "Continue with this deprecated script? [y/N]: " -n 1 -r
+echo
+if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    echo "Cancelled. Please use: npx @sk8metal/michi-cli setup-existing"
+    exit 0
+fi
+echo ""
 
 # 色付きメッセージ
 GREEN='\033[0;32m'

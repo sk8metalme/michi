@@ -71,6 +71,104 @@ npx cc-sdd@next --lang ja --windsurf
 詳細: [cc-sdd公式ドキュメント](https://github.com/gotalab/cc-sdd/blob/main/tools/cc-sdd/README_ja.md)
 
 
+## Step 2.5: 推奨ワークフロー（cc-sdd + Michi）
+
+既存リポジトリにMichiを導入する標準的な手順は以下の通りです：
+
+### 3ステップワークフロー
+
+```bash
+# Step 1: cc-sddで標準ファイル生成
+npx cc-sdd@latest --cursor --lang ja
+
+# Step 2: Michi固有ファイルを追加
+npx @sk8metal/michi-cli setup-existing --cursor --lang ja
+# または npm run michi:setup:cursor
+
+# Step 3: 環境設定
+npm run setup:interactive
+```
+
+### 各ステップの詳細
+
+#### Step 1: cc-sdd導入
+
+cc-sddは、AI駆動開発ワークフローのコアフレームワークです。以下を自動生成します:
+
+- `.kiro/settings/` - テンプレート設定
+- `.cursor/commands/kiro/` - 11のスラッシュコマンド
+- `AGENTS.md` - プロジェクト設定
+
+**実行例（IDE別）**:
+
+```bash
+# Cursor IDE
+npx cc-sdd@latest --cursor --lang ja
+
+# Claude Code
+npx cc-sdd@latest --claude --lang ja
+
+# Gemini CLI
+npx cc-sdd@latest --gemini --lang ja
+
+# Codex CLI
+npx cc-sdd@next --codex --lang ja
+
+# Windsurf IDE
+npx cc-sdd@next --windsurf --lang ja
+```
+
+#### Step 2: Michi固有ファイル追加
+
+Michiの専用機能（Confluence/JIRA連携、マルチプロジェクト管理）を追加します:
+
+**実行例**:
+
+```bash
+# Cursor IDE
+npx @sk8metal/michi-cli setup-existing --cursor --lang ja
+# または npm run michi:setup:cursor
+
+# Claude Code
+npx @sk8metal/michi-cli setup-existing --claude --lang ja
+# または npm run michi:setup:claude
+
+# Claude Code Subagents
+npx @sk8metal/michi-cli setup-existing --claude-agent --lang ja
+# または npm run michi:setup:claude-agent
+```
+
+**追加されるもの**:
+
+- 共通ルール（`.cursor/rules/`または`.claude/rules/`）
+- Michi専用コマンド（`.cursor/commands/michi/`または`.claude/commands/michi/`）
+- Steeringテンプレート（`.kiro/steering/`）
+- Specテンプレート（`.kiro/settings/templates/`）
+- プロジェクトメタデータ（`.kiro/project.json`）
+- 環境変数テンプレート（`.env`）
+
+#### Step 3: 環境設定
+
+対話的設定ツールで認証情報とプロジェクトメタデータを設定します：
+
+```bash
+npm run setup:interactive
+```
+
+このツールが以下を設定します：
+
+- プロジェクト情報（`project.json`）
+- 認証情報（`.env`）
+
+詳細は [Step 3: 環境変数の設定](#step-3-環境変数の設定) を参照してください。
+
+### なぜこの順序なのか？
+
+1. **cc-sdd → Michi**: cc-sddが基盤を作り、Michiが拡張機能を追加
+2. **ファイル追加 → 環境設定**: 設定ファイルが先に存在する必要がある
+3. **標準化**: すべてのプロジェクトで一貫した手順
+
+
 ## Step 3: 環境変数の設定
 
 ### 3-1. .env ファイルの作成
@@ -378,11 +476,154 @@ michi help
 
 ## トラブルシューティング
 
+### cc-sddのインストールに失敗する
+
+**症状**: `npx cc-sdd@latest` が失敗する
+
+**原因**:
+- npmキャッシュの問題
+- ネットワーク接続の問題
+- Node.jsのバージョンが古い
+
+**解決方法**:
+
+```bash
+# キャッシュをクリア
+npm cache clean --force
+
+# 再度実行
+npx cc-sdd@latest --cursor --lang ja
+
+# それでも失敗する場合は、Node.jsバージョンを確認
+node --version
+# 20.0.0以上が必要
+```
+
+### setup-existing の実行エラー
+
+**症状**: `npx @sk8metal/michi-cli setup-existing` が失敗する
+
+**原因**:
+- ネットワーク接続の問題
+- 必要な依存関係がインストールされていない
+- 権限の問題
+
+**解決方法**:
+
+```bash
+# NPMキャッシュをクリア
+npm cache clean --force
+
+# 再度実行
+npx @sk8metal/michi-cli setup-existing --cursor --lang ja
+
+# または、開発リポジトリから実行する場合
+cd /path/to/michi
+npm run michi:setup:cursor
+```
+
+### 環境変数設定のミス
+
+**症状**: Confluence/JIRA連携が動作しない
+
+**原因**:
+- `.env`ファイルの認証情報が間違っている
+- 環境変数が正しく読み込まれていない
+
+**解決方法**:
+
+```bash
+# .envファイルの内容を確認
+cat .env
+
+# 認証情報が正しいか確認
+# - ATLASSIAN_URL: https://your-domain.atlassian.net 形式
+# - ATLASSIAN_EMAIL: メールアドレス形式
+# - ATLASSIAN_API_TOKEN: 有効なトークン
+# - GITHUB_TOKEN: ghp_ で始まるトークン
+
+# トークンの有効性を確認
+curl -u your-email@company.com:your-api-token \
+  https://your-domain.atlassian.net/rest/api/3/myself
+```
+
 ### MCP サーバーが動作しない
+
+**症状**: Cursor IDEでAtlassian MCPが接続できない
+
+**原因**:
+- `~/.cursor/mcp.json`の設定が間違っている
+- Atlassian API Tokenが無効
+- Cursorが設定を読み込んでいない
+
+**解決方法**:
 
 1. Cursor を再起動
 2. `~/.cursor/mcp.json` の認証情報を確認
+
+```bash
+# mcp.jsonの内容を確認
+cat ~/.cursor/mcp.json
+
+# 認証情報が.envと一致しているか確認
+```
+
 3. Atlassian API Token が有効か確認
+
+```bash
+# トークンの有効性をテスト
+curl -u your-email@company.com:your-token \
+  https://your-domain.atlassian.net/rest/api/3/myself
+```
+
+4. Cursor のログを確認
+
+- Cursor > View > Toggle Developer Tools
+- Console タブでエラーを確認
+
+### JIRA Issue Type ID の取得方法
+
+**症状**: `JIRA_ISSUE_TYPE_STORY`や`JIRA_ISSUE_TYPE_SUBTASK`の値がわからない
+
+**解決方法**:
+
+**方法1: JIRA管理画面から確認（管理者権限が必要）**
+
+1. JIRAに管理者権限でログイン
+2. Settings（設定）> Issues（課題）> Issue types（課題タイプ）
+3. 「Story」と「Subtask」のIDを確認
+
+**方法2: REST APIで確認（推奨）**
+
+```bash
+# すべてのIssue Typeを取得
+curl -u your-email@company.com:your-api-token \
+  https://your-domain.atlassian.net/rest/api/3/issuetype | jq
+
+# 出力例:
+# [
+#   {
+#     "id": "10036",
+#     "name": "Story",
+#     ...
+#   },
+#   {
+#     "id": "10037",
+#     "name": "Subtask",
+#     ...
+#   }
+# ]
+```
+
+**方法3: jqがない場合**
+
+```bash
+# jqなしで確認
+curl -u your-email@company.com:your-api-token \
+  https://your-domain.atlassian.net/rest/api/3/issuetype
+
+# 出力から "Story" と "Subtask" の "id" フィールドを探す
+```
 
 ### GitHub認証エラー
 

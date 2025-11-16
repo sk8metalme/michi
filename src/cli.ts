@@ -17,6 +17,7 @@ import { createResourceDashboard } from '../scripts/resource-dashboard.js';
 import { WorkflowOrchestrator } from '../scripts/workflow-orchestrator.js';
 import { configInteractive } from '../scripts/config-interactive.js';
 import { validateAndReport } from '../scripts/utils/config-validator.js';
+import { setupExisting } from './commands/setup-existing.js';
 import { config } from 'dotenv';
 import { readFileSync, existsSync } from 'fs';
 import { dirname, join } from 'path';
@@ -234,6 +235,25 @@ export function createCLI(): Command {
         process.exit(valid ? 0 : 1);
       } catch (error) {
         console.error('❌ Validation failed:', error instanceof Error ? error.message : error);
+        process.exit(1);
+      }
+    });
+
+  // setup-existing コマンド
+  program
+    .command('setup-existing')
+    .description('Add Michi workflow to existing repository')
+    .option('--cursor', 'Use Cursor IDE environment')
+    .option('--claude', 'Use Claude Code environment')
+    .option('--claude-agent', 'Use Claude Code Subagents environment')
+    .option('--lang <code>', 'Language code (default: ja)', 'ja')
+    .option('--project-name <name>', 'Project name')
+    .option('--jira-key <key>', 'JIRA project key')
+    .action(async (options) => {
+      try {
+        await setupExisting(options);
+      } catch (error) {
+        console.error('❌ Setup failed:', error instanceof Error ? error.message : error);
         process.exit(1);
       }
     });
