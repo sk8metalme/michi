@@ -3,7 +3,7 @@
  */
 
 import { mkdirSync, rmSync, writeFileSync, existsSync } from 'fs';
-import { join } from 'path';
+import { join, dirname } from 'path';
 import { tmpdir } from 'os';
 import { execSync } from 'child_process';
 
@@ -56,7 +56,7 @@ export class TestProject {
    */
   writeFile(relativePath: string, content: string): void {
     const filePath = join(this.path, relativePath);
-    const dir = join(filePath, '..');
+    const dir = dirname(filePath);
     if (!existsSync(dir)) {
       mkdirSync(dir, { recursive: true });
     }

@@ -32,10 +32,8 @@ describe('Setup Argument Validation', () => {
   });
 
   describe('Environment Selection', () => {
-    it('should use cursor as default environment when no flag provided', async () => {
-      // When no environment flag is provided, interactive mode should default to cursor
-      // This test would need to mock the interactive prompt
-      // For now, we test explicit cursor flag
+    it('should create cursor directory when cursor flag is provided', async () => {
+      // This test verifies that the cursor flag explicitly creates the .cursor directory
       
       await setupExisting({
         cursor: true,
@@ -367,9 +365,8 @@ describe('Setup Argument Validation', () => {
       }).rejects.toThrow(/JIRAキーの形式が不正です/);
     });
 
-    it('should reject JIRA key with lowercase (before conversion)', async () => {
-      // This test should pass because the validation converts to uppercase
-      // If it didn't convert, this would fail
+    it('should convert lowercase JIRA key to uppercase', async () => {
+      // This test ensures that lowercase JIRA keys are automatically converted to uppercase
       await setupExisting({
         cursor: true,
         projectName: 'Test Project',
