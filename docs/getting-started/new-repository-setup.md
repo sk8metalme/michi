@@ -51,28 +51,95 @@ git push -u origin main
 
 ### 方法2: 既存プロジェクトにMichi共通ルール・コマンドを追加（推奨 - 既存リポジトリ）
 
-既存のリポジトリにMichi共通ルール・コマンド・テンプレートをコピー：
+既存のリポジトリにMichiを導入する推奨ワークフロー：
+
+#### cc-sdd準拠の3ステップ
+
+```bash
+# Step 1: cc-sddで標準ファイル生成
+npx cc-sdd@latest --cursor --lang ja
+
+# Step 2: Michi固有ファイルを追加
+npx @sk8metal/michi-cli setup-existing --cursor --lang ja
+# または npm run michi:setup:cursor
+
+# Step 3: 環境設定
+npm run setup:interactive
+```
+
+#### IDE別実行例
+
+**Cursor IDE（推奨）**:
 
 ```bash
 # 既存プロジェクトのディレクトリに移動
 cd /path/to/existing-repo
 
-# Michiの共通ルール・コマンド・テンプレートをコピー
-bash /path/to/michi/scripts/setup-existing.sh
+# Step 1: cc-sdd導入
+npx cc-sdd@latest --cursor --lang ja
+
+# Step 2: Michi固有ファイル追加
+npx @sk8metal/michi-cli setup-existing --cursor --lang ja
+# または npm run michi:setup:cursor
+
+# Step 3: 環境設定
+npm run setup:interactive
 ```
 
-このスクリプトが自動的に：
-1. ✅ リポジトリルートを検出
-2. ✅ `projects/{project-id}/`ディレクトリ作成
-3. ✅ 共通ルール（`.cursor/rules/`）をコピー
-4. ✅ カスタムコマンド（`.cursor/commands/kiro/`）をコピー
-5. ✅ Steeringテンプレート（`.kiro/steering/`）をコピー
-6. ✅ Specテンプレート（`.kiro/settings/templates/`）をコピー
+**Claude Code**:
 
-**次のステップ**:
-1. cc-sddを導入: `npx cc-sdd@latest --lang ja --cursor`
-2. 設定を対話的に作成: `npm run setup:interactive`
-3. Cursorで開く: `cursor .`
+```bash
+# 既存プロジェクトのディレクトリに移動
+cd /path/to/existing-repo
+
+# Step 1: cc-sdd導入
+npx cc-sdd@latest --claude --lang ja
+
+# Step 2: Michi固有ファイル追加
+npx @sk8metal/michi-cli setup-existing --claude --lang ja
+# または npm run michi:setup:claude
+
+# Step 3: 環境設定
+npm run setup:interactive
+```
+
+**その他のIDE（Gemini, Codex, Windsurf）**:
+
+```bash
+# 既存プロジェクトのディレクトリに移動
+cd /path/to/existing-repo
+
+# Step 1: cc-sdd導入（IDE別）
+npx cc-sdd@latest --gemini --lang ja     # Gemini CLI
+npx cc-sdd@next --codex --lang ja        # Codex CLI
+npx cc-sdd@next --windsurf --lang ja     # Windsurf IDE
+
+# Step 2: Michi固有ファイル追加（Cursor互換モード）
+npx @sk8metal/michi-cli setup-existing --cursor --lang ja
+
+# Step 3: 環境設定
+npm run setup:interactive
+```
+
+#### 自動的に追加されるもの
+
+このワークフローにより以下が自動的に追加されます：
+
+1. **cc-sdd導入（Step 1）**:
+   - `.kiro/settings/` - テンプレート設定
+   - `.cursor/commands/kiro/` または `.claude/commands/kiro/` - 11のスラッシュコマンド
+   - `AGENTS.md` または `CLAUDE.md` - プロジェクト設定
+
+2. **Michi固有ファイル追加（Step 2）**:
+   - 共通ルール（`.cursor/rules/` または `.claude/rules/`）
+   - Michi専用コマンド（`.cursor/commands/michi/` または `.claude/commands/michi/`）
+   - Steeringテンプレート（`.kiro/steering/`）
+   - Specテンプレート（`.kiro/settings/templates/`）
+   - プロジェクトメタデータ（`.kiro/project.json`）
+   - 環境変数テンプレート（`.env`）
+
+3. **環境設定（Step 3）**:
+   - 対話的に `project.json` と `.env` を設定
 
 **重要**: すべてのプロジェクトは`projects/{project-id}/`配下に配置されます。
 

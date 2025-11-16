@@ -22,15 +22,46 @@ michi --help
 
 ## 2. cc-sddをインストール
 
-```bash
-# Cursor IDE を使用する場合
-npx cc-sdd@latest --lang ja --cursor
+cc-sddは、Michiの仕様駆動開発ワークフローのコアフレームワークです。
 
-# Claude Code を使用する場合
-npx cc-sdd@latest --lang ja --claude
+### 推奨ワークフロー（cc-sdd準拠）
+
+既存リポジトリにMichiを導入する標準的な3ステップ：
+
+```bash
+# Step 1: cc-sddで標準ファイル生成
+npx cc-sdd@latest --cursor --lang ja
+
+# Step 2: Michi固有ファイルを追加
+npx @sk8metal/michi-cli setup-existing --cursor --lang ja
+# または npm run michi:setup:cursor
+
+# Step 3: 環境設定（後述）
+npm run setup:interactive
 ```
 
-cc-sddは、Michiの仕様駆動開発ワークフローのコアフレームワークです。
+### IDE別インストール例
+
+```bash
+# Cursor IDE（推奨）
+npx cc-sdd@latest --lang ja --cursor
+
+# Claude Code
+npx cc-sdd@latest --lang ja --claude
+
+# Gemini CLI
+npx cc-sdd@latest --lang ja --gemini
+
+# Codex CLI
+npx cc-sdd@next --lang ja --codex
+
+# Windsurf IDE
+npx cc-sdd@next --lang ja --windsurf
+```
+
+**重要**: Step 2で `npx @sk8metal/michi-cli setup-existing` を実行すると、テンプレートがNPMパッケージから自動的にコピーされます。git clone不要です。
+
+詳細な手順は [セットアップガイド](./setup.md#step-25-推奨ワークフローcc-sdd--michi) を参照してください。
 
 ## 3. 環境変数を設定
 

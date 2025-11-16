@@ -316,28 +316,123 @@ APPROVAL_GATES_RELEASE=SM,部長
 
 ## 他のリポジトリでプロジェクトを進める
 
-### 既存リポジトリにMichi共通ルール・コマンドを追加（最も簡単）
+### 推奨ワークフロー（cc-sdd準拠）
+
+既存リポジトリにMichiを導入する標準的な手順です：
+
+```bash
+# Step 1: cc-sddで標準ファイル生成
+npx cc-sdd@latest --cursor --lang ja
+
+# Step 2: Michi固有ファイルを追加
+npx @sk8metal/michi-cli setup-existing --cursor --lang ja
+
+# Step 3: 環境設定
+npm run setup:interactive
+```
+
+**ステップの説明**:
+
+1. **cc-sdd導入**: AI駆動開発ワークフローのコアフレームワークをインストール
+2. **Michi固有ファイル追加**: Confluence/JIRA連携、マルチプロジェクト管理などのMichi専用機能を追加
+3. **環境設定**: 認証情報とプロジェクトメタデータを対話的に設定
+
+### IDE別セットアップ例
+
+#### Cursor IDE（推奨）
+
+```bash
+# Step 1: cc-sdd導入
+npx cc-sdd@latest --cursor --lang ja
+
+# Step 2: Michi固有ファイル追加
+npx @sk8metal/michi-cli setup-existing --cursor --lang ja
+# または npm run michi:setup:cursor
+
+# Step 3: 環境設定
+npm run setup:interactive
+```
+
+#### Claude Code
+
+```bash
+# Step 1: cc-sdd導入
+npx cc-sdd@latest --claude --lang ja
+
+# Step 2: Michi固有ファイル追加
+npx @sk8metal/michi-cli setup-existing --claude --lang ja
+# または npm run michi:setup:claude
+
+# Step 3: 環境設定
+npm run setup:interactive
+```
+
+#### Gemini CLI
+
+```bash
+# Step 1: cc-sdd導入
+npx cc-sdd@latest --gemini --lang ja
+
+# Step 2: Michi固有ファイル追加（Cursor互換モード）
+npx @sk8metal/michi-cli setup-existing --cursor --lang ja
+
+# Step 3: 環境設定
+npm run setup:interactive
+```
+
+#### Codex CLI
+
+```bash
+# Step 1: cc-sdd導入
+npx cc-sdd@next --codex --lang ja
+
+# Step 2: Michi固有ファイル追加（Cursor互換モード）
+npx @sk8metal/michi-cli setup-existing --cursor --lang ja
+
+# Step 3: 環境設定
+npm run setup:interactive
+```
+
+#### Windsurf IDE
+
+```bash
+# Step 1: cc-sdd導入
+npx cc-sdd@next --windsurf --lang ja
+
+# Step 2: Michi固有ファイル追加（Cursor互換モード）
+npx @sk8metal/michi-cli setup-existing --cursor --lang ja
+
+# Step 3: 環境設定
+npm run setup:interactive
+```
+
+### 既存リポジトリ vs 新規リポジトリ
+
+#### 既存リポジトリにMichiを追加（推奨）
+
+既に稼働しているプロジェクトにMichiを追加する場合：
 
 ```bash
 # 既存プロジェクトのディレクトリに移動
 cd /path/to/existing-repo
 
-# Michiの共通ルール・コマンド・テンプレートをコピー
-bash /path/to/michi/scripts/setup-existing.sh
+# 推奨ワークフローを実行
+npx cc-sdd@latest --cursor --lang ja
+npx @sk8metal/michi-cli setup-existing --cursor --lang ja
+npm run setup:interactive
 ```
 
-このスクリプトが自動的に：
-- 共通ルール（`.cursor/rules/`）をコピー
-- Michi専用コマンド（`.cursor/commands/michi/`）をコピー
-- Steeringテンプレート（`.kiro/steering/`）をコピー
-- Specテンプレート（`.kiro/settings/templates/`）をコピー
+**自動的に追加されるもの**:
+- 共通ルール（`.cursor/rules/`または`.claude/rules/`）
+- Michi専用コマンド（`.cursor/commands/michi/`または`.claude/commands/michi/`）
+- Steeringテンプレート（`.kiro/steering/`）
+- Specテンプレート（`.kiro/settings/templates/`）
+- プロジェクトメタデータ（`.kiro/project.json`）
+- 環境変数テンプレート（`.env`）
 
-**次のステップ**:
-1. cc-sddを導入: `npx cc-sdd@latest --lang ja --cursor`
-2. 設定を対話的に作成: `npm run setup:interactive`
+#### 新規リポジトリを作成してMichiを導入
 
-
-### 新規リポジトリを作成してセットアップ
+新しいプロジェクトをゼロから始める場合：
 
 ```bash
 # Michiディレクトリから実行
@@ -349,6 +444,11 @@ npm run create-project -- \
 ```
 
 詳細: [新規リポジトリセットアップガイド](./docs/getting-started/new-repository-setup.md)
+
+**どちらを選ぶべきか？**
+
+- ✅ **既存リポジトリに追加**: 既に稼働中のプロジェクトがある場合
+- ✅ **新規リポジトリ作成**: 新しいプロジェクトを始める場合
 
 ## ドキュメント
 
