@@ -20,21 +20,21 @@ describe('environments', () => {
       const config = ENV_CONFIG.claude;
       expect(config.rulesDir).toBe('.claude/rules');
       expect(config.commandsDir).toBe('.claude/commands/kiro');
-      expect(config.templateSource).toBe('templates/claude');
+      expect(config.templateSource).toBe('claude');
     });
 
     it('should have correct structure for claude-agent', () => {
       const config = ENV_CONFIG['claude-agent'];
       expect(config.rulesDir).toBe('.claude/rules');
       expect(config.commandsDir).toBe('.claude/commands/kiro');
-      expect(config.templateSource).toBe('templates/claude-agent');
+      expect(config.templateSource).toBe('claude-agent');
     });
 
     it('should have correct structure for cursor', () => {
       const config = ENV_CONFIG.cursor;
       expect(config.rulesDir).toBe('.cursor/rules');
       expect(config.commandsDir).toBe('.cursor/commands/kiro');
-      expect(config.templateSource).toBe('templates/cursor');
+      expect(config.templateSource).toBe('cursor');
     });
 
     it('should have all required properties for each environment', () => {
