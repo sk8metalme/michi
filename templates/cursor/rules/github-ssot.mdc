@@ -1,151 +1,151 @@
 ---
-title: GitHub Single Source of Truth ルール
-description: GitHubを真実の源とし、Confluenceと同期する運用ルール
+title: GitHub Single Source of Truth Rules
+description: {{DEV_GUIDELINES}} for using GitHub as SSoT and syncing with Confluence
 ---
 
-# GitHub Single Source of Truth (SSoT) ルール
+# GitHub Single Source of Truth (SSoT) Rules
 
-## 基本原則
+## Basic Principles
 
 ### Single Source of Truth
-- **すべての仕様書は GitHub で管理**（.kiro/specs/）
-- Confluence は**参照・承認専用**（編集は GitHub のみ）
-- 二重管理を避ける
+- **All specifications managed in GitHub** (.kiro/specs/)
+- Confluence is **for reference and approval only** (edit only in GitHub)
+- Avoid dual management
 
-### データフロー
+### Data Flow
 ```
-GitHub (.kiro/specs/)  ← 真実の源（編集可能）
-    ↓ 同期
-Confluence ← 表示・承認用（読み取り専用）
+GitHub (.kiro/specs/)  ← Source of Truth (editable)
+    ↓ sync
+Confluence ← View & Approval only (read-only)
 ```
 
-## ファイル構造
+## File Structure
 
-### GitHub リポジトリ
+### GitHub Repository
 ```
 .kiro/
-├── project.json          # プロジェクトメタデータ
+├── project.json          # Project metadata
 ├── specs/
 │   └── <feature>/
-│       ├── requirements.md  # 要件定義
-│       ├── design.md        # 設計
-│       ├── tasks.md         # タスク分割
-│       └── test-report.md   # テスト結果
+│       ├── requirements.md  # Requirements definition
+│       ├── design.md        # Design
+│       ├── tasks.md         # Task breakdown
+│       └── test-report.md   # Test results
 └── settings/
-    └── templates/       # テンプレート
+    └── templates/       # Templates
 ```
 
-## ワークフロー
+## Workflow
 
-### 1. Markdown 生成 → GitHub
+### 1. Generate Markdown → GitHub
 ```
-Cursor: /kiro:spec-requirements <feature>
-  ↓ 生成: .kiro/specs/<feature>/requirements.md
+Cursor: /michi:spec-requirements <feature>
+  ↓ Generate: .kiro/specs/<feature>/requirements.md
   ↓
-jj commit -m "docs: 要件定義追加"
+jj commit -m "docs: Add requirements"
 jj git push
 ```
 
-### 2. GitHub → Confluence 同期
+### 2. GitHub → Confluence Sync
 ```
-Cursor AI (MCP使用):
-  1. GitHub URL取得
-  2. Markdown → Confluence Storage Format変換
-  3. confluence_create_page() でページ作成
-  4. GitHub リンクを埋め込み
+Cursor AI (using MCP):
+  1. Get GitHub URL
+  2. Convert Markdown → Confluence Storage Format
+  3. Create page with confluence_create_page()
+  4. Embed GitHub link
 ```
 
-### 3. Confluence で承認
-- 企画・部長が Confluence でレビュー
-- Page Properties で承認
-- 承認完了 → 次フェーズへ
+### 3. Approval in Confluence
+- Planners/Managers review in Confluence
+- Approve via Page Properties
+- After approval → Proceed to next phase
 
-### 4. GitHub で技術レビュー
-- 技術者は GitHub で Markdown レビュー
-- PR 形式でコメント・修正提案（オプション）
-- マージ後、自動的に Confluence 更新
+### 4. Technical Review in GitHub
+- Engineers review Markdown in GitHub
+- Comment/suggest changes in PR format (optional)
+- After merge, auto-update Confluence
 
-## Confluence ページ構成
+## Confluence Page Structure
 
-### テンプレート構造
+### Template Structure
 ```markdown
-## GitHub連携
-📄 最新版は [GitHub](URL) で管理
-編集はGitHubで行い、自動同期されます
+## GitHub Integration
+📄 Latest version managed in [GitHub](URL)
+Edit in GitHub, auto-synced to Confluence
 
 ---
 
-{変換されたMarkdown}
+{Converted Markdown}
 
 ---
 
-## 承認
-{approval マクロ}
-承認者: @企画, @部長
+## Approval
+{approval macro}
+Approvers: @Planner, @Manager
 {/approval}
 ```
 
-## レビューフロー分離
+## Review Flow Separation
 
-### 技術者レビュー（GitHub）
-- 対象: requirements.md, design.md, tasks.md
-- 方法: GitHub PR、コメント
-- 観点: 技術的正確性、実装可能性
+### Engineer Review (GitHub)
+- Target: requirements.md, design.md, tasks.md
+- Method: GitHub PR, comments
+- Focus: Technical accuracy, feasibility
 
-### 企画・部長レビュー（Confluence）
-- 対象: 要件、設計、見積もり
-- 方法: Confluence コメント、承認マクロ
-- 観点: ビジネス要件、優先度、予算
+### Planner/Manager Review (Confluence)
+- Target: Requirements, design, estimates
+- Method: Confluence comments, approval macro
+- Focus: Business requirements, priority, budget
 
-## 更新の同期
+## Update Synchronization
 
-### GitHub 更新時
+### On GitHub Update
 ```
-GitHub プッシュ
-  ↓ Webhook（オプション）
-Confluence 自動更新
+GitHub push
+  ↓ Webhook (optional)
+Confluence auto-update
 ```
 
-### 手動同期
+### Manual Sync
 ```bash
-# コマンド実行
-/kiro:confluence-sync <feature>
+# Run command
+/michi:confluence-sync <feature>
 
-# または npm script
+# Or npm script
 npm run confluence:sync <feature>
 ```
 
-## メリット
+## Benefits
 
-✅ **バージョン管理**: すべての変更履歴が GitHub に
-✅ **二重管理ゼロ**: Confluence は参照のみ
-✅ **技術者フレンドリー**: Markdown, Git, PR
-✅ **企画・部長フレンドリー**: Confluence の使いやすい UI
-✅ **自動同期**: プッシュ = Confluence 更新
-✅ **証跡管理**: GitHub が正式記録
+✅ **Version Control**: All change history in GitHub
+✅ **Zero Dual Management**: Confluence for reference only
+✅ **Engineer-Friendly**: Markdown, Git, PR
+✅ **Planner/Manager-Friendly**: Confluence's user-friendly UI
+✅ **Auto Sync**: Push = Confluence update
+✅ **Audit Trail**: GitHub as official record
 
-## 禁止事項
+## Prohibited Actions
 
-❌ Confluence で直接編集
-❌ GitHub と Confluence の両方で管理
-❌ Confluence から GitHub への逆同期
+❌ Direct editing in Confluence
+❌ Managing in both GitHub and Confluence
+❌ Reverse sync from Confluence to GitHub
 
-## 例外ケース
+## Exception Cases
 
-以下の場合のみ Confluence で直接作成可能：
-- 議事録（会議メモ）
-- 一時的なメモ
-- プロジェクト外のドキュメント
+Direct creation in Confluence allowed only for:
+- Meeting minutes
+- Temporary notes
+- Documents outside the project
 
-## トラブルシューティング
+## Troubleshooting
 
-### Confluence が古い場合
+### If Confluence is outdated
 ```bash
-# 手動で再同期
-/kiro:confluence-sync <feature>
+# Manually re-sync
+/michi:confluence-sync <feature>
 ```
 
-### 同期エラーの場合
-1. GitHub の Markdown が正しいか確認
-2. Confluence API 認証を確認
-3. ページ ID が正しいか確認
+### On sync error
+1. Verify GitHub Markdown is correct
+2. Check Confluence API authentication
+3. Verify page ID is correct

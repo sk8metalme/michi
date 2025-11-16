@@ -1,18 +1,18 @@
 ---
-title: マルチプロジェクト管理ルール
-description: 複数プロジェクト並行稼働時の命名規則とワークフロー
+title: Multi-Project Management Rules
+description: {{DEV_GUIDELINES}} for managing multiple concurrent projects with naming conventions and workflows
 ---
 
-# マルチプロジェクト管理ルール
+# Multi-Project Management Rules
 
-## プロジェクト識別
+## Project Identification
 
-### プロジェクトメタデータの読み込み
-- すべての操作で `.kiro/project.json` を参照
-- プロジェクトID、JIRA キー、Confluence ラベルを取得
-- 動的にプロジェクト情報を使用
+### Loading Project Metadata
+- Reference `.kiro/project.json` in all operations
+- Retrieve project ID, JIRA key, and Confluence labels
+- Use project information dynamically
 
-### 例
+### Example
 ```typescript
 const projectMeta = JSON.parse(fs.readFileSync('.kiro/project.json', 'utf8'));
 // projectMeta.projectId
@@ -20,62 +20,62 @@ const projectMeta = JSON.parse(fs.readFileSync('.kiro/project.json', 'utf8'));
 // projectMeta.confluenceLabels
 ```
 
-## 命名規則
+## Naming Conventions
 
-### Confluence ページ
-- 形式: `[{projectName}] {document_type}`
-- 例: `[A社-サービス1] 要件定義`
-- 例: `[Michi] ユーザー認証 設計`
+### Confluence Pages
+- Format: `[{projectName}] {document_type}`
+- Example: `[Company-A-Service1] Requirements`
+- Example: `[{{PROJECT_ID}}] User Auth Design`
 
 ### JIRA Epic/Story
 - Epic: `[{projectName}] {feature_name}`
 - Story: `[{projectName}] {task_name}`
-- 例: `[Michi] ユーザー認証機能`
+- Example: `[{{PROJECT_ID}}] User Authentication Feature`
 
-### GitHub ブランチ
-- 形式: `{projectId}/feature/{feature_name}`
-- 例: `michi/feature/user-auth`
-- 例: `customer-a-service-1/feature/payment`
+### GitHub Branches
+- Format: `{projectId}/feature/{feature_name}`
+- Example: `{{PROJECT_ID}}/feature/user-auth`
+- Example: `customer-a-service-1/feature/payment`
 
-### ラベル付与
+### Label Assignment
 - Confluence: `projectMeta.confluenceLabels` + `requirements|design|tasks`
-- JIRA: `projectMeta.confluenceLabels` + 機能名
+- JIRA: `projectMeta.confluenceLabels` + feature name
 
-## プロジェクト横断ビュー
+## Cross-Project Views
 
-### Confluence ダッシュボード
-- 全プロジェクトの要件、設計、タスクを一覧表示
-- ラベルでフィルタリング可能
-- ステータス（レビュー待ち、承認済み）で絞り込み
+### Confluence Dashboard
+- Display requirements, design, tasks across all projects
+- Filter by labels
+- Filter by status (Pending Review, Approved)
 
-### JIRA ダッシュボード
-- プロジェクトキー別に進捗追跡
-- `project IN (MICHI, PRJA, PRJB)` でフィルタ
-- ストーリーポイント集計
+### JIRA Dashboard
+- Track progress by project key
+- Filter: `project IN ({{JIRA_PROJECT_KEY}}, PRJA, PRJB)`
+- Aggregate story points
 
-## ワークフロー統一
+## Unified Workflow
 
-すべてのプロジェクトで同じワークフローを使用：
+Use the same workflow across all projects:
 
-1. `/kiro:spec-init` → 仕様初期化
-2. `/kiro:spec-requirements` → 要件定義（Confluence 同期）
-3. `/kiro:spec-design` → 設計（Confluence 同期 + 見積もり）
-4. `/kiro:spec-tasks` → タスク分割（JIRA 連携）
-5. `/kiro:spec-impl` → TDD 実装
-6. GitHub PR → レビュー
-7. リリース準備
+1. `/michi:spec-init` → Specification initialization
+2. `/michi:spec-requirements` → Requirements definition (Confluence sync)
+3. `/michi:spec-design` → Design (Confluence sync + estimation)
+4. `/michi:spec-tasks` → Task breakdown (JIRA integration)
+5. `/michi:spec-impl` → TDD implementation
+6. GitHub PR → Review
+7. Release preparation
 
-## プロジェクト切り替え
+## Project Switching
 
-複数プロジェクトを切り替えながら作業する場合：
+When switching between multiple projects:
 
-1. リポジトリをチェックアウト
-2. `.kiro/project.json` を確認
-3. 対応する Confluence/JIRA ページを開く
+1. Check out repository
+2. Verify `.kiro/project.json`
+3. Open corresponding Confluence/JIRA pages
 
-## 重要な注意事項
+## Important Notes
 
-- プロジェクトごとに独立した `.kiro/project.json` を維持
-- JIRA プロジェクトキーは一意にする
-- Confluence ラベルでプロジェクトを識別
-- GitHub ブランチ名にプロジェクト ID を含める
+- Maintain independent `.kiro/project.json` for each project
+- Ensure JIRA project keys are unique
+- Identify projects by Confluence labels
+- Include project ID in GitHub branch names
