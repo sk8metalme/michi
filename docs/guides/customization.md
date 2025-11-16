@@ -363,7 +363,7 @@ Confluenceスペース
 
 ```bash
 # 対話式設定ツールを実行
-npx @michi/cli config:interactive
+npx @sk8metal/michi-cli config:interactive
 
 # または
 npm run config:interactive
@@ -371,7 +371,7 @@ npm run config:interactive
 
 ### 使い方
 
-1. **コマンド実行**: `npx @michi/cli config:interactive`
+1. **コマンド実行**: `npx @sk8metal/michi-cli config:interactive`
 2. **設定項目を選択**: 
    - Confluence設定のカスタマイズ
    - JIRA設定のカスタマイズ
@@ -394,7 +394,7 @@ npm run config:interactive
 
 ```bash
 # 設定ファイルのバリデーション
-npx @michi/cli config:validate
+npx @sk8metal/michi-cli config:validate
 
 # または
 npm run config:validate

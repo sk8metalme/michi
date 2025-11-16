@@ -7,7 +7,9 @@
  * npx tsx /path/to/michi/scripts/setup-existing-project.ts \
  *   --michi-path /path/to/michi \
  *   --project-name "既存プロジェクト" \
- *   --jira-key "EXIST"
+ *   --jira-key "EXIST" \
+ *   --environment cursor \
+ *   --lang ja
  */
 
 import { cpSync, existsSync, mkdirSync, writeFileSync, readFileSync } from 'fs';
@@ -20,6 +22,8 @@ interface SetupConfig {
   projectName: string;    // プロジェクト表示名
   jiraKey: string;        // JIRAプロジェクトキー
   labels?: string[];      // Confluenceラベル（オプション）
+  environment?: string;   // cc-sdd環境: 'claude' | 'claude-agent' | 'cursor'
+  langCode?: string;      // 言語コード: 'ja'
 }
 
 function parseArgs(): SetupConfig {
@@ -40,6 +44,12 @@ function parseArgs(): SetupConfig {
     case 'jira-key':
       config.jiraKey = value;
       break;
+    case 'environment':
+      config.environment = value;
+      break;
+    case 'lang':
+      config.langCode = value;
+      break;
     }
   }
   
@@ -47,11 +57,17 @@ function parseArgs(): SetupConfig {
   if (!config.michiPath) {
     config.michiPath = resolve(__dirname, '..');
   }
+  if (!config.environment) {
+    config.environment = 'claude';
+  }
+  if (!config.langCode) {
+    config.langCode = 'ja';
+  }
   
   // 必須フィールドチェック
   if (!config.projectName || !config.jiraKey) {
     console.error('Missing required parameters');
-    console.error('Usage: tsx setup-existing-project.ts --project-name <name> --jira-key <key> [--michi-path <path>]');
+    console.error('Usage: tsx setup-existing-project.ts --project-name <name> --jira-key <key> [--michi-path <path>] [--environment <env>] [--lang <code>]');
     process.exit(1);
   }
   
@@ -66,6 +82,8 @@ async function setupExistingProject(config: SetupConfig): Promise<void> {
   console.log(`   プロジェクト: ${config.projectName}`);
   console.log(`   ディレクトリ: ${currentDir}`);
   console.log(`   Michiパス: ${config.michiPath}`);
+  console.log(`   環境: ${config.environment}`);
+  console.log(`   言語: ${config.langCode}`);
   console.log('');
   
   // リポジトリルートを検出
@@ -393,9 +411,10 @@ npm run github:create-pr <branch>   # PR作成
     console.log('  2. .env ファイルを編集して認証情報を設定');
     console.log('  3. package.json が既存の場合、スクリプトを手動追加');
     console.log('  4. npm install で依存関係をインストール（リポジトリルートで実行）');
-    console.log('  5. jj commit でセットアップをコミット');
-    console.log('  6. Cursor で開く: cursor .');
-    console.log('  7. /kiro:spec-init <機能説明> で開発開始');
+    console.log(`  5. cc-sddを導入: npx cc-sdd@latest --lang ${config.langCode} --${config.environment}`);
+    console.log('  6. jj commit でセットアップをコミット');
+    console.log('  7. Cursor で開く: cursor .');
+    console.log('  8. /kiro:spec-init <機能説明> で開発開始');
     console.log('');
     console.log('作成されたファイル:');
     console.log(`  - ${projectDir}/.kiro/project.json`);
@@ -419,4 +438,3 @@ setupExistingProject(config).catch(error => {
   console.error('❌ Error:', error.message);
   process.exit(1);
 });
-
