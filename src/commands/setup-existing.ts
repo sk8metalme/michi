@@ -8,14 +8,13 @@
  */
 
 import { cpSync, existsSync, mkdirSync, writeFileSync, readFileSync, readdirSync } from 'fs';
-import { resolve, join, basename, dirname } from 'path';
+import { join, basename, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { execSync } from 'child_process';
 import { findRepositoryRoot } from '../../scripts/utils/project-finder.js';
 import {
   type Environment,
-  getEnvironmentConfig,
-  isSupportedEnvironment
+  getEnvironmentConfig
 } from '../../scripts/constants/environments.js';
 import {
   type SupportedLanguage,
@@ -63,7 +62,7 @@ function validateProjectName(name: string): string {
   }
   
   // パストラバーサル対策
-  if (/[\/\\]/.test(trimmed)) {
+  if (/[/\\]/.test(trimmed)) {
     throw new Error('プロジェクト名にパス区切り文字（/ または \\）は使用できません');
   }
   
@@ -73,6 +72,7 @@ function validateProjectName(name: string): string {
   }
   
   // 制御文字対策
+  // eslint-disable-next-line no-control-regex
   if (/[\x00-\x1F\x7F]/.test(trimmed)) {
     throw new Error('プロジェクト名に制御文字は使用できません');
   }
