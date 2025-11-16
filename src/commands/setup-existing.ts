@@ -7,7 +7,7 @@
  * npm run michi:setup:cursor
  */
 
-import { cpSync, existsSync, mkdirSync, writeFileSync, readFileSync, readdirSync } from 'fs';
+import { cpSync, existsSync, mkdirSync, writeFileSync, readFileSync, readdirSync, chmodSync } from 'fs';
 import { join, basename, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { execSync } from 'child_process';
@@ -460,12 +460,16 @@ JIRA_ISSUE_TYPE_SUBTASK=10037
   if (!existsSync('.env')) {
     try {
       writeFileSync('.env', envTemplate, 'utf-8');
-      console.log('   ✅ .env template created');
+      // セキュリティ: .envファイルの権限を600に設定（所有者のみ読み書き可能）
+      chmodSync('.env', 0o600);
+      console.log('   ✅ .env template created (permissions: 600)');
     } catch (error) {
       throw new Error(`Failed to write .env template: ${error instanceof Error ? error.message : error}`);
     }
   } else {
     console.log('   ℹ️  .env already exists (kept)');
+    console.log('   ⚠️  Warning: Please verify .env file permissions (recommended: 600)');
+    console.log('   Run: chmod 600 .env');
   }
 
   // 完了メッセージ
