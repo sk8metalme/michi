@@ -5,6 +5,8 @@ description: GitHub の Markdown を Confluence に同期
 
 # Confluence同期コマンド
 
+{{DEV_GUIDELINES}}
+
 このコマンドは、GitHubで管理されている仕様書（requirements, design, tasks）をConfluenceに同期します。
 
 ## 使い方
@@ -26,8 +28,8 @@ description: GitHub の Markdown を Confluence に同期
 
 ## 実行内容
 
-1. `.kiro/project.json` からプロジェクトメタデータを読み込み
-2. `.kiro/specs/<feature>/<doc_type>.md` を読み込み
+1. `{{KIRO_DIR}}/project.json` からプロジェクトメタデータを読み込み
+2. `{{KIRO_DIR}}/specs/<feature>/<doc_type>.md` を読み込み
 3. Markdown → Confluence Storage Format に変換
 4. GitHub URLを埋め込み
 5. Confluenceページを作成または更新
@@ -58,7 +60,7 @@ npm run confluence:sync <feature_name> [doc_type]
 ## 前提条件
 
 - `.env` ファイルに Atlassian 認証情報が設定されている
-- `.kiro/project.json` が存在する
+- `{{KIRO_DIR}}/project.json` が存在する
 - 同期する Markdown ファイルが存在する
 
 ## トラブルシューティング

@@ -5,6 +5,8 @@ description: プロジェクトを切り替える
 
 # プロジェクト切り替えコマンド
 
+{{DEV_GUIDELINES}}
+
 複数プロジェクトを管理している場合、プロジェクトを切り替えるコマンドです。
 
 ## 使い方
@@ -26,7 +28,7 @@ description: プロジェクトを切り替える
 
 1. プロジェクトIDに対応するGitHubリポジトリを特定
 2. ローカルにクローン（未クローンの場合）またはチェックアウト
-3. `.kiro/project.json` を読み込んで表示
+3. `{{KIRO_DIR}}/project.json` を読み込んで表示
 4. 対応するConfluenceプロジェクトページのURLを表示
 5. JIRAプロジェクトダッシュボードのURLを表示
 
@@ -57,7 +59,7 @@ jj git clone https://github.com/org/<project_id>
 cd <project_id>
 
 # プロジェクト情報を表示
-cat .kiro/project.json
+cat {{KIRO_DIR}}/project.json
 ```
 
 ## 関連コマンド
