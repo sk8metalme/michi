@@ -70,6 +70,8 @@
     "test:run": "vitest --run",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --run --coverage",
+    "test:integration:setup": "vitest --run src/__tests__/integration/setup",
+    "test:coverage:setup": "vitest --run --coverage src/__tests__/integration/setup",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
