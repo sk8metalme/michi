@@ -1,53 +1,59 @@
 # プロジェクトコンテキスト
 
 ## 現在のタスク
-Issue #55, #56の修正（v0.0.9リリース向け）
+Issue #58: テンプレートディレクトリ名の整合性修正
 
 ## 進捗状況
 - **開始日時**: 2025-11-17 (月)
-- **現在フェーズ**: Phase 3 - PR作成
-- **完了率**: 100% (Issue #55, #56完了)
+- **現在フェーズ**: Phase 0 - 計画策定
+- **完了率**: 0%
 
-## タスク一覧
+## タスク概要
 
-### Issue #55: バリデーションエラーハンドリング修正
-- **優先度**: 高
-- **工数**: 1.5h
-- **ステータス**: ✅ 完了
-- **スキップ中のテスト**: 0個（5個すべて有効化・成功）
-  - ✅ should reject unsupported language
-  - ✅ should reject empty project name
-  - ✅ should reject project name with path traversal
-  - ✅ should reject project name with backslash
-  - ✅ should reject project name with control characters
+### Issue #58: テンプレートディレクトリ名の不整合修正
+- **優先度**: 低（技術的負債）
+- **工数**: 0.5h（予想）
+- **ステータス**: 🔄 進行中
 
-### Issue #56: Claude-agentテンプレート構造修正
-- **優先度**: 中
-- **工数**: 2h
-- **ステータス**: ✅ 完了
-- **スキップ中のテスト**: 0個（4個すべて有効化・成功）
-  - ✅ should accept claude-agent environment flag
-  - ✅ should create .claude/subagents directory
-  - ✅ should have subagents directory structure
-  - ✅ should not create basic Claude rules directory
+## 問題の詳細
 
-## 実装順序
-1. Issue #55（先行） - コアロジックの品質担保
-2. Issue #56 - テンプレート追加
+### 現状
+- **テンプレートソース**: `templates/claude-agent/rules/`
+- **配置先**: `.claude/subagents`
+
+`rules`という名前のディレクトリが`subagents`という名前で配置されるため、新規開発者にとって混乱を招く。
+
+### 影響範囲
+- **重大度**: 低（機能的には動作している）
+- **保守性**: 中（新規開発者への混乱）
+- **リスク**: 低（テンプレートコピーロジックのみに限定）
+
+### 推奨解決策
+**Option 1** (推奨): テンプレートディレクトリをリネーム
+- `templates/claude-agent/rules/` → `templates/claude-agent/subagents/`
+- シンプルで明確、一貫性がある
+
+**Option 2**: 柔軟なテンプレート命名をサポート
+- `EnvironmentConfig`に`rulesDirTemplateName`を追加
+- より柔軟だが複雑性が増す
+
+## 影響ファイル
+- `templates/claude-agent/rules/` (リネーム対象)
+- `src/commands/setup-existing.ts` (変数名を確認)
+
+## 前提条件
+- Issue #55, #56は完了済み
+- 全テストスイート成功（235 passed）
 
 ## 完了条件
-- [x] Issue #55: 5つのバリデーションテストが全て成功
-- [x] Issue #56: 4つのテストが全て成功
-- [x] 全テストスイート成功（235 passed）
+- [ ] テンプレートディレクトリを`subagents`にリネーム
+- [ ] 全テストスイート成功
 - [ ] Lintエラーなし
-- [ ] PRレビュー承認
-- [ ] mainへマージ
+- [ ] ドキュメント更新（必要に応じて）
 
 ## メモ
-- TDD原則を遵守（テスト先行）
-- 各実装後に必ずレビュー
-- PR作成後はCI成功まで監視
+- TDD原則を遵守（既存テストで動作確認）
+- Option 1（リネームのみ）を採用予定
 
 ---
-最終更新: 2025-11-17 (月) - Phase 1開始
-
+最終更新: 2025-11-17 (月) - Issue #58開始

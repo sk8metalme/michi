@@ -374,8 +374,10 @@ export async function setupExisting(options: SetupOptions): Promise<void> {
   if (!existsSync(templateSourceDir)) {
     console.log(`   ⚠️  Template source not found: ${templateSourceDir}`);
   } else {
-    // rulesディレクトリ
-    const rulesTemplateDir = join(templateSourceDir, 'rules');
+    // rulesディレクトリ（環境別にテンプレートディレクトリ名が異なる）
+    // cursor/claude: 'rules', claude-agent: 'subagents'
+    const templateDirName = config.environment === 'claude-agent' ? 'subagents' : 'rules';
+    const rulesTemplateDir = join(templateSourceDir, templateDirName);
     const rulesDestDir = join(currentDir, envConfig.rulesDir);
 
     if (existsSync(rulesTemplateDir)) {
