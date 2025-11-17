@@ -159,30 +159,22 @@ async function buildConfig(options: SetupOptions): Promise<SetupConfig> {
 
   // プロジェクト名（対話的プロンプト）
   let projectName = options.projectName;
-  if (!projectName) {
+  if (projectName === undefined) {
     console.log('');
     projectName = await prompt('プロジェクト名（例: プロジェクトA）: ');
   }
   
   // バリデーション
-  try {
-    projectName = validateProjectName(projectName);
-  } catch (error) {
-    throw new Error(`プロジェクト名が不正です: ${error instanceof Error ? error.message : error}`);
-  }
+  projectName = validateProjectName(projectName || '');
 
   // JIRAキー（対話的プロンプト）
   let jiraKey = options.jiraKey;
-  if (!jiraKey) {
+  if (jiraKey === undefined) {
     jiraKey = await prompt('JIRAプロジェクトキー（例: PRJA）: ');
   }
   
   // バリデーション
-  try {
-    jiraKey = validateJiraKey(jiraKey);
-  } catch (error) {
-    throw new Error(`JIRAキーが不正です: ${error instanceof Error ? error.message : error}`);
-  }
+  jiraKey = validateJiraKey(jiraKey || '');
 
   // 確認
   console.log('');

@@ -16,6 +16,7 @@ Michiは、開発フロー全体（要件定義→設計→タスク分割→実
 
 ### 主な機能
 - ✅ **AI駆動開発**: cc-sdd + Cursor/VS Code統合
+- ✅ **多言語サポート**: 12言語対応（AI駆動、翻訳ファイル不要）
 - ✅ **GitHub SSoT(Single Source Of True)**: GitHubを情報源として管理
 - ✅ **Confluence/JIRA連携**: 承認者向けドキュメント、タスク管理
 - ✅ **マルチプロジェクト対応**: 3-5プロジェクト同時進行
@@ -463,6 +464,7 @@ npm run create-project -- \
 - [フェーズ自動化ガイド](./docs/guides/phase-automation.md) - Confluence/JIRA自動作成 ⭐
 - [マルチプロジェクト管理](./docs/guides/multi-project.md) - 複数プロジェクト管理
 - [カスタマイズガイド](./docs/guides/customization.md) - Confluence/JIRA階層構造のカスタマイズ
+- [多言語サポートガイド](./docs/guides/internationalization.md) - AI駆動多言語対応（12言語サポート） ⭐
 
 ### リファレンス
 - [クイックリファレンス](./docs/reference/quick-reference.md) - コマンド一覧、チートシート ⭐

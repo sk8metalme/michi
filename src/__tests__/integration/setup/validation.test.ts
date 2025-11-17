@@ -74,8 +74,7 @@ describe('Setup Argument Validation', () => {
       expect(existsSync(join(testProject.path, '.claude/rules'))).toBe(true);
     });
 
-    // TODO: Fix template structure (Issue #55)
-    it.skip('should accept claude-agent environment flag', async () => {
+    it('should accept claude-agent environment flag', async () => {
       await setupExisting({
         claudeAgent: true,
         projectName: 'Test Project',
@@ -141,12 +140,11 @@ describe('Setup Argument Validation', () => {
       expect(projectJson.language).toBe('zh-TW');
     });
 
-    // TODO: Fix validation error handling (Issue #54)
-    it.skip('should reject unsupported language', async () => {
+    it('should reject unsupported language', async () => {
       await expect(async () => {
         await setupExisting({
           cursor: true,
-          lang: 'fr', // Unsupported language
+          lang: 'xx', // Unsupported language (changed from 'fr' which is now supported)
           projectName: 'Test Project',
           jiraKey: 'TEST'
         });
@@ -203,8 +201,7 @@ describe('Setup Argument Validation', () => {
       expect(projectJson.projectName).toBe('Test Project');
     });
 
-    // TODO: Fix validation error handling (Issue #54)
-    it.skip('should reject empty project name', async () => {
+    it('should reject empty project name', async () => {
       await expect(async () => {
         await setupExisting({
           cursor: true,
@@ -214,8 +211,7 @@ describe('Setup Argument Validation', () => {
       }).rejects.toThrow(/プロジェクト名が空です/);
     });
 
-    // TODO: Fix validation error handling (Issue #54)
-    it.skip('should reject project name with path traversal characters', async () => {
+    it('should reject project name with path traversal characters', async () => {
       await expect(async () => {
         await setupExisting({
           cursor: true,
@@ -225,8 +221,7 @@ describe('Setup Argument Validation', () => {
       }).rejects.toThrow(/パス区切り文字/);
     });
 
-    // TODO: Fix validation error handling (Issue #54)
-    it.skip('should reject project name with backslash', async () => {
+    it('should reject project name with backslash', async () => {
       await expect(async () => {
         await setupExisting({
           cursor: true,
@@ -236,8 +231,7 @@ describe('Setup Argument Validation', () => {
       }).rejects.toThrow(/パス区切り文字/);
     });
 
-    // TODO: Fix validation error handling (Issue #54)
-    it.skip('should reject project name with control characters', async () => {
+    it('should reject project name with control characters', async () => {
       await expect(async () => {
         await setupExisting({
           cursor: true,
