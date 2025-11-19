@@ -280,7 +280,11 @@ export async function setupExisting(options: SetupOptions): Promise<void> {
   
   const gitDir = join(repoRoot, '.git');
   if (!existsSync(gitDir)) {
-    throw new Error(`Gitリポジトリではありません: ${repoRoot}`);
+    console.warn('⚠️  Warning: Not a Git repository');
+    console.warn(`   Directory: ${repoRoot}`);
+    console.warn('   Recommendation: Run "git init" to initialize a repository');
+    console.warn('   Continuing without Git...');
+    console.log('');
   }
 
   // テンプレートディレクトリを解決
@@ -414,21 +418,79 @@ export async function setupExisting(options: SetupOptions): Promise<void> {
   // Specテンプレートをコピー
   console.log('\n📄 Step 5: Copying spec templates...');
   const michiSpecTemplatesDir = join(templatesDir, '..', '.kiro', 'settings', 'templates');
-  if (existsSync(michiSpecTemplatesDir)) {
-    try {
-      cpSync(michiSpecTemplatesDir, join(currentDir, '.kiro/settings/templates'), { recursive: true });
-      console.log('   ✅ Spec templates copied');
-    } catch (error) {
-      throw new Error(`Failed to copy spec templates: ${error instanceof Error ? error.message : error}`);
-    }
-  } else {
-    console.log('   ⚠️  Spec templates not found (skipped)');
+  if (!existsSync(michiSpecTemplatesDir)) {
+    throw new Error(
+      `Spec templates not found at: ${michiSpecTemplatesDir}\n` +
+      `This is a critical error. Please ensure Michi repository has .kiro/settings/templates directory.`
+    );
+  }
+  try {
+    cpSync(michiSpecTemplatesDir, join(currentDir, '.kiro/settings/templates'), { recursive: true });
+    console.log('   ✅ Spec templates copied');
+  } catch (error) {
+    throw new Error(`Failed to copy spec templates: ${error instanceof Error ? error.message : error}`);
+  }
+  
+  // Specルールをコピー
+  const michiSpecRulesDir = join(templatesDir, '..', '.kiro', 'settings', 'rules');
+  if (!existsSync(michiSpecRulesDir)) {
+    throw new Error(
+      `Spec rules not found at: ${michiSpecRulesDir}\n` +
+      `This is a critical error. Please ensure Michi repository has .kiro/settings/rules directory.`
+    );
+  }
+  try {
+    cpSync(michiSpecRulesDir, join(currentDir, '.kiro/settings/rules'), { recursive: true });
+    console.log('   ✅ Spec rules copied');
+  } catch (error) {
+    throw new Error(`Failed to copy spec rules: ${error instanceof Error ? error.message : error}`);
   }
 
-  // .env テンプレート作成
-  console.log('\n🔐 Step 6: Creating .env template...');
+  // .env 対話的設定
+  console.log('\n🔐 Step 6: Configuring environment variables...');
 
-  const envTemplate = `# Atlassian設定（MCP + REST API共通）
+  const envConfigPath = '.env';
+  
+  // 動的インポート（env-config.tsが新規作成されたため）
+  const { parseEnvFile, configureEnvInteractive, generateEnvContent } = await import('../../scripts/utils/env-config.js');
+  
+  let existingEnvValues: Map<string, string> | undefined;
+
+  if (existsSync(envConfigPath)) {
+    console.log('   ℹ️  既存の .env ファイルを検出しました');
+    existingEnvValues = parseEnvFile(envConfigPath);
+    
+    const overwrite = await prompt('既存値を表示して上書き確認しますか？ [Y/n]: ');
+    if (overwrite.toLowerCase() !== 'n') {
+      // 対話的設定を実行
+      const newEnvValues = await configureEnvInteractive(existingEnvValues, config.jiraKey, repoUrl);
+      const envContent = generateEnvContent(newEnvValues);
+      try {
+        writeFileSync(envConfigPath, envContent, 'utf-8');
+        chmodSync(envConfigPath, 0o600);
+        console.log('   ✅ .env updated (permissions: 600)');
+      } catch (error) {
+        throw new Error(`Failed to update .env: ${error instanceof Error ? error.message : error}`);
+      }
+    } else {
+      console.log('   ℹ️  .env file kept unchanged');
+    }
+  } else {
+    // 新規作成の場合も対話的設定
+    const shouldConfigure = await prompt('.env を対話的に設定しますか？ [Y/n]: ');
+    if (shouldConfigure.toLowerCase() !== 'n') {
+      const newEnvValues = await configureEnvInteractive(undefined, config.jiraKey, repoUrl);
+      const envContent = generateEnvContent(newEnvValues);
+      try {
+        writeFileSync(envConfigPath, envContent, 'utf-8');
+        chmodSync(envConfigPath, 0o600);
+        console.log('   ✅ .env created (permissions: 600)');
+      } catch (error) {
+        throw new Error(`Failed to create .env: ${error instanceof Error ? error.message : error}`);
+      }
+    } else {
+      // 従来のテンプレート作成（フォールバック）
+      const envTemplate = `# Atlassian設定（MCP + REST API共通）
 ATLASSIAN_URL=https://your-domain.atlassian.net
 ATLASSIAN_EMAIL=your-email@company.com
 ATLASSIAN_API_TOKEN=your-token-here
@@ -450,31 +512,99 @@ JIRA_PROJECT_KEYS=${config.jiraKey}
 JIRA_ISSUE_TYPE_STORY=10036
 JIRA_ISSUE_TYPE_SUBTASK=10037
 `;
+      try {
+        writeFileSync(envConfigPath, envTemplate, 'utf-8');
+        chmodSync(envConfigPath, 0o600);
+        console.log('   ✅ .env template created (permissions: 600)');
+      } catch (error) {
+        throw new Error(`Failed to write .env template: ${error instanceof Error ? error.message : error}`);
+      }
+    }
+  }
 
-  if (!existsSync('.env')) {
+  // .gitignore 更新
+  console.log('\n📝 Step 7: Updating .gitignore...');
+
+  const gitignorePath = join(repoRoot, '.gitignore');
+  let gitignoreContent = '';
+
+  if (existsSync(gitignorePath)) {
     try {
-      writeFileSync('.env', envTemplate, 'utf-8');
-      // セキュリティ: .envファイルの権限を600に設定（所有者のみ読み書き可能）
-      chmodSync('.env', 0o600);
-      console.log('   ✅ .env template created (permissions: 600)');
+      gitignoreContent = readFileSync(gitignorePath, 'utf-8');
     } catch (error) {
-      throw new Error(`Failed to write .env template: ${error instanceof Error ? error.message : error}`);
+      console.warn('   ⚠️  Warning: Failed to read .gitignore');
+      if (error instanceof Error && error.message) {
+        console.warn(`   Reason: ${error.message}`);
+      }
+    }
+  }
+
+  const entriesToAdd = [
+    '# Environment variables',
+    '.env',
+    '.env.local',
+    '.env.*.local'
+  ];
+
+  let modified = false;
+  const lines = gitignoreContent.split('\n').map(l => l.trim());
+
+  for (const entry of entriesToAdd) {
+    if (!lines.includes(entry.trim())) {
+      if (!modified) {
+        gitignoreContent += '\n\n# Added by michi setup\n';
+        modified = true;
+      }
+      gitignoreContent += entry + '\n';
+    }
+  }
+
+  if (modified) {
+    try {
+      writeFileSync(gitignorePath, gitignoreContent, 'utf-8');
+      console.log('   ✅ .gitignore updated');
+    } catch (error) {
+      console.warn('   ⚠️  Warning: Failed to update .gitignore');
+      if (error instanceof Error && error.message) {
+        console.warn(`   Reason: ${error.message}`);
+      }
+      console.warn('   Please manually add .env to .gitignore');
     }
   } else {
-    console.log('   ℹ️  .env already exists (kept)');
-    console.log('   ⚠️  Warning: Please verify .env file permissions (recommended: 600)');
-    console.log('   Run: chmod 600 .env');
+    console.log('   ℹ️  .gitignore already contains .env entries');
   }
+
+  // セットアップバリデーション
+  console.log('\n🔍 Step 8: Validating setup...');
+  
+  const requiredFiles = [
+    '.kiro/settings/templates/specs/tasks.md',
+    '.kiro/settings/templates/specs/requirements.md',
+    '.kiro/settings/templates/specs/design.md',
+    '.kiro/settings/rules/tasks-generation.md'
+  ];
+  
+  const missingFiles = requiredFiles.filter(f => !existsSync(join(currentDir, f)));
+  if (missingFiles.length > 0) {
+    throw new Error(
+      `Setup validation failed. Missing required files:\n${missingFiles.map(f => `  - ${f}`).join('\n')}\n\n` +
+      `Please ensure Michi repository has all required template files.`
+    );
+  }
+  console.log('   ✅ All required templates present');
 
   // 完了メッセージ
   console.log('\n');
   console.log('🎉 セットアップ完了！');
   console.log('');
   console.log('次のステップ:');
-  console.log('  1. .env ファイルを編集して認証情報を設定');
+  console.log('  1. .env ファイルの内容を確認（必要に応じて追加編集）');
   console.log('  2. npm install で依存関係をインストール（リポジトリルートで実行）');
   console.log('  3. Cursor で開く: cursor .');
-  console.log('  4. /kiro:spec-init <機能説明> で開発開始');
+  console.log('  4. Cursorを起動したら ~/.cursor/mcp.json の設定を確認');
+  console.log('     MCP設定の詳細: https://github.com/sk8metalme/michi/issues');
+  console.log('     （環境別MCP設定の対話的セットアップ機能は開発中）');
+  console.log('  5. /kiro:spec-init <機能説明> で開発開始');
   console.log('');
   console.log('詳細: https://github.com/sk8metalme/michi');
   console.log('');

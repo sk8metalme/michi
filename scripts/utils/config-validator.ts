@@ -8,6 +8,14 @@ import { AppConfigSchema } from '../config/config-schema.js';
 import type { ZodIssue } from 'zod';
 import type { AppConfig } from '../config/config-schema.js';
 import { getConfig, getConfigPath } from './config-loader.js';
+import { loadProjectMeta } from './project-meta.js';
+import {
+  getProjectIssueTypes,
+  hasJiraCredentials,
+  hasIssueTypeId,
+  filterStoryTypes,
+  filterSubtaskTypes
+} from './jira-issue-type-fetcher.js';
 
 /**
  * バリデーション結果
@@ -253,7 +261,7 @@ export function validateForConfluenceSync(
 }
 
 /**
- * JIRA同期実行前の必須設定値チェック
+ * JIRA同期実行前の必須設定値チェック（同期版）
  * @param projectRoot プロジェクトルート（デフォルト: process.cwd()）
  * @returns バリデーション結果
  */
@@ -338,6 +346,98 @@ export function validateForJiraSync(projectRoot: string = process.cwd()): Valida
     warnings,
     info
   };
+}
+
+/**
+ * JIRA同期実行前の必須設定値チェック（非同期版・Issue Type IDの存在チェック付き）
+ * @param projectRoot プロジェクトルート（デフォルト: process.cwd()）
+ * @returns バリデーション結果
+ */
+export async function validateForJiraSyncAsync(projectRoot: string = process.cwd()): Promise<ValidationResult> {
+  // まず同期版のバリデーションを実行
+  const result = validateForJiraSync(projectRoot);
+  
+  // JIRA認証情報とプロジェクトキーが設定されている場合、Issue Type IDの存在チェックを実行
+  if (hasJiraCredentials()) {
+    try {
+      const projectMeta = loadProjectMeta(projectRoot);
+      const projectKey = projectMeta.jiraProjectKey;
+      
+      if (projectKey) {
+        const config = getConfig(projectRoot);
+        const storyId = config.jira?.issueTypes?.story || process.env.JIRA_ISSUE_TYPE_STORY;
+        const subtaskId = config.jira?.issueTypes?.subtask || process.env.JIRA_ISSUE_TYPE_SUBTASK;
+        
+        // Issue Typesを取得
+        const issueTypes = await getProjectIssueTypes(projectKey);
+        
+        if (issueTypes && issueTypes.length > 0) {
+          // Story Issue Type IDの存在チェック
+          if (storyId) {
+            if (!hasIssueTypeId(issueTypes, storyId)) {
+              const storyTypes = filterStoryTypes(issueTypes);
+              const suggestions = storyTypes.length > 0
+                ? storyTypes.map(it => `  - ${it.name} (ID: ${it.id})`).join('\n')
+                : '  （Storyタイプが見つかりませんでした）';
+              
+              result.errors.push(
+                `設定されたStory Issue Type ID (${storyId}) がプロジェクト '${projectKey}' に存在しません。\n` +
+                '\n利用可能なStoryタイプ:\n' +
+                suggestions +
+                '\n\n修正方法:\n' +
+                '  1. .envファイルを編集:\n' +
+                '     JIRA_ISSUE_TYPE_STORY=<正しいID>\n' +
+                '\n' +
+                '  2. または、対話的設定を再実行:\n' +
+                '     npm run setup:interactive'
+              );
+            }
+          }
+          
+          // Subtask Issue Type IDの存在チェック
+          if (subtaskId) {
+            if (!hasIssueTypeId(issueTypes, subtaskId)) {
+              const subtaskTypes = filterSubtaskTypes(issueTypes);
+              const suggestions = subtaskTypes.length > 0
+                ? subtaskTypes.map(it => `  - ${it.name} (ID: ${it.id})`).join('\n')
+                : '  （Subtaskタイプが見つかりませんでした）';
+              
+              result.warnings.push(
+                `設定されたSubtask Issue Type ID (${subtaskId}) がプロジェクト '${projectKey}' に存在しません。\n` +
+                '\n利用可能なSubtaskタイプ:\n' +
+                suggestions +
+                '\n\n修正方法:\n' +
+                '  1. .envファイルを編集:\n' +
+                '     JIRA_ISSUE_TYPE_SUBTASK=<正しいID>\n' +
+                '\n' +
+                '  2. または、対話的設定を再実行:\n' +
+                '     npm run setup:interactive'
+              );
+            }
+          }
+        } else {
+          // Issue Types取得に失敗した場合（認証エラー、ネットワークエラーなど）
+          // エラーにはしないが、警告として記録
+          result.warnings.push(
+            `JIRAプロジェクト '${projectKey}' のIssue Typesを取得できませんでした。` +
+            '設定されたIssue Type IDの存在確認をスキップします。'
+          );
+        }
+      }
+    } catch (error) {
+      // プロジェクトメタデータの読み込みに失敗した場合など
+      // エラーにはしないが、警告として記録
+      result.warnings.push(
+        `プロジェクトメタデータの読み込みに失敗しました: ${error instanceof Error ? error.message : error}` +
+        `設定されたIssue Type IDの存在確認をスキップします。`
+      );
+    }
+  }
+  
+  // エラーがある場合はvalidをfalseに更新
+  result.valid = result.errors.length === 0;
+  
+  return result;
 }
 
 // CLI実行

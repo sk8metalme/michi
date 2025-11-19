@@ -209,6 +209,25 @@ async function runTasksPhase(feature: string): Promise<PhaseRunResult> {
   
   console.log('✅ tasks.md 存在確認');
   
+  // Step 1.5: tasks.mdフォーマット検証
+  console.log('\n🔍 tasks.mdフォーマット検証中...');
+  const { validateTasksFormat } = await import('./utils/tasks-format-validator.js');
+  try {
+    validateTasksFormat(tasksPath);
+    console.log('✅ tasks.mdフォーマット検証成功');
+  } catch (error: any) {
+    errors.push(`フォーマット検証失敗: ${error.message}`);
+    console.error('❌ フォーマット検証失敗:', error.message);
+    return {
+      phase: 'tasks',
+      success: false,
+      confluenceCreated: false,
+      jiraCreated: false,
+      validationPassed: false,
+      errors
+    };
+  }
+  
   // Step 2: JIRA Epic/Story作成
   console.log('\n📤 JIRA Epic/Story作成中...');
   try {

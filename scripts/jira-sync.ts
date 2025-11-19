@@ -24,7 +24,7 @@ import { config } from 'dotenv';
 import { loadProjectMeta } from './utils/project-meta.js';
 import { validateFeatureNameOrThrow } from './utils/feature-name-validator.js';
 import { getConfig, getConfigPath } from './utils/config-loader.js';
-import { validateForJiraSync } from './utils/config-validator.js';
+import { validateForJiraSync, validateForJiraSyncAsync } from './utils/config-validator.js';
 import { updateSpecJsonAfterJiraSync } from './utils/spec-updater.js';
 
 config();
@@ -295,8 +295,12 @@ class JIRAClient {
     await sleep(this.requestDelay);
     
     try {
-      const response = await axios.get(`${this.baseUrl}/search`, {
-        params: { jql, maxResults: 100 },
+      // JIRA API v3の新しいエンドポイントを使用
+      // /rest/api/3/search は廃止され、/rest/api/3/search/jql に移行
+      const response = await axios.post(`${this.baseUrl}/search/jql`, {
+        jql,
+        maxResults: 100
+      }, {
         headers: {
           'Authorization': `Basic ${this.auth}`,
           'Content-Type': 'application/json'
@@ -333,6 +337,36 @@ class JIRAClient {
       }
     });
   }
+  
+  /**
+   * プロジェクトのIssue Type IDを取得
+   * @param projectKey プロジェクトキー
+   * @param issueTypeName Issue Type名（例: "Epic", "Story"）
+   * @returns Issue Type ID
+   */
+  async getIssueTypeId(projectKey: string, issueTypeName: string): Promise<string | null> {
+    await sleep(this.requestDelay);
+    
+    try {
+      const response = await axios.get(`${this.baseUrl}/project/${projectKey}`, {
+        headers: {
+          'Authorization': `Basic ${this.auth}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      const issueTypes = response.data.issueTypes || [];
+      const issueType = issueTypes.find((it: any) => 
+        it.name.toLowerCase() === issueTypeName.toLowerCase() ||
+        it.name === issueTypeName
+      );
+      
+      return issueType ? issueType.id : null;
+    } catch (error) {
+      console.error(`Error getting issue type ID for ${issueTypeName}:`, error instanceof Error ? error.message : error);
+      return null;
+    }
+  }
 }
 
 async function syncTasksToJIRA(featureName: string): Promise<void> {
@@ -341,8 +375,8 @@ async function syncTasksToJIRA(featureName: string): Promise<void> {
   // feature名のバリデーション（必須）
   validateFeatureNameOrThrow(featureName);
   
-  // 実行前の必須設定値チェック
-  const validation = validateForJiraSync();
+  // 実行前の必須設定値チェック（非同期版：Issue Type IDの存在チェック付き）
+  const validation = await validateForJiraSyncAsync();
   
   if (validation.info.length > 0) {
     validation.info.forEach(msg => console.log(`ℹ️  ${msg}`));
@@ -365,24 +399,37 @@ async function syncTasksToJIRA(featureName: string): Promise<void> {
   
   // 設定からissue type IDを取得（検索と作成の両方で使用）
   const appConfig = getConfig();
-  const storyIssueTypeId = appConfig.jira?.issueTypes?.story || process.env.JIRA_ISSUE_TYPE_STORY;
+  const projectMeta = loadProjectMeta();
+  const config = getJIRAConfig();
+  const client = new JIRAClient(config);
+  
+  // StoryタイプのIDを動的に取得（日本語JIRAでは "ストーリー" という名前の場合がある）
+  let storyIssueTypeId: string | undefined = appConfig.jira?.issueTypes?.story || process.env.JIRA_ISSUE_TYPE_STORY;
+  console.log(`📋 Story Issue Type ID from config/env: ${storyIssueTypeId || 'not found'}`);
+  
+  if (!storyIssueTypeId) {
+    console.log('🔍 Attempting to find Story issue type dynamically...');
+    const foundId = await client.getIssueTypeId(projectMeta.jiraProjectKey, 'Story') ||
+                    await client.getIssueTypeId(projectMeta.jiraProjectKey, 'ストーリー');
+    storyIssueTypeId = foundId ?? undefined;
+    console.log(`📋 Story Issue Type ID from API: ${storyIssueTypeId || 'not found'}`);
+  }
+  
   const subtaskIssueTypeId = appConfig.jira?.issueTypes?.subtask || process.env.JIRA_ISSUE_TYPE_SUBTASK;
   
   if (!storyIssueTypeId) {
     throw new Error(
-      'JIRA Story issue type ID is not configured. ' +
+      'JIRA Story issue type ID is not configured and could not be found in project. ' +
       'Please set JIRA_ISSUE_TYPE_STORY environment variable or configure it in .michi/config.json. ' +
       'You can find the issue type ID in JIRA UI (Settings > Issues > Issue types) or via REST API: ' +
-      'GET https://your-domain.atlassian.net/rest/api/3/issuetype'
+      'GET https://your-domain.atlassian.net/rest/api/3/project/{projectKey}'
     );
   }
   
-  const projectMeta = loadProjectMeta();
+  console.log(`✅ Using Story Issue Type ID: ${storyIssueTypeId}`);
+  
   const tasksPath = resolve(`.kiro/specs/${featureName}/tasks.md`);
   const tasksContent = readFileSync(tasksPath, 'utf-8');
-  
-  const config = getJIRAConfig();
-  const client = new JIRAClient(config);
   
   // spec.jsonを読み込んで既存のEpicキーを確認
   const specPath = resolve(`.kiro/specs/${featureName}/spec.json`);
@@ -421,6 +468,17 @@ async function syncTasksToJIRA(featureName: string): Promise<void> {
       console.log('Using existing Epic instead of creating new one');
       epic = existingEpics[0];
     } else {
+      // EpicタイプのIDを取得（日本語JIRAでは "エピック" という名前の場合がある）
+      const epicTypeId = await client.getIssueTypeId(projectMeta.jiraProjectKey, 'Epic') ||
+                         await client.getIssueTypeId(projectMeta.jiraProjectKey, 'エピック');
+      
+      if (!epicTypeId) {
+        throw new Error(
+          'Epic issue type not found in project. ' +
+          'Please ensure the project has Epic issue type enabled.'
+        );
+      }
+      
       const epicDescription = `機能: ${featureName}\nGitHub: ${projectMeta.repository}/tree/main/.kiro/specs/${featureName}`;
       
       const epicPayload = {
@@ -428,7 +486,7 @@ async function syncTasksToJIRA(featureName: string): Promise<void> {
           project: { key: projectMeta.jiraProjectKey },
           summary: epicSummary,
           description: textToADF(epicDescription),  // ADF形式に変換
-          issuetype: { name: 'Epic' },
+          issuetype: { id: epicTypeId },  // IDを使用（nameではなく）
           labels: projectMeta.confluenceLabels
         }
       };
@@ -453,8 +511,16 @@ async function syncTasksToJIRA(featureName: string): Promise<void> {
     existingStories = [];
   }
   
-  const existingStorySummaries = new Set(existingStories.map((s: any) => s.fields.summary));
-  const existingStoryKeys = new Set(existingStories.map((s: any) => s.key));
+  const existingStorySummaries = new Set(
+    existingStories
+      .filter((s: any) => s?.fields?.summary)
+      .map((s: any) => s.fields.summary)
+  );
+  const existingStoryKeys = new Set(
+    existingStories
+      .filter((s: any) => s?.key)
+      .map((s: any) => s.key)
+  );
   
   console.log(`Found ${existingStories.length} existing stories for this feature`);
   
@@ -504,9 +570,12 @@ async function syncTasksToJIRA(featureName: string): Promise<void> {
     // 既に同じタイトルのStoryが存在するかチェック
     if (existingStorySummaries.has(storySummary)) {
       console.log(`Skipping Story (already exists): ${storyTitle}`);
-      const existing = existingStories.find((s: any) => s.fields.summary === storySummary);
+      const existing = existingStories.find((s: any) => s?.fields?.summary === storySummary);
       if (existing) {
         createdStories.push(existing.key);
+        existingStoryKeys.add(existing.key);
+      } else {
+        console.warn(`⚠️  Warning: Story "${storyTitle}" is in summary set but not found in existingStories array`);
       }
       continue;
     }

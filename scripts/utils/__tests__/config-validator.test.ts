@@ -2,7 +2,7 @@
  * config-validator.ts のユニットテスト
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { existsSync, writeFileSync, unlinkSync, mkdirSync, rmSync } from 'fs';
 import { resolve, join } from 'path';
 import { tmpdir } from 'os';
@@ -10,9 +10,11 @@ import {
   validateProjectConfig,
   validateForConfluenceSync,
   validateForJiraSync,
+  validateForJiraSyncAsync,
   validateAndReport
 } from '../config-validator.js';
 import { clearConfigCache } from '../config-loader.js';
+import * as jiraFetcher from '../jira-issue-type-fetcher.js';
 
 describe('config-validator', () => {
   let testProjectRoot: string;
@@ -318,6 +320,135 @@ describe('config-validator', () => {
       expect(result.valid).toBe(false);
       expect(result.errors.length).toBeGreaterThan(0);
       expect(result.errors[0]).toContain('selectedPhases');
+    });
+  });
+
+  describe('validateForJiraSyncAsync', () => {
+    beforeEach(() => {
+      // 環境変数をクリア
+      delete process.env.JIRA_ISSUE_TYPE_STORY;
+      delete process.env.JIRA_ISSUE_TYPE_SUBTASK;
+      delete process.env.ATLASSIAN_URL;
+      delete process.env.ATLASSIAN_EMAIL;
+      delete process.env.ATLASSIAN_API_TOKEN;
+    });
+
+    it('認証情報が未設定の場合は同期版と同じ結果を返す', async () => {
+      const configPath = join(testProjectRoot, '.michi/config.json');
+      writeFileSync(configPath, JSON.stringify({
+        jira: {
+          issueTypes: {
+            story: '10036'
+          }
+        }
+      }));
+
+      // project.jsonを作成
+      const projectJsonPath = join(testProjectRoot, '.kiro/project.json');
+      mkdirSync(join(testProjectRoot, '.kiro'), { recursive: true });
+      writeFileSync(projectJsonPath, JSON.stringify({
+        jiraProjectKey: 'TEST'
+      }));
+
+      const result = await validateForJiraSyncAsync(testProjectRoot);
+
+      expect(result.valid).toBe(true);
+      expect(result.errors).toHaveLength(0);
+    });
+
+    it('認証情報が設定されていて、Issue Type IDが存在する場合は成功', async () => {
+      process.env.ATLASSIAN_URL = 'https://test.atlassian.net';
+      process.env.ATLASSIAN_EMAIL = 'test@example.com';
+      process.env.ATLASSIAN_API_TOKEN = 'test-token';
+      process.env.JIRA_ISSUE_TYPE_STORY = '10073';
+
+      const configPath = join(testProjectRoot, '.michi/config.json');
+      writeFileSync(configPath, JSON.stringify({
+        jira: {}
+      }));
+
+      // project.jsonを作成
+      const projectJsonPath = join(testProjectRoot, '.kiro/project.json');
+      mkdirSync(join(testProjectRoot, '.kiro'), { recursive: true });
+      writeFileSync(projectJsonPath, JSON.stringify({
+        jiraProjectKey: 'TEST'
+      }));
+
+      // JIRA APIのモック
+      vi.spyOn(jiraFetcher, 'hasJiraCredentials').mockReturnValue(true);
+      vi.spyOn(jiraFetcher, 'getProjectIssueTypes').mockResolvedValue([
+        { id: '10071', name: 'タスク', subtask: false },
+        { id: '10073', name: 'ストーリー', subtask: false },
+        { id: '10075', name: 'サブタスク', subtask: true }
+      ]);
+
+      const result = await validateForJiraSyncAsync(testProjectRoot);
+
+      expect(result.valid).toBe(true);
+      expect(result.errors).toHaveLength(0);
+    });
+
+    it('認証情報が設定されていて、Issue Type IDが存在しない場合はエラー', async () => {
+      process.env.ATLASSIAN_URL = 'https://test.atlassian.net';
+      process.env.ATLASSIAN_EMAIL = 'test@example.com';
+      process.env.ATLASSIAN_API_TOKEN = 'test-token';
+      process.env.JIRA_ISSUE_TYPE_STORY = '99999'; // 存在しないID
+
+      const configPath = join(testProjectRoot, '.michi/config.json');
+      writeFileSync(configPath, JSON.stringify({
+        jira: {}
+      }));
+
+      // project.jsonを作成
+      const projectJsonPath = join(testProjectRoot, '.kiro/project.json');
+      mkdirSync(join(testProjectRoot, '.kiro'), { recursive: true });
+      writeFileSync(projectJsonPath, JSON.stringify({
+        jiraProjectKey: 'TEST'
+      }));
+
+      // JIRA APIのモック
+      vi.spyOn(jiraFetcher, 'hasJiraCredentials').mockReturnValue(true);
+      vi.spyOn(jiraFetcher, 'getProjectIssueTypes').mockResolvedValue([
+        { id: '10071', name: 'タスク', subtask: false },
+        { id: '10073', name: 'ストーリー', subtask: false },
+        { id: '10075', name: 'サブタスク', subtask: true }
+      ]);
+
+      const result = await validateForJiraSyncAsync(testProjectRoot);
+
+      expect(result.valid).toBe(false);
+      expect(result.errors.length).toBeGreaterThan(0);
+      expect(result.errors[0]).toContain('99999');
+      expect(result.errors[0]).toContain('存在しません');
+    });
+
+    it('JIRA API取得に失敗した場合は警告を追加するがエラーにはしない', async () => {
+      process.env.ATLASSIAN_URL = 'https://test.atlassian.net';
+      process.env.ATLASSIAN_EMAIL = 'test@example.com';
+      process.env.ATLASSIAN_API_TOKEN = 'test-token';
+      process.env.JIRA_ISSUE_TYPE_STORY = '10073';
+
+      const configPath = join(testProjectRoot, '.michi/config.json');
+      writeFileSync(configPath, JSON.stringify({
+        jira: {}
+      }));
+
+      // project.jsonを作成
+      const projectJsonPath = join(testProjectRoot, '.kiro/project.json');
+      mkdirSync(join(testProjectRoot, '.kiro'), { recursive: true });
+      writeFileSync(projectJsonPath, JSON.stringify({
+        jiraProjectKey: 'TEST'
+      }));
+
+      // JIRA APIのモック（取得失敗）
+      vi.spyOn(jiraFetcher, 'hasJiraCredentials').mockReturnValue(true);
+      vi.spyOn(jiraFetcher, 'getProjectIssueTypes').mockResolvedValue(null);
+
+      const result = await validateForJiraSyncAsync(testProjectRoot);
+
+      expect(result.valid).toBe(true); // エラーにはしない
+      expect(result.warnings.length).toBeGreaterThan(0);
+      expect(result.warnings[0]).toContain('取得できませんでした');
     });
   });
 });

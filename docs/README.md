@@ -15,6 +15,7 @@ Michiのドキュメントは、目的別に以下のカテゴリに整理され
 | [セットアップガイド](./getting-started/setup.md) | Michiのインストールと設定手順 |
 | [クイックスタート](./getting-started/quick-start.md) | 5分で始めるMichi |
 | [新規リポジトリ作成](./getting-started/new-repository-setup.md) | 新規リポジトリを作成してMichiを使い始める方法 |
+| **[ハンズオンガイド](./hands-on/README.md)** ⭐ | 実際に手を動かして学ぶ1時間のチュートリアル |
 
 ### 📖 実践ガイド ([guides/](./guides/))
 
@@ -57,7 +58,8 @@ Michiプロジェクトに貢献したい開発者向けのガイドです。
 
 1. [セットアップガイド](./getting-started/setup.md) - Michiをインストール
 2. [クイックスタート](./getting-started/quick-start.md) - 5分で基本的な使い方を習得
-3. [ワークフローガイド](./guides/workflow.md) - AI開発フローを理解
+3. **[ハンズオンガイド](./hands-on/README.md)** ⭐ - 1時間で全ワークフローを体験
+4. [ワークフローガイド](./guides/workflow.md) - AI開発フローを理解
 
 ### Michiを別のプロジェクトで使う場合
 
