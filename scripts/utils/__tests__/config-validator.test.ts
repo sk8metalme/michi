@@ -2,21 +2,21 @@
  * config-validator.ts のユニットテスト
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { existsSync, writeFileSync, unlinkSync, mkdirSync, rmSync } from 'fs';
-import { resolve, join } from 'path';
-import { tmpdir } from 'os';
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { existsSync, writeFileSync, unlinkSync, mkdirSync, rmSync } from "fs";
+import { resolve, join } from "path";
+import { tmpdir } from "os";
 import {
   validateProjectConfig,
   validateForConfluenceSync,
   validateForJiraSync,
   validateForJiraSyncAsync,
-  validateAndReport
-} from '../config-validator.js';
-import { clearConfigCache } from '../config-loader.js';
-import * as jiraFetcher from '../jira-issue-type-fetcher.js';
+  validateAndReport,
+} from "../config-validator.js";
+import { clearConfigCache } from "../config-loader.js";
+import * as jiraFetcher from "../jira-issue-type-fetcher.js";
 
-describe('config-validator', () => {
+describe("config-validator", () => {
   let testProjectRoot: string;
   let originalEnv: NodeJS.ProcessEnv;
 
@@ -24,23 +24,26 @@ describe('config-validator', () => {
     // テスト用の一時ディレクトリを作成
     testProjectRoot = resolve(tmpdir(), `michi-test-${Date.now()}`);
     mkdirSync(testProjectRoot, { recursive: true });
-    mkdirSync(join(testProjectRoot, '.michi'), { recursive: true });
+    mkdirSync(join(testProjectRoot, ".michi"), { recursive: true });
 
     // 環境変数をバックアップ
     originalEnv = { ...process.env };
-    
+
     // キャッシュをクリア
     clearConfigCache();
   });
 
   afterEach(() => {
+    // モックをリストア
+    vi.restoreAllMocks();
+
     // 環境変数を復元
     process.env = originalEnv;
 
     // テスト用ディレクトリを削除
     if (existsSync(testProjectRoot)) {
       // ファイルを削除
-      const configPath = join(testProjectRoot, '.michi/config.json');
+      const configPath = join(testProjectRoot, ".michi/config.json");
       if (existsSync(configPath)) {
         unlinkSync(configPath);
       }
@@ -53,10 +56,10 @@ describe('config-validator', () => {
     }
   });
 
-  describe('validateProjectConfig', () => {
-    it('設定ファイルが存在しない場合は情報メッセージを返す', () => {
+  describe("validateProjectConfig", () => {
+    it("設定ファイルが存在しない場合は情報メッセージを返す", () => {
       // .michi/config.jsonが存在しないことを確認
-      const michiConfigPath = join(testProjectRoot, '.michi/config.json');
+      const michiConfigPath = join(testProjectRoot, ".michi/config.json");
       if (existsSync(michiConfigPath)) {
         unlinkSync(michiConfigPath);
       }
@@ -67,25 +70,28 @@ describe('config-validator', () => {
       expect(result.errors).toHaveLength(0);
       expect(result.warnings).toHaveLength(0);
       expect(result.info.length).toBeGreaterThan(0);
-      expect(result.info[0]).toContain('not found');
+      expect(result.info[0]).toContain("not found");
     });
 
-    it('有効な設定ファイルの場合は成功', () => {
+    it("有効な設定ファイルの場合は成功", () => {
       // .michiディレクトリが存在することを確認
-      const michiDir = join(testProjectRoot, '.michi');
+      const michiDir = join(testProjectRoot, ".michi");
       if (!existsSync(michiDir)) {
         mkdirSync(michiDir, { recursive: true });
       }
 
-      const configPath = join(testProjectRoot, '.michi/config.json');
-      writeFileSync(configPath, JSON.stringify({
-        confluence: {
-          pageCreationGranularity: 'single',
-          spaces: {
-            requirements: 'Michi'
-          }
-        }
-      }));
+      const configPath = join(testProjectRoot, ".michi/config.json");
+      writeFileSync(
+        configPath,
+        JSON.stringify({
+          confluence: {
+            pageCreationGranularity: "single",
+            spaces: {
+              requirements: "Michi",
+            },
+          },
+        }),
+      );
 
       const result = validateProjectConfig(testProjectRoot);
 
@@ -93,174 +99,201 @@ describe('config-validator', () => {
       expect(result.errors).toHaveLength(0);
     });
 
-    it('無効なJSONの場合はエラーを返す', () => {
-      const configPath = join(testProjectRoot, '.michi/config.json');
-      writeFileSync(configPath, '{ invalid json }');
+    it("無効なJSONの場合はエラーを返す", () => {
+      const configPath = join(testProjectRoot, ".michi/config.json");
+      writeFileSync(configPath, "{ invalid json }");
 
       const result = validateProjectConfig(testProjectRoot);
 
       expect(result.valid).toBe(false);
       expect(result.errors.length).toBeGreaterThan(0);
-      expect(result.errors[0]).toContain('Invalid JSON');
+      expect(result.errors[0]).toContain("Invalid JSON");
     });
 
-    it('by-hierarchyモードでhierarchy設定がない場合はエラー', () => {
-      const configPath = join(testProjectRoot, '.michi/config.json');
-      writeFileSync(configPath, JSON.stringify({
-        confluence: {
-          pageCreationGranularity: 'by-hierarchy'
-        }
-      }));
+    it("by-hierarchyモードでhierarchy設定がない場合はエラー", () => {
+      const configPath = join(testProjectRoot, ".michi/config.json");
+      writeFileSync(
+        configPath,
+        JSON.stringify({
+          confluence: {
+            pageCreationGranularity: "by-hierarchy",
+          },
+        }),
+      );
 
       const result = validateProjectConfig(testProjectRoot);
 
       expect(result.valid).toBe(false);
       expect(result.errors.length).toBeGreaterThan(0);
-      expect(result.errors[0]).toContain('hierarchy');
+      expect(result.errors[0]).toContain("hierarchy");
     });
 
-    it('selected-phasesモードでselectedPhases設定がない場合はエラー', () => {
-      const configPath = join(testProjectRoot, '.michi/config.json');
-      writeFileSync(configPath, JSON.stringify({
-        jira: {
-          storyCreationGranularity: 'selected-phases'
-        }
-      }));
+    it("selected-phasesモードでselectedPhases設定がない場合はエラー", () => {
+      const configPath = join(testProjectRoot, ".michi/config.json");
+      writeFileSync(
+        configPath,
+        JSON.stringify({
+          jira: {
+            storyCreationGranularity: "selected-phases",
+          },
+        }),
+      );
 
       const result = validateProjectConfig(testProjectRoot);
 
       expect(result.valid).toBe(false);
       expect(result.errors.length).toBeGreaterThan(0);
-      expect(result.errors[0]).toContain('selectedPhases');
+      expect(result.errors[0]).toContain("selectedPhases");
     });
   });
 
-  describe('validateForConfluenceSync', () => {
-    it('spaces設定がない場合は警告を返す', () => {
+  describe("validateForConfluenceSync", () => {
+    it("spaces設定がない場合は警告を返す", () => {
       // 環境変数をクリア
       delete process.env.CONFLUENCE_PRD_SPACE;
-      
-      const configPath = join(testProjectRoot, '.michi/config.json');
-      writeFileSync(configPath, JSON.stringify({
-        confluence: {
-          pageCreationGranularity: 'single'
-        }
-      }));
 
-      const result = validateForConfluenceSync('requirements', testProjectRoot);
+      const configPath = join(testProjectRoot, ".michi/config.json");
+      writeFileSync(
+        configPath,
+        JSON.stringify({
+          confluence: {
+            pageCreationGranularity: "single",
+          },
+        }),
+      );
+
+      const result = validateForConfluenceSync("requirements", testProjectRoot);
 
       expect(result.valid).toBe(true);
       // デフォルト設定がある場合、警告が表示されない可能性がある
       // 実際の動作に合わせてテストを調整
       if (result.warnings.length > 0) {
-        expect(result.warnings[0]).toContain('spaces');
+        expect(result.warnings[0]).toContain("spaces");
       }
     });
 
-    it('spaces設定がある場合は成功', () => {
-      const configPath = join(testProjectRoot, '.michi/config.json');
-      writeFileSync(configPath, JSON.stringify({
-        confluence: {
-          spaces: {
-            requirements: 'Michi'
-          }
-        }
-      }));
+    it("spaces設定がある場合は成功", () => {
+      const configPath = join(testProjectRoot, ".michi/config.json");
+      writeFileSync(
+        configPath,
+        JSON.stringify({
+          confluence: {
+            spaces: {
+              requirements: "Michi",
+            },
+          },
+        }),
+      );
 
-      const result = validateForConfluenceSync('requirements', testProjectRoot);
+      const result = validateForConfluenceSync("requirements", testProjectRoot);
 
       expect(result.valid).toBe(true);
       expect(result.errors).toHaveLength(0);
     });
 
-    it('by-hierarchyモードでhierarchy設定がない場合はエラー', () => {
+    it("by-hierarchyモードでhierarchy設定がない場合はエラー", () => {
       // デフォルト設定を上書きするため、hierarchyキーを削除
       // デフォルト設定にhierarchyがあるため、実際にはエラーにならない可能性がある
-      const configPath = join(testProjectRoot, '.michi/config.json');
-      writeFileSync(configPath, JSON.stringify({
-        confluence: {
-          pageCreationGranularity: 'by-hierarchy',
-          spaces: {
-            requirements: 'Michi'
-          }
-          // hierarchyキーを明示的に削除（デフォルト設定がマージされるため、実際にはエラーにならない）
-        }
-      }));
+      const configPath = join(testProjectRoot, ".michi/config.json");
+      writeFileSync(
+        configPath,
+        JSON.stringify({
+          confluence: {
+            pageCreationGranularity: "by-hierarchy",
+            spaces: {
+              requirements: "Michi",
+            },
+            // hierarchyキーを明示的に削除（デフォルト設定がマージされるため、実際にはエラーにならない）
+          },
+        }),
+      );
 
-      const result = validateForConfluenceSync('requirements', testProjectRoot);
+      const result = validateForConfluenceSync("requirements", testProjectRoot);
 
       // デフォルト設定にhierarchyがある場合、エラーにならない
       // このテストは、デフォルト設定の動作を確認するためのもの
       expect(result.valid).toBe(true);
     });
 
-    it('manualモードでstructure設定がない場合はエラー', () => {
-      const configPath = join(testProjectRoot, '.michi/config.json');
-      writeFileSync(configPath, JSON.stringify({
-        confluence: {
-          pageCreationGranularity: 'manual',
-          hierarchy: {
-            mode: 'simple'
-          }
-        }
-      }));
+    it("manualモードでstructure設定がない場合はエラー", () => {
+      const configPath = join(testProjectRoot, ".michi/config.json");
+      writeFileSync(
+        configPath,
+        JSON.stringify({
+          confluence: {
+            pageCreationGranularity: "manual",
+            hierarchy: {
+              mode: "simple",
+            },
+          },
+        }),
+      );
 
-      const result = validateForConfluenceSync('requirements', testProjectRoot);
+      const result = validateForConfluenceSync("requirements", testProjectRoot);
 
       expect(result.valid).toBe(false);
       expect(result.errors.length).toBeGreaterThan(0);
-      expect(result.errors[0]).toContain('structure');
+      expect(result.errors[0]).toContain("structure");
     });
 
-    it('環境変数CONFLUENCE_PRD_SPACEがある場合は情報メッセージ', () => {
-      process.env.CONFLUENCE_PRD_SPACE = 'Michi';
-      const configPath = join(testProjectRoot, '.michi/config.json');
-      writeFileSync(configPath, JSON.stringify({
-        confluence: {
-          pageCreationGranularity: 'single'
-        }
-      }));
+    it("環境変数CONFLUENCE_PRD_SPACEがある場合は情報メッセージ", () => {
+      process.env.CONFLUENCE_PRD_SPACE = "Michi";
+      const configPath = join(testProjectRoot, ".michi/config.json");
+      writeFileSync(
+        configPath,
+        JSON.stringify({
+          confluence: {
+            pageCreationGranularity: "single",
+          },
+        }),
+      );
 
-      const result = validateForConfluenceSync('requirements', testProjectRoot);
+      const result = validateForConfluenceSync("requirements", testProjectRoot);
 
       expect(result.valid).toBe(true);
       // 環境変数がある場合、infoメッセージが表示される可能性がある
       // 実際の動作に合わせてテストを調整
       if (result.info.length > 0) {
-        expect(result.info[0]).toContain('CONFLUENCE_PRD_SPACE');
+        expect(result.info[0]).toContain("CONFLUENCE_PRD_SPACE");
       }
     });
   });
 
-  describe('validateForJiraSync', () => {
+  describe("validateForJiraSync", () => {
     beforeEach(() => {
       // 環境変数をクリア
       delete process.env.JIRA_ISSUE_TYPE_STORY;
       delete process.env.JIRA_ISSUE_TYPE_SUBTASK;
     });
 
-    it('issueTypes.story設定がない場合はエラー', () => {
-      const configPath = join(testProjectRoot, '.michi/config.json');
-      writeFileSync(configPath, JSON.stringify({
-        jira: {}
-      }));
+    it("issueTypes.story設定がない場合はエラー", () => {
+      const configPath = join(testProjectRoot, ".michi/config.json");
+      writeFileSync(
+        configPath,
+        JSON.stringify({
+          jira: {},
+        }),
+      );
 
       const result = validateForJiraSync(testProjectRoot);
 
       expect(result.valid).toBe(false);
       expect(result.errors.length).toBeGreaterThan(0);
-      expect(result.errors[0]).toContain('issueTypes.story');
+      expect(result.errors[0]).toContain("issueTypes.story");
     });
 
-    it('issueTypes.story設定がある場合は成功', () => {
-      const configPath = join(testProjectRoot, '.michi/config.json');
-      writeFileSync(configPath, JSON.stringify({
-        jira: {
-          issueTypes: {
-            story: '10036'
-          }
-        }
-      }));
+    it("issueTypes.story設定がある場合は成功", () => {
+      const configPath = join(testProjectRoot, ".michi/config.json");
+      writeFileSync(
+        configPath,
+        JSON.stringify({
+          jira: {
+            issueTypes: {
+              story: "10036",
+            },
+          },
+        }),
+      );
 
       const result = validateForJiraSync(testProjectRoot);
 
@@ -268,14 +301,17 @@ describe('config-validator', () => {
       expect(result.errors).toHaveLength(0);
     });
 
-    it('環境変数JIRA_ISSUE_TYPE_STORYがある場合は情報メッセージ', () => {
-      process.env.JIRA_ISSUE_TYPE_STORY = '10036';
-      const configPath = join(testProjectRoot, '.michi/config.json');
-      writeFileSync(configPath, JSON.stringify({
-        jira: {
-          createEpic: true
-        }
-      }));
+    it("環境変数JIRA_ISSUE_TYPE_STORYがある場合は情報メッセージ", () => {
+      process.env.JIRA_ISSUE_TYPE_STORY = "10036";
+      const configPath = join(testProjectRoot, ".michi/config.json");
+      writeFileSync(
+        configPath,
+        JSON.stringify({
+          jira: {
+            createEpic: true,
+          },
+        }),
+      );
 
       const result = validateForJiraSync(testProjectRoot);
 
@@ -283,47 +319,53 @@ describe('config-validator', () => {
       // 環境変数がある場合、infoメッセージが表示される可能性がある
       // 実際の動作に合わせてテストを調整
       if (result.info.length > 0) {
-        expect(result.info[0]).toContain('JIRA_ISSUE_TYPE_STORY');
+        expect(result.info[0]).toContain("JIRA_ISSUE_TYPE_STORY");
       }
     });
 
-    it('issueTypes.subtask設定がない場合は警告', () => {
-      const configPath = join(testProjectRoot, '.michi/config.json');
-      writeFileSync(configPath, JSON.stringify({
-        jira: {
-          issueTypes: {
-            story: '10036'
-          }
-        }
-      }));
+    it("issueTypes.subtask設定がない場合は警告", () => {
+      const configPath = join(testProjectRoot, ".michi/config.json");
+      writeFileSync(
+        configPath,
+        JSON.stringify({
+          jira: {
+            issueTypes: {
+              story: "10036",
+            },
+          },
+        }),
+      );
 
       const result = validateForJiraSync(testProjectRoot);
 
       expect(result.valid).toBe(true);
       expect(result.warnings.length).toBeGreaterThan(0);
-      expect(result.warnings[0]).toContain('subtask');
+      expect(result.warnings[0]).toContain("subtask");
     });
 
-    it('selected-phasesモードでselectedPhases設定がない場合はエラー', () => {
-      const configPath = join(testProjectRoot, '.michi/config.json');
-      writeFileSync(configPath, JSON.stringify({
-        jira: {
-          storyCreationGranularity: 'selected-phases',
-          issueTypes: {
-            story: '10036'
-          }
-        }
-      }));
+    it("selected-phasesモードでselectedPhases設定がない場合はエラー", () => {
+      const configPath = join(testProjectRoot, ".michi/config.json");
+      writeFileSync(
+        configPath,
+        JSON.stringify({
+          jira: {
+            storyCreationGranularity: "selected-phases",
+            issueTypes: {
+              story: "10036",
+            },
+          },
+        }),
+      );
 
       const result = validateForJiraSync(testProjectRoot);
 
       expect(result.valid).toBe(false);
       expect(result.errors.length).toBeGreaterThan(0);
-      expect(result.errors[0]).toContain('selectedPhases');
+      expect(result.errors[0]).toContain("selectedPhases");
     });
   });
 
-  describe('validateForJiraSyncAsync', () => {
+  describe("validateForJiraSyncAsync", () => {
     beforeEach(() => {
       // 環境変数をクリア
       delete process.env.JIRA_ISSUE_TYPE_STORY;
@@ -333,22 +375,28 @@ describe('config-validator', () => {
       delete process.env.ATLASSIAN_API_TOKEN;
     });
 
-    it('認証情報が未設定の場合は同期版と同じ結果を返す', async () => {
-      const configPath = join(testProjectRoot, '.michi/config.json');
-      writeFileSync(configPath, JSON.stringify({
-        jira: {
-          issueTypes: {
-            story: '10036'
-          }
-        }
-      }));
+    it("認証情報が未設定の場合は同期版と同じ結果を返す", async () => {
+      const configPath = join(testProjectRoot, ".michi/config.json");
+      writeFileSync(
+        configPath,
+        JSON.stringify({
+          jira: {
+            issueTypes: {
+              story: "10036",
+            },
+          },
+        }),
+      );
 
       // project.jsonを作成
-      const projectJsonPath = join(testProjectRoot, '.kiro/project.json');
-      mkdirSync(join(testProjectRoot, '.kiro'), { recursive: true });
-      writeFileSync(projectJsonPath, JSON.stringify({
-        jiraProjectKey: 'TEST'
-      }));
+      const projectJsonPath = join(testProjectRoot, ".kiro/project.json");
+      mkdirSync(join(testProjectRoot, ".kiro"), { recursive: true });
+      writeFileSync(
+        projectJsonPath,
+        JSON.stringify({
+          jiraProjectKey: "TEST",
+        }),
+      );
 
       const result = await validateForJiraSyncAsync(testProjectRoot);
 
@@ -356,30 +404,43 @@ describe('config-validator', () => {
       expect(result.errors).toHaveLength(0);
     });
 
-    it('認証情報が設定されていて、Issue Type IDが存在する場合は成功', async () => {
-      process.env.ATLASSIAN_URL = 'https://test.atlassian.net';
-      process.env.ATLASSIAN_EMAIL = 'test@example.com';
-      process.env.ATLASSIAN_API_TOKEN = 'test-token';
-      process.env.JIRA_ISSUE_TYPE_STORY = '10073';
+    it("認証情報が設定されていて、Issue Type IDが存在する場合は成功", async () => {
+      process.env.ATLASSIAN_URL = "https://test.atlassian.net";
+      process.env.ATLASSIAN_EMAIL = "test@example.com";
+      process.env.ATLASSIAN_API_TOKEN = "test-token";
+      process.env.JIRA_ISSUE_TYPE_STORY = "10073";
 
-      const configPath = join(testProjectRoot, '.michi/config.json');
-      writeFileSync(configPath, JSON.stringify({
-        jira: {}
-      }));
+      const configPath = join(testProjectRoot, ".michi/config.json");
+      writeFileSync(
+        configPath,
+        JSON.stringify({
+          jira: {},
+        }),
+      );
 
-      // project.jsonを作成
-      const projectJsonPath = join(testProjectRoot, '.kiro/project.json');
-      mkdirSync(join(testProjectRoot, '.kiro'), { recursive: true });
-      writeFileSync(projectJsonPath, JSON.stringify({
-        jiraProjectKey: 'TEST'
-      }));
+      // project.jsonを作成（すべての必須フィールドを含める）
+      const projectJsonPath = join(testProjectRoot, ".kiro/project.json");
+      mkdirSync(join(testProjectRoot, ".kiro"), { recursive: true });
+      writeFileSync(
+        projectJsonPath,
+        JSON.stringify({
+          projectId: "test-project",
+          projectName: "Test Project",
+          jiraProjectKey: "TEST",
+          confluenceLabels: [],
+          status: "active",
+          team: [],
+          stakeholders: [],
+          repository: "",
+        }),
+      );
 
       // JIRA APIのモック
-      vi.spyOn(jiraFetcher, 'hasJiraCredentials').mockReturnValue(true);
-      vi.spyOn(jiraFetcher, 'getProjectIssueTypes').mockResolvedValue([
-        { id: '10071', name: 'タスク', subtask: false },
-        { id: '10073', name: 'ストーリー', subtask: false },
-        { id: '10075', name: 'サブタスク', subtask: true }
+      vi.spyOn(jiraFetcher, "hasJiraCredentials").mockReturnValue(true);
+      vi.spyOn(jiraFetcher, "getProjectIssueTypes").mockResolvedValue([
+        { id: "10071", name: "タスク", subtask: false },
+        { id: "10073", name: "ストーリー", subtask: false },
+        { id: "10075", name: "サブタスク", subtask: true },
       ]);
 
       const result = await validateForJiraSyncAsync(testProjectRoot);
@@ -388,67 +449,98 @@ describe('config-validator', () => {
       expect(result.errors).toHaveLength(0);
     });
 
-    it('認証情報が設定されていて、Issue Type IDが存在しない場合はエラー', async () => {
-      process.env.ATLASSIAN_URL = 'https://test.atlassian.net';
-      process.env.ATLASSIAN_EMAIL = 'test@example.com';
-      process.env.ATLASSIAN_API_TOKEN = 'test-token';
-      process.env.JIRA_ISSUE_TYPE_STORY = '99999'; // 存在しないID
+    it("認証情報が設定されていて、Issue Type IDが存在しない場合はエラー", async () => {
+      process.env.ATLASSIAN_URL = "https://test.atlassian.net";
+      process.env.ATLASSIAN_EMAIL = "test@example.com";
+      process.env.ATLASSIAN_API_TOKEN = "test-token";
+      process.env.JIRA_ISSUE_TYPE_STORY = "99999"; // 存在しないID
 
-      const configPath = join(testProjectRoot, '.michi/config.json');
-      writeFileSync(configPath, JSON.stringify({
-        jira: {}
-      }));
+      const configPath = join(testProjectRoot, ".michi/config.json");
+      writeFileSync(
+        configPath,
+        JSON.stringify({
+          jira: {},
+        }),
+      );
 
-      // project.jsonを作成
-      const projectJsonPath = join(testProjectRoot, '.kiro/project.json');
-      mkdirSync(join(testProjectRoot, '.kiro'), { recursive: true });
-      writeFileSync(projectJsonPath, JSON.stringify({
-        jiraProjectKey: 'TEST'
-      }));
+      // project.jsonを作成（すべての必須フィールドを含める）
+      const projectJsonPath = join(testProjectRoot, ".kiro/project.json");
+      mkdirSync(join(testProjectRoot, ".kiro"), { recursive: true });
+      writeFileSync(
+        projectJsonPath,
+        JSON.stringify({
+          projectId: "test-project",
+          projectName: "Test Project",
+          jiraProjectKey: "TEST",
+          confluenceLabels: [],
+          status: "active",
+          team: [],
+          stakeholders: [],
+          repository: "",
+        }),
+      );
 
       // JIRA APIのモック
-      vi.spyOn(jiraFetcher, 'hasJiraCredentials').mockReturnValue(true);
-      vi.spyOn(jiraFetcher, 'getProjectIssueTypes').mockResolvedValue([
-        { id: '10071', name: 'タスク', subtask: false },
-        { id: '10073', name: 'ストーリー', subtask: false },
-        { id: '10075', name: 'サブタスク', subtask: true }
+      vi.spyOn(jiraFetcher, "hasJiraCredentials").mockReturnValue(true);
+      vi.spyOn(jiraFetcher, "getProjectIssueTypes").mockResolvedValue([
+        { id: "10071", name: "タスク", subtask: false },
+        { id: "10073", name: "ストーリー", subtask: false },
+        { id: "10075", name: "サブタスク", subtask: true },
       ]);
 
       const result = await validateForJiraSyncAsync(testProjectRoot);
 
       expect(result.valid).toBe(false);
       expect(result.errors.length).toBeGreaterThan(0);
-      expect(result.errors.some(e => e.includes('99999') && e.includes('存在しません'))).toBe(true);
+      expect(
+        result.errors.some(
+          (e) => e.includes("99999") && e.includes("存在しません"),
+        ),
+      ).toBe(true);
     });
 
-    it('JIRA API取得に失敗した場合は警告を追加するがエラーにはしない', async () => {
-      process.env.ATLASSIAN_URL = 'https://test.atlassian.net';
-      process.env.ATLASSIAN_EMAIL = 'test@example.com';
-      process.env.ATLASSIAN_API_TOKEN = 'test-token';
-      process.env.JIRA_ISSUE_TYPE_STORY = '10073';
+    it("JIRA API取得に失敗した場合は警告を追加するがエラーにはしない", async () => {
+      process.env.ATLASSIAN_URL = "https://test.atlassian.net";
+      process.env.ATLASSIAN_EMAIL = "test@example.com";
+      process.env.ATLASSIAN_API_TOKEN = "test-token";
+      process.env.JIRA_ISSUE_TYPE_STORY = "10073";
 
-      const configPath = join(testProjectRoot, '.michi/config.json');
-      writeFileSync(configPath, JSON.stringify({
-        jira: {}
-      }));
+      const configPath = join(testProjectRoot, ".michi/config.json");
+      writeFileSync(
+        configPath,
+        JSON.stringify({
+          jira: {},
+        }),
+      );
 
-      // project.jsonを作成
-      const projectJsonPath = join(testProjectRoot, '.kiro/project.json');
-      mkdirSync(join(testProjectRoot, '.kiro'), { recursive: true });
-      writeFileSync(projectJsonPath, JSON.stringify({
-        jiraProjectKey: 'TEST'
-      }));
+      // project.jsonを作成（すべての必須フィールドを含める）
+      const projectJsonPath = join(testProjectRoot, ".kiro/project.json");
+      mkdirSync(join(testProjectRoot, ".kiro"), { recursive: true });
+      writeFileSync(
+        projectJsonPath,
+        JSON.stringify({
+          projectId: "test-project",
+          projectName: "Test Project",
+          jiraProjectKey: "TEST",
+          confluenceLabels: [],
+          status: "active",
+          team: [],
+          stakeholders: [],
+          repository: "",
+        }),
+      );
 
       // JIRA APIのモック（取得失敗）
-      vi.spyOn(jiraFetcher, 'hasJiraCredentials').mockReturnValue(true);
-      vi.spyOn(jiraFetcher, 'getProjectIssueTypes').mockResolvedValue(null);
+      vi.spyOn(jiraFetcher, "hasJiraCredentials").mockReturnValue(true);
+      vi.spyOn(jiraFetcher, "getProjectIssueTypes").mockResolvedValue(null);
 
       const result = await validateForJiraSyncAsync(testProjectRoot);
 
       expect(result.valid).toBe(true); // エラーにはしない
       expect(result.warnings.length).toBeGreaterThan(0);
-      expect(result.warnings.some(w => w.includes('取得できませんでした'))).toBe(true);
+      expect(
+        result.warnings.some((w) => w.includes("取得できませんでした")),
+      ).toBe(true);
     });
   });
 });
-
