@@ -178,11 +178,11 @@ export function hasIssueTypeId(
  * @returns Storyタイプのリスト
  */
 export function filterStoryTypes(issueTypes: IssueTypeInfo[]): IssueTypeInfo[] {
-  return issueTypes.filter(it => 
+  return issueTypes.filter(it =>
     !it.subtask &&
-    (it.name.toLowerCase().includes('story') ||
-     it.name.includes('ストーリー') ||
-     it.name.toLowerCase().includes('epic') === false) // Epicは除外
+    (it.name.toLowerCase().includes('story') || it.name.includes('ストーリー')) &&
+    !it.name.toLowerCase().includes('epic') &&
+    !it.name.includes('エピック')
   );
 }
 

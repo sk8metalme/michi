@@ -295,9 +295,9 @@ class JIRAClient {
     await sleep(this.requestDelay);
     
     try {
-      // JIRA API v3の新しいエンドポイントを使用
-      // /rest/api/3/search は廃止され、/rest/api/3/search/jql に移行
-      const response = await axios.post(`${this.baseUrl}/search/jql`, {
+      // JIRA API v3の検索エンドポイントを使用
+      // POST /rest/api/3/search でJQL検索を実行
+      const response = await axios.post(`${this.baseUrl}/search`, {
         jql,
         maxResults: 100
       }, {

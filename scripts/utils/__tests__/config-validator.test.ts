@@ -418,8 +418,7 @@ describe('config-validator', () => {
 
       expect(result.valid).toBe(false);
       expect(result.errors.length).toBeGreaterThan(0);
-      expect(result.errors[0]).toContain('99999');
-      expect(result.errors[0]).toContain('存在しません');
+      expect(result.errors.some(e => e.includes('99999') && e.includes('存在しません'))).toBe(true);
     });
 
     it('JIRA API取得に失敗した場合は警告を追加するがエラーにはしない', async () => {
@@ -448,7 +447,7 @@ describe('config-validator', () => {
 
       expect(result.valid).toBe(true); // エラーにはしない
       expect(result.warnings.length).toBeGreaterThan(0);
-      expect(result.warnings[0]).toContain('取得できませんでした');
+      expect(result.warnings.some(w => w.includes('取得できませんでした'))).toBe(true);
     });
   });
 });

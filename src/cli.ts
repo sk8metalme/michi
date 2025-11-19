@@ -32,13 +32,12 @@ const __dirname = dirname(__filename);
  * 利用者のプロジェクトがNode.jsでなくてもMichiを使えるようにする
  */
 function getMichiVersion(): string {
+  // package.jsonの場所を探索
+  // - ビルド後/npm実行時: __dirname/../../package.json (dist/src/cli.js)
+  // - 開発時: __dirname/../package.json (src/cli.ts)
   const possiblePaths = [
-    // 1. dist/src/cli.js からの相対パス（npm link / グローバルインストール後）
     join(__dirname, '..', '..', 'package.json'),
-    // 2. src/cli.ts からの相対パス（開発時）
     join(__dirname, '..', 'package.json'),
-    // 3. node_modules内（npx実行時）
-    join(__dirname, '..', '..', '..', 'package.json'),
   ];
 
   for (const path of possiblePaths) {

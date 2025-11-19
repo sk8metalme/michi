@@ -14,14 +14,28 @@ import { readFileSync } from 'fs';
  */
 export function validateTasksFormat(tasksPath: string): void {
   let content: string;
-  
+
   try {
     content = readFileSync(tasksPath, 'utf-8');
   } catch (error) {
     throw new Error(`Failed to read tasks.md: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
-  
-  // 1. 全6フェーズが存在するかチェック
+
+  // 1. AI-DLCフォーマット検出（誤ったフォーマット）を最初にチェック
+  // より具体的なエラーメッセージを優先的に表示
+  // AI-DLCは "- [ ] 1." のようなフォーマットで、Phase 0:がない
+  const hasCheckboxPattern = /^- \[ \] \d+\./m.test(content);
+  const hasPhase0 = content.includes('Phase 0:');
+
+  if (hasCheckboxPattern && !hasPhase0) {
+    throw new Error(
+      `tasks.md appears to be in AI-DLC format instead of Michi 6-phase format.\n` +
+      `Detected "- [ ] 1." pattern without "Phase 0:" header.\n` +
+      `Please regenerate tasks.md using /kiro:spec-tasks command with correct template.`
+    );
+  }
+
+  // 2. 全6フェーズが存在するかチェック
   const requiredPhases = [
     'Phase 0: 要件定義（Requirements）',
     'Phase 1: 設計（Design）',
@@ -30,7 +44,7 @@ export function validateTasksFormat(tasksPath: string): void {
     'Phase 4: リリース準備（Release Preparation）',
     'Phase 5: リリース（Release）'
   ];
-  
+
   const missingPhases = requiredPhases.filter(phase => !content.includes(phase));
   if (missingPhases.length > 0) {
     throw new Error(
@@ -39,27 +53,14 @@ export function validateTasksFormat(tasksPath: string): void {
       `Please regenerate tasks.md using /kiro:spec-tasks command.`
     );
   }
-  
-  // 2. Storyヘッダーのフォーマットチェック
+
+  // 3. Storyヘッダーのフォーマットチェック
   const storyPattern = /### Story \d+\.\d+:/;
   if (!storyPattern.test(content)) {
     throw new Error(
       `tasks.md does not contain valid Story headers.\n` +
       `Expected format: "### Story X.Y: Title"\n` +
       `Please regenerate tasks.md using /kiro:spec-tasks command.`
-    );
-  }
-  
-  // 3. AI-DLCフォーマット検出（誤ったフォーマット）
-  // AI-DLCは "- [ ] 1." のようなフォーマットで、Phase 0:がない
-  const hasCheckboxPattern = /^- \[ \] \d+\./m.test(content);
-  const hasPhase0 = content.includes('Phase 0:');
-  
-  if (hasCheckboxPattern && !hasPhase0) {
-    throw new Error(
-      `tasks.md appears to be in AI-DLC format instead of Michi 6-phase format.\n` +
-      `Detected "- [ ] 1." pattern without "Phase 0:" header.\n` +
-      `Please regenerate tasks.md using /kiro:spec-tasks command with correct template.`
     );
   }
   
