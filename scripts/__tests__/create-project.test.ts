@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { execSync } from 'child_process';
+import { execSync, type ExecSyncOptions } from 'child_process';
 import { join } from 'path';
 
 // モジュールのモック
@@ -271,14 +271,14 @@ describe('create-project.ts .env作成時のcwd修正', () => {
 
     // execSync の呼び出しをモック
     mockExecSync.mockImplementation(
-      (command: string, options?: { cwd?: string; stdio?: string }) => {
+      (command: string, options?: ExecSyncOptions) => {
         if (command === 'npm run setup:env') {
           // cwd が actualProjectDir であることを確認
           expect(options?.cwd).toBe(actualProjectDir);
           expect(options?.cwd).not.toBe(projectDir);
-          return '';
+          return Buffer.from('');
         }
-        return '';
+        return Buffer.from('');
       },
     );
 

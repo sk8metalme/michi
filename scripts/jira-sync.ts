@@ -505,8 +505,8 @@ async function syncTasksToJIRA(featureName: string): Promise<void> {
     console.error('spec.json not found or invalid');
   }
 
-  let epic: JIRAIssue | undefined;
-  
+  let epic: { key: string } | undefined;
+
   // 既存のEpicをチェック
   if (spec.jira?.epicKey) {
     console.log(`Existing Epic found: ${spec.jira.epicKey}`);
@@ -560,7 +560,12 @@ async function syncTasksToJIRA(featureName: string): Promise<void> {
       console.log(`✅ Epic created: ${epic.key}`);
     }
   }
-  
+
+  // Epicが確実に設定されていることを確認
+  if (!epic) {
+    throw new Error('Epic creation or retrieval failed');
+  }
+
   // 既存のStoryを検索（重複防止）
   // ラベルで検索（summary検索では "Story: タイトル" 形式に一致しないため）
   // issuetype検索にはIDを使用（名前は言語依存のため）
