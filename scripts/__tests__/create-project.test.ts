@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { execSync } from 'child_process';
+import { execSync, type ExecSyncOptions } from 'child_process';
 import { join } from 'path';
 
 // モジュールのモック
@@ -8,7 +8,7 @@ vi.mock('fs', () => ({
   existsSync: vi.fn(() => true),
   mkdirSync: vi.fn(),
   cpSync: vi.fn(),
-  writeFileSync: vi.fn()
+  writeFileSync: vi.fn(),
 }));
 vi.mock('dotenv', () => ({ config: vi.fn() }));
 
@@ -27,8 +27,14 @@ describe('create-project.ts パス問題', () => {
     expect(cursorRulesPath).not.toContain(join(projectDir, '.cursor'));
 
     // .cursor/commands のコピー先パスを検証
-    const cursorCommandsPath = join(actualProjectDir, '.cursor/commands/kiro', 'test.md');
-    expect(cursorCommandsPath).toContain('projects/test-project/.cursor/commands');
+    const cursorCommandsPath = join(
+      actualProjectDir,
+      '.cursor/commands/kiro',
+      'test.md',
+    );
+    expect(cursorCommandsPath).toContain(
+      'projects/test-project/.cursor/commands',
+    );
 
     // .kiro/steering のコピー先パスを検証
     const kiroSteeringPath = join(actualProjectDir, '.kiro/steering');
@@ -61,11 +67,11 @@ describe('create-project.ts パス問題', () => {
       join(actualProjectDir, '.cursor/commands/kiro'),
       join(actualProjectDir, '.kiro/steering'),
       join(actualProjectDir, '.kiro/settings/templates'),
-      join(actualProjectDir, 'scripts/utils')
+      join(actualProjectDir, 'scripts/utils'),
     ];
 
     // すべてのディレクトリが actualProjectDir 配下にあることを確認
-    directories.forEach(dir => {
+    directories.forEach((dir) => {
       expect(dir).toContain('projects/test-project');
       expect(dir.startsWith(actualProjectDir)).toBe(true);
     });
@@ -98,7 +104,7 @@ describe('create-project.ts jj/git 依存性', () => {
       try {
         const jjVersion = execSync('jj --version', {
           encoding: 'utf-8',
-          stdio: ['pipe', 'pipe', 'pipe']
+          stdio: ['pipe', 'pipe', 'pipe'],
         }).trim();
         return { vcs: 'jj' as const, version: jjVersion };
       } catch {
@@ -110,7 +116,7 @@ describe('create-project.ts jj/git 依存性', () => {
     expect(result.vcs).toBe('jj');
     expect(mockExecSync).toHaveBeenCalledWith(
       'jj --version',
-      expect.objectContaining({ encoding: 'utf-8' })
+      expect.objectContaining({ encoding: 'utf-8' }),
     );
   });
 
@@ -131,14 +137,14 @@ describe('create-project.ts jj/git 依存性', () => {
       try {
         const jjVersion = execSync('jj --version', {
           encoding: 'utf-8',
-          stdio: ['pipe', 'pipe', 'pipe']
+          stdio: ['pipe', 'pipe', 'pipe'],
         }).trim();
         return { vcs: 'jj' as const, version: jjVersion };
       } catch {
         try {
           const gitVersion = execSync('git --version', {
             encoding: 'utf-8',
-            stdio: ['pipe', 'pipe', 'pipe']
+            stdio: ['pipe', 'pipe', 'pipe'],
           }).trim();
           return { vcs: 'git' as const, version: gitVersion };
         } catch {
@@ -150,8 +156,16 @@ describe('create-project.ts jj/git 依存性', () => {
     const result = checkDeps();
     expect(result.vcs).toBe('git');
     expect(mockExecSync).toHaveBeenCalledTimes(2);
-    expect(mockExecSync).toHaveBeenNthCalledWith(1, 'jj --version', expect.anything());
-    expect(mockExecSync).toHaveBeenNthCalledWith(2, 'git --version', expect.anything());
+    expect(mockExecSync).toHaveBeenNthCalledWith(
+      1,
+      'jj --version',
+      expect.anything(),
+    );
+    expect(mockExecSync).toHaveBeenNthCalledWith(
+      2,
+      'git --version',
+      expect.anything(),
+    );
   });
 
   it('jj も git も未インストール時はエラーを投げる', () => {
@@ -165,14 +179,14 @@ describe('create-project.ts jj/git 依存性', () => {
       try {
         const jjVersion = execSync('jj --version', {
           encoding: 'utf-8',
-          stdio: ['pipe', 'pipe', 'pipe']
+          stdio: ['pipe', 'pipe', 'pipe'],
         }).trim();
         return { vcs: 'jj' as const, version: jjVersion };
       } catch {
         try {
           const gitVersion = execSync('git --version', {
             encoding: 'utf-8',
-            stdio: ['pipe', 'pipe', 'pipe']
+            stdio: ['pipe', 'pipe', 'pipe'],
           }).trim();
           return { vcs: 'git' as const, version: gitVersion };
         } catch {
@@ -189,18 +203,26 @@ describe('create-project.ts jj/git 依存性', () => {
     const projectDir = '/test/repo';
 
     // jj の場合
-    const jjDeps: { vcs: 'jj' | 'git'; version: string } = { vcs: 'jj', version: 'jj 0.15.0' };
-    const jjCommand = jjDeps.vcs === 'jj'
-      ? `jj git clone ${repoUrl} ${projectDir}`
-      : `git clone ${repoUrl} ${projectDir}`;
+    const jjDeps: { vcs: 'jj' | 'git'; version: string } = {
+      vcs: 'jj',
+      version: 'jj 0.15.0',
+    };
+    const jjCommand =
+      jjDeps.vcs === 'jj'
+        ? `jj git clone ${repoUrl} ${projectDir}`
+        : `git clone ${repoUrl} ${projectDir}`;
 
     expect(jjCommand).toBe(`jj git clone ${repoUrl} ${projectDir}`);
 
     // git の場合
-    const gitDeps: { vcs: 'jj' | 'git'; version: string } = { vcs: 'git', version: 'git version 2.40' };
-    const gitCommand = gitDeps.vcs === 'jj'
-      ? `jj git clone ${repoUrl} ${projectDir}`
-      : `git clone ${repoUrl} ${projectDir}`;
+    const gitDeps: { vcs: 'jj' | 'git'; version: string } = {
+      vcs: 'git',
+      version: 'git version 2.40',
+    };
+    const gitCommand =
+      gitDeps.vcs === 'jj'
+        ? `jj git clone ${repoUrl} ${projectDir}`
+        : `git clone ${repoUrl} ${projectDir}`;
 
     expect(gitCommand).toBe(`git clone ${repoUrl} ${projectDir}`);
   });
@@ -210,28 +232,20 @@ describe('create-project.ts jj/git 依存性', () => {
 
     // jj の場合のコマンド群
     const jjDeps: { vcs: 'jj' | 'git' } = { vcs: 'jj' };
-    const jjCommands = jjDeps.vcs === 'jj' ? [
-      `jj commit -m "${message}"`,
-      'jj bookmark create main -r "@-"'
-    ] : [
-      'git add .',
-      `git commit -m "${message}"`,
-      'git branch -M main'
-    ];
+    const jjCommands =
+      jjDeps.vcs === 'jj'
+        ? [`jj commit -m "${message}"`, 'jj bookmark create main -r "@-"']
+        : ['git add .', `git commit -m "${message}"`, 'git branch -M main'];
 
     expect(jjCommands).toContain('jj commit -m "chore: initial commit"');
     expect(jjCommands).toContain('jj bookmark create main -r "@-"');
 
     // git の場合のコマンド群
     const gitDeps: { vcs: 'jj' | 'git' } = { vcs: 'git' };
-    const gitCommands = gitDeps.vcs === 'jj' ? [
-      `jj commit -m "${message}"`,
-      'jj bookmark create main -r "@-"'
-    ] : [
-      'git add .',
-      `git commit -m "${message}"`,
-      'git branch -M main'
-    ];
+    const gitCommands =
+      gitDeps.vcs === 'jj'
+        ? [`jj commit -m "${message}"`, 'jj bookmark create main -r "@-"']
+        : ['git add .', `git commit -m "${message}"`, 'git branch -M main'];
 
     expect(gitCommands).toContain('git add .');
     expect(gitCommands).toContain('git commit -m "chore: initial commit"');
@@ -256,22 +270,24 @@ describe('create-project.ts .env作成時のcwd修正', () => {
     const actualProjectDir = '/test/repo/projects/test-project';
 
     // execSync の呼び出しをモック
-    mockExecSync.mockImplementation((command: string, options?: any) => {
-      if (command === 'npm run setup:env') {
-        // cwd が actualProjectDir であることを確認
-        expect(options?.cwd).toBe(actualProjectDir);
-        expect(options?.cwd).not.toBe(projectDir);
-        return '';
-      }
-      return '';
-    });
+    mockExecSync.mockImplementation(
+      (command: string, options?: ExecSyncOptions) => {
+        if (command === 'npm run setup:env') {
+          // cwd が actualProjectDir であることを確認
+          expect(options?.cwd).toBe(actualProjectDir);
+          expect(options?.cwd).not.toBe(projectDir);
+          return Buffer.from('');
+        }
+        return Buffer.from('');
+      },
+    );
 
     // .env作成のロジックを再現
     execSync('npm run setup:env', { cwd: actualProjectDir, stdio: 'inherit' });
 
     expect(mockExecSync).toHaveBeenCalledWith(
       'npm run setup:env',
-      expect.objectContaining({ cwd: actualProjectDir })
+      expect.objectContaining({ cwd: actualProjectDir }),
     );
   });
 
@@ -287,6 +303,8 @@ describe('create-project.ts .env作成時のcwd修正', () => {
     expect(envPathInActualProjectDir).toContain('projects/test-project/.env');
     expect(envPathInActualProjectDir).not.toBe(envPathInProjectDir);
     expect(envPathInProjectDir).toBe('/test/repo/.env');
-    expect(envPathInActualProjectDir).toBe('/test/repo/projects/test-project/.env');
+    expect(envPathInActualProjectDir).toBe(
+      '/test/repo/projects/test-project/.env',
+    );
   });
 });

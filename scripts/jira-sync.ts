@@ -24,8 +24,8 @@ import { config } from 'dotenv';
 import { loadProjectMeta } from './utils/project-meta.js';
 import { validateFeatureNameOrThrow } from './utils/feature-name-validator.js';
 import { getConfig, getConfigPath } from './utils/config-loader.js';
-import { validateForJiraSync } from './utils/config-validator.js';
-import { updateSpecJsonAfterJiraSync } from './utils/spec-updater.js';
+import { validateForJiraSyncAsync } from './utils/config-validator.js';
+import { updateSpecJsonAfterJiraSync, type SpecJson } from './utils/spec-updater.js';
 
 config();
 
@@ -42,6 +42,73 @@ function sleep(ms: number): Promise<void> {
  */
 function getRequestDelay(): number {
   return parseInt(process.env.ATLASSIAN_REQUEST_DELAY || '500', 10);
+}
+
+/**
+ * Atlassian Document Format (ADF) の型定義
+ */
+interface ADFNode {
+  type: string;
+  attrs?: Record<string, unknown>;
+  content?: ADFNode[];
+  text?: string;
+  marks?: Array<{ type: string; attrs?: Record<string, unknown> }>;
+}
+
+interface ADFDocument {
+  version: number;
+  type: 'doc';
+  content: ADFNode[];
+}
+
+/**
+ * JIRA Issue型定義（必要最小限）
+ */
+interface JIRAIssue {
+  id: string;
+  key: string;
+  self: string;
+  fields: {
+    summary: string;
+    issuetype?: { id: string; name: string };
+    status?: { name: string };
+    [key: string]: unknown;
+  };
+}
+
+/**
+ * JIRA Issue作成/更新ペイロード型
+ */
+interface JIRAIssuePayload {
+  fields: {
+    project: { key: string };
+    summary: string;
+    description?: ADFDocument;
+    issuetype: { id: string };
+    labels?: string[];
+    parent?: { key: string };
+    [key: string]: unknown;
+  };
+  update?: Record<string, unknown>;
+}
+
+/**
+ * JIRA Issue作成レスポンス型
+ */
+interface JIRAIssueCreateResponse {
+  id: string;
+  key: string;
+  self: string;
+}
+
+/**
+ * JIRA Issue Type型
+ */
+interface JIRAIssueType {
+  id: string;
+  name: string;
+  description?: string;
+  subtask: boolean;
 }
 
 /**
@@ -121,8 +188,8 @@ function extractStoryDetails(tasksContent: string, storyTitle: string): StoryDet
 /**
  * リッチなADF形式を生成
  */
-function createRichADF(details: StoryDetails, phaseLabel: string, githubUrl: string): any {
-  const content: any[] = [];
+function createRichADF(details: StoryDetails, phaseLabel: string, githubUrl: string): ADFDocument {
+  const content: ADFNode[] = [];
   
   // 説明セクション
   if (details.description) {
@@ -238,7 +305,7 @@ function createRichADF(details: StoryDetails, phaseLabel: string, githubUrl: str
 /**
  * プレーンテキストをAtlassian Document Format（ADF）に変換
  */
-function textToADF(text: string): any {
+function textToADF(text: string): ADFDocument {
   // 改行で分割して段落を作成
   const paragraphs = text.split('\n').filter(line => line.trim().length > 0);
   
@@ -290,13 +357,17 @@ class JIRAClient {
    * JQL検索でIssueを検索
    * @throws 検索エラー時は例外を再スロー（呼び出し元で処理）
    */
-  async searchIssues(jql: string): Promise<any[]> {
+  async searchIssues(jql: string): Promise<JIRAIssue[]> {
     // レートリミット対策: リクエスト前に待機
     await sleep(this.requestDelay);
     
     try {
-      const response = await axios.get(`${this.baseUrl}/search`, {
-        params: { jql, maxResults: 100 },
+      // JIRA API v3の検索エンドポイントを使用
+      // POST /rest/api/3/search でJQL検索を実行
+      const response = await axios.post(`${this.baseUrl}/search`, {
+        jql,
+        maxResults: 100
+      }, {
         headers: {
           'Authorization': `Basic ${this.auth}`,
           'Content-Type': 'application/json'
@@ -309,11 +380,11 @@ class JIRAClient {
     }
   }
   
-  async createIssue(payload: any): Promise<any> {
+  async createIssue(payload: JIRAIssuePayload): Promise<JIRAIssueCreateResponse> {
     // レートリミット対策: リクエスト前に待機
     await sleep(this.requestDelay);
-    
-    const response = await axios.post(`${this.baseUrl}/issue`, payload, {
+
+    const response = await axios.post<JIRAIssueCreateResponse>(`${this.baseUrl}/issue`, payload, {
       headers: {
         'Authorization': `Basic ${this.auth}`,
         'Content-Type': 'application/json'
@@ -321,8 +392,8 @@ class JIRAClient {
     });
     return response.data;
   }
-  
-  async updateIssue(issueKey: string, payload: any): Promise<void> {
+
+  async updateIssue(issueKey: string, payload: Partial<JIRAIssuePayload>): Promise<void> {
     // レートリミット対策: リクエスト前に待機
     await sleep(this.requestDelay);
     
@@ -333,6 +404,36 @@ class JIRAClient {
       }
     });
   }
+  
+  /**
+   * プロジェクトのIssue Type IDを取得
+   * @param projectKey プロジェクトキー
+   * @param issueTypeName Issue Type名（例: "Epic", "Story"）
+   * @returns Issue Type ID
+   */
+  async getIssueTypeId(projectKey: string, issueTypeName: string): Promise<string | null> {
+    await sleep(this.requestDelay);
+    
+    try {
+      const response = await axios.get(`${this.baseUrl}/project/${projectKey}`, {
+        headers: {
+          'Authorization': `Basic ${this.auth}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      const issueTypes = (response.data.issueTypes || []) as JIRAIssueType[];
+      const issueType = issueTypes.find((it: JIRAIssueType) =>
+        it.name.toLowerCase() === issueTypeName.toLowerCase() ||
+        it.name === issueTypeName
+      );
+      
+      return issueType ? issueType.id : null;
+    } catch (error) {
+      console.error(`Error getting issue type ID for ${issueTypeName}:`, error instanceof Error ? error.message : error);
+      return null;
+    }
+  }
 }
 
 async function syncTasksToJIRA(featureName: string): Promise<void> {
@@ -341,8 +442,8 @@ async function syncTasksToJIRA(featureName: string): Promise<void> {
   // feature名のバリデーション（必須）
   validateFeatureNameOrThrow(featureName);
   
-  // 実行前の必須設定値チェック
-  const validation = validateForJiraSync();
+  // 実行前の必須設定値チェック（非同期版：Issue Type IDの存在チェック付き）
+  const validation = await validateForJiraSyncAsync();
   
   if (validation.info.length > 0) {
     validation.info.forEach(msg => console.log(`ℹ️  ${msg}`));
@@ -365,36 +466,47 @@ async function syncTasksToJIRA(featureName: string): Promise<void> {
   
   // 設定からissue type IDを取得（検索と作成の両方で使用）
   const appConfig = getConfig();
-  const storyIssueTypeId = appConfig.jira?.issueTypes?.story || process.env.JIRA_ISSUE_TYPE_STORY;
-  const subtaskIssueTypeId = appConfig.jira?.issueTypes?.subtask || process.env.JIRA_ISSUE_TYPE_SUBTASK;
-  
-  if (!storyIssueTypeId) {
-    throw new Error(
-      'JIRA Story issue type ID is not configured. ' +
-      'Please set JIRA_ISSUE_TYPE_STORY environment variable or configure it in .michi/config.json. ' +
-      'You can find the issue type ID in JIRA UI (Settings > Issues > Issue types) or via REST API: ' +
-      'GET https://your-domain.atlassian.net/rest/api/3/issuetype'
-    );
-  }
-  
   const projectMeta = loadProjectMeta();
-  const tasksPath = resolve(`.kiro/specs/${featureName}/tasks.md`);
-  const tasksContent = readFileSync(tasksPath, 'utf-8');
-  
   const config = getJIRAConfig();
   const client = new JIRAClient(config);
   
-  // spec.jsonを読み込んで既存のEpicキーを確認
-  const specPath = resolve(`.kiro/specs/${featureName}/spec.json`);
-  let spec: any = {};
-  try {
-    spec = JSON.parse(readFileSync(specPath, 'utf-8'));
-  } catch (error) {
-    console.error('spec.json not found or invalid');
+  // StoryタイプのIDを動的に取得（日本語JIRAでは "ストーリー" という名前の場合がある）
+  let storyIssueTypeId: string | undefined = appConfig.jira?.issueTypes?.story || process.env.JIRA_ISSUE_TYPE_STORY;
+  console.log(`📋 Story Issue Type ID from config/env: ${storyIssueTypeId || 'not found'}`);
+  
+  if (!storyIssueTypeId) {
+    console.log('🔍 Attempting to find Story issue type dynamically...');
+    const foundId = await client.getIssueTypeId(projectMeta.jiraProjectKey, 'Story') ||
+                    await client.getIssueTypeId(projectMeta.jiraProjectKey, 'ストーリー');
+    storyIssueTypeId = foundId ?? undefined;
+    console.log(`📋 Story Issue Type ID from API: ${storyIssueTypeId || 'not found'}`);
   }
   
-  let epic: any;
+  if (!storyIssueTypeId) {
+    throw new Error(
+      'JIRA Story issue type ID is not configured and could not be found in project. ' +
+      'Please set JIRA_ISSUE_TYPE_STORY environment variable or configure it in .michi/config.json. ' +
+      'You can find the issue type ID in JIRA UI (Settings > Issues > Issue types) or via REST API: ' +
+      'GET https://your-domain.atlassian.net/rest/api/3/project/{projectKey}'
+    );
+  }
   
+  console.log(`✅ Using Story Issue Type ID: ${storyIssueTypeId}`);
+  
+  const tasksPath = resolve(`.kiro/specs/${featureName}/tasks.md`);
+  const tasksContent = readFileSync(tasksPath, 'utf-8');
+  
+  // spec.jsonを読み込んで既存のEpicキーを確認
+  const specPath = resolve(`.kiro/specs/${featureName}/spec.json`);
+  let spec: SpecJson = {};
+  try {
+    spec = JSON.parse(readFileSync(specPath, 'utf-8')) as SpecJson;
+  } catch {
+    console.error('spec.json not found or invalid');
+  }
+
+  let epic: { key: string } | undefined;
+
   // 既存のEpicをチェック
   if (spec.jira?.epicKey) {
     console.log(`Existing Epic found: ${spec.jira.epicKey}`);
@@ -407,7 +519,7 @@ async function syncTasksToJIRA(featureName: string): Promise<void> {
     
     // 同じタイトルのEpicがすでに存在するかJQLで検索
     const jql = `project = ${projectMeta.jiraProjectKey} AND issuetype = Epic AND summary ~ "${featureName}"`;
-    let existingEpics: any[] = [];
+    let existingEpics: JIRAIssue[] = [];
     try {
       existingEpics = await client.searchIssues(jql);
     } catch (error) {
@@ -421,6 +533,17 @@ async function syncTasksToJIRA(featureName: string): Promise<void> {
       console.log('Using existing Epic instead of creating new one');
       epic = existingEpics[0];
     } else {
+      // EpicタイプのIDを取得（日本語JIRAでは "エピック" という名前の場合がある）
+      const epicTypeId = await client.getIssueTypeId(projectMeta.jiraProjectKey, 'Epic') ||
+                         await client.getIssueTypeId(projectMeta.jiraProjectKey, 'エピック');
+      
+      if (!epicTypeId) {
+        throw new Error(
+          'Epic issue type not found in project. ' +
+          'Please ensure the project has Epic issue type enabled.'
+        );
+      }
+      
       const epicDescription = `機能: ${featureName}\nGitHub: ${projectMeta.repository}/tree/main/.kiro/specs/${featureName}`;
       
       const epicPayload = {
@@ -428,7 +551,7 @@ async function syncTasksToJIRA(featureName: string): Promise<void> {
           project: { key: projectMeta.jiraProjectKey },
           summary: epicSummary,
           description: textToADF(epicDescription),  // ADF形式に変換
-          issuetype: { name: 'Epic' },
+          issuetype: { id: epicTypeId },  // IDを使用（nameではなく）
           labels: projectMeta.confluenceLabels
         }
       };
@@ -437,7 +560,12 @@ async function syncTasksToJIRA(featureName: string): Promise<void> {
       console.log(`✅ Epic created: ${epic.key}`);
     }
   }
-  
+
+  // Epicが確実に設定されていることを確認
+  if (!epic) {
+    throw new Error('Epic creation or retrieval failed');
+  }
+
   // 既存のStoryを検索（重複防止）
   // ラベルで検索（summary検索では "Story: タイトル" 形式に一致しないため）
   // issuetype検索にはIDを使用（名前は言語依存のため）
@@ -453,8 +581,16 @@ async function syncTasksToJIRA(featureName: string): Promise<void> {
     existingStories = [];
   }
   
-  const existingStorySummaries = new Set(existingStories.map((s: any) => s.fields.summary));
-  const existingStoryKeys = new Set(existingStories.map((s: any) => s.key));
+  const existingStorySummaries = new Set(
+    existingStories
+      .filter((s: JIRAIssue) => s?.fields?.summary)
+      .map((s: JIRAIssue) => s.fields.summary)
+  );
+  const existingStoryKeys = new Set(
+    existingStories
+      .filter((s: JIRAIssue) => s?.key)
+      .map((s: JIRAIssue) => s.key)
+  );
   
   console.log(`Found ${existingStories.length} existing stories for this feature`);
   
@@ -504,9 +640,12 @@ async function syncTasksToJIRA(featureName: string): Promise<void> {
     // 既に同じタイトルのStoryが存在するかチェック
     if (existingStorySummaries.has(storySummary)) {
       console.log(`Skipping Story (already exists): ${storyTitle}`);
-      const existing = existingStories.find((s: any) => s.fields.summary === storySummary);
+      const existing = existingStories.find((s: any) => s?.fields?.summary === storySummary);
       if (existing) {
         createdStories.push(existing.key);
+        existingStoryKeys.add(existing.key);
+      } else {
+        console.warn(`⚠️  Warning: Story "${storyTitle}" is in summary set but not found in existingStories array`);
       }
       continue;
     }

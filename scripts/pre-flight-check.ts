@@ -81,7 +81,7 @@ function checkProjectJson(): { errors: string[], warnings: string[] } {
   let projectMeta: any;
   try {
     projectMeta = JSON.parse(readFileSync(projectJsonPath, 'utf-8'));
-  } catch (error) {
+  } catch {
     errors.push('❌ project.json のパースに失敗しました');
     return { errors, warnings };
   }

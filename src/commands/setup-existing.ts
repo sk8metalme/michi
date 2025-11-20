@@ -1,28 +1,36 @@
 /**
  * setup-existing command
  * 既存プロジェクトにMichiワークフローを追加するコマンド
- * 
+ *
  * 使い方:
  * npx @sk8metal/michi-cli setup-existing --cursor --lang ja
  * npm run michi:setup:cursor
  */
 
-import { cpSync, existsSync, mkdirSync, writeFileSync, readFileSync, readdirSync, chmodSync } from 'fs';
+import {
+  cpSync,
+  existsSync,
+  mkdirSync,
+  writeFileSync,
+  readFileSync,
+  readdirSync,
+  chmodSync,
+} from 'fs';
 import { join, basename, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { execSync } from 'child_process';
 import { findRepositoryRoot } from '../../scripts/utils/project-finder.js';
 import {
   type Environment,
-  getEnvironmentConfig
+  getEnvironmentConfig,
 } from '../../scripts/constants/environments.js';
 import {
   type SupportedLanguage,
-  isSupportedLanguage
+  isSupportedLanguage,
 } from '../../scripts/constants/languages.js';
 import {
   createTemplateContext,
-  renderTemplate
+  renderTemplate,
 } from '../../scripts/template/renderer.js';
 import * as readline from 'readline';
 
@@ -52,7 +60,7 @@ interface SetupConfig {
  */
 function validateProjectName(name: string): string {
   const trimmed = name.trim();
-  
+
   // 長さチェック
   if (!trimmed || trimmed.length === 0) {
     throw new Error('プロジェクト名が空です');
@@ -60,23 +68,25 @@ function validateProjectName(name: string): string {
   if (trimmed.length > 100) {
     throw new Error('プロジェクト名が長すぎます（最大100文字）');
   }
-  
+
   // パストラバーサル対策
   if (/[/\\]/.test(trimmed)) {
-    throw new Error('プロジェクト名にパス区切り文字（/ または \\）は使用できません');
+    throw new Error(
+      'プロジェクト名にパス区切り文字（/ または \\）は使用できません',
+    );
   }
-  
+
   // 相対パス攻撃対策
   if (/^\.\.?$|^\.\.?\//.test(trimmed)) {
     throw new Error('プロジェクト名に相対パス（. または ..）は使用できません');
   }
-  
+
   // 制御文字対策
   // eslint-disable-next-line no-control-regex
   if (/[\x00-\x1F\x7F]/.test(trimmed)) {
     throw new Error('プロジェクト名に制御文字は使用できません');
   }
-  
+
   return trimmed;
 }
 
@@ -85,12 +95,14 @@ function validateProjectName(name: string): string {
  */
 function validateJiraKey(key: string): string {
   const trimmed = key.trim().toUpperCase();
-  
+
   // JIRAキー形式: 2-10文字の大文字英字
   if (!/^[A-Z]{2,10}$/.test(trimmed)) {
-    throw new Error('JIRAキーの形式が不正です（2-10文字の大文字英字のみ、例: PRJA）');
+    throw new Error(
+      'JIRAキーの形式が不正です（2-10文字の大文字英字のみ、例: PRJA）',
+    );
   }
-  
+
   return trimmed;
 }
 
@@ -100,7 +112,7 @@ function validateJiraKey(key: string): string {
 async function prompt(question: string): Promise<string> {
   const rl = readline.createInterface({
     input: process.stdin,
-    output: process.stdout
+    output: process.stdout,
   });
 
   try {
@@ -117,7 +129,9 @@ async function prompt(question: string): Promise<string> {
 /**
  * 環境を決定（オプションまたは対話的）
  */
-async function determineEnvironment(options: SetupOptions): Promise<Environment> {
+async function determineEnvironment(
+  options: SetupOptions,
+): Promise<Environment> {
   if (options.cursor) return 'cursor';
   if (options.claude) return 'claude';
   if (options.claudeAgent) return 'claude-agent';
@@ -130,7 +144,7 @@ async function determineEnvironment(options: SetupOptions): Promise<Environment>
   console.log('');
 
   const choice = await prompt('選択 [1-3] (デフォルト: 1): ');
-  
+
   switch (choice || '1') {
   case '1':
     return 'cursor';
@@ -159,30 +173,22 @@ async function buildConfig(options: SetupOptions): Promise<SetupConfig> {
 
   // プロジェクト名（対話的プロンプト）
   let projectName = options.projectName;
-  if (!projectName) {
+  if (projectName === undefined) {
     console.log('');
     projectName = await prompt('プロジェクト名（例: プロジェクトA）: ');
   }
-  
+
   // バリデーション
-  try {
-    projectName = validateProjectName(projectName);
-  } catch (error) {
-    throw new Error(`プロジェクト名が不正です: ${error instanceof Error ? error.message : error}`);
-  }
+  projectName = validateProjectName(projectName || '');
 
   // JIRAキー（対話的プロンプト）
   let jiraKey = options.jiraKey;
-  if (!jiraKey) {
+  if (jiraKey === undefined) {
     jiraKey = await prompt('JIRAプロジェクトキー（例: PRJA）: ');
   }
-  
+
   // バリデーション
-  try {
-    jiraKey = validateJiraKey(jiraKey);
-  } catch (error) {
-    throw new Error(`JIRAキーが不正です: ${error instanceof Error ? error.message : error}`);
-  }
+  jiraKey = validateJiraKey(jiraKey || '');
 
   // 確認
   console.log('');
@@ -202,7 +208,7 @@ async function buildConfig(options: SetupOptions): Promise<SetupConfig> {
     projectName,
     jiraKey,
     environment,
-    langCode
+    langCode,
   };
 }
 
@@ -213,25 +219,29 @@ function resolveTemplatesDir(): string {
   const candidates = [
     {
       path: join(__dirname, '..', '..', '..', 'templates'),
-      description: 'Production (compiled)'
+      description: 'Production (compiled)',
     },
     {
       path: join(__dirname, '..', '..', 'templates'),
-      description: 'Development (source)'
-    }
+      description: 'Development (source)',
+    },
   ];
 
   for (const candidate of candidates) {
     if (existsSync(candidate.path)) {
       if (process.env.DEBUG) {
-        console.log(`📋 Template path resolved: ${candidate.path} (${candidate.description})`);
+        console.log(
+          `📋 Template path resolved: ${candidate.path} (${candidate.description})`,
+        );
       }
       return candidate.path;
     }
   }
 
   // エラー時は試行したパスを表示
-  const triedPaths = candidates.map(c => `  - ${c.path} (${c.description})`).join('\n');
+  const triedPaths = candidates
+    .map((c) => `  - ${c.path} (${c.description})`)
+    .join('\n');
   throw new Error(`Templates directory not found. Tried:\n${triedPaths}`);
 }
 
@@ -241,7 +251,7 @@ function resolveTemplatesDir(): string {
 function copyAndRenderTemplates(
   sourceDir: string,
   destDir: string,
-  context: ReturnType<typeof createTemplateContext>
+  context: ReturnType<typeof createTemplateContext>,
 ): void {
   const entries = readdirSync(sourceDir, { withFileTypes: true });
 
@@ -280,15 +290,21 @@ export async function setupExisting(options: SetupOptions): Promise<void> {
   // リポジトリルートを検出
   const repoRoot = findRepositoryRoot(currentDir);
   console.log(`📁 リポジトリルート: ${repoRoot}`);
-  
+
   // repoRootの安全性を検証
   if (!repoRoot || !existsSync(repoRoot)) {
     throw new Error('リポジトリルートが見つかりません');
   }
-  
+
   const gitDir = join(repoRoot, '.git');
   if (!existsSync(gitDir)) {
-    throw new Error(`Gitリポジトリではありません: ${repoRoot}`);
+    console.warn('⚠️  Warning: Not a Git repository');
+    console.warn(`   Directory: ${repoRoot}`);
+    console.warn(
+      '   Recommendation: Run "git init" to initialize a repository',
+    );
+    console.warn('   Continuing without Git...');
+    console.log('');
   }
 
   // テンプレートディレクトリを解決
@@ -309,14 +325,16 @@ export async function setupExisting(options: SetupOptions): Promise<void> {
   // GitHub URLを取得
   let repoUrl = '';
   try {
-    repoUrl = execSync('git config --get remote.origin.url', { 
-      encoding: 'utf-8', 
+    repoUrl = execSync('git config --get remote.origin.url', {
+      encoding: 'utf-8',
       cwd: repoRoot,
-      stdio: ['ignore', 'pipe', 'pipe']
+      stdio: ['ignore', 'pipe', 'pipe'],
     }).trim();
-    
+
     if (repoUrl.startsWith('git@github.com:')) {
-      repoUrl = repoUrl.replace('git@github.com:', 'https://github.com/').replace('.git', '');
+      repoUrl = repoUrl
+        .replace('git@github.com:', 'https://github.com/')
+        .replace('.git', '');
     } else if (repoUrl.endsWith('.git')) {
       repoUrl = repoUrl.replace('.git', '');
     }
@@ -357,14 +375,20 @@ export async function setupExisting(options: SetupOptions): Promise<void> {
     team: [],
     stakeholders: ['@企画', '@部長'],
     repository: repoUrl,
-    description: `${config.projectName}の開発`
+    description: `${config.projectName}の開発`,
   };
 
   try {
-    writeFileSync('.kiro/project.json', JSON.stringify(projectJson, null, 2), 'utf-8');
+    writeFileSync(
+      '.kiro/project.json',
+      JSON.stringify(projectJson, null, 2),
+      'utf-8',
+    );
     console.log('   ✅ project.json created');
   } catch (error) {
-    throw new Error(`Failed to write project.json: ${error instanceof Error ? error.message : error}`);
+    throw new Error(
+      `Failed to write project.json: ${error instanceof Error ? error.message : error}`,
+    );
   }
 
   // 環境別テンプレートのコピーとレンダリング
@@ -374,7 +398,9 @@ export async function setupExisting(options: SetupOptions): Promise<void> {
   const templateContext = createTemplateContext(
     config.langCode,
     '.kiro',
-    envConfig.rulesDir.startsWith('.') ? envConfig.rulesDir.substring(1, envConfig.rulesDir.indexOf('/', 1)) : envConfig.rulesDir.split('/')[0]
+    envConfig.rulesDir.startsWith('.')
+      ? envConfig.rulesDir.substring(1, envConfig.rulesDir.indexOf('/', 1))
+      : envConfig.rulesDir.split('/')[0],
   );
 
   const templateSourceDir = join(templatesDir, envConfig.templateSource);
@@ -382,8 +408,11 @@ export async function setupExisting(options: SetupOptions): Promise<void> {
   if (!existsSync(templateSourceDir)) {
     console.log(`   ⚠️  Template source not found: ${templateSourceDir}`);
   } else {
-    // rulesディレクトリ
-    const rulesTemplateDir = join(templateSourceDir, 'rules');
+    // rulesディレクトリ（環境別にテンプレートディレクトリ名が異なる）
+    // cursor/claude: 'rules', claude-agent: 'subagents'
+    const templateDirName =
+      config.environment === 'claude-agent' ? 'subagents' : 'rules';
+    const rulesTemplateDir = join(templateSourceDir, templateDirName);
     const rulesDestDir = join(currentDir, envConfig.rulesDir);
 
     if (existsSync(rulesTemplateDir)) {
@@ -398,7 +427,11 @@ export async function setupExisting(options: SetupOptions): Promise<void> {
 
     if (existsSync(commandsTemplateDir)) {
       mkdirSync(commandsDestDir, { recursive: true });
-      copyAndRenderTemplates(commandsTemplateDir, commandsDestDir, templateContext);
+      copyAndRenderTemplates(
+        commandsTemplateDir,
+        commandsDestDir,
+        templateContext,
+      );
       console.log(`   ✅ Commands copied to ${envConfig.commandsDir}`);
     }
   }
@@ -408,10 +441,14 @@ export async function setupExisting(options: SetupOptions): Promise<void> {
   const michiSteeringDir = join(templatesDir, '..', '.kiro', 'steering');
   if (existsSync(michiSteeringDir)) {
     try {
-      cpSync(michiSteeringDir, join(currentDir, '.kiro/steering'), { recursive: true });
+      cpSync(michiSteeringDir, join(currentDir, '.kiro/steering'), {
+        recursive: true,
+      });
       console.log('   ✅ Steering templates copied');
     } catch (error) {
-      throw new Error(`Failed to copy steering templates: ${error instanceof Error ? error.message : error}`);
+      throw new Error(
+        `Failed to copy steering templates: ${error instanceof Error ? error.message : error}`,
+      );
     }
   } else {
     console.log('   ⚠️  Steering templates not found (skipped)');
@@ -419,22 +456,124 @@ export async function setupExisting(options: SetupOptions): Promise<void> {
 
   // Specテンプレートをコピー
   console.log('\n📄 Step 5: Copying spec templates...');
-  const michiSpecTemplatesDir = join(templatesDir, '..', '.kiro', 'settings', 'templates');
+  const michiSpecTemplatesDir = join(
+    templatesDir,
+    '..',
+    '.kiro',
+    'settings',
+    'templates',
+  );
   if (existsSync(michiSpecTemplatesDir)) {
     try {
-      cpSync(michiSpecTemplatesDir, join(currentDir, '.kiro/settings/templates'), { recursive: true });
+      cpSync(
+        michiSpecTemplatesDir,
+        join(currentDir, '.kiro/settings/templates'),
+        { recursive: true },
+      );
       console.log('   ✅ Spec templates copied');
     } catch (error) {
-      throw new Error(`Failed to copy spec templates: ${error instanceof Error ? error.message : error}`);
+      throw new Error(
+        `Failed to copy spec templates: ${error instanceof Error ? error.message : error}`,
+      );
     }
   } else {
     console.log('   ⚠️  Spec templates not found (skipped)');
   }
 
-  // .env テンプレート作成
-  console.log('\n🔐 Step 6: Creating .env template...');
+  // Specルールをコピー
+  const michiSpecRulesDir = join(
+    templatesDir,
+    '..',
+    '.kiro',
+    'settings',
+    'rules',
+  );
+  if (existsSync(michiSpecRulesDir)) {
+    try {
+      cpSync(michiSpecRulesDir, join(currentDir, '.kiro/settings/rules'), {
+        recursive: true,
+      });
+      console.log('   ✅ Spec rules copied');
+    } catch (error) {
+      throw new Error(
+        `Failed to copy spec rules: ${error instanceof Error ? error.message : error}`,
+      );
+    }
+  } else {
+    console.log('   ⚠️  Spec rules not found (skipped)');
+  }
 
-  const envTemplate = `# Atlassian設定（MCP + REST API共通）
+  // .env 対話的設定
+  console.log('\n🔐 Step 6: Configuring environment variables...');
+
+  const envConfigPath = '.env';
+
+  // 動的インポート（env-config.tsが新規作成されたため）
+  const { parseEnvFile, configureEnvInteractive, generateEnvContent } =
+    await import('../../scripts/utils/env-config.js');
+
+  let existingEnvValues: Map<string, string> | undefined;
+
+  if (existsSync(envConfigPath)) {
+    console.log('   ℹ️  既存の .env ファイルを検出しました');
+    existingEnvValues = parseEnvFile(envConfigPath);
+
+    const overwrite = await prompt(
+      '既存値を表示して上書き確認しますか？ [Y/n]: ',
+    );
+    if (overwrite.toLowerCase() !== 'n') {
+      // 対話的設定を実行
+      const newEnvValues = await configureEnvInteractive(
+        existingEnvValues,
+        config.jiraKey,
+        repoUrl,
+      );
+      const envContent = generateEnvContent(newEnvValues);
+      try {
+        writeFileSync(envConfigPath, envContent, 'utf-8');
+        chmodSync(envConfigPath, 0o600);
+        console.log('   ✅ .env updated (permissions: 600)');
+      } catch (error) {
+        throw new Error(
+          `Failed to update .env: ${error instanceof Error ? error.message : error}`,
+        );
+      }
+    } else {
+      console.log('   ℹ️  .env file kept unchanged');
+    }
+  } else {
+    // 新規作成の場合
+    // テスト環境かどうかを判定（process.env.NODE_ENVまたはプロセスが対話的かどうか）
+    const isInteractive =
+      process.stdin.isTTY && process.env.NODE_ENV !== 'test';
+
+    if (isInteractive) {
+      // 対話的環境では、ユーザーに確認
+      const shouldConfigure = await prompt(
+        '.env を対話的に設定しますか？ [Y/n]: ',
+      );
+      if (shouldConfigure.toLowerCase() !== 'n') {
+        const newEnvValues = await configureEnvInteractive(
+          undefined,
+          config.jiraKey,
+          repoUrl,
+        );
+        const envContent = generateEnvContent(newEnvValues);
+        try {
+          writeFileSync(envConfigPath, envContent, 'utf-8');
+          chmodSync(envConfigPath, 0o600);
+          console.log('   ✅ .env created (permissions: 600)');
+        } catch (error) {
+          throw new Error(
+            `Failed to create .env: ${error instanceof Error ? error.message : error}`,
+          );
+        }
+        return; // 早期リターン
+      }
+    }
+
+    // 非対話的環境、またはユーザーが'n'と答えた場合: テンプレート作成
+    const envTemplate = `# Atlassian設定（MCP + REST API共通）
 ATLASSIAN_URL=https://your-domain.atlassian.net
 ATLASSIAN_EMAIL=your-email@company.com
 ATLASSIAN_API_TOKEN=your-token-here
@@ -456,20 +595,89 @@ JIRA_PROJECT_KEYS=${config.jiraKey}
 JIRA_ISSUE_TYPE_STORY=10036
 JIRA_ISSUE_TYPE_SUBTASK=10037
 `;
-
-  if (!existsSync('.env')) {
     try {
-      writeFileSync('.env', envTemplate, 'utf-8');
-      // セキュリティ: .envファイルの権限を600に設定（所有者のみ読み書き可能）
-      chmodSync('.env', 0o600);
+      writeFileSync(envConfigPath, envTemplate, 'utf-8');
+      chmodSync(envConfigPath, 0o600);
       console.log('   ✅ .env template created (permissions: 600)');
     } catch (error) {
-      throw new Error(`Failed to write .env template: ${error instanceof Error ? error.message : error}`);
+      throw new Error(
+        `Failed to write .env template: ${error instanceof Error ? error.message : error}`,
+      );
+    }
+  }
+
+  // .gitignore 更新
+  console.log('\n📝 Step 7: Updating .gitignore...');
+
+  const gitignorePath = join(repoRoot, '.gitignore');
+  let gitignoreContent = '';
+
+  if (existsSync(gitignorePath)) {
+    try {
+      gitignoreContent = readFileSync(gitignorePath, 'utf-8');
+    } catch (error) {
+      console.warn('   ⚠️  Warning: Failed to read .gitignore');
+      if (error instanceof Error && error.message) {
+        console.warn(`   Reason: ${error.message}`);
+      }
+    }
+  }
+
+  const entriesToAdd = [
+    '# Environment variables',
+    '.env',
+    '.env.local',
+    '.env.*.local',
+  ];
+
+  let modified = false;
+  const lines = gitignoreContent.split('\n').map((l) => l.trim());
+
+  for (const entry of entriesToAdd) {
+    if (!lines.includes(entry.trim())) {
+      if (!modified) {
+        gitignoreContent += '\n\n# Added by michi setup\n';
+        modified = true;
+      }
+      gitignoreContent += entry + '\n';
+    }
+  }
+
+  if (modified) {
+    try {
+      writeFileSync(gitignorePath, gitignoreContent, 'utf-8');
+      console.log('   ✅ .gitignore updated');
+    } catch (error) {
+      console.warn('   ⚠️  Warning: Failed to update .gitignore');
+      if (error instanceof Error && error.message) {
+        console.warn(`   Reason: ${error.message}`);
+      }
+      console.warn('   Please manually add .env to .gitignore');
     }
   } else {
-    console.log('   ℹ️  .env already exists (kept)');
-    console.log('   ⚠️  Warning: Please verify .env file permissions (recommended: 600)');
-    console.log('   Run: chmod 600 .env');
+    console.log('   ℹ️  .gitignore already contains .env entries');
+  }
+
+  // セットアップバリデーション
+  console.log('\n🔍 Step 8: Validating setup...');
+
+  const expectedFiles = [
+    '.kiro/settings/templates/specs/tasks.md',
+    '.kiro/settings/templates/specs/requirements.md',
+    '.kiro/settings/templates/specs/design.md',
+    '.kiro/settings/rules/tasks-generation.md',
+  ];
+
+  const missingFiles = expectedFiles.filter(
+    (f) => !existsSync(join(currentDir, f)),
+  );
+  if (missingFiles.length > 0) {
+    console.log(
+      '   ⚠️  Some template files not found (will be created by cc-sdd):',
+    );
+    missingFiles.forEach((f) => console.log(`      - ${f}`));
+  } else {
+    console.log('   ✅ All template files present');
   }
 
   // 完了メッセージ
@@ -477,12 +685,16 @@ JIRA_ISSUE_TYPE_SUBTASK=10037
   console.log('🎉 セットアップ完了！');
   console.log('');
   console.log('次のステップ:');
-  console.log('  1. .env ファイルを編集して認証情報を設定');
-  console.log('  2. npm install で依存関係をインストール（リポジトリルートで実行）');
+  console.log('  1. .env ファイルの内容を確認（必要に応じて追加編集）');
+  console.log(
+    '  2. npm install で依存関係をインストール（リポジトリルートで実行）',
+  );
   console.log('  3. Cursor で開く: cursor .');
-  console.log('  4. /kiro:spec-init <機能説明> で開発開始');
+  console.log('  4. Cursorを起動したら ~/.cursor/mcp.json の設定を確認');
+  console.log('     MCP設定の詳細: https://github.com/sk8metalme/michi/issues');
+  console.log('     （環境別MCP設定の対話的セットアップ機能は開発中）');
+  console.log('  5. /kiro:spec-init <機能説明> で開発開始');
   console.log('');
   console.log('詳細: https://github.com/sk8metalme/michi');
   console.log('');
 }
-

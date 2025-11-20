@@ -4,7 +4,7 @@
  */
 
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
-import { resolve, join, basename } from 'path';
+import { join, basename } from 'path';
 import * as readline from 'readline';
 import { findCurrentProject, findAllProjects, selectProject, findRepositoryRoot } from './utils/project-finder.js';
 import type { ProjectMetadata } from './utils/project-meta.js';
@@ -375,7 +375,7 @@ async function main(): Promise<number> {
     const projectsDir = join(repoRoot, 'projects');
     
     // プロジェクト検出
-    const currentProject = findCurrentProject();
+    findCurrentProject();
     const allProjects = findAllProjects();
     
     let projectPath: string;
@@ -420,7 +420,7 @@ async function main(): Promise<number> {
         try {
           const content = readFileSync(projectJsonPath, 'utf-8');
           existingMeta = JSON.parse(content);
-        } catch (error) {
+        } catch {
           // 読み込みエラーは無視
         }
       }
@@ -442,7 +442,7 @@ async function main(): Promise<number> {
         try {
           const content = readFileSync(projectJsonPath, 'utf-8');
           existingMeta = JSON.parse(content);
-        } catch (error) {
+        } catch {
           // 読み込みエラーは無視
         }
       }

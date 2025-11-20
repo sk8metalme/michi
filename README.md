@@ -16,6 +16,7 @@ Michiは、開発フロー全体（要件定義→設計→タスク分割→実
 
 ### 主な機能
 - ✅ **AI駆動開発**: cc-sdd + Cursor/VS Code統合
+- ✅ **多言語サポート**: 12言語対応（AI駆動、翻訳ファイル不要）
 - ✅ **GitHub SSoT(Single Source Of True)**: GitHubを情報源として管理
 - ✅ **Confluence/JIRA連携**: 承認者向けドキュメント、タスク管理
 - ✅ **マルチプロジェクト対応**: 3-5プロジェクト同時進行
@@ -31,15 +32,40 @@ Confluence ← ドキュメント管理
 JIRA ← タスク管理・進捗追跡
 ```
 
+### 対応プロジェクト
+
+Michiは**言語非依存**で、どんなプロジェクトでも使用できます：
+
+- ✅ **Java**（Maven/Gradle）
+- ✅ **Python**（pip/poetry/uv）
+- ✅ **Go**（go mod）
+- ✅ **Node.js**（npm/yarn/pnpm）
+- ✅ **Rust**（Cargo）
+- ✅ **PHP**（Composer）
+- ✅ **Ruby**（Bundler）
+- ✅ その他あらゆる言語
+
+**重要**: Michiは`package.json`を要求しません。プロジェクトの設定は`.kiro/project.json`で完結します。
+
 ## クイックスタート
 
 ### 前提条件
 
-- Node.js 20.x以上
+- Node.js 20.x以上（Michi CLIの実行に必要。プロジェクト自体はNode.jsでなくてもOK）
 - Git（または Jujutsu (jj) も使用可能）
 - Cursor IDE または VS Code
 - GitHub CLI (gh) - PR作成時に使用
+- **GitHub Personal Access Token** - GitHub連携に必要（[作成ガイド](./docs/getting-started/github-token-setup.md)）
 - **cc-sdd**: AI駆動開発ワークフローのコアフレームワーク
+
+**重要な注意事項**:
+- ⚠️ **セットアップ時にテンプレートファイルが不足している場合、エラーが発生します**
+  - 最新のMichiをインストールしてください
+  - エラーが発生した場合は[トラブルシューティング](./docs/hands-on/troubleshooting.md)を参照
+- ⚠️ **tasks.mdのフォーマットが間違っているとJIRA同期が失敗します**
+  - 全6フェーズ（Phase 0-5）が必須です
+  - AIコマンド実行時は必ずテンプレートを参照するよう指示してください
+  - 詳細: [tasks.mdフォーマット問題](./docs/hands-on/troubleshooting.md#問題-tasksmdのフォーマットが間違っているformat-validation-error)
 
 ### インストール
 
@@ -457,12 +483,14 @@ npm run create-project -- \
 - [クイックスタート](./docs/getting-started/quick-start.md) - 5分で始める ⭐
 - [セットアップガイド](./docs/getting-started/setup.md) - インストール・設定手順
 - [新規リポジトリセットアップ](./docs/getting-started/new-repository-setup.md) - 新規リポジトリでの開始方法
+- **[ハンズオンガイド](./docs/hands-on/README.md)** - 実際に手を動かして学ぶ1時間のチュートリアル ⭐
 
 ### 実践ガイド
 - [ワークフローガイド](./docs/guides/workflow.md) - AI開発フロー ⭐
 - [フェーズ自動化ガイド](./docs/guides/phase-automation.md) - Confluence/JIRA自動作成 ⭐
 - [マルチプロジェクト管理](./docs/guides/multi-project.md) - 複数プロジェクト管理
 - [カスタマイズガイド](./docs/guides/customization.md) - Confluence/JIRA階層構造のカスタマイズ
+- [多言語サポートガイド](./docs/guides/internationalization.md) - AI駆動多言語対応（12言語サポート） ⭐
 
 ### リファレンス
 - [クイックリファレンス](./docs/reference/quick-reference.md) - コマンド一覧、チートシート ⭐

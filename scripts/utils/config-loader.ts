@@ -290,7 +290,7 @@ export function getConfig(projectRoot: string = process.cwd()): AppConfig {
         cachedDefaultConfigMtime = null;
       }
     }
-  } catch (error) {
+  } catch {
     // ファイルアクセスエラー（削除された場合など）は変更として扱う
     defaultConfigChanged = true;
     cachedDefaultConfigMtime = null;
@@ -312,7 +312,7 @@ export function getConfig(projectRoot: string = process.cwd()): AppConfig {
         cachedConfigMtime = null;
       }
     }
-  } catch (error) {
+  } catch {
     // ファイルアクセスエラー（削除された場合など）は変更として扱う
     projectConfigChanged = true;
     cachedConfigMtime = null;

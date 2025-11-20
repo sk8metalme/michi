@@ -114,7 +114,7 @@ export interface ConfluencePageOptions {
 }
 
 export function createConfluencePage(options: ConfluencePageOptions): string {
-  const { title, githubUrl, content, approvers = ['企画', '部長'], projectName } = options;
+  const { githubUrl, content, approvers = ['企画', '部長'], projectName } = options;
   
   const approversList = approvers.map(a => a.startsWith('@') ? a : `@${a}`).join(',');
   

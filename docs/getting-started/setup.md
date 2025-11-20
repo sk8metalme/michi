@@ -325,12 +325,39 @@ SLACK_WEBHOOK_URL=<SlackWebhook URL>
 4. 生成されたトークンをコピーして `.env` に貼り付け
 
 #### GitHub Token
+
+**重要**: GitHubトークンをまだ作成していない場合は、以下の詳細ガイドを参照してください：
+
+📖 **[GitHubトークン作成ガイド](./github-token-setup.md)**
+
+トークン作成ガイドでは以下を解説しています：
+- Fine-grained tokens と Tokens (classic) の違い
+- 必要な権限の詳細説明
+- トークンの作成手順（ステップバイステップ）
+- セキュリティベストプラクティス
+- トラブルシューティング
+
+**クイックガイド**（既にトークンを持っている場合）:
+
 ```bash
+# GitHub CLIを使用する場合
 gh auth login
 gh auth token
+
+# 生成されたトークンを .env に設定
 ```
 
-生成されたトークンを `.env` の `GITHUB_TOKEN` に設定
+トークン作成後、`.env` の `GITHUB_TOKEN` に設定:
+
+```bash
+GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+```
+
+**必要な権限**:
+- `repo` (Full control of private repositories)
+- `workflow` (Update GitHub Action workflows)
+
+詳細は [GitHubトークン作成ガイド](./github-token-setup.md) を参照してください。
 
 #### Slack Webhook URL（オプション）
 1. https://api.slack.com/apps にアクセス

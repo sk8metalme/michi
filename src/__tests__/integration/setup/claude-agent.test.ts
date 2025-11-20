@@ -39,8 +39,7 @@ describe('Claude Agent Environment Setup', () => {
   });
 
   describe('Basic Setup', () => {
-    // TODO: Fix template structure (Issue #55)
-    it.skip('should create .claude/subagents directory', async () => {
+    it('should create .claude/subagents directory', async () => {
       await setupExisting({
         claudeAgent: true,
         projectName: 'Test Project',
@@ -95,8 +94,7 @@ describe('Claude Agent Environment Setup', () => {
   });
 
   describe('Claude Agent-specific Structure', () => {
-    // TODO: Fix template structure (Issue #55)
-    it.skip('should have subagents directory structure', async () => {
+    it('should have subagents directory structure', async () => {
       await setupExisting({
         claudeAgent: true,
         projectName: 'Test Project',
@@ -121,8 +119,7 @@ describe('Claude Agent Environment Setup', () => {
       expect(existsSync(cursorDir)).toBe(false);
     });
 
-    // TODO: Fix template structure (Issue #55)
-    it.skip('should not create basic Claude rules directory', async () => {
+    it('should not create basic Claude rules directory', async () => {
       await setupExisting({
         claudeAgent: true,
         projectName: 'Test Project',

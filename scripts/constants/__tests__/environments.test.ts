@@ -25,7 +25,7 @@ describe('environments', () => {
 
     it('should have correct structure for claude-agent', () => {
       const config = ENV_CONFIG['claude-agent'];
-      expect(config.rulesDir).toBe('.claude/rules');
+      expect(config.rulesDir).toBe('.claude/subagents');
       expect(config.commandsDir).toBe('.claude/commands/kiro');
       expect(config.templateSource).toBe('claude-agent');
     });

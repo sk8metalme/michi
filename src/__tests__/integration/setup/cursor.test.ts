@@ -10,7 +10,7 @@ import {
   assertDirectoryExists,
   assertFileExists,
   assertDirectoryStructure,
-  assertFileContains
+  assertFileContains,
 } from './helpers/fs-assertions.js';
 
 // Mock readline to auto-confirm prompts
@@ -43,7 +43,7 @@ describe('Cursor Environment Setup', () => {
       await setupExisting({
         cursor: true,
         projectName: 'Test Project',
-        jiraKey: 'TEST'
+        jiraKey: 'TEST',
       });
 
       // Assert directory structure
@@ -56,7 +56,7 @@ describe('Cursor Environment Setup', () => {
       await setupExisting({
         cursor: true,
         projectName: 'Test Project',
-        jiraKey: 'TEST'
+        jiraKey: 'TEST',
       });
 
       assertDirectoryStructure(testProject.path, {
@@ -72,7 +72,7 @@ describe('Cursor Environment Setup', () => {
       await setupExisting({
         cursor: true,
         projectName: 'Test Project',
-        jiraKey: 'TEST'
+        jiraKey: 'TEST',
       });
 
       const projectJsonPath = join(testProject.path, '.kiro/project.json');
@@ -87,7 +87,7 @@ describe('Cursor Environment Setup', () => {
       await setupExisting({
         cursor: true,
         projectName: 'Test Project',
-        jiraKey: 'TEST'
+        jiraKey: 'TEST',
       });
 
       const envPath = join(testProject.path, '.env');
@@ -103,13 +103,13 @@ describe('Cursor Environment Setup', () => {
         cursor: true,
         lang: 'ja',
         projectName: 'Test Project',
-        jiraKey: 'TEST'
+        jiraKey: 'TEST',
       });
 
       // Check if rules contain language-specific content
       const rulesDir = join(testProject.path, '.cursor/rules');
       assertDirectoryExists(rulesDir);
-      
+
       // Note: Actual file checks depend on template content
       // This is a placeholder for template verification
     });
@@ -120,7 +120,7 @@ describe('Cursor Environment Setup', () => {
       await setupExisting({
         cursor: true,
         projectName: 'テストプロジェクト',
-        jiraKey: 'TEST'
+        jiraKey: 'TEST',
       });
 
       const projectJson = join(testProject.path, '.kiro/project.json');
@@ -132,7 +132,7 @@ describe('Cursor Environment Setup', () => {
         cursor: true,
         lang: 'en',
         projectName: 'Test Project',
-        jiraKey: 'TEST'
+        jiraKey: 'TEST',
       });
 
       const projectJson = join(testProject.path, '.kiro/project.json');
@@ -145,7 +145,7 @@ describe('Cursor Environment Setup', () => {
       await setupExisting({
         cursor: true,
         projectName: 'Test Project',
-        jiraKey: 'TEST'
+        jiraKey: 'TEST',
       });
 
       const projectJson = join(testProject.path, '.kiro/project.json');
@@ -156,7 +156,10 @@ describe('Cursor Environment Setup', () => {
       // Remove git remote
       const { execSync } = await import('child_process');
       try {
-        execSync('git remote remove origin', { cwd: testProject.path, stdio: 'ignore' });
+        execSync('git remote remove origin', {
+          cwd: testProject.path,
+          stdio: 'ignore',
+        });
       } catch {
         // Ignore if remote doesn't exist
       }
@@ -164,7 +167,7 @@ describe('Cursor Environment Setup', () => {
       await setupExisting({
         cursor: true,
         projectName: 'Test Project',
-        jiraKey: 'TEST'
+        jiraKey: 'TEST',
       });
 
       const projectJson = join(testProject.path, '.kiro/project.json');
@@ -175,20 +178,21 @@ describe('Cursor Environment Setup', () => {
   });
 
   describe('Error Handling', () => {
-    it('should fail gracefully if not in Git repository', async () => {
+    it('should show warning if not in Git repository', async () => {
       // Remove .git directory
       const { rmSync } = await import('fs');
       const gitPath = join(testProject.path, '.git');
       rmSync(gitPath, { recursive: true, force: true });
 
-      await expect(async () => {
-        await setupExisting({
-          cursor: true,
-          projectName: 'Test Project',
-          jiraKey: 'TEST'
-        });
-      }).rejects.toThrow(/Gitリポジトリではありません/);
+      // Should not throw, but continue with warning
+      await setupExisting({
+        cursor: true,
+        projectName: 'Test Project',
+        jiraKey: 'TEST',
+      });
+
+      // If we reach here, the test passes
+      expect(true).toBe(true);
     });
   });
 });
-

@@ -1,5 +1,4 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import type { Octokit } from '@octokit/rest';
 
 // モジュールのモック
 vi.mock('@octokit/rest');
@@ -7,11 +6,17 @@ vi.mock('dotenv', () => ({ config: vi.fn() }));
 vi.mock('fs', () => ({
   existsSync: vi.fn(),
   writeFileSync: vi.fn(),
-  mkdirSync: vi.fn()
+  mkdirSync: vi.fn(),
 }));
 
 describe('multi-project-estimate pagination', () => {
-  let mockOctokit: any;
+  let mockOctokit: {
+    paginate: ReturnType<typeof vi.fn>;
+    repos: {
+      listForOrg: ReturnType<typeof vi.fn>;
+      getContent: ReturnType<typeof vi.fn>;
+    };
+  };
   let originalEnv: NodeJS.ProcessEnv;
 
   beforeEach(() => {
@@ -25,8 +30,8 @@ describe('multi-project-estimate pagination', () => {
       paginate: vi.fn(),
       repos: {
         listForOrg: vi.fn(),
-        getContent: vi.fn()
-      }
+        getContent: vi.fn(),
+      },
     };
 
     vi.clearAllMocks();
@@ -41,12 +46,12 @@ describe('multi-project-estimate pagination', () => {
     // 150リポジトリをシミュレート
     const mockRepos = Array.from({ length: 150 }, (_, i) => ({
       name: `repo-${i}`,
-      owner: { login: 'test-org' }
+      owner: { login: 'test-org' },
     }));
 
     mockOctokit.paginate
-      .mockResolvedValueOnce(mockRepos)  // repos.listForOrg
-      .mockResolvedValue([]);  // その後の呼び出しは空配列
+      .mockResolvedValueOnce(mockRepos) // repos.listForOrg
+      .mockResolvedValue([]); // その後の呼び出しは空配列
 
     // 検証: paginateが正しいパラメータで呼ばれることを確認
     // 実際のテストでは、multi-project-estimate.tsのaggregateEstimates関数を
@@ -60,13 +65,13 @@ describe('multi-project-estimate pagination', () => {
     // 50個のprojectsをシミュレート
     const mockProjects = Array.from({ length: 50 }, (_, i) => ({
       name: `project-${i}`,
-      type: 'dir' as const
+      type: 'dir' as const,
     }));
 
     mockOctokit.paginate
-      .mockResolvedValueOnce([{ name: 'test-repo' }])  // repos
-      .mockResolvedValueOnce(mockProjects)  // projects
-      .mockResolvedValue([]);  // その後の呼び出し
+      .mockResolvedValueOnce([{ name: 'test-repo' }]) // repos
+      .mockResolvedValueOnce(mockProjects) // projects
+      .mockResolvedValue([]); // その後の呼び出し
 
     // pagination が 'GET /repos/{owner}/{repo}/contents/{path}' 形式で
     // 呼ばれることを確認するためのアサーション用意
@@ -77,13 +82,13 @@ describe('multi-project-estimate pagination', () => {
     // 50個のspecsをシミュレート
     const mockSpecs = Array.from({ length: 50 }, (_, i) => ({
       name: `spec-${i}`,
-      type: 'dir' as const
+      type: 'dir' as const,
     }));
 
     mockOctokit.paginate
-      .mockResolvedValueOnce([{ name: 'test-repo' }])  // repos
-      .mockResolvedValueOnce([{ name: 'project-1', type: 'dir' }])  // projects
-      .mockResolvedValueOnce(mockSpecs);  // specs
+      .mockResolvedValueOnce([{ name: 'test-repo' }]) // repos
+      .mockResolvedValueOnce([{ name: 'project-1', type: 'dir' }]) // projects
+      .mockResolvedValueOnce(mockSpecs); // specs
 
     // specsの取得で pagination が使われることを確認
     expect(mockSpecs.length).toBe(50);
@@ -92,19 +97,23 @@ describe('multi-project-estimate pagination', () => {
   it('型ガードが正しく機能してunknown型を処理する', () => {
     const validEntry = {
       type: 'dir' as const,
-      name: 'test-project'
+      name: 'test-project',
     };
 
     const invalidEntry = {
       type: 'file' as const,
-      name: 'test.txt'
+      name: 'test.txt',
     };
 
     // 型ガードのロジック（multi-project-estimate.ts と同じ）
-    const isValidDir = (entry: any): boolean => {
-      return typeof entry === 'object' && entry !== null &&
-        'type' in entry && entry.type === 'dir' &&
-        'name' in entry;
+    const isValidDir = (entry: unknown): boolean => {
+      return (
+        typeof entry === 'object' &&
+        entry !== null &&
+        'type' in entry &&
+        (entry as { type: string }).type === 'dir' &&
+        'name' in entry
+      );
     };
 
     expect(isValidDir(validEntry)).toBe(true);
@@ -127,16 +136,13 @@ describe('multi-project-estimate pagination', () => {
   });
 
   it('エラー発生時にスキップして処理を継続する', async () => {
-    const mockRepos = [
-      { name: 'valid-repo' },
-      { name: 'invalid-repo' }
-    ];
+    const mockRepos = [{ name: 'valid-repo' }, { name: 'invalid-repo' }];
 
     mockOctokit.paginate
-      .mockResolvedValueOnce(mockRepos)  // repos
-      .mockResolvedValueOnce([{ name: 'project-1', type: 'dir' }])  // valid-repo の projects
-      .mockRejectedValueOnce(new Error('Not found'))  // invalid-repo で失敗
-      .mockResolvedValue([]);  // その後の呼び出し
+      .mockResolvedValueOnce(mockRepos) // repos
+      .mockResolvedValueOnce([{ name: 'project-1', type: 'dir' }]) // valid-repo の projects
+      .mockRejectedValueOnce(new Error('Not found')) // invalid-repo で失敗
+      .mockResolvedValue([]); // その後の呼び出し
 
     // エラーが発生しても処理が継続されることを確認
     // 実装では try-catch で continue を使用

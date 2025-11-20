@@ -23,14 +23,43 @@ import { readFileSync, existsSync } from 'fs';
 import { dirname, join } from 'path';
 
 // package.jsonからバージョンを読み込む
-// コンパイル後は dist/src/cli.js から実行されるため、2階層上がる必要がある
-// テスト環境では src/cli.ts から直接実行されるため、process.cwd()も考慮する
+// Michi自身のpackage.jsonのみを読み込み、利用者のpackage.jsonは読まない
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-// まず、コンパイル後のパス（dist/src/cli.js）を試す
-const distPath = join(__dirname, '..', '..', 'package.json');
-const packageJsonPath = existsSync(distPath) ? distPath : join(process.cwd(), 'package.json');
-const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
+
+/**
+ * Michi自身のpackage.jsonからバージョンを取得
+ * 利用者のプロジェクトがNode.jsでなくてもMichiを使えるようにする
+ */
+function getMichiVersion(): string {
+  // package.jsonの場所を探索
+  // - ビルド後/npm実行時: __dirname/../../package.json (dist/src/cli.js)
+  // - 開発時: __dirname/../package.json (src/cli.ts)
+  const possiblePaths = [
+    join(__dirname, '..', '..', 'package.json'),
+    join(__dirname, '..', 'package.json'),
+  ];
+
+  for (const path of possiblePaths) {
+    if (existsSync(path)) {
+      try {
+        const packageJson = JSON.parse(readFileSync(path, 'utf-8'));
+        // name フィールドで確実にMichiのpackage.jsonか確認
+        if (packageJson.name === '@sk8metal/michi-cli') {
+          return packageJson.version;
+        }
+      } catch {
+        // 次のパスを試す
+        continue;
+      }
+    }
+  }
+
+  // どこにも見つからない場合はデフォルト値（開発環境など）
+  return '0.0.0-dev';
+}
+
+const michiVersion = getMichiVersion();
 
 // 環境変数読み込み
 config();
@@ -59,7 +88,7 @@ export function createCLI(): Command {
   program
     .name('michi')
     .description('🛣️  Michi(道) - Managed Intelligent Comprehensive Hub for Integration')
-    .version(packageJson.version);
+    .version(michiVersion);
 
   // jira:sync コマンド
   program

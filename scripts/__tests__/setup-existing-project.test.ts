@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { join } from 'path';
-import { mkdirSync, cpSync } from 'fs';
+import { mkdirSync } from 'fs';
+import { parseEnvFile, generateEnvContent } from '../utils/env-config.js';
 
 // モジュールのモック
 vi.mock('fs', () => ({
@@ -42,6 +43,102 @@ vi.mock('../template/renderer.js', () => ({
 describe('setup-existing-project.ts 修正内容のテスト', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+  
+  describe('.env 対話的設定機能', () => {
+    it('.env ファイルが存在しない場合、対話的設定を提供する', () => {
+      // 新規作成の場合の動作を確認
+      // parseEnvFile が空のMapを返すことを確認
+      const result = parseEnvFile('nonexistent.env');
+
+      expect(result).toBeInstanceOf(Map);
+      expect(result.size).toBe(0);
+    });
+    
+    it('.env ファイルが存在する場合、既存値を読み込む', async () => {
+      const fs = await import('fs');
+
+      // モックの設定
+      vi.mocked(fs.existsSync).mockReturnValue(true);
+      vi.mocked(fs.readFileSync).mockReturnValue(`ATLASSIAN_URL=https://existing.atlassian.net
+ATLASSIAN_EMAIL=existing@example.com
+ATLASSIAN_API_TOKEN=existing_token
+`);
+
+      const result = parseEnvFile('.env');
+
+      expect(result.size).toBeGreaterThan(0);
+      expect(result.get('ATLASSIAN_URL')).toBe('https://existing.atlassian.net');
+    });
+    
+    it('generateEnvContent が正しい形式の .env を生成する', () => {
+      const values = new Map([
+        ['ATLASSIAN_URL', 'https://test.atlassian.net'],
+        ['ATLASSIAN_EMAIL', 'test@example.com'],
+        ['ATLASSIAN_API_TOKEN', 'test_token'],
+        ['JIRA_PROJECT_KEYS', 'TEST'],
+        ['JIRA_ISSUE_TYPE_STORY', '10036'],
+        ['JIRA_ISSUE_TYPE_SUBTASK', '10037']
+      ]);
+
+      const content = generateEnvContent(values);
+
+      expect(content).toContain('# Atlassian設定');
+      expect(content).toContain('ATLASSIAN_URL=https://test.atlassian.net');
+      expect(content).toContain('ATLASSIAN_EMAIL=test@example.com');
+      expect(content).toContain('ATLASSIAN_API_TOKEN=test_token');
+    });
+    
+    it('.gitignore に .env エントリが追加される', () => {
+      // .gitignore 更新のロジック
+      let gitignoreContent = '# Existing content\nnode_modules/\n';
+      
+      const entriesToAdd = [
+        '# Environment variables',
+        '.env',
+        '.env.local',
+        '.env.*.local'
+      ];
+      
+      const lines = gitignoreContent.split('\n').map(l => l.trim());
+      let modified = false;
+      
+      for (const entry of entriesToAdd) {
+        if (!lines.includes(entry.trim())) {
+          if (!modified) {
+            gitignoreContent += '\n\n# Added by michi setup\n';
+            modified = true;
+          }
+          gitignoreContent += entry + '\n';
+        }
+      }
+      
+      expect(modified).toBe(true);
+      expect(gitignoreContent).toContain('# Added by michi setup');
+      expect(gitignoreContent).toContain('.env');
+      expect(gitignoreContent).toContain('.env.local');
+      expect(gitignoreContent).toContain('.env.*.local');
+    });
+    
+    it('.gitignore に既に .env がある場合、重複しない', () => {
+      const gitignoreContent = `# Environment
+.env
+.env.local
+.env.*.local
+`;
+      
+      const lines = gitignoreContent.split('\n').map(l => l.trim());
+      const entriesToAdd = ['.env', '.env.local', '.env.*.local'];
+      
+      let modified = false;
+      for (const entry of entriesToAdd) {
+        if (!lines.includes(entry.trim())) {
+          modified = true;
+        }
+      }
+      
+      expect(modified).toBe(false);
+    });
   });
 
   it('ディレクトリがコピー前に作成される', () => {

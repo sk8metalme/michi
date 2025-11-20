@@ -12,7 +12,7 @@
  *   --lang ja
  */
 
-import { cpSync, existsSync, mkdirSync, writeFileSync, readFileSync, readdirSync, statSync } from 'fs';
+import { cpSync, existsSync, mkdirSync, writeFileSync, readFileSync, readdirSync } from 'fs';
 import { resolve, join, basename, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { execSync } from 'child_process';

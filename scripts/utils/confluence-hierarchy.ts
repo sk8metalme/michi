@@ -3,12 +3,10 @@
  * 各パターン（single, by-section, by-hierarchy, manual）に対応
  */
 
-import { readFileSync } from 'fs';
-import { resolve } from 'path';
 import type { ConfluenceClient } from '../confluence-sync.js';
 import { convertMarkdownToConfluence, createConfluencePage } from '../markdown-to-confluence.js';
 import type { ProjectMetadata } from './project-meta.js';
-import type { ConfluenceConfig, ConfluencePageCreationGranularity } from '../config/config-schema.js';
+import type { ConfluenceConfig } from '../config/config-schema.js';
 
 /**
  * ページ作成結果
@@ -200,7 +198,7 @@ async function getOrCreateParentPage(
   parentTitle: string,
   projectMeta: ProjectMetadata,
   featureName: string,
-  githubUrl: string
+  _githubUrl: string
 ): Promise<string> {
   // 既存の親ページを検索
   const existingParent = await client.searchPage(spaceKey, parentTitle);

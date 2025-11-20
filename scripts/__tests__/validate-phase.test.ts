@@ -9,7 +9,7 @@ import { validatePhase } from '../validate-phase.js';
 // fsモジュールのモック
 vi.mock('fs', () => ({
   existsSync: vi.fn(),
-  readFileSync: vi.fn()
+  readFileSync: vi.fn(),
 }));
 
 // project-metaのモック
@@ -17,8 +17,8 @@ vi.mock('../utils/project-meta.js', () => ({
   loadProjectMeta: vi.fn(() => ({
     projectId: 'test-project',
     projectName: 'テストプロジェクト',
-    jiraProjectKey: 'TEST'
-  }))
+    jiraProjectKey: 'TEST',
+  })),
 }));
 
 describe('validatePhase', () => {
@@ -30,17 +30,19 @@ describe('validatePhase', () => {
     it('すべての必須項目が揃っている場合、validationが成功する', () => {
       // Arrange: requirementsフェーズを代表例としてテスト
       vi.mocked(existsSync).mockReturnValue(true);
-      vi.mocked(readFileSync).mockReturnValue(JSON.stringify({
-        confluence: {
-          spaceKey: 'TEST',
-          requirementsPageId: '12345'
-        },
-        milestones: {
-          requirements: {
-            completed: true
-          }
-        }
-      }));
+      vi.mocked(readFileSync).mockReturnValue(
+        JSON.stringify({
+          confluence: {
+            spaceKey: 'TEST',
+            requirementsPageId: '12345',
+          },
+          milestones: {
+            requirements: {
+              completed: true,
+            },
+          },
+        }),
+      );
 
       // Act
       const result = validatePhase('test-feature', 'requirements');
@@ -54,19 +56,23 @@ describe('validatePhase', () => {
     it('Confluenceページが作成されていない場合、エラーを返す', () => {
       // Arrange
       vi.mocked(existsSync).mockReturnValue(true);
-      vi.mocked(readFileSync).mockReturnValue(JSON.stringify({
-        confluence: {
-          spaceKey: 'TEST'
-          // requirementsPageId が存在しない
-        }
-      }));
+      vi.mocked(readFileSync).mockReturnValue(
+        JSON.stringify({
+          confluence: {
+            spaceKey: 'TEST',
+            // requirementsPageId が存在しない
+          },
+        }),
+      );
 
       // Act
       const result = validatePhase('test-feature', 'requirements');
 
       // Assert
       expect(result.valid).toBe(false);
-      expect(result.errors).toContain('❌ Confluenceページ（要件定義）が作成されていません');
+      expect(result.errors).toContain(
+        '❌ Confluenceページ（要件定義）が作成されていません',
+      );
     });
   });
 
@@ -74,23 +80,27 @@ describe('validatePhase', () => {
     it('designフェーズ: 前提条件（requirements完了）をチェックする', () => {
       // Arrange
       vi.mocked(existsSync).mockReturnValue(true);
-      vi.mocked(readFileSync).mockReturnValue(JSON.stringify({
-        confluence: {
-          designPageId: '67890'
-        },
-        milestones: {
-          requirements: {
-            completed: false // 前提条件が満たされていない
-          }
-        }
-      }));
+      vi.mocked(readFileSync).mockReturnValue(
+        JSON.stringify({
+          confluence: {
+            designPageId: '67890',
+          },
+          milestones: {
+            requirements: {
+              completed: false, // 前提条件が満たされていない
+            },
+          },
+        }),
+      );
 
       // Act
       const result = validatePhase('test-feature', 'design');
 
       // Assert
       expect(result.valid).toBe(false);
-      expect(result.errors).toContain('❌ 要件定義が完了していません（前提条件）');
+      expect(result.errors).toContain(
+        '❌ 要件定義が完了していません（前提条件）',
+      );
     });
 
     it('tasksフェーズ: JIRA Epic/Story作成をチェックする', () => {
@@ -103,12 +113,12 @@ describe('validatePhase', () => {
         return JSON.stringify({
           milestones: {
             design: {
-              completed: true
-            }
+              completed: true,
+            },
           },
           jira: {
             // epicKey が存在しない（重要なチェック）
-          }
+          },
         });
       });
 
@@ -130,16 +140,16 @@ describe('validatePhase', () => {
         return JSON.stringify({
           milestones: {
             design: {
-              completed: true
-            }
+              completed: true,
+            },
           },
           jira: {
             epicKey: 'TEST-1',
             stories: {
               created: 5,
-              total: 5
-            }
-          }
+              total: 5,
+            },
+          },
         });
       });
 
@@ -148,7 +158,9 @@ describe('validatePhase', () => {
 
       // Assert
       expect(result.valid).toBe(true); // 警告だけなのでvalid
-      expect(result.warnings).toContain('⚠️  tasks.mdに曜日表記（月、火、水...）が含まれていません');
+      expect(result.warnings).toContain(
+        '⚠️  tasks.mdに曜日表記（月、火、水...）が含まれていません',
+      );
     });
   });
 
@@ -156,30 +168,42 @@ describe('validatePhase', () => {
     it('spec.jsonが存在しない場合、エラーを返す', () => {
       // Arrange
       // requirements.mdは存在するが、spec.jsonは存在しない
-      vi.mocked(existsSync).mockImplementation((path: string | Buffer | URL) => {
-        const pathStr = typeof path === 'string' ? path : path instanceof URL ? path.pathname : path.toString();
-        if (pathStr.includes('requirements.md')) {
-          return true;
-        }
-        if (pathStr.includes('spec.json')) {
+      vi.mocked(existsSync).mockImplementation(
+        (path: string | Buffer | URL) => {
+          const pathStr =
+            typeof path === 'string'
+              ? path
+              : path instanceof URL
+                ? path.pathname
+                : path.toString();
+          if (pathStr.includes('requirements.md')) {
+            return true;
+          }
+          if (pathStr.includes('spec.json')) {
+            return false;
+          }
           return false;
-        }
-        return false;
-      });
+        },
+      );
 
       // Act
       const result = validatePhase('test-feature', 'requirements');
 
       // Assert: エラーをスローせず、errors配列にエラーを含めて返す
       expect(result.valid).toBe(false);
-      expect(result.errors).toContainEqual(expect.stringContaining('spec.json読み込みエラー'));
-      expect(result.errors).toContainEqual(expect.stringContaining('spec.json not found'));
+      expect(result.errors).toContainEqual(
+        expect.stringContaining('spec.json読み込みエラー'),
+      );
+      expect(result.errors).toContainEqual(
+        expect.stringContaining('spec.json not found'),
+      );
     });
 
     it('不正なフェーズ名の場合、エラーをスローする', () => {
       // Act & Assert
-      expect(() => validatePhase('test-feature', 'invalid' as any)).toThrow('Unknown phase: invalid');
+      expect(() =>
+        validatePhase('test-feature', 'invalid' as 'requirements'),
+      ).toThrow('Unknown phase: invalid');
     });
   });
 });
-
