@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // validateProjectId関数のロジックを再現
 function validateProjectId(projectId: string): boolean {
@@ -8,9 +8,9 @@ function validateProjectId(projectId: string): boolean {
   }
   // パストラバーサル文字を拒否
   if (
-    projectId.includes("..") ||
-    projectId.includes("/") ||
-    projectId.includes("\\")
+    projectId.includes('..') ||
+    projectId.includes('/') ||
+    projectId.includes('\\')
   ) {
     return false;
   }
@@ -18,41 +18,41 @@ function validateProjectId(projectId: string): boolean {
   return /^[A-Za-z0-9_-]+$/.test(projectId);
 }
 
-describe("setup-interactive.ts 修正内容のテスト", () => {
+describe('setup-interactive.ts 修正内容のテスト', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  describe("validateProjectId の呼び出し", () => {
-    it("getProjectMetadata 内で validateProjectId が呼び出される", () => {
-      const projectIdDefault = "test-project";
+  describe('validateProjectId の呼び出し', () => {
+    it('getProjectMetadata 内で validateProjectId が呼び出される', () => {
+      const projectIdDefault = 'test-project';
       const projectId = projectIdDefault;
 
       // バリデーション（getProjectMetadata内のロジックを再現）
       if (!validateProjectId(projectId)) {
         throw new Error(
-          "無効なプロジェクトIDです。英数字、ハイフン、アンダースコアのみ使用できます。",
+          '無効なプロジェクトIDです。英数字、ハイフン、アンダースコアのみ使用できます。',
         );
       }
 
       // 有効なプロジェクトIDはエラーを投げない
-      expect(projectId).toBe("test-project");
+      expect(projectId).toBe('test-project');
     });
 
-    it("無効なプロジェクトID（パストラバーサル）は拒否される", () => {
-      const invalidIds = ["../test", "test/../", "test\\..", "../../"];
+    it('無効なプロジェクトID（パストラバーサル）は拒否される', () => {
+      const invalidIds = ['../test', 'test/../', 'test\\..', '../../'];
 
       invalidIds.forEach((id) => {
         expect(validateProjectId(id)).toBe(false);
       });
     });
 
-    it("無効なプロジェクトID（特殊文字）は拒否される", () => {
+    it('無効なプロジェクトID（特殊文字）は拒否される', () => {
       const invalidIds = [
-        "test@project",
-        "test#project",
-        "test$project",
-        "test project",
+        'test@project',
+        'test#project',
+        'test$project',
+        'test project',
       ];
 
       invalidIds.forEach((id) => {
@@ -60,12 +60,12 @@ describe("setup-interactive.ts 修正内容のテスト", () => {
       });
     });
 
-    it("有効なプロジェクトIDは受け入れられる", () => {
+    it('有効なプロジェクトIDは受け入れられる', () => {
       const validIds = [
-        "test-project",
-        "test_project",
-        "test123",
-        "Test-Project_123",
+        'test-project',
+        'test_project',
+        'test123',
+        'Test-Project_123',
       ];
 
       validIds.forEach((id) => {
@@ -74,8 +74,8 @@ describe("setup-interactive.ts 修正内容のテスト", () => {
     });
   });
 
-  describe("main 関数の戻り値", () => {
-    it("main 関数は Promise<number> を返す", async () => {
+  describe('main 関数の戻り値', () => {
+    it('main 関数は Promise<number> を返す', async () => {
       // main関数のシグネチャを再現
       async function main(): Promise<number> {
         // 正常終了
@@ -83,15 +83,15 @@ describe("setup-interactive.ts 修正内容のテスト", () => {
       }
 
       const result = await main();
-      expect(typeof result).toBe("number");
+      expect(typeof result).toBe('number');
       expect(result).toBe(0);
     });
 
-    it("エラー時は 1 を返す", async () => {
+    it('エラー時は 1 を返す', async () => {
       // main関数のエラーハンドリングを再現
       async function main(): Promise<number> {
         try {
-          throw new Error("テストエラー");
+          throw new Error('テストエラー');
         } catch {
           return 1;
         }
@@ -101,7 +101,7 @@ describe("setup-interactive.ts 修正内容のテスト", () => {
       expect(result).toBe(1);
     });
 
-    it("早期終了時は 0 を返す", async () => {
+    it('早期終了時は 0 を返す', async () => {
       // 早期終了のロジックを再現
       async function main(): Promise<number> {
         // 設定する項目がない場合
@@ -120,8 +120,8 @@ describe("setup-interactive.ts 修正内容のテスト", () => {
     });
   });
 
-  describe("process.exit の削除", () => {
-    it("process.exit の代わりに return を使用する", () => {
+  describe('process.exit の削除', () => {
+    it('process.exit の代わりに return を使用する', () => {
       // 修正前: process.exit(0)
       // 修正後: return 0
 
@@ -131,10 +131,10 @@ describe("setup-interactive.ts 修正内容のテスト", () => {
 
       const result = newStyle();
       expect(result).toBe(0);
-      expect(typeof result).toBe("number");
+      expect(typeof result).toBe('number');
     });
 
-    it("エラー時も process.exit の代わりに return を使用する", () => {
+    it('エラー時も process.exit の代わりに return を使用する', () => {
       // 修正前: process.exit(1)
       // 修正後: return 1
 
@@ -144,12 +144,12 @@ describe("setup-interactive.ts 修正内容のテスト", () => {
 
       const result = newStyle();
       expect(result).toBe(1);
-      expect(typeof result).toBe("number");
+      expect(typeof result).toBe('number');
     });
   });
 
-  describe("CLIエントリーポイントでの process.exit 呼び出し", () => {
-    it("main() の戻り値を受け取って process.exit を呼び出す", async () => {
+  describe('CLIエントリーポイントでの process.exit 呼び出し', () => {
+    it('main() の戻り値を受け取って process.exit を呼び出す', async () => {
       // CLIエントリーポイントのロジックを再現
       let exitCode: number | null = null;
 
@@ -176,7 +176,7 @@ describe("setup-interactive.ts 修正内容のテスト", () => {
       expect(exitCode).toBe(0);
     });
 
-    it("エラー時は 1 で終了する", async () => {
+    it('エラー時は 1 で終了する', async () => {
       let exitCode: number | null = null;
 
       const mockProcessExit = (code: number) => {
@@ -184,7 +184,7 @@ describe("setup-interactive.ts 修正内容のテスト", () => {
       };
 
       async function main(): Promise<number> {
-        throw new Error("テストエラー");
+        throw new Error('テストエラー');
       }
 
       // CLIエントリーポイント

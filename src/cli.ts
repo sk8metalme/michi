@@ -48,7 +48,7 @@ function getMichiVersion(): string {
         if (packageJson.name === '@sk8metal/michi-cli') {
           return packageJson.version;
         }
-      } catch (error) {
+      } catch {
         // 次のパスを試す
         continue;
       }

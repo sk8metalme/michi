@@ -3,8 +3,7 @@ import {
   createTemplateContext,
   renderTemplate,
   renderJsonTemplate,
-  renderTemplates,
-  type TemplateContext
+  renderTemplates
 } from '../renderer.js';
 
 describe('renderer', () => {

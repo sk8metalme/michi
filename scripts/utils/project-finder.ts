@@ -38,7 +38,7 @@ function loadProjectMetadata(dir: string): ProjectMetadata | null {
     const content = readFileSync(projectJsonPath, 'utf-8');
     const meta = JSON.parse(content) as ProjectMetadata;
     return meta;
-  } catch (error) {
+  } catch {
     // パースエラーなどは無視
     return null;
   }
@@ -143,7 +143,7 @@ export function findAllProjects(
         }
       }
     }
-  } catch (error) {
+  } catch {
     // アクセス権限エラーなどは無視
   }
   

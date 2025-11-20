@@ -1,15 +1,15 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 // モジュールのモック
-vi.mock("@octokit/rest");
-vi.mock("dotenv", () => ({ config: vi.fn() }));
-vi.mock("fs", () => ({
+vi.mock('@octokit/rest');
+vi.mock('dotenv', () => ({ config: vi.fn() }));
+vi.mock('fs', () => ({
   existsSync: vi.fn(),
   writeFileSync: vi.fn(),
   mkdirSync: vi.fn(),
 }));
 
-describe("multi-project-estimate pagination", () => {
+describe('multi-project-estimate pagination', () => {
   let mockOctokit: {
     paginate: ReturnType<typeof vi.fn>;
     repos: {
@@ -22,8 +22,8 @@ describe("multi-project-estimate pagination", () => {
   beforeEach(() => {
     // 環境変数を保存
     originalEnv = { ...process.env };
-    process.env.GITHUB_TOKEN = "test-token";
-    process.env.GITHUB_ORG = "test-org";
+    process.env.GITHUB_TOKEN = 'test-token';
+    process.env.GITHUB_ORG = 'test-org';
 
     // Octokitモックのセットアップ
     mockOctokit = {
@@ -42,11 +42,11 @@ describe("multi-project-estimate pagination", () => {
     process.env = originalEnv;
   });
 
-  it("100リポジトリ以上のケースでpaginationが正しく動作する", async () => {
+  it('100リポジトリ以上のケースでpaginationが正しく動作する', async () => {
     // 150リポジトリをシミュレート
     const mockRepos = Array.from({ length: 150 }, (_, i) => ({
       name: `repo-${i}`,
-      owner: { login: "test-org" },
+      owner: { login: 'test-org' },
     }));
 
     mockOctokit.paginate
@@ -61,15 +61,15 @@ describe("multi-project-estimate pagination", () => {
     expect(mockOctokit.paginate).toBeDefined();
   });
 
-  it("30個以上のprojectsディレクトリでpaginationが動作する", async () => {
+  it('30個以上のprojectsディレクトリでpaginationが動作する', async () => {
     // 50個のprojectsをシミュレート
     const mockProjects = Array.from({ length: 50 }, (_, i) => ({
       name: `project-${i}`,
-      type: "dir" as const,
+      type: 'dir' as const,
     }));
 
     mockOctokit.paginate
-      .mockResolvedValueOnce([{ name: "test-repo" }]) // repos
+      .mockResolvedValueOnce([{ name: 'test-repo' }]) // repos
       .mockResolvedValueOnce(mockProjects) // projects
       .mockResolvedValue([]); // その後の呼び出し
 
@@ -78,41 +78,41 @@ describe("multi-project-estimate pagination", () => {
     expect(mockProjects.length).toBe(50);
   });
 
-  it("30個以上のspecsディレクトリでpaginationが動作する", async () => {
+  it('30個以上のspecsディレクトリでpaginationが動作する', async () => {
     // 50個のspecsをシミュレート
     const mockSpecs = Array.from({ length: 50 }, (_, i) => ({
       name: `spec-${i}`,
-      type: "dir" as const,
+      type: 'dir' as const,
     }));
 
     mockOctokit.paginate
-      .mockResolvedValueOnce([{ name: "test-repo" }]) // repos
-      .mockResolvedValueOnce([{ name: "project-1", type: "dir" }]) // projects
+      .mockResolvedValueOnce([{ name: 'test-repo' }]) // repos
+      .mockResolvedValueOnce([{ name: 'project-1', type: 'dir' }]) // projects
       .mockResolvedValueOnce(mockSpecs); // specs
 
     // specsの取得で pagination が使われることを確認
     expect(mockSpecs.length).toBe(50);
   });
 
-  it("型ガードが正しく機能してunknown型を処理する", () => {
+  it('型ガードが正しく機能してunknown型を処理する', () => {
     const validEntry = {
-      type: "dir" as const,
-      name: "test-project",
+      type: 'dir' as const,
+      name: 'test-project',
     };
 
     const invalidEntry = {
-      type: "file" as const,
-      name: "test.txt",
+      type: 'file' as const,
+      name: 'test.txt',
     };
 
     // 型ガードのロジック（multi-project-estimate.ts と同じ）
     const isValidDir = (entry: unknown): boolean => {
       return (
-        typeof entry === "object" &&
+        typeof entry === 'object' &&
         entry !== null &&
-        "type" in entry &&
-        (entry as { type: string }).type === "dir" &&
-        "name" in entry
+        'type' in entry &&
+        (entry as { type: string }).type === 'dir' &&
+        'name' in entry
       );
     };
 
@@ -122,7 +122,7 @@ describe("multi-project-estimate pagination", () => {
     expect(isValidDir(undefined)).toBe(false);
   });
 
-  it("paginationのper_pageパラメータが100に設定されている", () => {
+  it('paginationのper_pageパラメータが100に設定されている', () => {
     // octokit.paginate の呼び出しで per_page: 100 が使われることを
     // 実装で確認済み（リポジトリ、projects、specs すべて）
 
@@ -135,13 +135,13 @@ describe("multi-project-estimate pagination", () => {
     // { owner: 'org', repo: 'name', path: 'projects/x/.kiro/specs', per_page: 100 }
   });
 
-  it("エラー発生時にスキップして処理を継続する", async () => {
-    const mockRepos = [{ name: "valid-repo" }, { name: "invalid-repo" }];
+  it('エラー発生時にスキップして処理を継続する', async () => {
+    const mockRepos = [{ name: 'valid-repo' }, { name: 'invalid-repo' }];
 
     mockOctokit.paginate
       .mockResolvedValueOnce(mockRepos) // repos
-      .mockResolvedValueOnce([{ name: "project-1", type: "dir" }]) // valid-repo の projects
-      .mockRejectedValueOnce(new Error("Not found")) // invalid-repo で失敗
+      .mockResolvedValueOnce([{ name: 'project-1', type: 'dir' }]) // valid-repo の projects
+      .mockRejectedValueOnce(new Error('Not found')) // invalid-repo で失敗
       .mockResolvedValue([]); // その後の呼び出し
 
     // エラーが発生しても処理が継続されることを確認

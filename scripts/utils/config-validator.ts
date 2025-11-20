@@ -2,20 +2,18 @@
  * 設定ファイルのバリデーション
  */
 
-import { existsSync, readFileSync } from "fs";
-import { resolve } from "path";
-import { AppConfigSchema } from "../config/config-schema.js";
-import type { ZodIssue } from "zod";
-import type { AppConfig } from "../config/config-schema.js";
-import { getConfig, getConfigPath } from "./config-loader.js";
-import { loadProjectMeta } from "./project-meta.js";
+import { existsSync, readFileSync } from 'fs';
+import { AppConfigSchema } from '../config/config-schema.js';
+import type { ZodIssue } from 'zod';
+import { getConfig, getConfigPath } from './config-loader.js';
+import { loadProjectMeta } from './project-meta.js';
 import {
   getProjectIssueTypes,
   hasJiraCredentials,
   hasIssueTypeId,
   filterStoryTypes,
   filterSubtaskTypes,
-} from "./jira-issue-type-fetcher.js";
+} from './jira-issue-type-fetcher.js';
 
 /**
  * バリデーション結果
@@ -41,7 +39,7 @@ export function validateProjectConfig(
 
   if (!existsSync(configPath)) {
     // 設定ファイルが存在しない場合は情報メッセージ（デフォルト設定を使用）
-    info.push("Project config file not found. Using default configuration.");
+    info.push('Project config file not found. Using default configuration.');
     return {
       valid: true,
       errors: [],
@@ -51,7 +49,7 @@ export function validateProjectConfig(
   }
 
   try {
-    const content = readFileSync(configPath, "utf-8");
+    const content = readFileSync(configPath, 'utf-8');
     const parsed = JSON.parse(content);
 
     // スキーマでバリデーション
@@ -59,7 +57,7 @@ export function validateProjectConfig(
 
     if (!result.success) {
       result.error.issues.forEach((error: ZodIssue) => {
-        const path = error.path.map(String).join(".");
+        const path = error.path.map(String).join('.');
         errors.push(`${path}: ${error.message}`);
       });
 
@@ -80,8 +78,8 @@ export function validateProjectConfig(
 
       // hierarchy設定の整合性チェック
       if (
-        confluence.pageCreationGranularity === "by-hierarchy" ||
-        confluence.pageCreationGranularity === "manual"
+        confluence.pageCreationGranularity === 'by-hierarchy' ||
+        confluence.pageCreationGranularity === 'manual'
       ) {
         if (!confluence.hierarchy) {
           errors.push(
@@ -89,7 +87,7 @@ export function validateProjectConfig(
           );
         } else {
           if (
-            confluence.pageCreationGranularity === "by-hierarchy" &&
+            confluence.pageCreationGranularity === 'by-hierarchy' &&
             !confluence.hierarchy.parentPageTitle
           ) {
             warnings.push(
@@ -98,7 +96,7 @@ export function validateProjectConfig(
           }
 
           if (
-            confluence.pageCreationGranularity === "manual" &&
+            confluence.pageCreationGranularity === 'manual' &&
             !confluence.hierarchy.structure
           ) {
             errors.push(
@@ -114,7 +112,7 @@ export function validateProjectConfig(
       const jira = config.jira;
 
       if (
-        jira.storyCreationGranularity === "selected-phases" &&
+        jira.storyCreationGranularity === 'selected-phases' &&
         !jira.selectedPhases
       ) {
         errors.push(
@@ -124,7 +122,7 @@ export function validateProjectConfig(
 
       if (jira.selectedPhases && jira.selectedPhases.length === 0) {
         warnings.push(
-          "jira.selectedPhases is empty. No stories will be created.",
+          'jira.selectedPhases is empty. No stories will be created.',
         );
       }
     }
@@ -135,17 +133,17 @@ export function validateProjectConfig(
 
       if (workflow.enabledPhases && workflow.enabledPhases.length === 0) {
         warnings.push(
-          "workflow.enabledPhases is empty. No phases will be executed.",
+          'workflow.enabledPhases is empty. No phases will be executed.',
         );
       }
 
-      const validPhases = ["requirements", "design", "tasks"];
+      const validPhases = ['requirements', 'design', 'tasks'];
       const invalidPhases = workflow.enabledPhases?.filter(
         (phase) => !validPhases.includes(phase),
       );
       if (invalidPhases && invalidPhases.length > 0) {
         warnings.push(
-          `Unknown phases in workflow.enabledPhases: ${invalidPhases.join(", ")}`,
+          `Unknown phases in workflow.enabledPhases: ${invalidPhases.join(', ')}`,
         );
       }
     }
@@ -161,7 +159,7 @@ export function validateProjectConfig(
       errors.push(`Invalid JSON: ${error.message}`);
     } else {
       errors.push(
-        `Error reading config file: ${error instanceof Error ? error.message : "Unknown error"}`,
+        `Error reading config file: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
     }
 
@@ -183,21 +181,21 @@ export function validateAndReport(
   const result = validateProjectConfig(projectRoot);
 
   if (result.info.length > 0) {
-    console.log("ℹ️  Info:");
+    console.log('ℹ️  Info:');
     result.info.forEach((message) => {
       console.log(`   - ${message}`);
     });
   }
 
   if (result.warnings.length > 0) {
-    console.log("⚠️  Warnings:");
+    console.log('⚠️  Warnings:');
     result.warnings.forEach((warning) => {
       console.log(`   - ${warning}`);
     });
   }
 
   if (result.errors.length > 0) {
-    console.error("❌ Validation errors:");
+    console.error('❌ Validation errors:');
     result.errors.forEach((error) => {
       console.error(`   - ${error}`);
     });
@@ -205,7 +203,7 @@ export function validateAndReport(
   }
 
   if (result.valid) {
-    console.log("✅ Configuration is valid");
+    console.log('✅ Configuration is valid');
   }
 
   return result.valid;
@@ -218,7 +216,7 @@ export function validateAndReport(
  * @returns バリデーション結果
  */
 export function validateForConfluenceSync(
-  docType: "requirements" | "design" | "tasks",
+  docType: 'requirements' | 'design' | 'tasks',
   projectRoot: string = process.cwd(),
 ): ValidationResult {
   const errors: string[] = [];
@@ -226,11 +224,10 @@ export function validateForConfluenceSync(
   const info: string[] = [];
 
   const config = getConfig(projectRoot);
-  const configPath = getConfigPath(projectRoot);
 
   // Confluence設定のチェック
   if (!config.confluence) {
-    warnings.push("confluence設定がありません。デフォルト設定を使用します。");
+    warnings.push('confluence設定がありません。デフォルト設定を使用します。');
   } else {
     const confluence = config.confluence;
 
@@ -239,15 +236,15 @@ export function validateForConfluenceSync(
       if (!process.env.CONFLUENCE_PRD_SPACE) {
         warnings.push(
           `confluence.spaces.${docType}が設定されていません。` +
-            "環境変数CONFLUENCE_PRD_SPACEも設定されていないため、デフォルト値（PRD）を使用します。" +
-            "\n  推奨: .michi/config.jsonに以下を追加してください:\n" +
-            "  {\n" +
+            '環境変数CONFLUENCE_PRD_SPACEも設定されていないため、デフォルト値（PRD）を使用します。' +
+            '\n  推奨: .michi/config.jsonに以下を追加してください:\n' +
+            '  {\n' +
             '    "confluence": {\n' +
             '      "spaces": {\n' +
             `        "${docType}": "YOUR_SPACE_KEY"\n` +
-            "      }\n" +
-            "    }\n" +
-            "  }",
+            '      }\n' +
+            '    }\n' +
+            '  }',
         );
       } else {
         info.push(
@@ -258,41 +255,41 @@ export function validateForConfluenceSync(
 
     // hierarchy設定のチェック（by-hierarchyモードの場合）
     if (
-      confluence.pageCreationGranularity === "by-hierarchy" ||
-      confluence.pageCreationGranularity === "manual"
+      confluence.pageCreationGranularity === 'by-hierarchy' ||
+      confluence.pageCreationGranularity === 'manual'
     ) {
       if (!confluence.hierarchy) {
         errors.push(
-          "confluence.hierarchyが設定されていません。" +
+          'confluence.hierarchyが設定されていません。' +
             `pageCreationGranularityが"${confluence.pageCreationGranularity}"の場合、hierarchy設定が必須です。` +
-            "\n  解決方法: .michi/config.jsonに以下を追加してください:\n" +
-            "  {\n" +
+            '\n  解決方法: .michi/config.jsonに以下を追加してください:\n' +
+            '  {\n' +
             '    "confluence": {\n' +
             '      "hierarchy": {\n' +
             '        "mode": "simple",\n' +
             '        "parentPageTitle": "[{projectName}] {featureName}"\n' +
-            "      }\n" +
-            "    }\n" +
-            "  }",
+            '      }\n' +
+            '    }\n' +
+            '  }',
         );
       } else if (
-        confluence.pageCreationGranularity === "by-hierarchy" &&
+        confluence.pageCreationGranularity === 'by-hierarchy' &&
         confluence.hierarchy &&
         !confluence.hierarchy.parentPageTitle
       ) {
         warnings.push(
-          "confluence.hierarchy.parentPageTitleが設定されていません。" +
-            "by-hierarchyモードでは推奨されます。",
+          'confluence.hierarchy.parentPageTitleが設定されていません。' +
+            'by-hierarchyモードでは推奨されます。',
         );
       }
 
       if (
-        confluence.pageCreationGranularity === "manual" &&
+        confluence.pageCreationGranularity === 'manual' &&
         confluence.hierarchy &&
         !confluence.hierarchy.structure
       ) {
         errors.push(
-          "confluence.hierarchy.structureが設定されていません。" +
+          'confluence.hierarchy.structureが設定されていません。' +
             'pageCreationGranularityが"manual"の場合、structure設定が必須です。',
         );
       }
@@ -320,11 +317,10 @@ export function validateForJiraSync(
   const info: string[] = [];
 
   const config = getConfig(projectRoot);
-  const configPath = getConfigPath(projectRoot);
 
   // JIRA設定のチェック
   if (!config.jira) {
-    warnings.push("jira設定がありません。デフォルト設定を使用します。");
+    warnings.push('jira設定がありません。デフォルト設定を使用します。');
   } else {
     const jira = config.jira;
 
@@ -332,20 +328,20 @@ export function validateForJiraSync(
     if (!jira.issueTypes) {
       if (!process.env.JIRA_ISSUE_TYPE_STORY) {
         errors.push(
-          "jira.issueTypes.storyが設定されていません。" +
-            "環境変数JIRA_ISSUE_TYPE_STORYも設定されていないため、JIRA同期を実行できません。" +
-            "\n  解決方法1: 環境変数を設定:\n" +
-            "  export JIRA_ISSUE_TYPE_STORY=10036  # JIRAインスタンス固有のID\n" +
-            "\n  解決方法2: .michi/config.jsonに以下を追加:\n" +
-            "  {\n" +
+          'jira.issueTypes.storyが設定されていません。' +
+            '環境変数JIRA_ISSUE_TYPE_STORYも設定されていないため、JIRA同期を実行できません。' +
+            '\n  解決方法1: 環境変数を設定:\n' +
+            '  export JIRA_ISSUE_TYPE_STORY=10036  # JIRAインスタンス固有のID\n' +
+            '\n  解決方法2: .michi/config.jsonに以下を追加:\n' +
+            '  {\n' +
             '    "jira": {\n' +
             '      "issueTypes": {\n' +
             '        "story": "10036",\n' +
             '        "subtask": "10037"\n' +
-            "      }\n" +
-            "    }\n" +
-            "  }" +
-            "\n  確認方法: JIRA管理画面（Settings > Issues > Issue types）またはREST API: GET /rest/api/3/issuetype",
+            '      }\n' +
+            '    }\n' +
+            '  }' +
+            '\n  確認方法: JIRA管理画面（Settings > Issues > Issue types）またはREST API: GET /rest/api/3/issuetype',
         );
       } else {
         info.push(
@@ -356,10 +352,10 @@ export function validateForJiraSync(
       if (!jira.issueTypes.story) {
         if (!process.env.JIRA_ISSUE_TYPE_STORY) {
           errors.push(
-            "jira.issueTypes.storyが設定されていません。" +
-              "環境変数JIRA_ISSUE_TYPE_STORYも設定されていないため、JIRA同期を実行できません。" +
-              "\n  解決方法: .michi/config.jsonのjira.issueTypes.storyに値を設定するか、" +
-              "環境変数JIRA_ISSUE_TYPE_STORYを設定してください。",
+            'jira.issueTypes.storyが設定されていません。' +
+              '環境変数JIRA_ISSUE_TYPE_STORYも設定されていないため、JIRA同期を実行できません。' +
+              '\n  解決方法: .michi/config.jsonのjira.issueTypes.storyに値を設定するか、' +
+              '環境変数JIRA_ISSUE_TYPE_STORYを設定してください。',
           );
         } else {
           info.push(
@@ -371,8 +367,8 @@ export function validateForJiraSync(
       if (!jira.issueTypes.subtask) {
         if (!process.env.JIRA_ISSUE_TYPE_SUBTASK) {
           warnings.push(
-            "jira.issueTypes.subtaskが設定されていません。" +
-              "環境変数JIRA_ISSUE_TYPE_SUBTASKも設定されていないため、サブタスクは作成されません。",
+            'jira.issueTypes.subtaskが設定されていません。' +
+              '環境変数JIRA_ISSUE_TYPE_SUBTASKも設定されていないため、サブタスクは作成されません。',
           );
         } else {
           info.push(
@@ -384,18 +380,18 @@ export function validateForJiraSync(
 
     // selectedPhases設定のチェック
     if (
-      jira.storyCreationGranularity === "selected-phases" &&
+      jira.storyCreationGranularity === 'selected-phases' &&
       !jira.selectedPhases
     ) {
       errors.push(
-        "jira.selectedPhasesが設定されていません。" +
+        'jira.selectedPhasesが設定されていません。' +
           'storyCreationGranularityが"selected-phases"の場合、selectedPhases設定が必須です。',
       );
     }
 
     if (jira.selectedPhases && jira.selectedPhases.length === 0) {
       warnings.push(
-        "jira.selectedPhasesが空です。ストーリーは作成されません。",
+        'jira.selectedPhasesが空です。ストーリーは作成されません。',
       );
     }
   }
@@ -444,20 +440,20 @@ export async function validateForJiraSyncAsync(
               const suggestions =
                 storyTypes.length > 0
                   ? storyTypes
-                      .map((it) => `  - ${it.name} (ID: ${it.id})`)
-                      .join("\n")
-                  : "  （Storyタイプが見つかりませんでした）";
+                    .map((it) => `  - ${it.name} (ID: ${it.id})`)
+                    .join('\n')
+                  : '  （Storyタイプが見つかりませんでした）';
 
               result.errors.push(
                 `設定されたStory Issue Type ID (${storyId}) がプロジェクト '${projectKey}' に存在しません。\n` +
-                  "\n利用可能なStoryタイプ:\n" +
+                  '\n利用可能なStoryタイプ:\n' +
                   suggestions +
-                  "\n\n修正方法:\n" +
-                  "  1. .envファイルを編集:\n" +
-                  "     JIRA_ISSUE_TYPE_STORY=<正しいID>\n" +
-                  "\n" +
-                  "  2. または、対話的設定を再実行:\n" +
-                  "     npm run setup:interactive",
+                  '\n\n修正方法:\n' +
+                  '  1. .envファイルを編集:\n' +
+                  '     JIRA_ISSUE_TYPE_STORY=<正しいID>\n' +
+                  '\n' +
+                  '  2. または、対話的設定を再実行:\n' +
+                  '     npm run setup:interactive',
               );
               result.valid = false;
             }
@@ -470,20 +466,20 @@ export async function validateForJiraSyncAsync(
               const suggestions =
                 subtaskTypes.length > 0
                   ? subtaskTypes
-                      .map((it) => `  - ${it.name} (ID: ${it.id})`)
-                      .join("\n")
-                  : "  （Subtaskタイプが見つかりませんでした）";
+                    .map((it) => `  - ${it.name} (ID: ${it.id})`)
+                    .join('\n')
+                  : '  （Subtaskタイプが見つかりませんでした）';
 
               result.warnings.push(
                 `設定されたSubtask Issue Type ID (${subtaskId}) がプロジェクト '${projectKey}' に存在しません。\n` +
-                  "\n利用可能なSubtaskタイプ:\n" +
+                  '\n利用可能なSubtaskタイプ:\n' +
                   suggestions +
-                  "\n\n修正方法:\n" +
-                  "  1. .envファイルを編集:\n" +
-                  "     JIRA_ISSUE_TYPE_SUBTASK=<正しいID>\n" +
-                  "\n" +
-                  "  2. または、対話的設定を再実行:\n" +
-                  "     npm run setup:interactive",
+                  '\n\n修正方法:\n' +
+                  '  1. .envファイルを編集:\n' +
+                  '     JIRA_ISSUE_TYPE_SUBTASK=<正しいID>\n' +
+                  '\n' +
+                  '  2. または、対話的設定を再実行:\n' +
+                  '     npm run setup:interactive',
               );
             }
           }
@@ -492,7 +488,7 @@ export async function validateForJiraSyncAsync(
           // エラーにはしないが、警告として記録
           result.warnings.push(
             `JIRAプロジェクト '${projectKey}' のIssue Typesを取得できませんでした。` +
-              "設定されたIssue Type IDの存在確認をスキップします。",
+              '設定されたIssue Type IDの存在確認をスキップします。',
           );
         }
       }
@@ -501,7 +497,7 @@ export async function validateForJiraSyncAsync(
       // エラーにはしないが、警告として記録
       result.warnings.push(
         `プロジェクトメタデータの読み込みに失敗しました: ${error instanceof Error ? error.message : error}` +
-          "設定されたIssue Type IDの存在確認をスキップします。",
+          '設定されたIssue Type IDの存在確認をスキップします。',
       );
     }
   }

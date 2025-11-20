@@ -7,7 +7,6 @@ import { config } from 'dotenv';
 import { loadProjectMeta } from './utils/project-meta.js';
 import { syncToConfluence } from './confluence-sync.js';
 import { syncTasksToJIRA } from './jira-sync.js';
-import { createPR } from './pr-automation.js';
 
 config();
 

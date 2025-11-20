@@ -8,16 +8,15 @@
  * - .envファイルの生成
  */
 
-import { readFileSync, existsSync } from "fs";
-import * as readline from "readline";
+import { readFileSync, existsSync } from 'fs';
+import * as readline from 'readline';
 import {
   getProjectIssueTypes,
   hasJiraCredentials,
   findIssueTypeIdByName,
   filterStoryTypes,
   filterSubtaskTypes,
-  type IssueTypeInfo,
-} from "./jira-issue-type-fetcher.js";
+} from './jira-issue-type-fetcher.js';
 
 /**
  * 環境変数の設定項目定義
@@ -35,72 +34,72 @@ export interface EnvValue {
  */
 const ENV_CONFIG: EnvValue[] = [
   {
-    key: "ATLASSIAN_URL",
-    description: "Atlassian URL (例: https://your-domain.atlassian.net)",
+    key: 'ATLASSIAN_URL',
+    description: 'Atlassian URL (例: https://your-domain.atlassian.net)',
     required: true,
   },
   {
-    key: "ATLASSIAN_EMAIL",
-    description: "Atlassianアカウントのメールアドレス",
+    key: 'ATLASSIAN_EMAIL',
+    description: 'Atlassianアカウントのメールアドレス',
     required: true,
   },
   {
-    key: "ATLASSIAN_API_TOKEN",
+    key: 'ATLASSIAN_API_TOKEN',
     description:
-      "Atlassian API Token (https://id.atlassian.com/manage-profile/security/api-tokens で生成)",
+      'Atlassian API Token (https://id.atlassian.com/manage-profile/security/api-tokens で生成)',
     required: true,
     sensitive: true,
   },
   {
-    key: "GITHUB_ORG",
-    description: "GitHub Organization (オプション)",
+    key: 'GITHUB_ORG',
+    description: 'GitHub Organization (オプション)',
     required: false,
   },
   {
-    key: "GITHUB_TOKEN",
-    description: "GitHub Personal Access Token (オプション)",
+    key: 'GITHUB_TOKEN',
+    description: 'GitHub Personal Access Token (オプション)',
     required: false,
     sensitive: true,
   },
   {
-    key: "GITHUB_REPO",
-    description: "GitHubリポジトリ (例: owner/repo)",
+    key: 'GITHUB_REPO',
+    description: 'GitHubリポジトリ (例: owner/repo)',
     required: false,
   },
   {
-    key: "CONFLUENCE_PRD_SPACE",
-    description: "Confluence PRDスペースキー",
+    key: 'CONFLUENCE_PRD_SPACE',
+    description: 'Confluence PRDスペースキー',
     required: false,
-    defaultValue: "PRD",
+    defaultValue: 'PRD',
   },
   {
-    key: "CONFLUENCE_QA_SPACE",
-    description: "Confluence QAスペースキー",
+    key: 'CONFLUENCE_QA_SPACE',
+    description: 'Confluence QAスペースキー',
     required: false,
-    defaultValue: "QA",
+    defaultValue: 'QA',
   },
   {
-    key: "CONFLUENCE_RELEASE_SPACE",
-    description: "Confluence Releaseスペースキー",
+    key: 'CONFLUENCE_RELEASE_SPACE',
+    description: 'Confluence Releaseスペースキー',
     required: false,
-    defaultValue: "RELEASE",
+    defaultValue: 'RELEASE',
   },
   {
-    key: "JIRA_PROJECT_KEYS",
-    description: "JIRAプロジェクトキー（カンマ区切り）",
+    key: 'JIRA_PROJECT_KEYS',
+    description: 'JIRAプロジェクトキー（カンマ区切り）',
     required: false,
   },
   {
-    key: "JIRA_ISSUE_TYPE_STORY",
-    description: "JIRA Story Issue Type ID (JIRAインスタンス固有)",
+    key: 'JIRA_ISSUE_TYPE_STORY',
+    description: 'JIRA Story Issue Type ID (JIRAインスタンス固有)',
     required: true,
-    defaultValue: "10036",
+    defaultValue: '10036',
   },
   {
-    key: "JIRA_ISSUE_TYPE_SUBTASK",
-    description: "JIRA Subtask Issue Type ID (JIRAインスタンス固有)",
+    key: 'JIRA_ISSUE_TYPE_SUBTASK',
+    description: 'JIRA Subtask Issue Type ID (JIRAインスタンス固有)',
     required: true,
-    defaultValue: "10037",
+    defaultValue: '10037',
   },
 ];
 
@@ -118,14 +117,14 @@ export function parseEnvFile(filePath: string): Map<string, string> {
   }
 
   try {
-    const content = readFileSync(filePath, "utf-8");
-    const lines = content.split("\n");
+    const content = readFileSync(filePath, 'utf-8');
+    const lines = content.split('\n');
 
     for (const line of lines) {
       const trimmed = line.trim();
 
       // コメント行または空行をスキップ
-      if (!trimmed || trimmed.startsWith("#")) {
+      if (!trimmed || trimmed.startsWith('#')) {
         continue;
       }
 
@@ -138,7 +137,7 @@ export function parseEnvFile(filePath: string): Map<string, string> {
         // クォートを除去
         if (
           (value.startsWith('"') && value.endsWith('"')) ||
-          (value.startsWith("'") && value.endsWith("'"))
+          (value.startsWith('\'') && value.endsWith('\''))
         ) {
           value = value.slice(1, -1);
         }
@@ -164,9 +163,9 @@ export function parseEnvFile(filePath: string): Map<string, string> {
  */
 function maskValue(value: string): string {
   if (!value) {
-    return "";
+    return '';
   }
-  return "***hidden***";
+  return '***hidden***';
 }
 
 /**
@@ -202,7 +201,7 @@ async function promptJiraIssueTypeId(
   projectKey: string | undefined,
   existingValue?: string,
 ): Promise<string> {
-  const requiredMark = config.required ? " (必須)" : " (オプション)";
+  const requiredMark = config.required ? ' (必須)' : ' (オプション)';
 
   console.log(`\n📌 ${config.key}${requiredMark}`);
   console.log(`   ${config.description}`);
@@ -224,29 +223,29 @@ async function promptJiraIssueTypeId(
     if (issueTypes && issueTypes.length > 0) {
       // StoryまたはSubtaskタイプをフィルタリング
       const filteredTypes =
-        config.key === "JIRA_ISSUE_TYPE_STORY"
+        config.key === 'JIRA_ISSUE_TYPE_STORY'
           ? filterStoryTypes(issueTypes)
           : filterSubtaskTypes(issueTypes);
 
       if (filteredTypes.length > 0) {
-        console.log("\n   📋 利用可能なIssue Types:");
+        console.log('\n   📋 利用可能なIssue Types:');
         filteredTypes.forEach((it, index) => {
-          const marker = existingValue === it.id ? " ← 現在の値" : "";
+          const marker = existingValue === it.id ? ' ← 現在の値' : '';
           console.log(`      ${index + 1}. ${it.name} (ID: ${it.id})${marker}`);
         });
 
-        console.log("\n   選択方法:");
+        console.log('\n   選択方法:');
         console.log(`     - 番号を入力 (1-${filteredTypes.length})`);
         console.log(`     - Issue Type名を入力 (例: ${filteredTypes[0].name})`);
         console.log(`     - IDを直接入力 (例: ${filteredTypes[0].id})`);
-        console.log("     - Enterキーで既存値またはデフォルト値を使用");
+        console.log('     - Enterキーで既存値またはデフォルト値を使用');
 
-        const promptText = "   選択: ";
+        const promptText = '   選択: ';
         const input = await question(rl, promptText);
 
         if (!input) {
           // 入力が空の場合、既存値またはデフォルト値を使用
-          return existingValue || config.defaultValue || "";
+          return existingValue || config.defaultValue || '';
         }
 
         // 番号で選択
@@ -285,19 +284,19 @@ async function promptJiraIssueTypeId(
         return input;
       } else {
         console.log(
-          `   ⚠️  ${config.key === "JIRA_ISSUE_TYPE_STORY" ? "Story" : "Subtask"}タイプが見つかりませんでした`,
+          `   ⚠️  ${config.key === 'JIRA_ISSUE_TYPE_STORY' ? 'Story' : 'Subtask'}タイプが見つかりませんでした`,
         );
       }
     } else {
       console.log(
-        "   ⚠️  JIRA APIへのアクセスに失敗しました（認証情報が未設定、またはネットワークエラー）",
+        '   ⚠️  JIRA APIへのアクセスに失敗しました（認証情報が未設定、またはネットワークエラー）',
       );
-      console.log("   手動でIDを入力してください。");
-      console.log("   ");
-      console.log("   JIRA管理画面で確認:");
-      console.log("   Settings > Issues > Issue types");
-      console.log("   ");
-      console.log("   または、REST APIで確認:");
+      console.log('   手動でIDを入力してください。');
+      console.log('   ');
+      console.log('   JIRA管理画面で確認:');
+      console.log('   Settings > Issues > Issue types');
+      console.log('   ');
+      console.log('   または、REST APIで確認:');
       console.log(
         `   GET https://your-domain.atlassian.net/rest/api/3/project/${projectKey}`,
       );
@@ -305,22 +304,22 @@ async function promptJiraIssueTypeId(
   } else {
     if (!hasJiraCredentials()) {
       console.log(
-        "   ℹ️  Atlassian認証情報が未設定のため、手動でIDを入力してください",
+        '   ℹ️  Atlassian認証情報が未設定のため、手動でIDを入力してください',
       );
     }
     if (!projectKey) {
       console.log(
-        "   ℹ️  JIRAプロジェクトキーが未設定のため、手動でIDを入力してください",
+        '   ℹ️  JIRAプロジェクトキーが未設定のため、手動でIDを入力してください',
       );
     }
   }
 
   // フォールバック: 通常の入力プロンプト
   const promptText = existingValue
-    ? "   新しい値を入力（Enter=変更なし）: "
+    ? '   新しい値を入力（Enter=変更なし）: '
     : config.defaultValue
-      ? "   値を入力（Enter=デフォルト）: "
-      : "   値を入力: ";
+      ? '   値を入力（Enter=デフォルト）: '
+      : '   値を入力: ';
 
   const input = await question(rl, promptText);
 
@@ -336,11 +335,11 @@ async function promptJiraIssueTypeId(
     }
     // 必須項目で値がない場合はエラー
     if (config.required) {
-      console.log("   ⚠️  必須項目です。値を入力してください。");
+      console.log('   ⚠️  必須項目です。値を入力してください。');
       return promptJiraIssueTypeId(rl, config, projectKey, existingValue);
     }
     // オプション項目は空文字を返す
-    return "";
+    return '';
   }
 
   return input;
@@ -363,14 +362,14 @@ export async function promptEnvValue(
 ): Promise<string> {
   // JIRA Issue Type ID設定の場合は特別な処理
   if (
-    config.key === "JIRA_ISSUE_TYPE_STORY" ||
-    config.key === "JIRA_ISSUE_TYPE_SUBTASK"
+    config.key === 'JIRA_ISSUE_TYPE_STORY' ||
+    config.key === 'JIRA_ISSUE_TYPE_SUBTASK'
   ) {
     return promptJiraIssueTypeId(rl, config, projectKey, existingValue);
   }
 
   // 通常の入力処理
-  const requiredMark = config.required ? " (必須)" : " (オプション)";
+  const requiredMark = config.required ? ' (必須)' : ' (オプション)';
 
   console.log(`\n📌 ${config.key}${requiredMark}`);
   console.log(`   ${config.description}`);
@@ -385,10 +384,10 @@ export async function promptEnvValue(
   }
 
   const promptText = existingValue
-    ? "   新しい値を入力（Enter=変更なし）: "
+    ? '   新しい値を入力（Enter=変更なし）: '
     : config.defaultValue
-      ? "   値を入力（Enter=デフォルト）: "
-      : "   値を入力: ";
+      ? '   値を入力（Enter=デフォルト）: '
+      : '   値を入力: ';
 
   const input = await question(rl, promptText);
 
@@ -404,11 +403,11 @@ export async function promptEnvValue(
     }
     // 必須項目で値がない場合はエラー
     if (config.required) {
-      console.log("   ⚠️  必須項目です。値を入力してください。");
+      console.log('   ⚠️  必須項目です。値を入力してください。');
       return promptEnvValue(rl, config, existingValue, projectKey);
     }
     // オプション項目は空文字を返す
-    return "";
+    return '';
   }
 
   return input;
@@ -421,46 +420,48 @@ export async function promptEnvValue(
  * @returns .envファイルの内容
  */
 export function generateEnvContent(values: Map<string, string>): string {
-  let content = "# Atlassian設定（MCP + REST API共通）\n";
+  let content = '# Atlassian設定（MCP + REST API共通）\n';
 
   // Atlassian設定
   const atlassianKeys = [
-    "ATLASSIAN_URL",
-    "ATLASSIAN_EMAIL",
-    "ATLASSIAN_API_TOKEN",
+    'ATLASSIAN_URL',
+    'ATLASSIAN_EMAIL',
+    'ATLASSIAN_API_TOKEN',
   ];
   for (const key of atlassianKeys) {
-    const value = values.get(key) || "";
+    const value = values.get(key) || '';
     content += `${key}=${value}\n`;
   }
 
   // GitHub設定
-  content += "\n# GitHub設定\n";
-  const githubKeys = ["GITHUB_ORG", "GITHUB_TOKEN", "GITHUB_REPO"];
+  content += '\n# GitHub設定\n';
+  const githubKeys = ['GITHUB_ORG', 'GITHUB_TOKEN', 'GITHUB_REPO'];
   for (const key of githubKeys) {
-    const value = values.get(key) || "";
+    const value = values.get(key) || '';
     content += `${key}=${value}\n`;
   }
 
   // Confluence設定
-  content += "\n# Confluence共有スペース\n";
+  content += '\n# Confluence共有スペース\n';
   const confluenceKeys = [
-    "CONFLUENCE_PRD_SPACE",
-    "CONFLUENCE_QA_SPACE",
-    "CONFLUENCE_RELEASE_SPACE",
+    'CONFLUENCE_PRD_SPACE',
+    'CONFLUENCE_QA_SPACE',
+    'CONFLUENCE_RELEASE_SPACE',
   ];
   for (const key of confluenceKeys) {
-    const value = values.get(key) || "";
+    const value = values.get(key) || '';
     content += `${key}=${value}\n`;
   }
 
   // JIRA設定
-  content += "\n# JIRAプロジェクトキー\n";
-  content += `JIRA_PROJECT_KEYS=${values.get("JIRA_PROJECT_KEYS") || ""}\n`;
+  content += '\n# JIRAプロジェクトキー\n';
+  content += `JIRA_PROJECT_KEYS=${values.get('JIRA_PROJECT_KEYS') || ''}\n`;
 
-  content += "\n# JIRA Issue Type IDs（JIRAインスタンス固有 - 必須）\n";
-  content += `JIRA_ISSUE_TYPE_STORY=${values.get("JIRA_ISSUE_TYPE_STORY") || "10036"}\n`;
-  content += `JIRA_ISSUE_TYPE_SUBTASK=${values.get("JIRA_ISSUE_TYPE_SUBTASK") || "10037"}\n`;
+  content += '\n# JIRA Issue Type IDs（JIRAインスタンス固有 - 必須）\n';
+  const storyConfig = ENV_CONFIG.find(c => c.key === 'JIRA_ISSUE_TYPE_STORY');
+  const subtaskConfig = ENV_CONFIG.find(c => c.key === 'JIRA_ISSUE_TYPE_SUBTASK');
+  content += `JIRA_ISSUE_TYPE_STORY=${values.get('JIRA_ISSUE_TYPE_STORY') || storyConfig?.defaultValue || ''}\n`;
+  content += `JIRA_ISSUE_TYPE_SUBTASK=${values.get('JIRA_ISSUE_TYPE_SUBTASK') || subtaskConfig?.defaultValue || ''}\n`;
 
   return content;
 }
@@ -486,20 +487,20 @@ export async function configureEnvInteractive(
   const newValues = new Map<string, string>();
 
   try {
-    console.log("\n🔐 環境変数の設定");
-    console.log("=".repeat(60));
+    console.log('\n🔐 環境変数の設定');
+    console.log('='.repeat(60));
     console.log(
-      "各項目を設定してください。Enterキーのみで既存値またはデフォルト値を使用します。",
+      '各項目を設定してください。Enterキーのみで既存値またはデフォルト値を使用します。',
     );
 
     for (const config of ENV_CONFIG) {
       let existingValue = existingValues?.get(config.key);
 
       // 自動設定項目
-      if (config.key === "JIRA_PROJECT_KEYS" && jiraKey && !existingValue) {
+      if (config.key === 'JIRA_PROJECT_KEYS' && jiraKey && !existingValue) {
         existingValue = jiraKey;
       }
-      if (config.key === "GITHUB_REPO" && repoUrl && !existingValue) {
+      if (config.key === 'GITHUB_REPO' && repoUrl && !existingValue) {
         // URLからリポジトリ名を抽出 (例: https://github.com/owner/repo -> owner/repo)
         const match = repoUrl.match(/github\.com[/:]([\w-]+\/[\w-]+)/);
         if (match) {
@@ -508,7 +509,7 @@ export async function configureEnvInteractive(
       }
 
       // JIRA Issue Type ID設定時は、プロジェクトキーを渡す
-      const projectKey = jiraKey || existingValues?.get("JIRA_PROJECT_KEYS");
+      const projectKey = jiraKey || existingValues?.get('JIRA_PROJECT_KEYS');
       const value = await promptEnvValue(rl, config, existingValue, projectKey);
 
       if (value) {
@@ -516,7 +517,7 @@ export async function configureEnvInteractive(
       }
     }
 
-    console.log("\n✅ 環境変数の設定が完了しました");
+    console.log('\n✅ 環境変数の設定が完了しました');
   } finally {
     rl.close();
   }

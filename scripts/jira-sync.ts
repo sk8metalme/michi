@@ -24,8 +24,8 @@ import { config } from 'dotenv';
 import { loadProjectMeta } from './utils/project-meta.js';
 import { validateFeatureNameOrThrow } from './utils/feature-name-validator.js';
 import { getConfig, getConfigPath } from './utils/config-loader.js';
-import { validateForJiraSync, validateForJiraSyncAsync } from './utils/config-validator.js';
-import { updateSpecJsonAfterJiraSync } from './utils/spec-updater.js';
+import { validateForJiraSyncAsync } from './utils/config-validator.js';
+import { updateSpecJsonAfterJiraSync, type SpecJson } from './utils/spec-updater.js';
 
 config();
 
@@ -42,6 +42,73 @@ function sleep(ms: number): Promise<void> {
  */
 function getRequestDelay(): number {
   return parseInt(process.env.ATLASSIAN_REQUEST_DELAY || '500', 10);
+}
+
+/**
+ * Atlassian Document Format (ADF) の型定義
+ */
+interface ADFNode {
+  type: string;
+  attrs?: Record<string, unknown>;
+  content?: ADFNode[];
+  text?: string;
+  marks?: Array<{ type: string; attrs?: Record<string, unknown> }>;
+}
+
+interface ADFDocument {
+  version: number;
+  type: 'doc';
+  content: ADFNode[];
+}
+
+/**
+ * JIRA Issue型定義（必要最小限）
+ */
+interface JIRAIssue {
+  id: string;
+  key: string;
+  self: string;
+  fields: {
+    summary: string;
+    issuetype?: { id: string; name: string };
+    status?: { name: string };
+    [key: string]: unknown;
+  };
+}
+
+/**
+ * JIRA Issue作成/更新ペイロード型
+ */
+interface JIRAIssuePayload {
+  fields: {
+    project: { key: string };
+    summary: string;
+    description?: ADFDocument;
+    issuetype: { id: string };
+    labels?: string[];
+    parent?: { key: string };
+    [key: string]: unknown;
+  };
+  update?: Record<string, unknown>;
+}
+
+/**
+ * JIRA Issue作成レスポンス型
+ */
+interface JIRAIssueCreateResponse {
+  id: string;
+  key: string;
+  self: string;
+}
+
+/**
+ * JIRA Issue Type型
+ */
+interface JIRAIssueType {
+  id: string;
+  name: string;
+  description?: string;
+  subtask: boolean;
 }
 
 /**
@@ -121,8 +188,8 @@ function extractStoryDetails(tasksContent: string, storyTitle: string): StoryDet
 /**
  * リッチなADF形式を生成
  */
-function createRichADF(details: StoryDetails, phaseLabel: string, githubUrl: string): any {
-  const content: any[] = [];
+function createRichADF(details: StoryDetails, phaseLabel: string, githubUrl: string): ADFDocument {
+  const content: ADFNode[] = [];
   
   // 説明セクション
   if (details.description) {
@@ -238,7 +305,7 @@ function createRichADF(details: StoryDetails, phaseLabel: string, githubUrl: str
 /**
  * プレーンテキストをAtlassian Document Format（ADF）に変換
  */
-function textToADF(text: string): any {
+function textToADF(text: string): ADFDocument {
   // 改行で分割して段落を作成
   const paragraphs = text.split('\n').filter(line => line.trim().length > 0);
   
@@ -290,7 +357,7 @@ class JIRAClient {
    * JQL検索でIssueを検索
    * @throws 検索エラー時は例外を再スロー（呼び出し元で処理）
    */
-  async searchIssues(jql: string): Promise<any[]> {
+  async searchIssues(jql: string): Promise<JIRAIssue[]> {
     // レートリミット対策: リクエスト前に待機
     await sleep(this.requestDelay);
     
@@ -313,11 +380,11 @@ class JIRAClient {
     }
   }
   
-  async createIssue(payload: any): Promise<any> {
+  async createIssue(payload: JIRAIssuePayload): Promise<JIRAIssueCreateResponse> {
     // レートリミット対策: リクエスト前に待機
     await sleep(this.requestDelay);
-    
-    const response = await axios.post(`${this.baseUrl}/issue`, payload, {
+
+    const response = await axios.post<JIRAIssueCreateResponse>(`${this.baseUrl}/issue`, payload, {
       headers: {
         'Authorization': `Basic ${this.auth}`,
         'Content-Type': 'application/json'
@@ -325,8 +392,8 @@ class JIRAClient {
     });
     return response.data;
   }
-  
-  async updateIssue(issueKey: string, payload: any): Promise<void> {
+
+  async updateIssue(issueKey: string, payload: Partial<JIRAIssuePayload>): Promise<void> {
     // レートリミット対策: リクエスト前に待機
     await sleep(this.requestDelay);
     
@@ -355,8 +422,8 @@ class JIRAClient {
         }
       });
       
-      const issueTypes = response.data.issueTypes || [];
-      const issueType = issueTypes.find((it: any) => 
+      const issueTypes = (response.data.issueTypes || []) as JIRAIssueType[];
+      const issueType = issueTypes.find((it: JIRAIssueType) =>
         it.name.toLowerCase() === issueTypeName.toLowerCase() ||
         it.name === issueTypeName
       );
@@ -415,8 +482,6 @@ async function syncTasksToJIRA(featureName: string): Promise<void> {
     console.log(`📋 Story Issue Type ID from API: ${storyIssueTypeId || 'not found'}`);
   }
   
-  const subtaskIssueTypeId = appConfig.jira?.issueTypes?.subtask || process.env.JIRA_ISSUE_TYPE_SUBTASK;
-  
   if (!storyIssueTypeId) {
     throw new Error(
       'JIRA Story issue type ID is not configured and could not be found in project. ' +
@@ -433,14 +498,14 @@ async function syncTasksToJIRA(featureName: string): Promise<void> {
   
   // spec.jsonを読み込んで既存のEpicキーを確認
   const specPath = resolve(`.kiro/specs/${featureName}/spec.json`);
-  let spec: any = {};
+  let spec: SpecJson = {};
   try {
-    spec = JSON.parse(readFileSync(specPath, 'utf-8'));
-  } catch (error) {
+    spec = JSON.parse(readFileSync(specPath, 'utf-8')) as SpecJson;
+  } catch {
     console.error('spec.json not found or invalid');
   }
-  
-  let epic: any;
+
+  let epic: JIRAIssue | undefined;
   
   // 既存のEpicをチェック
   if (spec.jira?.epicKey) {
@@ -454,7 +519,7 @@ async function syncTasksToJIRA(featureName: string): Promise<void> {
     
     // 同じタイトルのEpicがすでに存在するかJQLで検索
     const jql = `project = ${projectMeta.jiraProjectKey} AND issuetype = Epic AND summary ~ "${featureName}"`;
-    let existingEpics: any[] = [];
+    let existingEpics: JIRAIssue[] = [];
     try {
       existingEpics = await client.searchIssues(jql);
     } catch (error) {
@@ -513,13 +578,13 @@ async function syncTasksToJIRA(featureName: string): Promise<void> {
   
   const existingStorySummaries = new Set(
     existingStories
-      .filter((s: any) => s?.fields?.summary)
-      .map((s: any) => s.fields.summary)
+      .filter((s: JIRAIssue) => s?.fields?.summary)
+      .map((s: JIRAIssue) => s.fields.summary)
   );
   const existingStoryKeys = new Set(
     existingStories
-      .filter((s: any) => s?.key)
-      .map((s: any) => s.key)
+      .filter((s: JIRAIssue) => s?.key)
+      .map((s: JIRAIssue) => s.key)
   );
   
   console.log(`Found ${existingStories.length} existing stories for this feature`);

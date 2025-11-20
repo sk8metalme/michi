@@ -4,7 +4,7 @@
  */
 
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
-import { resolve, dirname } from 'path';
+import { resolve } from 'path';
 
 /**
  * spec.json の型定義
