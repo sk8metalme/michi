@@ -4,11 +4,10 @@
  */
 
 import { readFileSync } from 'fs';
-import { resolve } from 'path';
 import type { ConfluenceClient } from '../confluence-sync.js';
 import { convertMarkdownToConfluence, createConfluencePage } from '../markdown-to-confluence.js';
 import type { ProjectMetadata } from './project-meta.js';
-import type { ConfluenceConfig, ConfluencePageCreationGranularity } from '../config/config-schema.js';
+import type { ConfluenceConfig } from '../config/config-schema.js';
 
 /**
  * ページ作成結果

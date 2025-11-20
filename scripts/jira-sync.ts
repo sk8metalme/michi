@@ -24,7 +24,7 @@ import { config } from 'dotenv';
 import { loadProjectMeta } from './utils/project-meta.js';
 import { validateFeatureNameOrThrow } from './utils/feature-name-validator.js';
 import { getConfig, getConfigPath } from './utils/config-loader.js';
-import { validateForJiraSync, validateForJiraSyncAsync } from './utils/config-validator.js';
+import { validateForJiraSyncAsync } from './utils/config-validator.js';
 import { updateSpecJsonAfterJiraSync } from './utils/spec-updater.js';
 
 config();

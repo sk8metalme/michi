@@ -443,18 +443,6 @@ async function syncToConfluence(
   return firstPageUrl;
 }
 
-/**
- * ドキュメントタイプのラベルを取得
- */
-function getDocTypeLabel(docType: string): string {
-  const labels: Record<string, string> = {
-    requirements: '要件定義',
-    design: '設計',
-    tasks: 'タスク分割'
-  };
-  return labels[docType] || docType;
-}
-
 // CLI実行
 if (import.meta.url === `file://${process.argv[1]}`) {
   const args = process.argv.slice(2);
@@ -466,7 +454,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   }
   
   const featureName = args[0];
-  const docType = (args[1] as any) || 'requirements';
+  const docType = (args[1] as string) || 'requirements';
   
   syncToConfluence(featureName, docType)
     .then(() => {

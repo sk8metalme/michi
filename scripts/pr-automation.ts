@@ -4,7 +4,6 @@
 
 import { Octokit } from '@octokit/rest';
 import { config } from 'dotenv';
-import { loadProjectMeta } from './utils/project-meta.js';
 
 config();
 

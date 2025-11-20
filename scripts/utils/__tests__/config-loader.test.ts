@@ -50,7 +50,7 @@ describe('config-loader', () => {
       // ディレクトリを削除
       try {
         rmSync(testProjectRoot, { recursive: true, force: true });
-      } catch (e) {
+      } catch {
         // 削除失敗は無視
       }
     }

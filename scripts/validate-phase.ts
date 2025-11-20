@@ -5,7 +5,6 @@
 
 import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
-import { loadProjectMeta } from './utils/project-meta.js';
 import { validateFeatureName } from './utils/feature-name-validator.js';
 
 type Phase = 'requirements' | 'design' | 'tasks';

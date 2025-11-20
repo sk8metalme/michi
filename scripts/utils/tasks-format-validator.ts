@@ -4,7 +4,7 @@
  * Michi 6-Phase構造に準拠しているかを検証
  */
 
-import { readFileSync } from "fs";
+import { readFileSync } from 'fs';
 
 /**
  * tasks.mdのフォーマットを検証
@@ -16,10 +16,10 @@ export function validateTasksFormat(tasksPath: string): void {
   let content: string;
 
   try {
-    content = readFileSync(tasksPath, "utf-8");
+    content = readFileSync(tasksPath, 'utf-8');
   } catch (error) {
     throw new Error(
-      `Failed to read tasks.md: ${error instanceof Error ? error.message : "Unknown error"}`,
+      `Failed to read tasks.md: ${error instanceof Error ? error.message : 'Unknown error'}`,
     );
   }
 
@@ -27,24 +27,24 @@ export function validateTasksFormat(tasksPath: string): void {
   // より具体的なエラーメッセージを優先的に表示
   // AI-DLCは "- [ ] 1." のようなフォーマットで、Phase 0:がない
   const hasCheckboxPattern = /^- \[ \] \d+\./m.test(content);
-  const hasPhase0 = content.includes("Phase 0:");
+  const hasPhase0 = content.includes('Phase 0:');
 
   if (hasCheckboxPattern && !hasPhase0) {
     throw new Error(
-      "tasks.md appears to be in AI-DLC format instead of Michi 6-phase format.\n" +
+      'tasks.md appears to be in AI-DLC format instead of Michi 6-phase format.\n' +
         'Detected "- [ ] 1." pattern without "Phase 0:" header.\n' +
-        "Please regenerate tasks.md using /kiro:spec-tasks command with correct template.",
+        'Please regenerate tasks.md using /kiro:spec-tasks command with correct template.',
     );
   }
 
   // 2. 全6フェーズが存在するかチェック
   const requiredPhases = [
-    "Phase 0: 要件定義（Requirements）",
-    "Phase 1: 設計（Design）",
-    "Phase 2: 実装（Implementation）",
-    "Phase 3: 試験（Testing）",
-    "Phase 4: リリース準備（Release Preparation）",
-    "Phase 5: リリース（Release）",
+    'Phase 0: 要件定義（Requirements）',
+    'Phase 1: 設計（Design）',
+    'Phase 2: 実装（Implementation）',
+    'Phase 3: 試験（Testing）',
+    'Phase 4: リリース準備（Release Preparation）',
+    'Phase 5: リリース（Release）',
   ];
 
   const missingPhases = requiredPhases.filter(
@@ -52,9 +52,9 @@ export function validateTasksFormat(tasksPath: string): void {
   );
   if (missingPhases.length > 0) {
     throw new Error(
-      `tasks.md is missing required phases:\n${missingPhases.map((p) => `  - ${p}`).join("\n")}\n\n` +
-        "Expected all 6 phases (Phase 0 through Phase 5).\n" +
-        "Please regenerate tasks.md using /kiro:spec-tasks command.",
+      `tasks.md is missing required phases:\n${missingPhases.map((p) => `  - ${p}`).join('\n')}\n\n` +
+        'Expected all 6 phases (Phase 0 through Phase 5).\n' +
+        'Please regenerate tasks.md using /kiro:spec-tasks command.',
     );
   }
 
@@ -62,24 +62,24 @@ export function validateTasksFormat(tasksPath: string): void {
   const storyPattern = /### Story \d+\.\d+:/;
   if (!storyPattern.test(content)) {
     throw new Error(
-      "tasks.md does not contain valid Story headers.\n" +
+      'tasks.md does not contain valid Story headers.\n' +
         'Expected format: "### Story X.Y: Title"\n' +
-        "Please regenerate tasks.md using /kiro:spec-tasks command.",
+        'Please regenerate tasks.md using /kiro:spec-tasks command.',
     );
   }
 
   // 4. 営業日スケジュールのチェック（警告のみ）
   const hasBusinessDayMention =
-    content.includes("営業日") ||
-    content.includes("business day") ||
-    content.includes("Day 1") ||
-    content.includes("Day 2");
+    content.includes('営業日') ||
+    content.includes('business day') ||
+    content.includes('Day 1') ||
+    content.includes('Day 2');
 
   if (!hasBusinessDayMention) {
     console.warn(
-      "⚠️  Warning: tasks.md does not mention business days or day numbering.\n" +
-        "   Michi expects tasks to include business day schedule (Day 1, Day 2, etc.).\n" +
-        "   This may cause validation warnings during JIRA sync.",
+      '⚠️  Warning: tasks.md does not mention business days or day numbering.\n' +
+        '   Michi expects tasks to include business day schedule (Day 1, Day 2, etc.).\n' +
+        '   This may cause validation warnings during JIRA sync.',
     );
   }
 
@@ -87,9 +87,9 @@ export function validateTasksFormat(tasksPath: string): void {
   const phaseHeaderPattern = /## Phase \d+: .+（.+）/;
   if (!phaseHeaderPattern.test(content)) {
     console.warn(
-      "⚠️  Warning: Phase headers may not have correct format.\n" +
+      '⚠️  Warning: Phase headers may not have correct format.\n' +
         '   Expected format: "## Phase X: Name（Label）"\n' +
-        "   Labels in parentheses are required for JIRA label detection.",
+        '   Labels in parentheses are required for JIRA label detection.',
     );
   }
 }
@@ -117,7 +117,7 @@ export function isValidTasksFormat(tasksPath: string): boolean {
  */
 export function countPhases(tasksPath: string): number {
   try {
-    const content = readFileSync(tasksPath, "utf-8");
+    const content = readFileSync(tasksPath, 'utf-8');
     const phasePattern = /## Phase \d+:/g;
     const matches = content.match(phasePattern);
     return matches ? matches.length : 0;
@@ -134,7 +134,7 @@ export function countPhases(tasksPath: string): number {
  */
 export function countStories(tasksPath: string): number {
   try {
-    const content = readFileSync(tasksPath, "utf-8");
+    const content = readFileSync(tasksPath, 'utf-8');
     const storyPattern = /### Story \d+\.\d+:/g;
     const matches = content.match(storyPattern);
     return matches ? matches.length : 0;

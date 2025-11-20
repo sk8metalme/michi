@@ -4,7 +4,6 @@ import {
   renderTemplate,
   renderJsonTemplate,
   renderTemplates,
-  type TemplateContext
 } from '../renderer.js';
 
 describe('renderer', () => {

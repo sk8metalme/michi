@@ -4,7 +4,7 @@
  */
 
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
-import { resolve, join, basename } from 'path';
+import { join, basename } from 'path';
 import * as readline from 'readline';
 import { findCurrentProject, findAllProjects, selectProject, findRepositoryRoot } from './utils/project-finder.js';
 import type { ProjectMetadata } from './utils/project-meta.js';

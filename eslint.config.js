@@ -27,12 +27,12 @@ export default tseslint.config(
     ignores: [
       'dist/',
       'node_modules/',
-      '*.js',
       'scripts/set-permissions.js',
       'scripts/copy-static-assets.js',
       '*.d.ts',
       'coverage/',
       'vitest.config.ts',
+      'eslint.config.js',
     ],
   }
 );

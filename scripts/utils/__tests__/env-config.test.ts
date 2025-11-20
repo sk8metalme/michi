@@ -26,7 +26,7 @@ describe('env-config', () => {
     if (existsSync(testDir)) {
       try {
         rmdirSync(testDir);
-      } catch (error) {
+      } catch {
         // ディレクトリが空でない場合は無視
       }
     }
