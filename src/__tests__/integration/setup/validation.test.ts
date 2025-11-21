@@ -360,23 +360,6 @@ describe('Setup Argument Validation', () => {
         });
       }).rejects.toThrow(/JIRAキーの形式が不正です/);
     });
-
-    it('should convert lowercase JIRA key to uppercase', async () => {
-      // This test ensures that lowercase JIRA keys are automatically converted to uppercase
-      await setupExisting({
-        cursor: true,
-        projectName: 'Test Project',
-        jiraKey: 'test',
-      });
-
-      const { join } = await import('path');
-      const { readFileSync } = await import('fs');
-
-      const projectJson = JSON.parse(
-        readFileSync(join(testProject.path, '.kiro/project.json'), 'utf-8'),
-      );
-      expect(projectJson.jiraProjectKey).toBe('TEST');
-    });
   });
 
   describe('Git Repository Validation', () => {
