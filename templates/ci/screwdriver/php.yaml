@@ -1,0 +1,20 @@
+shared:
+  image: php:8.3
+
+jobs:
+  main:
+    requires: [~pr, ~commit, ~tag]
+    steps:
+      - install-composer: |
+          php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+          php composer-setup.php
+          php -r "unlink('composer-setup.php');"
+      - install: php composer.phar install --prefer-dist --no-progress
+      - phpstan: php composer.phar phpstan
+      - test: php composer.phar test
+      - coverage: |
+          if [ -f "coverage.xml" ]; then
+            echo "Coverage report generated"
+            # Optional: Upload to coverage service
+            # php composer.phar coverage:upload
+          fi
