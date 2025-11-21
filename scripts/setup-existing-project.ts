@@ -262,8 +262,10 @@ async function setupExistingProject(config: SetupConfig): Promise<void> {
       console.log(`   ⚠️  Template source not found: ${templateSourceDir}`);
       console.log('   Skipping template copy');
     } else {
-      // rulesディレクトリのコピーとレンダリング
-      const rulesTemplateDir = join(templateSourceDir, 'rules');
+      // rulesディレクトリのコピーとレンダリング（環境別にテンプレートディレクトリ名が異なる）
+      // cursor/claude: 'rules', claude-agent: 'subagents'
+      const templateDirName = config.environment === 'claude-agent' ? 'subagents' : 'rules';
+      const rulesTemplateDir = join(templateSourceDir, templateDirName);
       const rulesDestDir = join(projectDir, envConfig.rulesDir);
       
       if (existsSync(rulesTemplateDir)) {
