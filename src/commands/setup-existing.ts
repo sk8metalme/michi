@@ -42,6 +42,9 @@ interface SetupOptions {
   cursor?: boolean;
   claude?: boolean;
   claudeAgent?: boolean; // camelCase
+  gemini?: boolean;
+  codex?: boolean;
+  cline?: boolean;
   lang?: string;
   projectName?: string; // camelCase
   jiraKey?: string; // camelCase
@@ -135,15 +138,21 @@ async function determineEnvironment(
   if (options.cursor) return 'cursor';
   if (options.claude) return 'claude';
   if (options.claudeAgent) return 'claude-agent';
+  if (options.gemini) return 'gemini';
+  if (options.codex) return 'codex';
+  if (options.cline) return 'cline';
 
   console.log('');
   console.log('環境を選択してください:');
   console.log('  1) Cursor IDE (推奨)');
   console.log('  2) Claude Code');
   console.log('  3) Claude Code Subagents');
+  console.log('  4) Gemini CLI');
+  console.log('  5) Codex CLI');
+  console.log('  6) Cline');
   console.log('');
 
-  const choice = await prompt('選択 [1-3] (デフォルト: 1): ');
+  const choice = await prompt('選択 [1-6] (デフォルト: 1): ');
 
   switch (choice || '1') {
   case '1':
@@ -152,6 +161,12 @@ async function determineEnvironment(
     return 'claude';
   case '3':
     return 'claude-agent';
+  case '4':
+    return 'gemini';
+  case '5':
+    return 'codex';
+  case '6':
+    return 'cline';
   default:
     console.log('無効な選択です。Cursor IDEを使用します。');
     return 'cursor';
