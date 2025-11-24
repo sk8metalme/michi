@@ -42,6 +42,9 @@ interface SetupOptions {
   cursor?: boolean;
   claude?: boolean;
   claudeAgent?: boolean; // camelCase
+  gemini?: boolean;
+  codex?: boolean;
+  cline?: boolean;
   lang?: string;
   projectName?: string; // camelCase
   jiraKey?: string; // camelCase
@@ -135,15 +138,21 @@ async function determineEnvironment(
   if (options.cursor) return 'cursor';
   if (options.claude) return 'claude';
   if (options.claudeAgent) return 'claude-agent';
+  if (options.gemini) return 'gemini';
+  if (options.codex) return 'codex';
+  if (options.cline) return 'cline';
 
   console.log('');
   console.log('環境を選択してください:');
   console.log('  1) Cursor IDE (推奨)');
   console.log('  2) Claude Code');
   console.log('  3) Claude Code Subagents');
+  console.log('  4) Gemini CLI');
+  console.log('  5) Codex CLI');
+  console.log('  6) Cline');
   console.log('');
 
-  const choice = await prompt('選択 [1-3] (デフォルト: 1): ');
+  const choice = await prompt('選択 [1-6] (デフォルト: 1): ');
 
   switch (choice || '1') {
   case '1':
@@ -152,6 +161,12 @@ async function determineEnvironment(
     return 'claude';
   case '3':
     return 'claude-agent';
+  case '4':
+    return 'gemini';
+  case '5':
+    return 'codex';
+  case '6':
+    return 'cline';
   default:
     console.log('無効な選択です。Cursor IDEを使用します。');
     return 'cursor';
@@ -679,7 +694,7 @@ JIRA_ISSUE_TYPE_SUBTASK=10037
     console.log('   ✅ All template files present');
   }
 
-  // 完了メッセージ
+  // 完了メッセージ（環境別）
   console.log('\n');
   console.log('🎉 セットアップ完了！');
   console.log('');
@@ -688,11 +703,56 @@ JIRA_ISSUE_TYPE_SUBTASK=10037
   console.log(
     '  2. npm install で依存関係をインストール（リポジトリルートで実行）',
   );
-  console.log('  3. Cursor で開く: cursor .');
-  console.log('  4. Cursorを起動したら ~/.cursor/mcp.json の設定を確認');
-  console.log('     MCP設定の詳細: https://github.com/sk8metalme/michi/issues');
-  console.log('     （環境別MCP設定の対話的セットアップ機能は開発中）');
-  console.log('  5. /kiro:spec-init <機能説明> で開発開始');
+
+  // 環境別のメッセージ
+  switch (config.environment) {
+  case 'cursor':
+    console.log('  3. Cursor で開く: cursor .');
+    console.log('  4. Cursorを起動したら ~/.cursor/mcp.json の設定を確認');
+    console.log('     MCP設定の詳細: https://github.com/sk8metalme/michi/issues');
+    console.log('     （環境別MCP設定の対話的セットアップ機能は開発中）');
+    console.log('  5. /kiro:spec-init <機能説明> で開発開始');
+    break;
+
+  case 'claude':
+    console.log('  3. Claude Code で開く');
+    console.log('  4. .claude/rules/ のルールファイルを確認');
+    console.log('  5. Claude Code コマンドで開発開始');
+    break;
+
+  case 'claude-agent':
+    console.log('  3. Claude Code で開く');
+    console.log('  4. .claude/subagents/ のサブエージェントを確認');
+    console.log('  5. サブエージェントを活用して開発開始');
+    break;
+
+  case 'gemini':
+    console.log('  3. Gemini CLI で開く');
+    console.log('  4. .gemini/GEMINI.md のプロジェクトコンテキストを確認');
+    console.log('  5. Gemini CLI コマンドで開発開始');
+    console.log('     （階層的コンテキストロード機能を活用）');
+    break;
+
+  case 'codex':
+    console.log('  3. Codex CLI で開く');
+    console.log('  4. .codex/docs/README.md の制限事項を確認');
+    console.log('  5. Codex CLI は設定ファイル中心のため、Michiとの統合は限定的');
+    console.log('     （他の環境の使用を推奨）');
+    break;
+
+  case 'cline':
+    console.log('  3. VSCode + Cline 拡張で開く');
+    console.log('  4. .clinerules/rules/ のルールファイルを確認');
+    console.log('  5. Clineのルールトグル機能（v3.13+）を活用');
+    console.log('     （各ルールファイルを個別に有効/無効化可能）');
+    break;
+
+  default:
+    console.log('  3. AI開発環境で開く');
+    console.log('  4. 生成されたルールファイルを確認');
+    console.log('  5. 開発開始');
+  }
+
   console.log('');
   console.log('詳細: https://github.com/sk8metalme/michi');
   console.log('');

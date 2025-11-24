@@ -9,39 +9,61 @@
 ## ワークフロー全体像
 
 ```
-1. 要件定義 (/kiro:spec-requirements)
+Phase 0.0: 仕様の初期化 (/kiro:spec-init)
+   ↓
+Phase 0.1: 要件定義 (/kiro:spec-requirements)
    ↓ GitHub → Confluence同期
    ↓ 企画・部長が承認
-   
-2. 設計 (/kiro:spec-design)
+
+Phase 0.2: 設計 (/kiro:spec-design)
    ↓ GitHub → Confluence同期
    ↓ 見積もり生成 → Excel出力
    ↓ アーキテクト・部長が承認
-   
-3. タスク分割 (/kiro:spec-tasks)
-   ↓ GitHub → JIRA連携
+
+Phase 0.3: テストタイプの選択
+   ↓ テスト計画フローに従う
+
+Phase 0.4: テスト仕様書の作成
+   ↓ テンプレートを使用
+
+Phase 0.5: タスク分割 (/kiro:spec-tasks)
+   ↓ tasks.md生成
+
+Phase 0.6: タスクのJIRA同期
    ↓ Epic/Story/Subtask自動作成
-   
-4. 実装 (/kiro:spec-impl)
-   ↓ TDD（テスト → コード → リファクタリング）
+
+Phase 0.7: Confluence同期
+   ↓
+Phase 1: 環境構築・基盤整備
+   ↓ テスト環境セットアップ
+
+Phase 2: TDD実装 (/kiro:spec-impl)
+   ↓ テスト → コード → リファクタリング
+
+Phase A: PR作成前の自動テスト（CI/CD）
+   ↓ 単体テスト + Lint + ビルド
    ↓ GitHub PR作成
-   ↓ JIRA ステータス更新
-   
-5. テスト
-   ↓ テストレポート生成
-   ↓ Confluence同期
-   
-6. リリース準備 (/kiro:release-prep)
-   ↓ リリースノート生成
-   ↓ JIRA Release作成
-   ↓ GitHub Release作成
+   ↓ PRマージ
+
+Phase 3: 追加の品質保証（PRマージ後）
+   ↓ 静的解析・セキュリティスキャン
+
+Phase B: リリース準備時の手動テスト
+   ↓ 統合・E2E・パフォーマンス・セキュリティ
+
+Phase 4: リリース準備ドキュメント作成 (/kiro:release-prep)
+   ↓ Confluenceリリース手順書
+   ↓ リリースJIRA起票
+
+Phase 5: リリース実行
+   ↓ タグ作成 → CI/CD → GitHub Release作成
 ```
 
 ## フェーズ別詳細
 
-### Phase 1: 要件定義
+### Phase 0.0-0.1: 仕様の初期化と要件定義
 
-#### Step 1: 仕様の初期化
+#### Phase 0.0 Step 1: 仕様の初期化
 
 Cursorで実行：
 ```bash
@@ -54,7 +76,7 @@ Cursorで実行：
 
 AIが `.kiro/specs/<feature>/` ディレクトリを作成します。
 
-#### Step 2: 要件定義の生成
+#### Phase 0.1 Step 1: 要件定義の生成
 
 ```bash
 # 凡例
@@ -68,7 +90,7 @@ AIが以下を生成：
 - `.kiro/specs/<feature>/requirements.md`
 - ビジネス要件、機能要件、非機能要件、リスク
 
-#### Step 3: GitHubにコミット
+#### Phase 0.1 Step 2: GitHubにコミット
 
 ```bash
 # 凡例
@@ -80,7 +102,7 @@ jj commit -m "docs: ユーザー認証 要件定義追加"
 jj git push
 ```
 
-#### Step 4: Confluenceに同期
+#### Phase 0.1 Step 3: Confluenceに同期
 
 Cursorで実行：
 ```bash
@@ -105,16 +127,16 @@ AIが自動的に：
 - プロジェクト情報付与
 - 企画・部長にメンション通知
 
-#### Step 5: 承認待ち
+#### Phase 0.1 Step 4: 承認待ち
 
 企画・部長がConfluenceで：
 - 要件をレビュー
 - コメントでフィードバック
 - Page Propertiesで承認
 
-### Phase 2: 設計
+### Phase 0.2: 設計
 
-#### Step 1: 設計書の生成
+#### Phase 0.2 Step 1: 設計書の生成
 
 ```bash
 # 凡例
@@ -130,7 +152,7 @@ AIが以下を生成：
 - データベース設計
 - 見積もり
 
-#### Step 2: GitHubにコミット
+#### Phase 0.2 Step 2: GitHubにコミット
 
 ```bash
 # 凡例
@@ -142,7 +164,7 @@ jj commit -m "docs: ユーザー認証 設計追加"
 jj git push
 ```
 
-#### Step 3: Confluenceに同期 + 見積もり出力
+#### Phase 0.2 Step 3: Confluenceに同期 + 見積もり出力
 
 ```bash
 # 凡例
@@ -156,13 +178,41 @@ npm run excel:sync user-auth
 
 見積もりExcelファイルが `estimates/<feature>-estimate.xlsx` に出力されます。
 
-#### Step 4: 承認待ち
+#### Phase 0.2 Step 4: 承認待ち
 
 アーキテクト・部長がレビュー・承認
 
-### Phase 3: タスク分割
+### Phase 0.3-0.4: テスト計画
 
-#### Step 1: タスク生成
+#### Phase 0.3: テストタイプの選択
+
+Phase 0.2（設計）完了後、Phase 0.4（テスト仕様書作成）の前に、どのテストタイプが必要かを決定します。
+
+詳細は [テスト計画フロー](../testing/test-planning-flow.md#phase-03-テストタイプの選択) を参照してください。
+
+**選択基準**:
+- 単体テスト: すべてのプロジェクトで必須
+- 統合テスト: 複数コンポーネントが連携するシステムで推奨
+- E2Eテスト: ユーザーインターフェースを持つアプリケーションで推奨
+- パフォーマンステスト: 高負荷が予想される、レスポンスタイムが重要な場合
+- セキュリティテスト: 機密データを扱う、外部公開APIの場合
+
+#### Phase 0.4: テスト仕様書の作成
+
+Phase 0.3で選択したテストタイプごとに、テスト仕様書を作成します。
+
+詳細は [テスト計画フロー](../testing/test-planning-flow.md#phase-04-テスト仕様書の作成) を参照してください。
+
+**使用するテンプレート**:
+- 単体テスト: `templates/test-specs/unit-test-spec-template.md`
+- 統合テスト: `templates/test-specs/integration-test-spec-template.md`
+- E2Eテスト: `templates/test-specs/e2e-test-spec-template.md`
+- パフォーマンステスト: `templates/test-specs/performance-test-spec-template.md`
+- セキュリティテスト: `templates/test-specs/security-test-spec-template.md`
+
+### Phase 0.5-0.6: タスク分割とJIRA同期
+
+#### Phase 0.5 Step 1: タスク生成
 
 ```bash
 # 凡例
@@ -172,9 +222,9 @@ npm run excel:sync user-auth
 /kiro:spec-tasks user-auth
 ```
 
-AIが実装タスクをストーリーに分割します。
+AIが実装タスクをストーリーに分割し、tasks.mdを生成します。
 
-#### Step 2: GitHubにコミット
+#### Phase 0.5 Step 2: GitHubにコミット
 
 ```bash
 # 凡例
@@ -186,7 +236,7 @@ jj commit -m "docs: ユーザー認証 タスク分割追加"
 jj git push
 ```
 
-#### Step 3: JIRAに同期
+#### Phase 0.6 Step 1: JIRAに同期
 
 ```bash
 # 凡例
@@ -201,9 +251,34 @@ npm run jira:sync user-auth
 - Story作成: 各実装タスク
 - Subtask作成: テスト、レビュータスク
 
-### Phase 4: 実装
+### Phase 1: 環境構築・基盤整備
 
-#### Step 1: TDD実装
+Phase 0.6までのテスト計画が完了したら、Phase 1で実装環境とテスト環境を整備します。
+
+詳細は [テスト計画フロー](../testing/test-planning-flow.md#phase-1-環境構築基盤整備) を参照してください。
+
+**実施内容**:
+- プロジェクト初期化
+- 依存関係インストール（テストフレームワーク、Lintツール等）
+- データベース接続設定
+- テスト環境の準備（pytest, vitest, JUnit等）
+- テストデータの準備（fixtures, seed等）
+- テストディレクトリ構造の作成
+
+**テストディレクトリ構造例**:
+```
+tests/
+├── specs/            # テスト仕様書（Phase 0.4で作成）
+├── unit/             # 単体テスト（Phase 2で作成）
+├── integration/      # 統合テスト（Phase 2で作成、必要に応じて）
+├── e2e/              # E2Eテスト（Phase 2で作成、必要に応じて）
+├── performance/      # パフォーマンステスト（Phase 2で作成、任意）
+└── security/         # セキュリティテスト（Phase 2で作成、任意）
+```
+
+### Phase 2: TDD実装
+
+#### Phase 2 Step 1: TDD実装
 
 ```bash
 # 凡例
@@ -213,12 +288,18 @@ npm run jira:sync user-auth
 /kiro:spec-impl user-auth FE-1,BE-1
 ```
 
-AIがTDD（テスト駆動開発）で実装：
-1. テストを書く
-2. コードを書く
-3. リファクタリング
+AIがTDD（テスト駆動開発）で実装します。
 
-#### Step 2: コミット
+詳細は [TDDサイクル](../testing/tdd-cycle.md) を参照してください。
+
+**TDDサイクル**:
+1. RED: 失敗するテストを書く
+2. GREEN: 最小限の実装でテストを通す
+3. REFACTOR: コードを改善する
+
+**重要**: Phase 2では、テストコードと実装コードを同時進行で作成します。Phase 0.4で作成したテスト仕様書に基づき、TDDサイクルを繰り返しながら開発を進めます。
+
+#### Phase 2 Step 2: コミット
 
 ```bash
 # 凡例
@@ -232,7 +313,29 @@ jj bookmark create michi/feature/user-auth -r '@-'
 jj git push --bookmark michi/feature/user-auth --allow-new
 ```
 
-#### Step 3: PR作成
+### Phase A: PR作成前の自動テスト
+
+Phase 2（実装）が完了したら、PR作成前にPhase Aのテストを実行します。
+
+詳細は [テスト実行フロー - Phase A](../testing/test-execution-flow.md#phase-a-pr作成前の自動テスト) を参照してください。
+
+**実行内容**:
+- 単体テスト（必須）
+- Lint（必須）
+- ビルド（必須）
+
+**実行方法**:
+- ローカルで事前確認: `npm test && npm run lint && npm run build`
+- CI/CDが自動実行（GitHub Actions / Screwdriver）
+
+**合格基準**:
+- すべての単体テストが成功
+- Lintエラー: 0件
+- ビルドエラー: 0件
+
+Phase Aが成功したら、PRを作成します。
+
+#### Phase A Step 1: PR作成
 
 ```bash
 # 凡例
@@ -255,9 +358,77 @@ gh pr create --head michi/feature/user-auth --base main \
   --body "実装内容..."
 ```
 
-### Phase 5-6: テスト・リリース
+### Phase 3: 追加の品質保証（PRマージ後）
 
-テストレポート生成とリリース準備は、同様のフローで実行します。
+PRがマージされた後、Phase 3で追加の品質保証を実施します。
+
+**実行内容**:
+- 静的解析（詳細な品質チェック）
+- セキュリティスキャン
+- カバレッジ確認と改善
+
+**目的**:
+- Phase Aで検出できなかった問題の早期発見
+- コード品質の継続的な向上
+- リリース前の品質保証を強化
+
+### Phase B: リリース準備時の手動テスト
+
+Phase 3完了後、リリース準備時にPhase Bのテストを実行します。
+
+詳細は [テスト実行フロー - Phase B](../testing/test-execution-flow.md#phase-b-リリース準備時の手動テスト) を参照してください。
+
+**実行内容**:
+- 統合テスト（推奨）: 複数コンポーネント間の連携を検証
+- E2Eテスト（推奨）: ユーザー視点での完全なフローを検証
+- パフォーマンステスト（任意）: システムの性能を検証
+- セキュリティテスト（任意）: セキュリティ脆弱性を検証
+
+**実行タイミング**:
+- PRがmainブランチにマージされた後
+- リリースタグを作成する前
+
+**重要**: Phase Bで問題が見つかった場合は、バグ修正のPRを作成し、Phase A → マージ → Phase Bのフローを経て修正します。
+
+### Phase 4-5: リリース準備と実行
+
+Phase Bのすべてのテストが成功したら、リリース準備とリリース実行を行います。
+
+詳細は [リリースフロー](../release/release-flow.md) を参照してください。
+
+#### Phase 4: リリース準備ドキュメント作成
+
+**Confluenceリリース手順書作成**:
+- リリースバージョン、予定日、担当者
+- リリース内容（新機能、バグ修正、変更点）
+- 影響範囲
+- リリース手順（事前準備、作業、事後確認）
+- ロールバック手順
+
+**リリースJIRA起票**:
+- プロジェクト、課題タイプ、要約、説明
+- Phase B完了確認チェックリスト
+- リリース作業チェックリスト
+
+#### Phase 5: リリース実行
+
+**タグ作成**:
+```bash
+git tag -a v1.0.0 -m "Release version 1.0.0"
+git push origin v1.0.0
+```
+
+**CI/CD実行確認**:
+- GitHub ActionsまたはScrewdriverのステータス確認
+
+**GitHub Release作成**:
+```bash
+gh release create v1.0.0 --title "Release v1.0.0" --notes-file release-notes.md
+```
+
+**リリース完了後**:
+- リリースJIRAをクローズ
+- 関係者への報告
 
 ## 統合ワークフロー実行
 

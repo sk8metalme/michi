@@ -44,19 +44,29 @@
 ## 📖 ワークフロー全体像
 
 ```
-Phase 0: 初期化 (spec-init)
+Phase 0.0: 初期化 (spec-init)
   ↓
-Phase 1: 要件定義 (spec-requirements + phase:run)
+Phase 0.1: 要件定義 (spec-requirements + phase:run)
   ↓ Confluence自動作成
   ↓
-Phase 2: 設計 (spec-design + phase:run)
+Phase 0.2: 設計 (spec-design + phase:run)
   ↓ Confluence自動作成
   ↓
-Phase 3: タスク分割 (spec-tasks + phase:run)
-  ↓ JIRA Epic/Story自動作成（全6フェーズ）
+Phase 0.3-0.4: テスト計画（テストタイプ選択 + テスト仕様書作成）
   ↓
-Phase 4-6: 実装・テスト・リリース
+Phase 0.5: タスク分割 (spec-tasks)
+  ↓
+Phase 0.6: タスクのJIRA同期 (phase:run tasks)
+  ↓ JIRA Epic/Story自動作成
+  ↓
+Phase 1: 環境構築・基盤整備
+  ↓ テスト環境セットアップ
+  ↓
+Phase 2: TDD実装 → Phase A (PR前テスト) → Phase 3 (追加QA) → Phase B (リリース前テスト) → Phase 4-5 (リリース準備・実行)
 ```
+
+**注意**: このワークフローガイドでは、体験の便宜上、Phase 0.3-0.4（テスト計画）とPhase 1（環境構築）はスキップします。
+詳細なテスト計画については [テスト計画フロー](../testing/test-planning-flow.md) を参照してください。
 
 ## ステップバイステップガイド
 
@@ -758,27 +768,37 @@ Michiは**TDD（テスト駆動開発）**を推奨しています：
 
 すべてのステップが正常に完了したか確認してください：
 
-### Phase 0: 初期化
+### Phase 0.0: 初期化
 - [ ] `.kiro/specs/health-check-endpoint/` ディレクトリが作成された
 - [ ] `spec.json` が生成された
 
-### Phase 1: 要件定義
+### Phase 0.1: 要件定義
 - [ ] `requirements.md` が生成された
 - [ ] Confluenceページが作成された（要件定義）
 - [ ] `spec.json` に `confluence.requirementsPageId` が記録された
 
-### Phase 2: 設計
+### Phase 0.2: 設計
 - [ ] `design.md` が生成された
 - [ ] Confluenceページが作成された（設計書）
 - [ ] `spec.json` に `confluence.designPageId` が記録された
 
-### Phase 3: タスク分割
-- [ ] `tasks.md` が生成された（全6フェーズ）
+### Phase 0.3-0.4: テスト計画（このガイドではスキップ）
+- このハンズオンでは省略していますが、実際のプロジェクトでは：
+- [ ] テストタイプを選択（Phase 0.3）
+- [ ] テスト仕様書を作成（Phase 0.4）
+
+### Phase 0.5-0.6: タスク分割とJIRA同期
+- [ ] `tasks.md` が生成された
 - [ ] JIRA Epicが作成された
-- [ ] JIRA Storyが作成された（9件）
+- [ ] JIRA Storyが作成された
 - [ ] `spec.json` に `jira.epicKey` と `jira.stories` が記録された
 
-### Phase 4: 実装準備
+### Phase 1: 環境構築（このガイドではスキップ）
+- このハンズオンでは省略していますが、実際のプロジェクトでは：
+- [ ] テスト環境をセットアップ
+- [ ] テストデータを準備
+
+### Phase 2: 実装準備
 - [ ] GitHubブランチが作成された
 - [ ] 実装タスクが明確になった
 

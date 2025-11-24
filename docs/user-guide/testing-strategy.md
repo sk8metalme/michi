@@ -25,23 +25,48 @@ michiは、テスト駆動開発（TDD）と段階的なテスト実行（Phase 
 ## テスト計画から実行までの流れ
 
 ```text
-Phase -1: テストタイプ選択
+Phase 0.3: テストタイプ選択
     ↓
-Phase 0-1〜0-5: テスト計画
+Phase 0.4: テスト仕様書の作成
+    ↓
+Phase 0.5: タスク分割 (spec-tasks)
+    ↓
+Phase 0.6: タスクのJIRA同期
+    ↓
+Phase 1: 環境構築・基盤整備
+    ├─ テスト環境の準備
+    ├─ テストデータの準備
+    └─ テストディレクトリ構造の作成
+    ↓
+Phase 2: TDD実装（テストと実装を同時進行）
     ↓
 Phase A: PR前の自動テスト（CI/CD）
+    ├─ 単体テスト
+    ├─ Lint
+    └─ ビルド
     ↓
-Phase B: リリース前の手動テスト
+[PRマージ]
     ↓
-リリース
+Phase 3: 追加の品質保証（PRマージ後）
+    ├─ 静的解析
+    ├─ セキュリティスキャン
+    └─ カバレッジ確認
+    ↓
+Phase B: リリース準備時の手動テスト
+    ├─ 統合テスト（推奨）
+    ├─ E2Eテスト（推奨）
+    ├─ パフォーマンステスト（任意）
+    └─ セキュリティテスト（任意）
+    ↓
+Phase 4-5: リリース準備・実行
 ```
 
 ### 各フェーズの詳細ドキュメント
 
-- **Phase -1〜0-5（テスト計画）**: [テスト計画フロー](./testing/test-planning-flow.md)
-- **TDD実践方法**: [TDDサイクル](./testing/tdd-cycle.md)
+- **Phase 0.3〜Phase 1（テスト計画と環境整備）**: [テスト計画フロー](./testing/test-planning-flow.md)
+- **Phase 2（TDD実装）**: [TDDサイクル](./testing/tdd-cycle.md)
 - **Phase A/B実行**: [テスト実行フロー](./testing/test-execution-flow.md)
-- **テスト失敗時**: [テスト失敗時の対応](./testing/test-failure-handling.md)
+- **Phase 3（追加QA）・テスト失敗時**: [テスト失敗時の対応](./testing/test-failure-handling.md)
 
 ## テストタイプと選択基準
 
@@ -147,9 +172,9 @@ A: バグ修正のPRを作成し、Phase Aを通過させてからマージ、Ph
 ## 関連ドキュメント
 
 ### テスト関連
-- [テスト計画フロー](./testing/test-planning-flow.md) - Phase -1〜0-5
-- [TDDサイクル](./testing/tdd-cycle.md) - RED-GREEN-REFACTOR
-- [テスト実行フロー](./testing/test-execution-flow.md) - Phase A/B
+- [テスト計画フロー](./testing/test-planning-flow.md) - Phase 0.3〜Phase 1
+- [TDDサイクル](./testing/tdd-cycle.md) - Phase 2: RED-GREEN-REFACTOR
+- [テスト実行フロー](./testing/test-execution-flow.md) - Phase A/B/3
 - [テスト失敗時の対応](./testing/test-failure-handling.md) - トラブルシューティング
 
 ### リリース関連

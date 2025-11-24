@@ -137,13 +137,36 @@ export function validateProjectConfig(
         );
       }
 
-      const validPhases = ['requirements', 'design', 'tasks'];
+      const validPhases = [
+        // 新ワークフロー構造
+        'spec-init',            // Phase 0.0: プロジェクト初期化
+        'requirements',          // Phase 0.1: 要件定義
+        'design',                // Phase 0.2: 設計
+        'test-type-selection',   // Phase 0.3: テストタイプ選択
+        'test-spec',             // Phase 0.4: テスト仕様書作成
+        'tasks',                 // Phase 0.5: タスク分割
+        'spec-tasks',            // Phase 0.5: タスク分割（別名）
+        'jira-sync',             // Phase 0.6: JIRA同期
+        'environment-setup',     // Phase 1: 環境構築
+        'implementation',        // Phase 2: TDD実装
+        'tdd-implementation',    // Phase 2: TDD実装（別名）
+        'phase-a',               // Phase A: PR前自動テスト
+        'pr-tests',              // Phase A: PR前自動テスト（別名）
+        'additional-qa',         // Phase 3: 追加QA
+        'testing',               // Phase 3: 追加QA（別名）
+        'phase-b',               // Phase B: リリース準備テスト
+        'release-tests',         // Phase B: リリース準備テスト（別名）
+        'release-prep',          // Phase 4: リリース準備
+        'release-preparation',   // Phase 4: リリース準備（別名）
+        'release',               // Phase 5: リリース
+      ];
       const invalidPhases = workflow.enabledPhases?.filter(
         (phase) => !validPhases.includes(phase),
       );
       if (invalidPhases && invalidPhases.length > 0) {
         warnings.push(
-          `Unknown phases in workflow.enabledPhases: ${invalidPhases.join(', ')}`,
+          `Unknown phases in workflow.enabledPhases: ${invalidPhases.join(', ')}\n` +
+            'See: docs/user-guide/guides/workflow.md for valid phase names',
         );
       }
     }

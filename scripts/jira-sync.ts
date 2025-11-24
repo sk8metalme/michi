@@ -363,11 +363,13 @@ class JIRAClient {
     
     try {
       // JIRA API v3の検索エンドポイントを使用
-      // POST /rest/api/3/search でJQL検索を実行
-      const response = await axios.post(`${this.baseUrl}/search`, {
-        jql,
-        maxResults: 100
-      }, {
+      // GET /rest/api/3/search でJQL検索を実行（GETメソッドが推奨）
+      const response = await axios.get(`${this.baseUrl}/search`, {
+        params: {
+          jql,
+          maxResults: 100,
+          fields: 'summary,issuetype,status,key'
+        },
         headers: {
           'Authorization': `Basic ${this.auth}`,
           'Content-Type': 'application/json'
@@ -375,7 +377,26 @@ class JIRAClient {
       });
       return response.data.issues || [];
     } catch (error) {
-      console.error('Error searching issues:', error instanceof Error ? error.message : error);
+      // エラーハンドリング改善
+      if (axios.isAxiosError(error)) {
+        const status = error.response?.status;
+        const errorMessages = error.response?.data?.errorMessages || [];
+        const message = errorMessages.join(', ') || error.message;
+        
+        console.error(`Error searching issues (HTTP ${status}): ${message}`);
+        
+        if (status === 410) {
+          console.error('💡 Hint: The search API endpoint returned 410 (Gone).');
+          console.error('   This may indicate the endpoint has been deprecated or disabled.');
+          console.error('   Check JIRA instance configuration or try alternative search methods.');
+        } else if (status === 401) {
+          console.error('💡 Hint: Authentication failed. Check ATLASSIAN_API_TOKEN in .env');
+        } else if (status === 403) {
+          console.error('💡 Hint: Permission denied. Check API token permissions in JIRA.');
+        }
+      } else {
+        console.error('Error searching issues:', error instanceof Error ? error.message : error);
+      }
       throw error; // エラーを再スローして呼び出し元で処理
     }
   }
@@ -524,8 +545,10 @@ async function syncTasksToJIRA(featureName: string): Promise<void> {
       existingEpics = await client.searchIssues(jql);
     } catch (error) {
       console.error('❌ Failed to search existing Epics:', error instanceof Error ? error.message : error);
-      console.error('⚠️  Cannot verify idempotency - Epic creation may result in duplicates');
-      throw new Error(`JIRA Epic search failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      console.error('⚠️  Cannot verify idempotency - proceeding with Epic creation');
+      console.error('   If Epic already exists, manual cleanup may be required');
+      // 検索失敗時はフォールバック: 新規作成を試みる（重複リスクあり）
+      existingEpics = [];
     }
     
     if (existingEpics.length > 0) {
@@ -569,10 +592,10 @@ async function syncTasksToJIRA(featureName: string): Promise<void> {
   // 既存のStoryを検索（重複防止）
   // ラベルで検索（summary検索では "Story: タイトル" 形式に一致しないため）
   // issuetype検索にはIDを使用（名前は言語依存のため）
-  const jql = `project = ${projectMeta.jiraProjectKey} AND issuetype = ${storyIssueTypeId} AND labels = "${featureName}"`;
+  const storyJql = `project = ${projectMeta.jiraProjectKey} AND issuetype = ${storyIssueTypeId} AND labels = "${featureName}"`;
   let existingStories: any[] = [];
   try {
-    existingStories = await client.searchIssues(jql);
+    existingStories = await client.searchIssues(storyJql);
   } catch (error) {
     console.error('❌ Failed to search existing Stories:', error instanceof Error ? error.message : error);
     console.error('⚠️  Cannot verify idempotency - Story creation may result in duplicates');
@@ -596,7 +619,8 @@ async function syncTasksToJIRA(featureName: string): Promise<void> {
   
   // フェーズラベル検出用の正規表現
   // Phase X: フェーズ名（ラベル）の形式を検出
-  const phasePattern = /## Phase [\d.]+:\s*(.+?)（(.+?)）/;
+  // Phase番号: 数字（0, 1, 2...）、ドット付き数字（0.1, 0.2...）、英字（A, B）に対応
+  const phasePattern = /## Phase [\d.A-Z]+:\s*(.+?)(?:（(.+?)）)?/;
   
   // Story作成（フェーズ検出付きパーサー）
   const lines = tasksContent.split('\n');
@@ -609,24 +633,46 @@ async function syncTasksToJIRA(featureName: string): Promise<void> {
     // フェーズ検出
     const phaseMatch = line.match(phasePattern);
     if (phaseMatch) {
-      const phaseName = phaseMatch[2]; // 括弧内のラベル（例: Requirements）
-      
-      // フェーズ名からラベルを決定
-      if (phaseName.includes('要件定義') || phaseName.toLowerCase().includes('requirements')) {
+      const phaseTitle = phaseMatch[1]; // フェーズタイトル全体
+      const phaseName = phaseMatch[2] || phaseTitle; // 括弧内のラベル（例: Requirements）または全体
+
+      // Phase番号を抽出（例: "0.1", "2", "A"）
+      const phaseNumberMatch = line.match(/## Phase ([\d.A-Z]+):/);
+      const phaseNumber = phaseNumberMatch ? phaseNumberMatch[1] : '';
+
+      // フェーズ番号またはフェーズ名からラベルを決定
+      // 新ワークフロー構造に対応
+      if (phaseNumber === '0.0' || phaseName.includes('初期化') || phaseName.toLowerCase().includes('init')) {
+        currentPhaseLabel = 'spec-init';
+      } else if (phaseNumber === '0.1' || phaseName.includes('要件定義') || phaseName.toLowerCase().includes('requirements')) {
         currentPhaseLabel = 'requirements';
-      } else if (phaseName.includes('設計') || phaseName.toLowerCase().includes('design')) {
+      } else if (phaseNumber === '0.2' || phaseName.includes('設計') || phaseName.toLowerCase().includes('design')) {
         currentPhaseLabel = 'design';
-      } else if (phaseName.includes('実装') || phaseName.toLowerCase().includes('implementation')) {
+      } else if (phaseNumber === '0.3' || phaseName.includes('テストタイプ') || phaseName.toLowerCase().includes('test-type') || phaseName.toLowerCase().includes('test type')) {
+        currentPhaseLabel = 'test-type-selection';
+      } else if (phaseNumber === '0.4' || phaseName.includes('テスト仕様') || phaseName.toLowerCase().includes('test-spec') || phaseName.toLowerCase().includes('test spec')) {
+        currentPhaseLabel = 'test-spec';
+      } else if (phaseNumber === '0.5' || phaseName.includes('タスク分割') || phaseName.toLowerCase().includes('tasks') || phaseName.toLowerCase().includes('task breakdown')) {
+        currentPhaseLabel = 'spec-tasks';
+      } else if (phaseNumber === '0.6' || phaseName.includes('JIRA') || phaseName.toLowerCase().includes('jira')) {
+        currentPhaseLabel = 'jira-sync';
+      } else if (phaseNumber === '1' || phaseName.includes('環境構築') || phaseName.toLowerCase().includes('environment') || phaseName.toLowerCase().includes('setup')) {
+        currentPhaseLabel = 'environment-setup';
+      } else if (phaseNumber === '2' || phaseName.includes('実装') || phaseName.includes('TDD') || phaseName.toLowerCase().includes('implementation')) {
         currentPhaseLabel = 'implementation';
-      } else if (phaseName.includes('試験') || phaseName.toLowerCase().includes('testing')) {
-        currentPhaseLabel = 'testing';
-      } else if (phaseName.includes('リリース準備') || phaseName.toLowerCase().includes('release-prep') || phaseName.toLowerCase().includes('release preparation')) {
+      } else if (phaseNumber === 'A' || phaseNumber.toLowerCase() === 'a' || phaseName.includes('PR前') || phaseName.toLowerCase().includes('pr-test') || phaseName.toLowerCase().includes('pr test')) {
+        currentPhaseLabel = 'phase-a';
+      } else if (phaseNumber === '3' || phaseName.includes('追加QA') || phaseName.includes('QA') || phaseName.includes('試験') || phaseName.toLowerCase().includes('testing') || phaseName.toLowerCase().includes('additional qa')) {
+        currentPhaseLabel = 'additional-qa';
+      } else if (phaseNumber === 'B' || phaseNumber.toLowerCase() === 'b' || phaseName.includes('リリース準備テスト') || phaseName.toLowerCase().includes('release-test') || phaseName.toLowerCase().includes('release test')) {
+        currentPhaseLabel = 'phase-b';
+      } else if (phaseNumber === '4' || phaseName.includes('リリース準備') || phaseName.toLowerCase().includes('release-prep') || phaseName.toLowerCase().includes('release preparation')) {
         currentPhaseLabel = 'release-prep';
-      } else if (phaseName.includes('リリース') || phaseName.toLowerCase().includes('release')) {
+      } else if (phaseNumber === '5' || (phaseName.includes('リリース') && !phaseName.includes('準備')) || (phaseName.toLowerCase().includes('release') && !phaseName.toLowerCase().includes('prep'))) {
         currentPhaseLabel = 'release';
       }
-      
-      console.log(`📌 Phase detected: ${phaseName} (label: ${currentPhaseLabel})`);
+
+      console.log(`📌 Phase detected: ${phaseTitle} (number: ${phaseNumber}, label: ${currentPhaseLabel})`);
       continue;
     }
     

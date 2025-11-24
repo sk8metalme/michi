@@ -7,7 +7,15 @@ import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
 import { validateFeatureName } from './utils/feature-name-validator.js';
 
-type Phase = 'requirements' | 'design' | 'tasks';
+type Phase =
+  | 'requirements'
+  | 'design'
+  | 'test-type-selection'
+  | 'test-spec'
+  | 'tasks'
+  | 'environment-setup'
+  | 'phase-a'
+  | 'phase-b';
 
 interface ValidationResult {
   phase: Phase;
@@ -215,6 +223,132 @@ function validateTasks(feature: string): ValidationResult {
 }
 
 /**
+ * テストタイプ選択フェーズのバリデーション（Phase 0.3）
+ * マニュアル対応フェーズ - バリデーション不要（常に成功）
+ */
+function validateTestTypeSelection(feature: string): ValidationResult {
+  const errors: string[] = [];
+  const warnings: string[] = [];
+
+  // feature名のバリデーション
+  const nameValidation = validateFeatureName(feature);
+  if (!nameValidation.valid) {
+    errors.push(...nameValidation.errors);
+  }
+
+  warnings.push('⚠️  このフェーズはマニュアル対応です。ガイダンスに従ってテストタイプを選択してください');
+
+  return {
+    phase: 'test-type-selection',
+    valid: errors.length === 0,
+    errors,
+    warnings
+  };
+}
+
+/**
+ * テスト仕様書作成フェーズのバリデーション（Phase 0.4）
+ * マニュアル対応フェーズ - バリデーション不要（常に成功）
+ */
+function validateTestSpec(feature: string): ValidationResult {
+  const errors: string[] = [];
+  const warnings: string[] = [];
+
+  // feature名のバリデーション
+  const nameValidation = validateFeatureName(feature);
+  if (!nameValidation.valid) {
+    errors.push(...nameValidation.errors);
+  }
+
+  // テスト仕様書ディレクトリの存在チェック（任意）
+  const testSpecDir = join(process.cwd(), 'docs', 'testing', 'specs', feature);
+  if (!existsSync(testSpecDir)) {
+    warnings.push('⚠️  テスト仕様書ディレクトリがありません: docs/testing/specs/' + feature);
+  }
+
+  warnings.push('⚠️  このフェーズはマニュアル対応です。テンプレートを使用してテスト仕様書を作成してください');
+
+  return {
+    phase: 'test-spec',
+    valid: errors.length === 0,
+    errors,
+    warnings
+  };
+}
+
+/**
+ * 環境構築フェーズのバリデーション（Phase 1）
+ * マニュアル対応フェーズ - バリデーション不要（常に成功）
+ */
+function validateEnvironmentSetup(feature: string): ValidationResult {
+  const errors: string[] = [];
+  const warnings: string[] = [];
+
+  // feature名のバリデーション
+  const nameValidation = validateFeatureName(feature);
+  if (!nameValidation.valid) {
+    errors.push(...nameValidation.errors);
+  }
+
+  warnings.push('⚠️  このフェーズはマニュアル対応です。環境構築チェックリストを完了してください');
+
+  return {
+    phase: 'environment-setup',
+    valid: errors.length === 0,
+    errors,
+    warnings
+  };
+}
+
+/**
+ * PR前自動テストフェーズのバリデーション（Phase A）
+ * CI/CD自動実行 - バリデーション不要（常に成功）
+ */
+function validatePhaseA(feature: string): ValidationResult {
+  const errors: string[] = [];
+  const warnings: string[] = [];
+
+  // feature名のバリデーション
+  const nameValidation = validateFeatureName(feature);
+  if (!nameValidation.valid) {
+    errors.push(...nameValidation.errors);
+  }
+
+  warnings.push('⚠️  このフェーズはCI/CD自動実行です。PR作成時に自動でテストが実行されます');
+
+  return {
+    phase: 'phase-a',
+    valid: errors.length === 0,
+    errors,
+    warnings
+  };
+}
+
+/**
+ * リリース準備テストフェーズのバリデーション（Phase B）
+ * マニュアル対応フェーズ - バリデーション不要（常に成功）
+ */
+function validatePhaseB(feature: string): ValidationResult {
+  const errors: string[] = [];
+  const warnings: string[] = [];
+
+  // feature名のバリデーション
+  const nameValidation = validateFeatureName(feature);
+  if (!nameValidation.valid) {
+    errors.push(...nameValidation.errors);
+  }
+
+  warnings.push('⚠️  このフェーズはマニュアル対応です。リリース準備テストチェックリストを完了してください');
+
+  return {
+    phase: 'phase-b',
+    valid: errors.length === 0,
+    errors,
+    warnings
+  };
+}
+
+/**
  * フェーズをバリデート
  */
 export function validatePhase(feature: string, phase: Phase): ValidationResult {
@@ -229,8 +363,23 @@ export function validatePhase(feature: string, phase: Phase): ValidationResult {
   case 'design':
     result = validateDesign(feature);
     break;
+  case 'test-type-selection':
+    result = validateTestTypeSelection(feature);
+    break;
+  case 'test-spec':
+    result = validateTestSpec(feature);
+    break;
   case 'tasks':
     result = validateTasks(feature);
+    break;
+  case 'environment-setup':
+    result = validateEnvironmentSetup(feature);
+    break;
+  case 'phase-a':
+    result = validatePhaseA(feature);
+    break;
+  case 'phase-b':
+    result = validatePhaseB(feature);
     break;
   default:
     throw new Error(`Unknown phase: ${phase}`);
@@ -265,14 +414,34 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   if (args.length < 2) {
     console.error('Usage: npm run validate:phase <feature> <phase>');
     console.error('Example: npm run validate:phase calculator-app requirements');
-    console.error('Phases: requirements, design, tasks');
+    console.error('\nAvailable Phases:');
+    console.error('  requirements       - Phase 0.1: 要件定義');
+    console.error('  design             - Phase 0.2: 設計');
+    console.error('  test-type-selection- Phase 0.3: テストタイプ選択（任意）');
+    console.error('  test-spec          - Phase 0.4: テスト仕様書作成（任意）');
+    console.error('  tasks              - Phase 0.5-0.6: タスク分割・JIRA同期');
+    console.error('  environment-setup  - Phase 1: 環境構築（任意）');
+    console.error('  phase-a            - Phase A: PR前自動テスト（任意）');
+    console.error('  phase-b            - Phase B: リリース準備テスト（任意）');
     process.exit(1);
   }
-  
+
   const [feature, phase] = args;
-  
-  if (!['requirements', 'design', 'tasks'].includes(phase)) {
-    console.error('Invalid phase. Must be: requirements, design, or tasks');
+
+  const validPhases = [
+    'requirements',
+    'design',
+    'test-type-selection',
+    'test-spec',
+    'tasks',
+    'environment-setup',
+    'phase-a',
+    'phase-b'
+  ];
+
+  if (!validPhases.includes(phase)) {
+    console.error(`Invalid phase: ${phase}`);
+    console.error('Must be one of: requirements, design, test-type-selection, test-spec, tasks, environment-setup, phase-a, phase-b');
     process.exit(1);
   }
   
