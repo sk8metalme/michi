@@ -264,7 +264,7 @@ async function getJiraConfig(rl: readline.Interface): Promise<any> {
     {
       value: 'by-phase',
       label: 'by-phase（フェーズごとに作成）',
-      description: 'Phase 0-5を個別に作成',
+      description: 'フェーズごとに個別に作成',
     },
     {
       value: 'selected-phases',
@@ -287,12 +287,20 @@ async function getJiraConfig(rl: readline.Interface): Promise<any> {
 
   if (granularity === 'selected-phases') {
     const phaseChoices = [
-      { value: 'requirements', label: '要件定義（Requirements）' },
-      { value: 'design', label: '設計（Design）' },
-      { value: 'implementation', label: '実装（Implementation）' },
-      { value: 'testing', label: '試験（Testing）' },
-      { value: 'release-prep', label: 'リリース準備（Release Preparation）' },
-      { value: 'release', label: 'リリース（Release）' },
+      // 新ワークフロー構造
+      { value: 'spec-init', label: 'Phase 0.0: プロジェクト初期化' },
+      { value: 'requirements', label: 'Phase 0.1: 要件定義（Requirements）' },
+      { value: 'design', label: 'Phase 0.2: 設計（Design）' },
+      { value: 'test-type-selection', label: 'Phase 0.3: テストタイプ選択' },
+      { value: 'test-spec', label: 'Phase 0.4: テスト仕様書作成' },
+      { value: 'spec-tasks', label: 'Phase 0.5: タスク分割' },
+      { value: 'environment-setup', label: 'Phase 1: 環境構築' },
+      { value: 'implementation', label: 'Phase 2: TDD実装（Implementation）' },
+      { value: 'phase-a', label: 'Phase A: PR前自動テスト' },
+      { value: 'testing', label: 'Phase 3: 追加QA（Testing）' },
+      { value: 'phase-b', label: 'Phase B: リリース準備テスト' },
+      { value: 'release-prep', label: 'Phase 4: リリース準備（Release Preparation）' },
+      { value: 'release', label: 'Phase 5: リリース（Release）' },
     ];
 
     const selectedPhases = await multiSelect(

@@ -124,16 +124,25 @@ export function createCLI(): Command {
     .command('phase:run')
     .description('Run complete phase workflow')
     .argument('<feature>', 'Feature name')
-    .argument('<phase>', 'Phase name (requirements, design, tasks)')
+    .argument('<phase>', 'Phase name (requirements, design, test-type-selection, test-spec, tasks, environment-setup, phase-a, phase-b)')
     .action(async (feature: string, phase: string) => {
-      const validPhases = ['requirements', 'design', 'tasks'];
+      const validPhases = [
+        'requirements',
+        'design',
+        'test-type-selection',
+        'test-spec',
+        'tasks',
+        'environment-setup',
+        'phase-a',
+        'phase-b'
+      ];
       if (!validPhases.includes(phase)) {
         console.error(`❌ Invalid phase. Must be: ${validPhases.join(', ')}`);
         process.exit(1);
       }
 
       try {
-        const result = await runPhase(feature, phase as 'requirements' | 'design' | 'tasks');
+        const result = await runPhase(feature, phase as 'requirements' | 'design' | 'test-type-selection' | 'test-spec' | 'tasks' | 'environment-setup' | 'phase-a' | 'phase-b');
         if (result.success) {
           console.log('\n✅ Phase completed');
         } else {
@@ -151,16 +160,25 @@ export function createCLI(): Command {
     .command('validate:phase')
     .description('Validate phase completion')
     .argument('<feature>', 'Feature name')
-    .argument('<phase>', 'Phase name (requirements, design, tasks)')
+    .argument('<phase>', 'Phase name (requirements, design, test-type-selection, test-spec, tasks, environment-setup, phase-a, phase-b)')
     .action(async (feature: string, phase: string) => {
-      const validPhases = ['requirements', 'design', 'tasks'];
+      const validPhases = [
+        'requirements',
+        'design',
+        'test-type-selection',
+        'test-spec',
+        'tasks',
+        'environment-setup',
+        'phase-a',
+        'phase-b'
+      ];
       if (!validPhases.includes(phase)) {
         console.error(`❌ Invalid phase. Must be: ${validPhases.join(', ')}`);
         process.exit(1);
       }
 
       try {
-        const result = validatePhase(feature, phase as 'requirements' | 'design' | 'tasks');
+        const result = validatePhase(feature, phase as 'requirements' | 'design' | 'test-type-selection' | 'test-spec' | 'tasks' | 'environment-setup' | 'phase-a' | 'phase-b');
         process.exit(result.valid ? 0 : 1);
       } catch (error) {
         console.error('❌ Validation failed:', error instanceof Error ? error.message : error);
@@ -275,6 +293,9 @@ export function createCLI(): Command {
     .option('--cursor', 'Use Cursor IDE environment')
     .option('--claude', 'Use Claude Code environment')
     .option('--claude-agent', 'Use Claude Code Subagents environment')
+    .option('--gemini', 'Use Gemini CLI environment')
+    .option('--codex', 'Use Codex CLI environment')
+    .option('--cline', 'Use Cline environment')
     .option('--lang <code>', 'Language code (default: ja)', 'ja')
     .option('--project-name <name>', 'Project name')
     .option('--jira-key <key>', 'JIRA project key')

@@ -35,7 +35,81 @@ describe('tasks-format-validator', () => {
   });
 
   describe('validateTasksFormat', () => {
-    it('正しい6フェーズフォーマットが成功する', () => {
+    it('正しい新ワークフローフォーマットが成功する', () => {
+      const validContent = `# tasks.md
+
+## Phase 0.1: 要件定義
+
+### Story 0.1.1: 要件定義書作成
+
+## Phase 0.2: 設計
+
+### Story 0.2.1: 基本設計
+
+## Phase 1: 環境構築
+
+### Story 1.1: テスト環境セットアップ
+
+## Phase 2: TDD実装
+
+### Story 2.1: プロジェクトセットアップ
+
+## Phase A: PR前自動テスト
+
+### Story A.1: 単体テスト実行
+
+## Phase 3: 追加QA
+
+### Story 3.1: 統合テスト
+
+## Phase B: リリース準備テスト
+
+### Story B.1: E2Eテスト実行
+
+## Phase 4: リリース準備
+
+### Story 4.1: 本番環境構築
+
+## Phase 5: リリース
+
+### Story 5.1: ステージング環境デプロイ
+
+Day 1（月）: 営業日ベース
+`;
+      writeFileSync(testFilePath, validContent, 'utf-8');
+      expect(() => validateTasksFormat(testFilePath)).not.toThrow();
+    });
+
+    it('正しい新ワークフローフォーマット（任意フェーズ省略）が成功する', () => {
+      const validContent = `# tasks.md
+
+## Phase 0.1: 要件定義
+
+### Story 0.1.1: 要件定義書作成
+
+## Phase 0.2: 設計
+
+### Story 0.2.1: 基本設計
+
+## Phase 2: TDD実装
+
+### Story 2.1: プロジェクトセットアップ
+
+## Phase 4: リリース準備
+
+### Story 4.1: 本番環境構築
+
+## Phase 5: リリース
+
+### Story 5.1: ステージング環境デプロイ
+
+Day 1（月）: 営業日ベース
+`;
+      writeFileSync(testFilePath, validContent, 'utf-8');
+      expect(() => validateTasksFormat(testFilePath)).not.toThrow();
+    });
+
+    it('正しい6フェーズフォーマット（レガシー）が成功する', () => {
       const validContent = `# tasks.md
 
 ## Phase 0: 要件定義（Requirements）
@@ -109,6 +183,22 @@ Day 1（月）: 営業日ベース
       writeFileSync(testFilePath, invalidContent, 'utf-8');
       expect(() => validateTasksFormat(testFilePath)).toThrow(/Phase 1: 設計（Design）/);
       expect(() => validateTasksFormat(testFilePath)).toThrow(/Phase 3: 試験（Testing）/);
+    });
+
+    it('新ワークフローで必須フェーズが不足している場合エラー', () => {
+      const invalidContent = `# tasks.md
+
+## Phase 0.1: 要件定義
+
+### Story 0.1.1: 要件定義書作成
+
+## Phase 2: TDD実装
+
+### Story 2.1: プロジェクトセットアップ
+`;
+      writeFileSync(testFilePath, invalidContent, 'utf-8');
+      expect(() => validateTasksFormat(testFilePath)).toThrow(/Phase 0.2:/);
+      expect(() => validateTasksFormat(testFilePath)).toThrow(/does not match either workflow structure/);
     });
 
     it('Storyヘッダーがない場合エラー', () => {

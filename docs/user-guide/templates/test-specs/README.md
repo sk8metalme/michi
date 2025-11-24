@@ -58,15 +58,34 @@ For each test case, specify:
 ## Test Specification Workflow
 
 ```text
-Phase 0-3: Create Test Specification
+Phase 0.3: テストタイプの選択
+    ↓ 必要なテストタイプを決定
     ↓
-Phase 0-4: Review Test Specification
+Phase 0.4: テスト仕様書の作成
+    ↓ テンプレートを使用して仕様書を作成
+    ↓ レビューと承認
     ↓
-Phase 0-5: Approve and Create Task
+Phase 0.5-0.6: タスク分割とJIRA同期
+    ↓ tasks.mdにテストタスクを含める
     ↓
-Implementation Phase
+Phase 1: 環境構築・基盤整備
+    ↓ テスト環境のセットアップ
     ↓
-Test Execution (Phase A or Phase B)
+Phase 2: TDD実装
+    ↓ テストコードと実装コードを同時作成
+    ↓
+Phase A: PR前の自動テスト実行
+    ├─ 単体テスト実行
+    ├─ Lint実行
+    └─ ビルド実行
+    ↓
+Phase 3: 追加の品質保証
+    ↓
+Phase B: リリース準備時の手動テスト実行
+    ├─ 統合テスト実行（推奨）
+    ├─ E2Eテスト実行（推奨）
+    ├─ パフォーマンステスト実行（任意）
+    └─ セキュリティテスト実行（任意）
 ```
 
 ## Best Practices

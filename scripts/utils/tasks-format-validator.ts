@@ -1,7 +1,9 @@
 /**
  * tasks.mdフォーマットバリデーター
  *
- * Michi 6-Phase構造に準拠しているかを検証
+ * Michi Workflow構造に準拠しているかを検証
+ * - 新ワークフロー構造（Phase 0.1-0.2, 1, 2, A, 3, B, 4-5）を推奨
+ * - 旧6-Phase構造（Phase 0-5）も互換性のためサポート
  */
 
 import { readFileSync } from 'fs';
@@ -25,20 +27,35 @@ export function validateTasksFormat(tasksPath: string): void {
 
   // 1. AI-DLCフォーマット検出（誤ったフォーマット）を最初にチェック
   // より具体的なエラーメッセージを優先的に表示
-  // AI-DLCは "- [ ] 1." のようなフォーマットで、Phase 0:がない
+  // AI-DLCは "- [ ] 1." のようなフォーマットで、Phase構造がない
   const hasCheckboxPattern = /^- \[ \] \d+\./m.test(content);
-  const hasPhase0 = content.includes('Phase 0:');
+  const hasPhaseStructure = content.includes('Phase 0:') || content.includes('Phase 0.1:');
 
-  if (hasCheckboxPattern && !hasPhase0) {
+  if (hasCheckboxPattern && !hasPhaseStructure) {
     throw new Error(
-      'tasks.md appears to be in AI-DLC format instead of Michi 6-phase format.\n' +
-        'Detected "- [ ] 1." pattern without "Phase 0:" header.\n' +
+      'tasks.md appears to be in AI-DLC format instead of Michi workflow format.\n' +
+        'Detected "- [ ] 1." pattern without Phase structure.\n' +
         'Please regenerate tasks.md using /kiro:spec-tasks command with correct template.',
     );
   }
 
-  // 2. 全6フェーズが存在するかチェック
-  const requiredPhases = [
+  // 2. フェーズ構造の検証（新旧両方をサポート）
+
+  // 新ワークフロー構造（推奨）
+  const newWorkflowPhases = [
+    'Phase 0.1:', // 要件定義
+    'Phase 0.2:', // 設計
+    'Phase 1:',   // 環境構築（任意）
+    'Phase 2:',   // TDD実装
+    'Phase A:',   // PR前自動テスト（任意）
+    'Phase 3:',   // 追加QA（任意）
+    'Phase B:',   // リリース準備テスト（任意）
+    'Phase 4:',   // リリース準備
+    'Phase 5:',   // リリース
+  ];
+
+  // 旧6-Phase構造（互換性のためサポート）
+  const legacyPhases = [
     'Phase 0: 要件定義（Requirements）',
     'Phase 1: 設計（Design）',
     'Phase 2: 実装（Implementation）',
@@ -47,14 +64,46 @@ export function validateTasksFormat(tasksPath: string): void {
     'Phase 5: リリース（Release）',
   ];
 
-  const missingPhases = requiredPhases.filter(
-    (phase) => !content.includes(phase),
-  );
-  if (missingPhases.length > 0) {
+  // 新ワークフロー構造の必須フェーズ
+  const newRequiredPhases = ['Phase 0.1:', 'Phase 0.2:', 'Phase 2:', 'Phase 4:', 'Phase 5:'];
+
+  // 旧構造の検証
+  const hasLegacyStructure = legacyPhases.every((phase) => content.includes(phase));
+
+  // 新構造の検証（必須フェーズのみ）
+  const hasNewStructure = newRequiredPhases.every((phase) => content.includes(phase));
+
+  if (!hasLegacyStructure && !hasNewStructure) {
+    const missingNewPhases = newRequiredPhases.filter(
+      (phase) => !content.includes(phase),
+    );
+    const missingLegacyPhases = legacyPhases.filter(
+      (phase) => !content.includes(phase),
+    );
+
     throw new Error(
-      `tasks.md is missing required phases:\n${missingPhases.map((p) => `  - ${p}`).join('\n')}\n\n` +
-        'Expected all 6 phases (Phase 0 through Phase 5).\n' +
-        'Please regenerate tasks.md using /kiro:spec-tasks command.',
+      `tasks.md does not match either workflow structure.\n\n` +
+        `Missing required phases (new workflow):\n${missingNewPhases.map((p) => `  - ${p}`).join('\n')}\n\n` +
+        `Missing phases (legacy workflow):\n${missingLegacyPhases.map((p) => `  - ${p}`).join('\n')}\n\n` +
+        'Please regenerate tasks.md using /kiro:spec-tasks command with the latest template.',
+    );
+  }
+
+  // 旧構造の場合は警告
+  if (hasLegacyStructure && !hasNewStructure) {
+    console.warn(
+      '⚠️  Warning: tasks.md uses legacy 6-phase structure (Phase 0-5).\n' +
+        '   Consider migrating to the new workflow structure:\n' +
+        '   - Phase 0.1: 要件定義\n' +
+        '   - Phase 0.2: 設計\n' +
+        '   - Phase 1: 環境構築（任意）\n' +
+        '   - Phase 2: TDD実装\n' +
+        '   - Phase A: PR前自動テスト（任意）\n' +
+        '   - Phase 3: 追加QA（任意）\n' +
+        '   - Phase B: リリース準備テスト（任意）\n' +
+        '   - Phase 4: リリース準備\n' +
+        '   - Phase 5: リリース\n' +
+        '   See: docs/user-guide/guides/workflow.md',
     );
   }
 
