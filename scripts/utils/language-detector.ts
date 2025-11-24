@@ -127,8 +127,8 @@ export function analyzeLanguage(feature: string, projectRoot: string = process.c
   // 信頼度を判定
   const confidence: 'high' | 'medium' | 'low' = 
     maxScore >= 5 ? 'high' : 
-    maxScore >= 3 ? 'medium' : 
-    'low';
+      maxScore >= 3 ? 'medium' : 
+        'low';
   
   return {
     language: recommendedLanguage,

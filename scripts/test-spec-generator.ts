@@ -66,7 +66,7 @@ export async function generateUnitTestSpec(feature: string, projectRoot: string 
         testCases.push({
           id: `UT-${String(tcCounter++).padStart(3, '0')}`,
           name: `${component.name}.${method.name} - 異常系（null入力）`,
-          description: `null入力時に適切なエラーハンドリングが行われることを確認`,
+          description: 'null入力時に適切なエラーハンドリングが行われることを確認',
           preconditions: [
             `${component.name}が初期化されている`
           ],
@@ -87,7 +87,7 @@ export async function generateUnitTestSpec(feature: string, projectRoot: string 
         testCases.push({
           id: `UT-${String(tcCounter++).padStart(3, '0')}`,
           name: `${component.name}.${method.name} - エッジケース（空文字列）`,
-          description: `空文字列入力時の動作を確認`,
+          description: '空文字列入力時の動作を確認',
           preconditions: [
             `${component.name}が初期化されている`
           ],
@@ -163,7 +163,7 @@ export async function generateIntegrationTestSpec(feature: string, projectRoot: 
     testCases.push({
       id: `IT-${String(tcCounter++).padStart(3, '0')}`,
       name: `${flow.name} - 失敗フロー`,
-      description: `エラー発生時に適切にハンドリングされることを確認`,
+      description: 'エラー発生時に適切にハンドリングされることを確認',
       preconditions: [
         'すべての依存コンポーネントが起動している'
       ],
@@ -243,7 +243,7 @@ export async function generateE2ETestSpec(feature: string, projectRoot: string =
       testCases.push({
         id: `E2E-${String(tcCounter++).padStart(3, '0')}`,
         name: `${req.title} - エラーフロー`,
-        description: `エラー発生時に適切にハンドリングされることを確認`,
+        description: 'エラー発生時に適切にハンドリングされることを確認',
         preconditions: [
           'アプリケーションが起動している'
         ],
@@ -308,7 +308,7 @@ export async function generatePerformanceTestSpec(feature: string, projectRoot: 
       steps: [
         '主要な操作を実行する',
         '応答時間を測定する',
-          '要件と比較する'
+        '要件と比較する'
       ],
       expectedResults: perfReq.acceptanceCriteria.filter(ac => 
         ac.includes('秒以内') || ac.includes('以内に')

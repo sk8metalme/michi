@@ -15,7 +15,7 @@
 ## JIRA Integration
 
 ### Issue Creation Format
-- Summary: `[{JIRA_KEY}] {title}`
+- Summary: `[{{JIRA_KEY}}] {title}`
 - Project Key: Use {{KIRO_DIR}}/project.json `jiraProjectKey`
 - Labels: Derived from Confluence labels
 

@@ -166,7 +166,7 @@ export function validateProjectConfig(
       if (invalidPhases && invalidPhases.length > 0) {
         warnings.push(
           `Unknown phases in workflow.enabledPhases: ${invalidPhases.join(', ')}\n` +
-            `See: docs/user-guide/guides/workflow.md for valid phase names`,
+            'See: docs/user-guide/guides/workflow.md for valid phase names',
         );
       }
     }

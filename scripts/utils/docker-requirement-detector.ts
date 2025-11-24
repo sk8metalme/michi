@@ -140,8 +140,8 @@ export function analyzeDockerRequirement(feature: string, projectRoot: string = 
   const recommended = score >= 3;
   const confidence: 'high' | 'medium' | 'low' = 
     score >= 5 ? 'high' : 
-    score >= 3 ? 'medium' : 
-    'low';
+      score >= 3 ? 'medium' : 
+        'low';
   
   return {
     recommended,

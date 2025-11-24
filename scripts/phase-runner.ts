@@ -585,7 +585,7 @@ async function runTestSpecPhase(feature: string): Promise<PhaseRunResult> {
   }
 
   console.log('\n📖 次のステップ:');
-  console.log(`   1. Phase 0.5: タスク分割へ進む`);
+  console.log('   1. Phase 0.5: タスク分割へ進む');
   console.log(`      michi phase:run ${feature} tasks`);
 
   console.log('\n' + '='.repeat(60));
@@ -621,7 +621,7 @@ async function runEnvironmentSetupPhase(feature: string): Promise<PhaseRunResult
     console.log(`   テストフレームワーク: ${detected.testFramework}`);
   }
   if (detected.hasCI) {
-    console.log(`   CI/CD: 既存の設定あり`);
+    console.log('   CI/CD: 既存の設定あり');
   }
 
   // Step 2: 実装言語を分析
@@ -754,8 +754,8 @@ async function runEnvironmentSetupPhase(feature: string): Promise<PhaseRunResult
     } else {
       const commands: Record<string, string> = {
         'Node.js/TypeScript': detected.packageManager === 'pnpm' ? 'pnpm install' : 
-                              detected.packageManager === 'yarn' ? 'yarn install' : 
-                              'npm install',
+          detected.packageManager === 'yarn' ? 'yarn install' : 
+            'npm install',
         'Java': existsSync('./gradlew') ? './gradlew build --no-daemon' : 'gradle build',
         'PHP': 'composer install',
         'Python': 'pip install -r requirements.txt',
@@ -805,7 +805,7 @@ async function runEnvironmentSetupPhase(feature: string): Promise<PhaseRunResult
   console.log(`   Docker Compose: ${answers.needsDocker ? 'あり' : 'なし'}`);
 
   console.log('\n📖 次のステップ:');
-  console.log(`   1. Phase 2: TDD実装へ進む`);
+  console.log('   1. Phase 2: TDD実装へ進む');
   console.log(`      /kiro:spec-impl ${feature}`);
 
   console.log('\n' + '='.repeat(60));

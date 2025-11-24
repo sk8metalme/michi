@@ -134,16 +134,16 @@ services:
 `;
   
   if (services.includes('postgres')) {
-    yaml += `  postgres_data:\n`;
+    yaml += '  postgres_data:\n';
   }
   if (services.includes('mysql')) {
-    yaml += `  mysql_data:\n`;
+    yaml += '  mysql_data:\n';
   }
   if (services.includes('redis')) {
-    yaml += `  redis_data:\n`;
+    yaml += '  redis_data:\n';
   }
   if (services.includes('mongodb')) {
-    yaml += `  mongodb_data:\n`;
+    yaml += '  mongodb_data:\n';
   }
   
   return yaml;

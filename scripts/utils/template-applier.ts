@@ -150,25 +150,25 @@ function generateTestCasesSection(testCases: TestCase[]): string {
     section += `**Description**: ${tc.description}\n\n`;
     
     if (tc.preconditions.length > 0) {
-      section += `**Preconditions**:\n`;
+      section += '**Preconditions**:\n';
       tc.preconditions.forEach(p => section += `- ${p}\n`);
       section += '\n';
     }
     
-    section += `**Test Steps**:\n`;
+    section += '**Test Steps**:\n';
     tc.steps.forEach((step, idx) => section += `${idx + 1}. ${step}\n`);
     section += '\n';
     
-    section += `**Expected Results**:\n`;
+    section += '**Expected Results**:\n';
     tc.expectedResults.forEach(r => section += `- ${r}\n`);
     section += '\n';
     
-    section += `**Actual Results**:\n`;
-    section += `[To be filled during test execution]\n\n`;
+    section += '**Actual Results**:\n';
+    section += '[To be filled during test execution]\n\n';
     
-    section += `**Status**: [ ] Pass / [ ] Fail / [ ] Blocked\n\n`;
-    section += `**Notes**:\n\n`;
-    section += `---\n\n`;
+    section += '**Status**: [ ] Pass / [ ] Fail / [ ] Blocked\n\n';
+    section += '**Notes**:\n\n';
+    section += '---\n\n';
   }
   
   return section;

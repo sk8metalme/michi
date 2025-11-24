@@ -82,7 +82,7 @@ export function validateTasksFormat(tasksPath: string): void {
     );
 
     throw new Error(
-      `tasks.md does not match either workflow structure.\n\n` +
+      'tasks.md does not match either workflow structure.\n\n' +
         `Missing required phases (new workflow):\n${missingNewPhases.map((p) => `  - ${p}`).join('\n')}\n\n` +
         `Missing phases (legacy workflow):\n${missingLegacyPhases.map((p) => `  - ${p}`).join('\n')}\n\n` +
         'Please regenerate tasks.md using /kiro:spec-tasks command with the latest template.',
