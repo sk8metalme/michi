@@ -520,8 +520,23 @@ async function runTestSpecPhase(feature: string): Promise<PhaseRunResult> {
     };
   }
 
-  const selection = JSON.parse(readFileSync(selectionPath, 'utf-8'));
-  const testTypes: string[] = selection.selectedTypes || [];
+  let selection: { selectedTypes?: string[] };
+  let testTypes: string[] = [];
+
+  try {
+    selection = JSON.parse(readFileSync(selectionPath, 'utf-8'));
+    testTypes = selection.selectedTypes || [];
+  } catch (error) {
+    errors.push(`test-type-selection.jsonの読み込みまたはパースに失敗しました: ${error instanceof Error ? error.message : String(error)}`);
+    return {
+      phase: 'test-spec' as Phase,
+      success: false,
+      confluenceCreated: false,
+      jiraCreated: false,
+      validationPassed: false,
+      errors
+    };
+  }
 
   console.log(`\n✅ 選択されたテストタイプ: ${testTypes.join(', ')}`);
 
