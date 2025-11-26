@@ -72,8 +72,8 @@ docs/
 - `.cursorrules` ファイルでプロジェクト固有ルールを定義
 
 ### Claude Agent SDK
-- カスタムサブエージェント: `docs/user-guide/templates/claude-agent/`
-- カスタムコマンド: `docs/user-guide/templates/claude/commands/`
+- カスタムサブエージェント: `templates/claude-agent/`
+- カスタムコマンド: `templates/claude/commands/`
 
 ## 参考リンク
 
