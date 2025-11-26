@@ -53,7 +53,7 @@ repository/  ← 1つのGitHubリポジトリ
 詳細な手順は [新規リポジトリセットアップガイド](../getting-started/new-repository-setup.md) を参照してください。
 
 **クイックスタート**:
-1. 既存リポジトリに追加: `bash /path/to/michi/scripts/setup-existing.sh`
+1. 既存リポジトリに追加: `npx tsx /path/to/michi/scripts/setup-existing-project.ts --michi-path /path/to/michi`
 2. 新規リポジトリ作成: `npm run create-project -- --name <id> --project-name <name> --jira-key <key>`
 
 **マルチプロジェクト特有の注意点**:

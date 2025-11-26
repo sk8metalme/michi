@@ -11,7 +11,7 @@
 cd /path/to/existing-repo
 
 # Michiの共通ルール・コマンド・テンプレートをコピー
-bash /path/to/michi/scripts/setup-existing.sh
+npx tsx /path/to/michi/scripts/setup-existing-project.ts --michi-path /path/to/michi
 ```
 
 このスクリプトが自動的に：
@@ -72,10 +72,7 @@ cat > .kiro/project.json << 'EOF'
 }
 EOF
 
-# 4. Michiから共通ルール・コマンド・テンプレートをコピー（自動スクリプト推奨）
-bash /path/to/michi/scripts/setup-existing.sh
-
-# または直接実行
+# 4. Michiから共通ルール・コマンド・テンプレートをコピー
 npx tsx /path/to/michi/scripts/setup-existing-project.ts \
   --michi-path /path/to/michi
 
