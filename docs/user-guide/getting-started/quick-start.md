@@ -153,6 +153,22 @@ npx @sk8metal/michi-cli phase:run user-authentication design
 
 TDD（テスト駆動開発）で実装が進められます。
 
+## 8. テストを作成（オプション）
+
+Phase Bテスト（手動回帰、負荷、セキュリティ）を対話的に作成できます：
+
+```bash
+npm run test:interactive
+```
+
+対話的に以下の情報を入力すると、テストファイルが自動生成されます：
+- テストタイプ（手動回帰/負荷/セキュリティ）
+- 対象エンドポイント
+- 期待するレスポンス
+- テスト条件
+
+詳細は [テスト計画フロー](../testing/test-planning-flow.md) を参照してください。
+
 ## 次のステップ
 
 ### より詳しく学ぶ

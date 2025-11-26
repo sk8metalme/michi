@@ -10,6 +10,8 @@ import { syncTasksToJIRA } from './jira-sync.js';
 import { validatePhase } from './validate-phase.js';
 import { runPreFlightCheck } from './pre-flight-check.js';
 import { validateFeatureNameOrThrow } from './utils/feature-name-validator.js';
+import { getTestCommands } from './constants/test-commands.js';
+import { loadSpecJson } from './utils/spec-updater.js';
 import inquirer from 'inquirer';
 
 type Phase =
@@ -846,13 +848,18 @@ async function runPhaseAPhase(feature: string): Promise<PhaseRunResult> {
 
   const errors: string[] = [];
 
+  // spec.jsonから言語を読み取る
+  const spec = loadSpecJson(feature);
+  const language = spec.environmentSetup?.language || 'Node.js/TypeScript';
+  const commands = getTestCommands(language);
+
   console.log('\n📚 このフェーズはCI/CD自動実行です');
   console.log('PR作成時に以下のテストが自動実行されます:\n');
 
   console.log('自動実行テスト:');
-  console.log('  - 単体テスト (npm test)');
-  console.log('  - Lint実行 (npm run lint)');
-  console.log('  - ビルド実行 (npm run build)\n');
+  console.log(`  - 単体テスト (${commands.test})`);
+  console.log(`  - Lint実行 (${commands.lint})`);
+  console.log(`  - ビルド実行 (${commands.build})\n`);
 
   console.log('CI/CD設定ファイル:');
   console.log('  - .github/workflows/ci.yml');
@@ -882,47 +889,115 @@ async function runPhaseAPhase(feature: string): Promise<PhaseRunResult> {
 
 /**
  * リリース準備テストフェーズを実行（Phase B）
- * マニュアル対応：手動テストチェックリストを表示
+ * テスト実行ファイルを自動生成し、手動テストチェックリストを表示
  */
 async function runPhaseBPhase(feature: string): Promise<PhaseRunResult> {
   console.log('\n🔍 Phase B: リリース準備テスト（Release Tests）');
   console.log('='.repeat(60));
 
   const errors: string[] = [];
+  const generatedFiles: string[] = [];
 
-  console.log('\n📚 このフェーズはマニュアル対応です');
-  console.log('以下のテストを実施してください:\n');
+  // Step 1: テストタイプ選択の読み込み
+  const selectionPath = join(process.cwd(), '.kiro', 'specs', feature, 'test-type-selection.json');
 
-  console.log('リリース準備テストチェックリスト:');
-  console.log('  [ ] 性能テスト実行');
-  console.log('      - 負荷テスト');
-  console.log('      - レスポンスタイム測定');
-  console.log('      - ボトルネック特定');
-  console.log('  [ ] セキュリティテスト実行');
-  console.log('      - 脆弱性スキャン');
-  console.log('      - セキュリティチェックリスト');
-  console.log('      - アクセス制御確認');
-  console.log('  [ ] 手動回帰テスト');
-  console.log('      - 回帰テストチェックリスト');
-  console.log('      - クリティカルパス確認');
-  console.log('      - 既知のバグ文書化\n');
+  let selectedTypes: string[] = [];
+  if (existsSync(selectionPath)) {
+    try {
+      const selection = JSON.parse(readFileSync(selectionPath, 'utf-8'));
+      selectedTypes = selection.selectedTypes || [];
+      console.log(`\n✅ 選択されたテストタイプ: ${selectedTypes.join(', ')}`);
+    } catch {
+      console.warn('⚠️  test-type-selection.jsonの読み込みに失敗しました');
+    }
+  } else {
+    console.log('\n⚠️  test-type-selection.jsonが存在しません');
+    console.log('   デフォルトのテストタイプを使用します');
+    selectedTypes = ['unit', 'lint', 'build', 'integration', 'performance', 'security'];
+  }
 
-  console.log('参考ドキュメント:');
-  console.log('  - docs/testing/specs/ (テスト仕様書)');
-  console.log('  - docs/user-guide/testing/test-execution-flow.md\n');
+  // Step 2: Phase B対象のテストタイプを抽出
+  const phaseBTypes = selectedTypes.filter(t => !['unit', 'lint', 'build'].includes(t));
 
-  console.log('次のステップ:');
-  console.log('  1. 上記チェックリストを完了');
-  console.log('  2. テスト結果をドキュメント化');
-  console.log('  3. Phase 4: リリース準備へ進む');
+  if (phaseBTypes.length > 0) {
+    console.log(`\n📝 Phase B対象テスト: ${phaseBTypes.join(', ')}`);
+
+    // Step 3: テスト実行ファイルを生成
+    console.log('\n🤖 テスト実行ファイルを自動生成中...');
+
+    const { generateAllTestExecutions } = await import('./test-execution-generator.js');
+
+    try {
+      const results = await generateAllTestExecutions(feature);
+
+      for (const result of results) {
+        if (result.success) {
+          console.log(`   ✅ ${result.testType}: ${result.files.length}ファイル生成`);
+          generatedFiles.push(...result.files);
+        } else {
+          console.error(`   ❌ ${result.testType}: ${result.error}`);
+          errors.push(`${result.testType}テスト生成失敗: ${result.error}`);
+        }
+      }
+    } catch (error: any) {
+      errors.push(`テスト実行ファイル生成失敗: ${error.message}`);
+      console.error('❌ テスト実行ファイル生成失敗:', error.message);
+    }
+  }
+
+  // Step 4: 生成されたファイルのサマリー
+  const testExecutionDir = join(process.cwd(), '.kiro', 'specs', feature, 'test-execution');
+  if (generatedFiles.length > 0) {
+    console.log('\n📄 生成されたファイル:');
+    generatedFiles.forEach(file => {
+      const relativePath = file.replace(testExecutionDir + '/', '');
+      console.log(`   - ${relativePath}`);
+    });
+  }
+
+  // Step 5: チェックリスト表示
+  console.log('\n' + '='.repeat(60));
+  console.log('📋 リリース準備テストチェックリスト:\n');
+
+  if (phaseBTypes.includes('performance')) {
+    console.log('  [ ] 性能テスト実行');
+    console.log(`      📁 .kiro/specs/${feature}/test-execution/performance/`);
+    console.log('      📖 詳細はディレクトリ内のREADME/計画書を参照');
+  }
+
+  if (phaseBTypes.includes('security')) {
+    console.log('  [ ] セキュリティテスト実行');
+    console.log(`      📁 .kiro/specs/${feature}/test-execution/security/`);
+    console.log('      📖 詳細はディレクトリ内のREADME/計画書を参照');
+  }
+
+  if (phaseBTypes.includes('integration')) {
+    console.log('  [ ] 統合テスト実行');
+    console.log(`      📁 .kiro/specs/${feature}/test-execution/integration/`);
+  }
+
+  if (phaseBTypes.includes('e2e')) {
+    console.log('  [ ] E2Eテスト実行');
+    console.log(`      📁 .kiro/specs/${feature}/test-execution/e2e/`);
+  }
+
+  console.log('\n参考ドキュメント:');
+  console.log(`  - .kiro/specs/${feature}/test-specs/ (テスト仕様書)`);
+  console.log('  - docs/user-guide/testing/test-execution-flow.md');
+
+  console.log('\n次のステップ:');
+  console.log('  1. 生成されたテストファイルを確認・編集');
+  console.log('  2. 各テストを実行');
+  console.log('  3. テスト結果をドキュメント化');
+  console.log('  4. Phase 4: リリース準備へ進む');
 
   console.log('\n' + '='.repeat(60));
-  console.log('✅ Phase B: リリース準備テストチェックリストを表示しました');
-  console.log('📢 テストを完了してPhase 4に進んでください');
+  console.log('✅ Phase B: テスト実行ファイル生成が完了しました');
+  console.log('📢 テストを実行してPhase 4に進んでください');
 
   return {
     phase: 'phase-b' as Phase,
-    success: true,
+    success: errors.length === 0,
     confluenceCreated: false,
     jiraCreated: false,
     validationPassed: true,
