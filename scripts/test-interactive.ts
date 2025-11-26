@@ -565,7 +565,7 @@ echo "対象: \${TARGET_URL}"
 echo "設定: \${CONFIG_FILE}"
 
 # Docker経由でZAPを実行
-docker run --rm -v "\$(pwd):/zap/wrk:rw" \\
+docker run --rm -v "$(pwd):/zap/wrk:rw" \\
   -t ghcr.io/zaproxy/zaproxy:stable \\
   zap.sh -cmd \\
   -autorun /zap/wrk/\${CONFIG_FILE}
@@ -574,10 +574,10 @@ echo "✅ スキャン完了"
 echo "レポート: \${REPORT_DIR}/zap-report.html"
 
 # アラート数チェック
-ALERT_COUNT=\$(grep -c "risk=" "\${REPORT_DIR}/zap-report.html" 2>/dev/null || echo "0")
+ALERT_COUNT=$(grep -c "risk=" "\${REPORT_DIR}/zap-report.html" 2>/dev/null || echo "0")
 MAX_ALERTS=${params.maxAlerts}
 
-if [ "\$ALERT_COUNT" -gt "\$MAX_ALERTS" ]; then
+if [ "$ALERT_COUNT" -gt "$MAX_ALERTS" ]; then
   echo "❌ アラート数が閾値を超えています: \${ALERT_COUNT} > \${MAX_ALERTS}"
   exit 1
 else
@@ -631,21 +631,21 @@ async function main(): Promise<number> {
 
     // テストタイプ別のパラメータ収集と生成
     switch (selectedType.value) {
-      case 'manual-regression': {
-        const params = await collectManualRegressionParams(rl, commonParams);
-        generatedFiles = generateManualRegressionFiles(params, outputDir);
-        break;
-      }
-      case 'load-test': {
-        const params = await collectLoadTestParams(rl, commonParams);
-        generatedFiles = generateLoadTestFiles(params, outputDir);
-        break;
-      }
-      case 'security-test': {
-        const params = await collectSecurityTestParams(rl, commonParams);
-        generatedFiles = generateSecurityTestFiles(params, outputDir);
-        break;
-      }
+    case 'manual-regression': {
+      const params = await collectManualRegressionParams(rl, commonParams);
+      generatedFiles = generateManualRegressionFiles(params, outputDir);
+      break;
+    }
+    case 'load-test': {
+      const params = await collectLoadTestParams(rl, commonParams);
+      generatedFiles = generateLoadTestFiles(params, outputDir);
+      break;
+    }
+    case 'security-test': {
+      const params = await collectSecurityTestParams(rl, commonParams);
+      generatedFiles = generateSecurityTestFiles(params, outputDir);
+      break;
+    }
     }
 
     // 結果表示
@@ -658,23 +658,23 @@ async function main(): Promise<number> {
     // 次のステップを案内
     console.log('\n📋 次のステップ:');
     switch (selectedType.value) {
-      case 'manual-regression':
-        console.log('  1. 生成されたMarkdownファイルを確認・編集');
-        console.log('  2. アプリケーションを起動');
-        console.log('  3. curlコマンドを実行してテスト');
-        break;
-      case 'load-test':
-        console.log('  1. pip install locust');
-        console.log(`  2. cd ${outputDir}`);
-        console.log(`  3. locust -f locustfile.py --web-host localhost`);
-        console.log('  4. http://localhost:8089 でテスト開始');
-        break;
-      case 'security-test':
-        console.log('  1. Docker Desktop を起動');
-        console.log(`  2. cd ${outputDir}`);
-        console.log('  3. chmod +x run-zap-scan.sh');
-        console.log('  4. ./run-zap-scan.sh');
-        break;
+    case 'manual-regression':
+      console.log('  1. 生成されたMarkdownファイルを確認・編集');
+      console.log('  2. アプリケーションを起動');
+      console.log('  3. curlコマンドを実行してテスト');
+      break;
+    case 'load-test':
+      console.log('  1. pip install locust');
+      console.log(`  2. cd ${outputDir}`);
+      console.log('  3. locust -f locustfile.py --web-host localhost');
+      console.log('  4. http://localhost:8089 でテスト開始');
+      break;
+    case 'security-test':
+      console.log('  1. Docker Desktop を起動');
+      console.log(`  2. cd ${outputDir}`);
+      console.log('  3. chmod +x run-zap-scan.sh');
+      console.log('  4. ./run-zap-scan.sh');
+      break;
     }
 
     console.log('\n🎉 設定が完了しました！');

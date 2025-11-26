@@ -41,7 +41,7 @@ function extractEndpointsFromDesign(designPath: string): { endpoint: string; met
   const endpoints: { endpoint: string; method: string; baseUrl: string }[] = [];
 
   // APIエンドポイントのパターンを検索
-  const apiPattern = /(?:GET|POST|PUT|DELETE|PATCH)\s+([\/\w\-\{\}]+)/gi;
+  const apiPattern = /(?:GET|POST|PUT|DELETE|PATCH)\s+([\w\-/{}]+)/gi;
   let match;
 
   while ((match = apiPattern.exec(content)) !== null) {
@@ -388,7 +388,7 @@ echo "対象: \${TARGET_URL}"
 echo "設定: \${CONFIG_FILE}"
 
 # Docker経由でZAPを実行
-docker run --rm -v "\$(pwd):/zap/wrk:rw" \\
+docker run --rm -v "$(pwd):/zap/wrk:rw" \\
   -t ghcr.io/zaproxy/zaproxy:stable \\
   zap.sh -cmd \\
   -autorun /zap/wrk/\${CONFIG_FILE}

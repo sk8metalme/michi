@@ -297,7 +297,7 @@ async function runTestTypeSelectionPhase(feature: string): Promise<PhaseRunResul
       existingSelection = JSON.parse(readFileSync(selectionPath, 'utf-8'));
       console.log('\n📋 既存の選択が見つかりました:');
       console.log(`   選択済みテストタイプ: ${existingSelection.selectedTypes?.join(', ') || 'なし'}`);
-    } catch (error) {
+    } catch {
       console.warn('⚠️  既存の選択ファイルの読み込みに失敗しました');
     }
   }
