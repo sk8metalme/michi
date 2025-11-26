@@ -550,15 +550,17 @@ function generateSecurityTestFiles(params: SecurityTestParams, outputDir: string
  * ZAP設定ファイルを生成
  */
 function generateZapConfig(params: SecurityTestParams): string {
-  const excludeList = params.excludePaths.split(',').map(p => `    - "${p.trim()}.*"`).join('\n');
+  // excludePathsのリスト項目は8スペースでインデント（excludePathsの子要素）
+  const excludeList = params.excludePaths.split(',').map(p => `        - "${p.trim()}.*"`).join('\n');
 
   let authConfig = '';
   if (params.authType !== 'none' && params.authHeader) {
+    // authenticationブロックは6スペースでインデント（contextの子要素）
     authConfig = `
-  authentication:
-    method: "script"
-    parameters:
-      authHeader: "${params.authHeader}"`;
+      authentication:
+        method: "script"
+        parameters:
+          authHeader: "${params.authHeader}"`;
   }
 
   return `# OWASP ZAP設定
