@@ -346,6 +346,31 @@ function processTemplate(templateFile: string, params: Record<string, string>): 
 }
 
 /**
+ * 安全なPythonクラス名を生成
+ * - 非英数字を削除
+ * - 空の場合は "Project" をフォールバック
+ * - 数字で始まる場合は "P" を前置
+ * - 最後に "User" を追加
+ */
+function generateSafePythonClassName(projectName: string): string {
+  // 非英数字を削除
+  let safeName = projectName.replace(/[^a-zA-Z0-9]/g, '');
+
+  // 空の場合はフォールバック
+  if (safeName === '') {
+    safeName = 'Project';
+  }
+
+  // 数字で始まる場合は "P" を前置
+  if (/^[0-9]/.test(safeName)) {
+    safeName = 'P' + safeName;
+  }
+
+  // "User" を追加してクラス名を完成
+  return safeName + 'User';
+}
+
+/**
  * 手動回帰テストの出力ファイルを生成
  */
 function generateManualRegressionFiles(params: ManualRegressionParams, outputDir: string): string[] {
@@ -443,6 +468,9 @@ function generateLocustFile(params: LoadTestParams): string {
   const methodLower = params.method.toLowerCase();
   const hasBody = ['post', 'put', 'patch'].includes(methodLower);
 
+  // 安全なPythonクラス名を生成
+  const className = generateSafePythonClassName(params.projectName);
+
   let taskCode = '';
   if (hasBody) {
     taskCode = `        self.client.${methodLower}(
@@ -462,7 +490,7 @@ ${params.projectName} 負荷テスト
 from locust import HttpUser, task, between
 
 
-class ${params.projectName.replace(/[^a-zA-Z0-9]/g, '')}User(HttpUser):
+class ${className}(HttpUser):
     """テスト対象ユーザーシミュレーション"""
 
     wait_time = between(1, 3)
@@ -560,9 +588,14 @@ jobs:
 
   - type: report
     parameters:
-      template: "traditional-html"
+      template: "traditional-json"
       reportDir: "./reports"
       reportFile: "zap-report"
+  - type: report
+    parameters:
+      template: "traditional-html"
+      reportDir: "./reports"
+      reportFile: "zap-report-html"
 `;
 }
 
@@ -595,13 +628,32 @@ docker run --rm -v "$(pwd):/zap/wrk:rw" \\
   -autorun /zap/wrk/\${CONFIG_FILE}
 
 echo "✅ スキャン完了"
-echo "レポート: \${REPORT_DIR}/zap-report.html"
+echo "レポート: \${REPORT_DIR}/zap-report.json"
+echo "HTML版: \${REPORT_DIR}/zap-report-html.html"
 
-# アラート数チェック
-ALERT_COUNT=$(grep -c "risk=" "\${REPORT_DIR}/zap-report.html" 2>/dev/null || echo "0")
+# アラート数チェック（JSON + jq使用）
+JSON_REPORT="\${REPORT_DIR}/zap-report.json"
 MAX_ALERTS=${params.maxAlerts}
 
-if [ "$ALERT_COUNT" -gt "$MAX_ALERTS" ]; then
+if [ ! -f "\${JSON_REPORT}" ]; then
+  echo "⚠️  JSONレポートが見つかりません: \${JSON_REPORT}"
+  ALERT_COUNT=0
+elif ! command -v jq &> /dev/null; then
+  echo "⚠️  jqコマンドが見つかりません。アラート数を0として処理します"
+  echo "   jqをインストールしてください: brew install jq"
+  ALERT_COUNT=0
+else
+  # ZAP JSONレポートから全アラートをカウント
+  ALERT_COUNT=$(jq '[.. | .alerts? | select(. != null) | .[]] | length' "\${JSON_REPORT}" 2>/dev/null || echo "0")
+
+  # 数値でない場合は0にフォールバック
+  if ! [[ "\${ALERT_COUNT}" =~ ^[0-9]+$ ]]; then
+    echo "⚠️  アラート数の解析に失敗しました。0として処理します"
+    ALERT_COUNT=0
+  fi
+fi
+
+if [ "\${ALERT_COUNT}" -gt "\${MAX_ALERTS}" ]; then
   echo "❌ アラート数が閾値を超えています: \${ALERT_COUNT} > \${MAX_ALERTS}"
   exit 1
 else
