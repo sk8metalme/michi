@@ -4,7 +4,7 @@
  */
 
 import { existsSync, writeFileSync, readFileSync, mkdirSync } from 'fs';
-import { join } from 'path';
+import { join, relative } from 'path';
 import { syncToConfluence } from './confluence-sync.js';
 import { syncTasksToJIRA } from './jira-sync.js';
 import { validatePhase } from './validate-phase.js';
@@ -925,12 +925,12 @@ async function runPhaseBPhase(feature: string): Promise<PhaseRunResult> {
     // Step 3: テスト実行ファイルを生成
     console.log('\n🤖 テスト実行ファイルを自動生成中...');
 
-    const { generateAllTestExecutions } = await import('./test-execution-generator.js');
+    const { generateTestExecution } = await import('./test-execution-generator.js');
 
-    try {
-      const results = await generateAllTestExecutions(feature);
+    for (const testType of phaseBTypes) {
+      try {
+        const result = await generateTestExecution(feature, testType);
 
-      for (const result of results) {
         if (result.success) {
           console.log(`   ✅ ${result.testType}: ${result.files.length}ファイル生成`);
           generatedFiles.push(...result.files);
@@ -938,10 +938,10 @@ async function runPhaseBPhase(feature: string): Promise<PhaseRunResult> {
           console.error(`   ❌ ${result.testType}: ${result.error}`);
           errors.push(`${result.testType}テスト生成失敗: ${result.error}`);
         }
+      } catch (error: any) {
+        errors.push(`${testType}テスト生成失敗: ${error.message}`);
+        console.error(`❌ ${testType}テスト生成失敗:`, error.message);
       }
-    } catch (error: any) {
-      errors.push(`テスト実行ファイル生成失敗: ${error.message}`);
-      console.error('❌ テスト実行ファイル生成失敗:', error.message);
     }
   }
 
@@ -950,7 +950,7 @@ async function runPhaseBPhase(feature: string): Promise<PhaseRunResult> {
   if (generatedFiles.length > 0) {
     console.log('\n📄 生成されたファイル:');
     generatedFiles.forEach(file => {
-      const relativePath = file.replace(testExecutionDir + '/', '');
+      const relativePath = relative(testExecutionDir, file);
       console.log(`   - ${relativePath}`);
     });
   }
@@ -992,12 +992,20 @@ async function runPhaseBPhase(feature: string): Promise<PhaseRunResult> {
   console.log('  4. Phase 4: リリース準備へ進む');
 
   console.log('\n' + '='.repeat(60));
-  console.log('✅ Phase B: テスト実行ファイル生成が完了しました');
-  console.log('📢 テストを実行してPhase 4に進んでください');
+  const success = errors.length === 0;
+  if (success) {
+    console.log('✅ Phase B: テスト実行ファイル生成が完了しました');
+    console.log('📢 テストを実行してPhase 4に進んでください');
+  } else {
+    console.log('⚠️  Phase B: テスト実行ファイル生成が部分的に完了しました');
+    console.log(`❌ ${errors.length}件のエラーが発生しています`);
+    errors.forEach(err => console.log(`   - ${err}`));
+    console.log('📢 エラーを修正してから再実行してください');
+  }
 
   return {
     phase: 'phase-b' as Phase,
-    success: errors.length === 0,
+    success,
     confluenceCreated: false,
     jiraCreated: false,
     validationPassed: true,

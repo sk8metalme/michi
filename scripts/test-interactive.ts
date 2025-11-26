@@ -306,11 +306,35 @@ async function collectSecurityTestParams(
 function processTemplate(templateFile: string, params: Record<string, string>): string {
   const templatePath = join(TEMPLATES_DIR, templateFile);
 
-  if (!existsSync(templatePath)) {
-    throw new Error(`テンプレートが見つかりません: ${templatePath}`);
-  }
+  let content: string;
 
-  let content = readFileSync(templatePath, 'utf-8');
+  if (!existsSync(templatePath)) {
+    console.warn(`⚠️  テンプレートが見つかりません: ${templatePath}`);
+    console.warn('   デフォルトのテンプレートを使用します');
+
+    // デフォルトテンプレート（基本的なMarkdown構造）
+    content = `# テスト計画書
+
+## プロジェクト情報
+- プロジェクト名: {{PROJECT_NAME}}
+- プロジェクトルート: {{PROJECT_ROOT}}
+
+## テスト対象
+- ベースURL: {{BASE_URL}}
+- エンドポイント: {{ENDPOINT}}
+
+## テスト手順
+1. テスト環境の準備
+2. テストケースの実行
+3. 結果の記録
+
+## 注意事項
+- このファイルは自動生成されたデフォルトテンプレートです
+- 必要に応じて内容を編集してください
+`;
+  } else {
+    content = readFileSync(templatePath, 'utf-8');
+  }
 
   // パラメータを置換
   for (const [key, value] of Object.entries(params)) {
