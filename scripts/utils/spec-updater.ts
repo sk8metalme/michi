@@ -36,6 +36,13 @@ export interface SpecJson {
     epicUrl?: string;
     storyKeys?: string[];
   };
+  environmentSetup?: {
+    completed?: boolean;
+    language?: string;
+    ciTool?: string;
+    dockerCompose?: boolean;
+    completedAt?: string;
+  };
   milestones?: {
     requirementsCompleted?: boolean;
     designCompleted?: boolean;

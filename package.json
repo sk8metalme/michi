@@ -68,6 +68,7 @@
     "test:package": "bash scripts/test-npm-package.sh",
     "config:interactive": "tsx scripts/config-interactive.ts",
     "config:validate": "tsx scripts/utils/config-validator.ts",
+    "test:interactive": "tsx scripts/test-interactive.ts",
     "test": "vitest",
     "test:run": "vitest --run",
     "test:ui": "vitest --ui",

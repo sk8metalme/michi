@@ -104,7 +104,7 @@ NPMパッケージpublish前の完全な手動検証フローガイド
    - テストディレクトリ `/tmp/michi-manual-test-<tool>` からでも実行可能
 
 3. **feature名の統一**
-   - すべての検証で `manual-test-feature` を使用
+   - すべての検証で `java-calculator-webapp` を使用
 
 ---
 
@@ -210,7 +210,7 @@ Cursor IDEを開き、AIコマンドを実行：
 ```
 
 **期待される動作:**
-- `.kiro/specs/manual-test-feature/` ディレクトリが作成される
+- `.kiro/specs/java-calculator-webapp/` ディレクトリが作成される
 - `spec.json` が初期化される
 
 #### 3.1 Phase 0.1: 要件定義（必須）
@@ -218,7 +218,7 @@ Cursor IDEを開き、AIコマンドを実行：
 **AIコマンド:**
 
 ```
-/kiro:spec-requirements manual-test-feature
+/kiro:spec-requirements java-calculator-webapp
 ```
 
 **期待される動作:**
@@ -229,14 +229,14 @@ Cursor IDEを開き、AIコマンドを実行：
 
 ```bash
 cd /tmp/michi-manual-test-cursor
-michi phase:run manual-test-feature requirements
+michi phase:run java-calculator-webapp requirements
 ```
 
 **CLIコマンド - Pattern B (Development):**
 
 ```bash
 cd /tmp/michi-manual-test-cursor
-npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature requirements
+npx tsx ~/Work/git/michi/src/cli.ts phase:run java-calculator-webapp requirements
 ```
 
 **期待される結果:**
@@ -248,7 +248,7 @@ npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature requirements
 **AIコマンド:**
 
 ```
-/kiro:spec-design manual-test-feature
+/kiro:spec-design java-calculator-webapp
 ```
 
 **期待される動作:**
@@ -259,14 +259,14 @@ npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature requirements
 
 ```bash
 cd /tmp/michi-manual-test-cursor
-michi phase:run manual-test-feature design
+michi phase:run java-calculator-webapp design
 ```
 
 **CLIコマンド - Pattern B (Development):**
 
 ```bash
 cd /tmp/michi-manual-test-cursor
-npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature design
+npx tsx ~/Work/git/michi/src/cli.ts phase:run java-calculator-webapp design
 ```
 
 **期待される結果:**
@@ -281,14 +281,14 @@ npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature design
 
 ```bash
 cd /tmp/michi-manual-test-cursor
-michi phase:run manual-test-feature test-type-selection
+michi phase:run java-calculator-webapp test-type-selection
 ```
 
 **CLIコマンド - Pattern B (Development):**
 
 ```bash
 cd /tmp/michi-manual-test-cursor
-npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature test-type-selection
+npx tsx ~/Work/git/michi/src/cli.ts phase:run java-calculator-webapp test-type-selection
 ```
 
 **期待される結果:**
@@ -303,14 +303,14 @@ npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature test-type-sele
 
 ```bash
 cd /tmp/michi-manual-test-cursor
-michi phase:run manual-test-feature test-spec
+michi phase:run java-calculator-webapp test-spec
 ```
 
 **CLIコマンド - Pattern B (Development):**
 
 ```bash
 cd /tmp/michi-manual-test-cursor
-npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature test-spec
+npx tsx ~/Work/git/michi/src/cli.ts phase:run java-calculator-webapp test-spec
 ```
 
 **期待される結果:**
@@ -322,7 +322,7 @@ npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature test-spec
 **AIコマンド:**
 
 ```
-/kiro:spec-tasks manual-test-feature
+/kiro:spec-tasks java-calculator-webapp
 ```
 
 **期待される動作:**
@@ -333,14 +333,14 @@ npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature test-spec
 
 ```bash
 cd /tmp/michi-manual-test-cursor
-michi phase:run manual-test-feature tasks
+michi phase:run java-calculator-webapp tasks
 ```
 
 **CLIコマンド - Pattern B (Development):**
 
 ```bash
 cd /tmp/michi-manual-test-cursor
-npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature tasks
+npx tsx ~/Work/git/michi/src/cli.ts phase:run java-calculator-webapp tasks
 ```
 
 **期待される結果:**
@@ -355,14 +355,14 @@ npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature tasks
 
 ```bash
 cd /tmp/michi-manual-test-cursor
-michi phase:run manual-test-feature environment-setup
+michi phase:run java-calculator-webapp environment-setup
 ```
 
 **CLIコマンド - Pattern B (Development):**
 
 ```bash
 cd /tmp/michi-manual-test-cursor
-npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature environment-setup
+npx tsx ~/Work/git/michi/src/cli.ts phase:run java-calculator-webapp environment-setup
 ```
 
 **期待される結果:**
@@ -374,7 +374,7 @@ npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature environment-se
 **AIコマンド:**
 
 ```
-/kiro:spec-impl manual-test-feature
+/kiro:spec-impl java-calculator-webapp
 ```
 
 **期待される動作:**
@@ -391,14 +391,14 @@ npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature environment-se
 
 ```bash
 cd /tmp/michi-manual-test-cursor
-michi phase:run manual-test-feature phase-a
+michi phase:run java-calculator-webapp phase-a
 ```
 
 **CLIコマンド - Pattern B (Development):**
 
 ```bash
 cd /tmp/michi-manual-test-cursor
-npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature phase-a
+npx tsx ~/Work/git/michi/src/cli.ts phase:run java-calculator-webapp phase-a
 ```
 
 **期待される結果:**
@@ -409,23 +409,39 @@ npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature phase-a
 
 **AIコマンド:** なし（このフェーズにはAIコマンドは不要）
 
+**前提条件:**
+- Phase 0.3 (test-type-selection) でテストタイプが選択済みであること
+- アプリケーションの実装が完了していること
+
 **CLIコマンド - Pattern A (NPM Package):**
 
 ```bash
 cd /tmp/michi-manual-test-cursor
-michi phase:run manual-test-feature phase-b
+michi phase:run java-calculator-webapp phase-b
 ```
 
 **CLIコマンド - Pattern B (Development):**
 
 ```bash
 cd /tmp/michi-manual-test-cursor
-npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature phase-b
+npx tsx ~/Work/git/michi/src/cli.ts phase:run java-calculator-webapp phase-b
 ```
 
 **期待される結果:**
-- リリース準備テストが実行される
-- バリデーションが成功する
+- `test-type-selection.json`から選択されたテストタイプを読み込む
+- Phase Bに該当するテスト（performance, security, integration, e2e）の実行ファイルを生成
+- `.kiro/specs/<feature>/test-execution/` 配下にテスト実行ファイルが作成される
+
+**生成されるファイル例:**
+
+| テストタイプ | 生成ファイル |
+|-------------|-------------|
+| performance | `test-execution/performance/locustfile.py`, `load-test-plan.md` |
+| security | `test-execution/security/zap-config.yaml`, `run-zap-scan.sh`, `security-test-plan.md` |
+| integration | `test-execution/integration/integration-checklist.md` |
+| e2e | `test-execution/e2e/e2e-checklist.md` |
+
+**注意:** 生成されるファイルはテンプレートとガイドです。実際のテストツール（Locust, k6, OWASP ZAP等）の選定と設定は、プロジェクトの要件に応じて行ってください。
 
 #### 3.11 Phase 4: リリース準備（任意）
 
@@ -453,11 +469,19 @@ npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature phase-b
 │       └── michi-project-switch.md (Michi)
 └── .kiro/
     └── specs/
-        └── manual-test-feature/
+        └── java-calculator-webapp/
             ├── spec.json
             ├── requirements.md (Step 3.2 AIで作成)
             ├── design.md (Step 3.3 AIで作成)
-            └── tasks.md (Step 3.4 AIで作成)
+            ├── tasks.md (Step 3.4 AIで作成)
+            ├── test-type-selection.json (Step 3.6 CLIで作成)
+            ├── test-specs/ (Step 3.7 CLIで作成)
+            │   └── *.md
+            └── test-execution/ (Step 3.10 Phase Bで作成、任意)
+                ├── performance/
+                ├── security/
+                ├── integration/
+                └── e2e/
 ```
 
 **重要な注意事項:**
@@ -512,7 +536,7 @@ ls -la /tmp/michi-manual-test-claude-code/.claude/
 # 出力例:
 # .claude/
 #   CLAUDE.md
-#   commands/
+#   commands/kiro
 #     kiro-spec-init.md
 #     kiro-spec-requirements.md
 #     ... (cc-sdd提供の10個のコマンド)
@@ -546,7 +570,7 @@ npx tsx ~/Work/git/michi/src/cli.ts setup-existing --claude --lang ja
 実行後、Michiのコマンドが追加されることを確認：
 
 ```bash
-ls -la /tmp/michi-manual-test-claude-code/.claude/commands/
+ls -la /tmp/michi-manual-test-claude-code/.claude/commands/kiro/michi
 # Michiのコマンドが追加されている:
 #   michi-confluence-sync.md
 #   michi-project-switch.md
@@ -561,11 +585,11 @@ ls -la /tmp/michi-manual-test-claude-code/.claude/commands/
 Claude Codeを起動し、スラッシュコマンドを実行：
 
 ```
-/kiro:spec-init マニュアルテスト機能
+/kiro:spec-init Java電卓webアプリ
 ```
 
 **期待される動作:**
-- `.kiro/specs/manual-test-feature/` ディレクトリが作成される
+- `.kiro/specs/java-calculator-webapp/` ディレクトリが作成される
 - `spec.json` が初期化される
 
 #### 3.1 Phase 0.1: 要件定義（必須）
@@ -573,7 +597,7 @@ Claude Codeを起動し、スラッシュコマンドを実行：
 **スラッシュコマンド:**
 
 ```
-/kiro:spec-requirements manual-test-feature
+/kiro:spec-requirements java-calculator-webapp
 ```
 
 **期待される動作:**
@@ -584,14 +608,14 @@ Claude Codeを起動し、スラッシュコマンドを実行：
 
 ```bash
 cd /tmp/michi-manual-test-claude-code
-michi phase:run manual-test-feature requirements
+michi phase:run java-calculator-webapp requirements
 ```
 
 **CLIコマンド - Pattern B (Development):**
 
 ```bash
 cd /tmp/michi-manual-test-claude-code
-npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature requirements
+npx tsx ~/Work/git/michi/src/cli.ts phase:run java-calculator-webapp requirements
 ```
 
 **期待される結果:**
@@ -603,7 +627,7 @@ npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature requirements
 **スラッシュコマンド:**
 
 ```
-/kiro:spec-design manual-test-feature
+/kiro:spec-design java-calculator-webapp
 ```
 
 **期待される動作:**
@@ -614,14 +638,14 @@ npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature requirements
 
 ```bash
 cd /tmp/michi-manual-test-claude-code
-michi phase:run manual-test-feature design
+michi phase:run java-calculator-webapp design
 ```
 
 **CLIコマンド - Pattern B (Development):**
 
 ```bash
 cd /tmp/michi-manual-test-claude-code
-npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature design
+npx tsx ~/Work/git/michi/src/cli.ts phase:run java-calculator-webapp design
 ```
 
 **期待される結果:**
@@ -636,14 +660,14 @@ npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature design
 
 ```bash
 cd /tmp/michi-manual-test-claude-code
-michi phase:run manual-test-feature test-type-selection
+michi phase:run java-calculator-webapp test-type-selection
 ```
 
 **CLIコマンド - Pattern B (Development):**
 
 ```bash
 cd /tmp/michi-manual-test-claude-code
-npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature test-type-selection
+npx tsx ~/Work/git/michi/src/cli.ts phase:run java-calculator-webapp test-type-selection
 ```
 
 **期待される結果:**
@@ -658,14 +682,14 @@ npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature test-type-sele
 
 ```bash
 cd /tmp/michi-manual-test-claude-code
-michi phase:run manual-test-feature test-spec
+michi phase:run java-calculator-webapp test-spec
 ```
 
 **CLIコマンド - Pattern B (Development):**
 
 ```bash
 cd /tmp/michi-manual-test-claude-code
-npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature test-spec
+npx tsx ~/Work/git/michi/src/cli.ts phase:run java-calculator-webapp test-spec
 ```
 
 **期待される結果:**
@@ -677,7 +701,7 @@ npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature test-spec
 **スラッシュコマンド:**
 
 ```
-/kiro:spec-tasks manual-test-feature
+/kiro:spec-tasks java-calculator-webapp
 ```
 
 **期待される動作:**
@@ -688,14 +712,14 @@ npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature test-spec
 
 ```bash
 cd /tmp/michi-manual-test-claude-code
-michi phase:run manual-test-feature tasks
+michi phase:run java-calculator-webapp tasks
 ```
 
 **CLIコマンド - Pattern B (Development):**
 
 ```bash
 cd /tmp/michi-manual-test-claude-code
-npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature tasks
+npx tsx ~/Work/git/michi/src/cli.ts phase:run java-calculator-webapp tasks
 ```
 
 **期待される結果:**
@@ -710,14 +734,14 @@ npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature tasks
 
 ```bash
 cd /tmp/michi-manual-test-claude-code
-michi phase:run manual-test-feature environment-setup
+michi phase:run java-calculator-webapp environment-setup
 ```
 
 **CLIコマンド - Pattern B (Development):**
 
 ```bash
 cd /tmp/michi-manual-test-claude-code
-npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature environment-setup
+npx tsx ~/Work/git/michi/src/cli.ts phase:run java-calculator-webapp environment-setup
 ```
 
 **期待される結果:**
@@ -729,7 +753,7 @@ npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature environment-se
 **スラッシュコマンド:**
 
 ```
-/kiro:spec-impl manual-test-feature
+/kiro:spec-impl java-calculator-webapp
 ```
 
 **期待される動作:**
@@ -746,14 +770,14 @@ npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature environment-se
 
 ```bash
 cd /tmp/michi-manual-test-claude-code
-michi phase:run manual-test-feature phase-a
+michi phase:run java-calculator-webapp phase-a
 ```
 
 **CLIコマンド - Pattern B (Development):**
 
 ```bash
 cd /tmp/michi-manual-test-claude-code
-npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature phase-a
+npx tsx ~/Work/git/michi/src/cli.ts phase:run java-calculator-webapp phase-a
 ```
 
 **期待される結果:**
@@ -768,23 +792,39 @@ npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature phase-a
 
 **スラッシュコマンド:** なし（このフェーズにはスラッシュコマンドは不要）
 
+**前提条件:**
+- Phase 0.3 (test-type-selection) でテストタイプが選択済みであること
+- アプリケーションの実装が完了していること
+
 **CLIコマンド - Pattern A (NPM Package):**
 
 ```bash
 cd /tmp/michi-manual-test-claude-code
-michi phase:run manual-test-feature phase-b
+michi phase:run java-calculator-webapp phase-b
 ```
 
 **CLIコマンド - Pattern B (Development):**
 
 ```bash
 cd /tmp/michi-manual-test-claude-code
-npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature phase-b
+npx tsx ~/Work/git/michi/src/cli.ts phase:run java-calculator-webapp phase-b
 ```
 
 **期待される結果:**
-- リリース準備テストが実行される
-- バリデーションが成功する
+- `test-type-selection.json`から選択されたテストタイプを読み込む
+- Phase Bに該当するテスト（performance, security, integration, e2e）の実行ファイルを生成
+- `.kiro/specs/<feature>/test-execution/` 配下にテスト実行ファイルが作成される
+
+**生成されるファイル例:**
+
+| テストタイプ | 生成ファイル |
+|-------------|-------------|
+| performance | `test-execution/performance/locustfile.py`, `load-test-plan.md` |
+| security | `test-execution/security/zap-config.yaml`, `run-zap-scan.sh`, `security-test-plan.md` |
+| integration | `test-execution/integration/integration-checklist.md` |
+| e2e | `test-execution/e2e/e2e-checklist.md` |
+
+**注意:** 生成されるファイルはテンプレートとガイドです。実際のテストツール（Locust, k6, OWASP ZAP等）の選定と設定は、プロジェクトの要件に応じて行ってください。
 
 #### 3.11 Phase 4: リリース準備（任意）
 
@@ -812,11 +852,19 @@ npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature phase-b
 │       └── michi-project-switch.md (Michi)
 └── .kiro/
     └── specs/
-        └── manual-test-feature/
+        └── java-calculator-webapp/
             ├── spec.json
             ├── requirements.md (Step 3.2 AIで作成)
             ├── design.md (Step 3.3 AIで作成)
-            └── tasks.md (Step 3.4 AIで作成)
+            ├── tasks.md (Step 3.4 AIで作成)
+            ├── test-type-selection.json (Step 3.6 CLIで作成)
+            ├── test-specs/ (Step 3.7 CLIで作成)
+            │   └── *.md
+            └── test-execution/ (Step 3.10 Phase Bで作成、任意)
+                ├── performance/
+                ├── security/
+                ├── integration/
+                └── e2e/
 ```
 
 **重要な注意事項:**
@@ -923,7 +971,7 @@ Claude Agent SDKを起動し、スラッシュコマンドを実行：
 ```
 
 **期待される動作:**
-- `.kiro/specs/manual-test-feature/` ディレクトリが作成される
+- `.kiro/specs/java-calculator-webapp/` ディレクトリが作成される
 - `spec.json` が初期化される
 
 #### 3.1 Phase 0.1: 要件定義（必須）
@@ -931,7 +979,7 @@ Claude Agent SDKを起動し、スラッシュコマンドを実行：
 **スラッシュコマンド:**
 
 ```
-/kiro:spec-requirements manual-test-feature
+/kiro:spec-requirements java-calculator-webapp
 ```
 
 **期待される動作:**
@@ -942,14 +990,14 @@ Claude Agent SDKを起動し、スラッシュコマンドを実行：
 
 ```bash
 cd /tmp/michi-manual-test-claude-agent
-michi phase:run manual-test-feature requirements
+michi phase:run java-calculator-webapp requirements
 ```
 
 **CLIコマンド - Pattern B (Development):**
 
 ```bash
 cd /tmp/michi-manual-test-claude-agent
-npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature requirements
+npx tsx ~/Work/git/michi/src/cli.ts phase:run java-calculator-webapp requirements
 ```
 
 **期待される結果:**
@@ -961,7 +1009,7 @@ npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature requirements
 **スラッシュコマンド:**
 
 ```
-/kiro:spec-design manual-test-feature
+/kiro:spec-design java-calculator-webapp
 ```
 
 **期待される動作:**
@@ -972,14 +1020,14 @@ npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature requirements
 
 ```bash
 cd /tmp/michi-manual-test-claude-agent
-michi phase:run manual-test-feature design
+michi phase:run java-calculator-webapp design
 ```
 
 **CLIコマンド - Pattern B (Development):**
 
 ```bash
 cd /tmp/michi-manual-test-claude-agent
-npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature design
+npx tsx ~/Work/git/michi/src/cli.ts phase:run java-calculator-webapp design
 ```
 
 **期待される結果:**
@@ -994,14 +1042,14 @@ npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature design
 
 ```bash
 cd /tmp/michi-manual-test-claude-agent
-michi phase:run manual-test-feature test-type-selection
+michi phase:run java-calculator-webapp test-type-selection
 ```
 
 **CLIコマンド - Pattern B (Development):**
 
 ```bash
 cd /tmp/michi-manual-test-claude-agent
-npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature test-type-selection
+npx tsx ~/Work/git/michi/src/cli.ts phase:run java-calculator-webapp test-type-selection
 ```
 
 **期待される結果:**
@@ -1016,14 +1064,14 @@ npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature test-type-sele
 
 ```bash
 cd /tmp/michi-manual-test-claude-agent
-michi phase:run manual-test-feature test-spec
+michi phase:run java-calculator-webapp test-spec
 ```
 
 **CLIコマンド - Pattern B (Development):**
 
 ```bash
 cd /tmp/michi-manual-test-claude-agent
-npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature test-spec
+npx tsx ~/Work/git/michi/src/cli.ts phase:run java-calculator-webapp test-spec
 ```
 
 **期待される結果:**
@@ -1035,7 +1083,7 @@ npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature test-spec
 **スラッシュコマンド:**
 
 ```
-/kiro:spec-tasks manual-test-feature
+/kiro:spec-tasks java-calculator-webapp
 ```
 
 **期待される動作:**
@@ -1046,14 +1094,14 @@ npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature test-spec
 
 ```bash
 cd /tmp/michi-manual-test-claude-agent
-michi phase:run manual-test-feature tasks
+michi phase:run java-calculator-webapp tasks
 ```
 
 **CLIコマンド - Pattern B (Development):**
 
 ```bash
 cd /tmp/michi-manual-test-claude-agent
-npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature tasks
+npx tsx ~/Work/git/michi/src/cli.ts phase:run java-calculator-webapp tasks
 ```
 
 **期待される結果:**
@@ -1068,14 +1116,14 @@ npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature tasks
 
 ```bash
 cd /tmp/michi-manual-test-claude-agent
-michi phase:run manual-test-feature environment-setup
+michi phase:run java-calculator-webapp environment-setup
 ```
 
 **CLIコマンド - Pattern B (Development):**
 
 ```bash
 cd /tmp/michi-manual-test-claude-agent
-npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature environment-setup
+npx tsx ~/Work/git/michi/src/cli.ts phase:run java-calculator-webapp environment-setup
 ```
 
 **期待される結果:**
@@ -1087,7 +1135,7 @@ npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature environment-se
 **スラッシュコマンド:**
 
 ```
-/kiro:spec-impl manual-test-feature
+/kiro:spec-impl java-calculator-webapp
 ```
 
 **期待される動作:**
@@ -1104,14 +1152,14 @@ npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature environment-se
 
 ```bash
 cd /tmp/michi-manual-test-claude-agent
-michi phase:run manual-test-feature phase-a
+michi phase:run java-calculator-webapp phase-a
 ```
 
 **CLIコマンド - Pattern B (Development):**
 
 ```bash
 cd /tmp/michi-manual-test-claude-agent
-npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature phase-a
+npx tsx ~/Work/git/michi/src/cli.ts phase:run java-calculator-webapp phase-a
 ```
 
 **期待される結果:**
@@ -1126,23 +1174,39 @@ npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature phase-a
 
 **スラッシュコマンド:** なし（このフェーズにはスラッシュコマンドは不要）
 
+**前提条件:**
+- Phase 0.3 (test-type-selection) でテストタイプが選択済みであること
+- アプリケーションの実装が完了していること
+
 **CLIコマンド - Pattern A (NPM Package):**
 
 ```bash
 cd /tmp/michi-manual-test-claude-agent
-michi phase:run manual-test-feature phase-b
+michi phase:run java-calculator-webapp phase-b
 ```
 
 **CLIコマンド - Pattern B (Development):**
 
 ```bash
 cd /tmp/michi-manual-test-claude-agent
-npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature phase-b
+npx tsx ~/Work/git/michi/src/cli.ts phase:run java-calculator-webapp phase-b
 ```
 
 **期待される結果:**
-- リリース準備テストが実行される
-- バリデーションが成功する
+- `test-type-selection.json`から選択されたテストタイプを読み込む
+- Phase Bに該当するテスト（performance, security, integration, e2e）の実行ファイルを生成
+- `.kiro/specs/<feature>/test-execution/` 配下にテスト実行ファイルが作成される
+
+**生成されるファイル例:**
+
+| テストタイプ | 生成ファイル |
+|-------------|-------------|
+| performance | `test-execution/performance/locustfile.py`, `load-test-plan.md` |
+| security | `test-execution/security/zap-config.yaml`, `run-zap-scan.sh`, `security-test-plan.md` |
+| integration | `test-execution/integration/integration-checklist.md` |
+| e2e | `test-execution/e2e/e2e-checklist.md` |
+
+**注意:** 生成されるファイルはテンプレートとガイドです。実際のテストツール（Locust, k6, OWASP ZAP等）の選定と設定は、プロジェクトの要件に応じて行ってください。
 
 #### 3.11 Phase 4: リリース準備（任意）
 
@@ -1247,7 +1311,7 @@ Clineを起動し、スラッシュコマンドを実行：
 ```
 
 **期待される動作:**
-- `.kiro/specs/manual-test-feature/` ディレクトリが作成される
+- `.kiro/specs/java-calculator-webapp/` ディレクトリが作成される
 - `spec.json` が初期化される
 
 #### 3.1 Phase 0.1: 要件定義（必須）
@@ -1255,7 +1319,7 @@ Clineを起動し、スラッシュコマンドを実行：
 **スラッシュコマンド:**
 
 ```
-/kiro:spec-requirements manual-test-feature
+/kiro:spec-requirements java-calculator-webapp
 ```
 
 **期待される動作:**
@@ -1266,14 +1330,14 @@ Clineを起動し、スラッシュコマンドを実行：
 
 ```bash
 cd /tmp/michi-manual-test-cline
-michi phase:run manual-test-feature requirements
+michi phase:run java-calculator-webapp requirements
 ```
 
 **CLIコマンド - Pattern B (Development):**
 
 ```bash
 cd /tmp/michi-manual-test-cline
-npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature requirements
+npx tsx ~/Work/git/michi/src/cli.ts phase:run java-calculator-webapp requirements
 ```
 
 **期待される結果:**
@@ -1285,7 +1349,7 @@ npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature requirements
 **スラッシュコマンド:**
 
 ```
-/kiro:spec-design manual-test-feature
+/kiro:spec-design java-calculator-webapp
 ```
 
 **期待される動作:**
@@ -1296,14 +1360,14 @@ npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature requirements
 
 ```bash
 cd /tmp/michi-manual-test-cline
-michi phase:run manual-test-feature design
+michi phase:run java-calculator-webapp design
 ```
 
 **CLIコマンド - Pattern B (Development):**
 
 ```bash
 cd /tmp/michi-manual-test-cline
-npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature design
+npx tsx ~/Work/git/michi/src/cli.ts phase:run java-calculator-webapp design
 ```
 
 **期待される結果:**
@@ -1318,14 +1382,14 @@ npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature design
 
 ```bash
 cd /tmp/michi-manual-test-cline
-michi phase:run manual-test-feature test-type-selection
+michi phase:run java-calculator-webapp test-type-selection
 ```
 
 **CLIコマンド - Pattern B (Development):**
 
 ```bash
 cd /tmp/michi-manual-test-cline
-npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature test-type-selection
+npx tsx ~/Work/git/michi/src/cli.ts phase:run java-calculator-webapp test-type-selection
 ```
 
 **期待される結果:**
@@ -1340,14 +1404,14 @@ npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature test-type-sele
 
 ```bash
 cd /tmp/michi-manual-test-cline
-michi phase:run manual-test-feature test-spec
+michi phase:run java-calculator-webapp test-spec
 ```
 
 **CLIコマンド - Pattern B (Development):**
 
 ```bash
 cd /tmp/michi-manual-test-cline
-npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature test-spec
+npx tsx ~/Work/git/michi/src/cli.ts phase:run java-calculator-webapp test-spec
 ```
 
 **期待される結果:**
@@ -1359,7 +1423,7 @@ npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature test-spec
 **スラッシュコマンド:**
 
 ```
-/kiro:spec-tasks manual-test-feature
+/kiro:spec-tasks java-calculator-webapp
 ```
 
 **期待される動作:**
@@ -1370,14 +1434,14 @@ npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature test-spec
 
 ```bash
 cd /tmp/michi-manual-test-cline
-michi phase:run manual-test-feature tasks
+michi phase:run java-calculator-webapp tasks
 ```
 
 **CLIコマンド - Pattern B (Development):**
 
 ```bash
 cd /tmp/michi-manual-test-cline
-npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature tasks
+npx tsx ~/Work/git/michi/src/cli.ts phase:run java-calculator-webapp tasks
 ```
 
 **期待される結果:**
@@ -1392,14 +1456,14 @@ npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature tasks
 
 ```bash
 cd /tmp/michi-manual-test-cline
-michi phase:run manual-test-feature environment-setup
+michi phase:run java-calculator-webapp environment-setup
 ```
 
 **CLIコマンド - Pattern B (Development):**
 
 ```bash
 cd /tmp/michi-manual-test-cline
-npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature environment-setup
+npx tsx ~/Work/git/michi/src/cli.ts phase:run java-calculator-webapp environment-setup
 ```
 
 **期待される結果:**
@@ -1411,7 +1475,7 @@ npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature environment-se
 **スラッシュコマンド:**
 
 ```
-/kiro:spec-impl manual-test-feature
+/kiro:spec-impl java-calculator-webapp
 ```
 
 **期待される動作:**
@@ -1428,14 +1492,14 @@ npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature environment-se
 
 ```bash
 cd /tmp/michi-manual-test-cline
-michi phase:run manual-test-feature phase-a
+michi phase:run java-calculator-webapp phase-a
 ```
 
 **CLIコマンド - Pattern B (Development):**
 
 ```bash
 cd /tmp/michi-manual-test-cline
-npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature phase-a
+npx tsx ~/Work/git/michi/src/cli.ts phase:run java-calculator-webapp phase-a
 ```
 
 **期待される結果:**
@@ -1450,23 +1514,39 @@ npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature phase-a
 
 **スラッシュコマンド:** なし（このフェーズにはスラッシュコマンドは不要）
 
+**前提条件:**
+- Phase 0.3 (test-type-selection) でテストタイプが選択済みであること
+- アプリケーションの実装が完了していること
+
 **CLIコマンド - Pattern A (NPM Package):**
 
 ```bash
 cd /tmp/michi-manual-test-cline
-michi phase:run manual-test-feature phase-b
+michi phase:run java-calculator-webapp phase-b
 ```
 
 **CLIコマンド - Pattern B (Development):**
 
 ```bash
 cd /tmp/michi-manual-test-cline
-npx tsx ~/Work/git/michi/src/cli.ts phase:run manual-test-feature phase-b
+npx tsx ~/Work/git/michi/src/cli.ts phase:run java-calculator-webapp phase-b
 ```
 
 **期待される結果:**
-- リリース準備テストが実行される
-- バリデーションが成功する
+- `test-type-selection.json`から選択されたテストタイプを読み込む
+- Phase Bに該当するテスト（performance, security, integration, e2e）の実行ファイルを生成
+- `.kiro/specs/<feature>/test-execution/` 配下にテスト実行ファイルが作成される
+
+**生成されるファイル例:**
+
+| テストタイプ | 生成ファイル |
+|-------------|-------------|
+| performance | `test-execution/performance/locustfile.py`, `load-test-plan.md` |
+| security | `test-execution/security/zap-config.yaml`, `run-zap-scan.sh`, `security-test-plan.md` |
+| integration | `test-execution/integration/integration-checklist.md` |
+| e2e | `test-execution/e2e/e2e-checklist.md` |
+
+**注意:** 生成されるファイルはテンプレートとガイドです。実際のテストツール（Locust, k6, OWASP ZAP等）の選定と設定は、プロジェクトの要件に応じて行ってください。
 
 #### 3.11 Phase 4: リリース準備（任意）
 
@@ -1621,16 +1701,16 @@ michi setup-existing --cursor --lang ja
 
 **症状:**
 ```
-Error: Feature 'manual-test-feature' not found
+Error: Feature 'java-calculator-webapp' not found
 ```
 
 **原因:**
-`.kiro/specs/manual-test-feature/` ディレクトリまたは `spec.json` が存在しない
+`.kiro/specs/java-calculator-webapp/` ディレクトリまたは `spec.json` が存在しない
 
 **解決方法:**
 1. AIコマンドで初期化されているか確認
    ```bash
-   ls -la .kiro/specs/manual-test-feature/spec.json
+   ls -la .kiro/specs/java-calculator-webapp/spec.json
    ```
 2. 存在しない場合は、AIコマンド `/kiro:spec-init` を再実行
 
@@ -1647,11 +1727,11 @@ Error: Validation failed for phase test-type-selection
 **解決方法:**
 1. 該当フェーズの出力ファイルを確認
    ```bash
-   cat .kiro/specs/manual-test-feature/test-types.md
+   cat .kiro/specs/java-calculator-webapp/test-types.md
    ```
 2. ファイルが空または不正な場合は、フェーズを再実行
    ```bash
-   michi phase:run manual-test-feature test-type-selection
+   michi phase:run java-calculator-webapp test-type-selection
    ```
 
 ### 問題5: 絶対パスコマンドが動作しない（Pattern B）
@@ -1667,10 +1747,10 @@ Error: Cannot find module '~/Work/git/michi/src/cli.ts'
 **解決方法:**
 ```bash
 # チルダの代わりに $HOME を使用
-npx tsx $HOME/Work/git/michi/src/cli.ts phase:run manual-test-feature test-type-selection
+npx tsx $HOME/Work/git/michi/src/cli.ts phase:run java-calculator-webapp test-type-selection
 
 # または完全な絶対パスを使用
-npx tsx /Users/yourusername/Work/git/michi/src/cli.ts phase:run manual-test-feature test-type-selection
+npx tsx /Users/yourusername/Work/git/michi/src/cli.ts phase:run java-calculator-webapp test-type-selection
 ```
 
 ### 問題6: 自動テストスクリプトが途中で失敗する
@@ -1728,6 +1808,199 @@ publish前に以下をすべて確認してください：
 - [ ] CHANGELOG.mdが更新されている
 - [ ] すべてのコミットがプッシュされている
 - [ ] GitHubでCIが成功している
+
+---
+
+---
+
+## Part 3: Phase Bテストの対話的作成フロー
+
+このセクションでは、AIとの対話を通じて手動回帰テスト、負荷テスト、セキュリティテストを作成する方法を説明します。
+
+### 3.1 対話フロー概要
+
+```
+[開始] ユーザーがテスト作成を依頼
+    ↓
+[ヒアリング] AIが必須項目を確認
+    - テスト対象（エンドポイント、機能）
+    - テストタイプ（手動回帰/負荷/セキュリティ）
+    - 成功基準（応答時間、エラー率など）
+    ↓
+[テンプレート選択] AIが適切なテンプレートを参照
+    ↓
+[生成] AIがテストを作成
+    ↓
+[レビュー] ユーザーがレビュー
+    ↓
+[修正] 必要に応じて修正
+    ↓
+[完了] テスト成果物の確定
+```
+
+### 3.2 手動回帰テストの作成
+
+#### 初期ヒアリング
+
+AIに手動回帰テストの作成を依頼する際、以下の情報を提供してください：
+
+| 項目 | 説明 | 例 |
+|------|------|-----|
+| テスト対象エンドポイント | APIのURL | `/api/calculator/evaluate` |
+| HTTPメソッド | GET, POST, PUT, DELETE | `POST` |
+| リクエストボディ形式 | JSON, XML, Form | `JSON` |
+| 期待するHTTPステータス | 成功/エラー時 | `200 OK`, `400 Bad Request` |
+| 期待するレスポンス形式 | レスポンスの構造 | `{"result": number}` |
+
+#### サンプルプロンプト
+
+```
+Calculator APIの手動回帰テストを作成してください。
+
+テスト対象:
+- エンドポイント: POST /api/calculator/evaluate
+- リクエストボディ: {"expression": "計算式"}
+- 期待レスポンス: {"result": 計算結果} または {"error": "エラーメッセージ"}
+
+テストケースの種類:
+- 正常系: 基本的な四則演算、優先順位、小数点計算
+- 異常系: ゼロ除算、構文エラー、空の式
+- セキュリティ: SQLインジェクション風入力、長大入力
+```
+
+#### 生成されるファイル
+
+- `docs/testing/manual-regression-guide.md`
+- または `tests/manual/regression-tests.md`
+
+### 3.3 負荷テストの作成
+
+#### 初期ヒアリング
+
+AIに負荷テストの作成を依頼する際、以下の情報を提供してください：
+
+| 項目 | 説明 | 例 |
+|------|------|-----|
+| テスト対象URL | APIのベースURL | `http://localhost:8080` |
+| 同時ユーザー数 | 最大同時接続数 | `100` |
+| Spawn rate | ユーザー増加率 | `10/秒` |
+| テスト時間 | 実行時間 | `60秒` |
+| 目標スループット | 1秒あたりのリクエスト数 | `100 req/s` |
+| 目標応答時間 | 平均応答時間 | `< 100ms` |
+
+#### サンプルプロンプト
+
+```
+Calculator APIの負荷テストをLocustで作成してください。
+
+テスト対象:
+- URL: http://localhost:8080
+- エンドポイント: POST /api/calculator/evaluate
+
+テスト要件:
+- 同時ユーザー数: 100
+- Spawn rate: 10ユーザー/秒
+- テスト時間: 60秒
+
+成功基準:
+- 平均応答時間: < 100ms
+- 95パーセンタイル: < 200ms
+- エラー率: < 1%
+- スループット: > 100 req/s
+
+シナリオ:
+- 基本的な計算（重み5）
+- 複雑な計算（重み3）
+- 小数点計算（重み2）
+```
+
+#### 生成されるファイル
+
+- `tests/load/locustfile.py`
+- `tests/load/requirements.txt`
+- `tests/load/README.md`
+
+### 3.4 セキュリティテストの作成
+
+#### 初期ヒアリング
+
+AIにセキュリティテストの作成を依頼する際、以下の情報を提供してください：
+
+| 項目 | 説明 | 例 |
+|------|------|-----|
+| テスト対象URL | APIのベースURL | `http://localhost:8080` |
+| スキャンタイプ | Baseline/Quick/Full | `Quick` |
+| 認証の有無 | 認証が必要か | `なし` |
+| 検出対象 | 重点的に検出したい脆弱性 | `SQLインジェクション, XSS` |
+
+#### サンプルプロンプト
+
+```
+Calculator APIのセキュリティテストをOWASP ZAPで作成してください。
+
+テスト対象:
+- URL: http://localhost:8080
+- エンドポイント: /api/calculator/evaluate
+- 認証: なし
+
+スキャン要件:
+- スキャンタイプ: Quick（API向け）
+- 実行環境: Docker
+
+検出対象:
+- SQLインジェクション
+- XSS（クロスサイトスクリプティング）
+- コマンドインジェクション
+- 情報漏洩
+
+レポート形式:
+- HTML（ブラウザ閲覧用）
+- JSON（CI/CD連携用）
+```
+
+#### 生成されるファイル
+
+- `tests/security/zap-config.yaml`
+- `tests/security/run-zap-scan.sh`
+- `tests/security/README.md`
+
+### 3.5 テスト修正の依頼方法
+
+生成されたテストを修正する場合、以下のようにAIに依頼します：
+
+#### 修正依頼の例
+
+```
+# テストケースの追加
+負荷テストに以下のシナリオを追加してください：
+- ランダムな数式を生成するテスト（重み1）
+- エラーハンドリングのテスト（重み1）
+
+# パラメータの変更
+同時ユーザー数を100から500に変更してください。
+
+# 成功基準の変更
+95パーセンタイルの目標を200msから150msに変更してください。
+
+# ツールの変更
+負荷テストをLocustからk6に変更してください。
+```
+
+### 3.6 対話的作成のベストプラクティス
+
+1. **段階的に作成**: まず基本的なテストを生成し、レビュー後に追加・修正
+2. **具体的な数値を提供**: 「高負荷」ではなく「同時100ユーザー」のように具体的に
+3. **成功基準を明確に**: 何をもって成功とするか事前に定義
+4. **既存テストを参照**: 既存のテストファイルがあれば、それを元に拡張
+5. **テンプレートを活用**: AIにテンプレートを参照させることで一貫性を確保
+
+### 3.7 使用ツール一覧
+
+| テストタイプ | 推奨ツール | 代替ツール |
+|-------------|-----------|-----------|
+| 手動回帰テスト | curl + Markdown | Postman, Insomnia |
+| 負荷テスト | Locust | k6, JMeter, Artillery |
+| セキュリティテスト | OWASP ZAP | Burp Suite, Nikto |
 
 ---
 

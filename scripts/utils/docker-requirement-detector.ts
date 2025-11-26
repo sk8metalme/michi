@@ -110,7 +110,7 @@ export function analyzeDockerRequirement(feature: string, projectRoot: string = 
         score += 1;
         reasons.push('パフォーマンステストが選択されている（負荷テストにデータベースが有用）');
       }
-    } catch (error) {
+    } catch {
       // test-type-selection.jsonの読み込みエラーは無視
     }
   }
