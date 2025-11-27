@@ -7,8 +7,11 @@ This directory contains templates for Claude Agent configuration.
 ```
 claude-agent/
 ├── README.md
-├── subagents/       # Subagent definitions
-│   └── .gitkeep
+├── agents/          # Subagent definitions
+│   ├── manager-agent.md
+│   ├── developer.md
+│   ├── designer.md
+│   └── tester.md
 └── commands/        # Kiro commands
     └── kiro/
 ```
