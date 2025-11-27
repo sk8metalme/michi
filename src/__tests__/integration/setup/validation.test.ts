@@ -84,9 +84,7 @@ describe('Setup Argument Validation', () => {
       const { existsSync } = await import('fs');
       const { join } = await import('path');
 
-      expect(existsSync(join(testProject.path, '.claude/subagents'))).toBe(
-        true,
-      );
+      expect(existsSync(join(testProject.path, '.claude/agents'))).toBe(true);
     });
   });
 

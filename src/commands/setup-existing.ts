@@ -424,8 +424,9 @@ export async function setupExisting(options: SetupOptions): Promise<void> {
     console.log(`   ⚠️  Template source not found: ${templateSourceDir}`);
   } else {
     // rulesディレクトリ（環境別にテンプレートディレクトリ名が異なる）
-    // cursor/claude: 'rules', claude-agent: 'subagents'
-    const templateDirName = config.environment === 'claude-agent' ? 'subagents' : 'rules';
+    // cursor/claude: 'rules', claude-agent: 'agents'
+    const templateDirName =
+      config.environment === 'claude-agent' ? 'agents' : 'rules';
     const rulesTemplateDir = join(templateSourceDir, templateDirName);
     const rulesDestDir = join(currentDir, envConfig.rulesDir);
 
@@ -515,6 +516,42 @@ export async function setupExisting(options: SetupOptions): Promise<void> {
     }
   } else {
     console.log('   ⚠️  Spec rules not found (skipped)');
+  }
+
+  // kiro-spec-tasksテンプレートを上書き（cc-sddのAI-DLC形式をMichiワークフロー形式に置換）
+  console.log('\n📋 Step 5.1: Overriding kiro-spec-tasks template...');
+  const kiroSpecTasksSource = join(
+    templatesDir,
+    envConfig.templateSource,
+    'commands',
+    'kiro',
+    'kiro-spec-tasks.md',
+  );
+  const kiroSpecTasksDest = join(currentDir, '.kiro', 'commands', 'kiro');
+
+  if (existsSync(kiroSpecTasksSource)) {
+    try {
+      mkdirSync(kiroSpecTasksDest, { recursive: true });
+      cpSync(
+        kiroSpecTasksSource,
+        join(kiroSpecTasksDest, 'kiro-spec-tasks.md'),
+      );
+      console.log(
+        '   ✅ kiro-spec-tasks.md overridden with Michi workflow format',
+      );
+      console.log(
+        '      (This ensures /kiro:spec-tasks generates Phase-based tasks.md)',
+      );
+    } catch (error) {
+      throw new Error(
+        `Failed to copy kiro-spec-tasks template: ${error instanceof Error ? error.message : error}`,
+      );
+    }
+  } else {
+    console.log(
+      `   ⚠️  kiro-spec-tasks template not found: ${kiroSpecTasksSource}`,
+    );
+    console.log('      (cc-sdd default template will be used)');
   }
 
   // .env 対話的設定
@@ -709,7 +746,9 @@ JIRA_ISSUE_TYPE_SUBTASK=10037
   case 'cursor':
     console.log('  3. Cursor で開く: cursor .');
     console.log('  4. Cursorを起動したら ~/.cursor/mcp.json の設定を確認');
-    console.log('     MCP設定の詳細: https://github.com/sk8metalme/michi/issues');
+    console.log(
+      '     MCP設定の詳細: https://github.com/sk8metalme/michi/issues',
+    );
     console.log('     （環境別MCP設定の対話的セットアップ機能は開発中）');
     console.log('  5. /kiro:spec-init <機能説明> で開発開始');
     break;
@@ -722,7 +761,7 @@ JIRA_ISSUE_TYPE_SUBTASK=10037
 
   case 'claude-agent':
     console.log('  3. Claude Code で開く');
-    console.log('  4. .claude/subagents/ のサブエージェントを確認');
+    console.log('  4. .claude/agents/ のサブエージェントを確認');
     console.log('  5. サブエージェントを活用して開発開始');
     break;
 
@@ -736,7 +775,9 @@ JIRA_ISSUE_TYPE_SUBTASK=10037
   case 'codex':
     console.log('  3. Codex CLI で開く');
     console.log('  4. .codex/docs/README.md の制限事項を確認');
-    console.log('  5. Codex CLI は設定ファイル中心のため、Michiとの統合は限定的');
+    console.log(
+      '  5. Codex CLI は設定ファイル中心のため、Michiとの統合は限定的',
+    );
     console.log('     （他の環境の使用を推奨）');
     break;
 

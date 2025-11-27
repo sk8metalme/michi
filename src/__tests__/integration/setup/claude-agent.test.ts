@@ -1,5 +1,5 @@
 /**
- * Integration tests for Claude Agent (Subagents) environment setup
+ * Integration tests for Claude Agent environment setup
  */
 
 import { describe, it, beforeEach, afterEach, vi } from 'vitest';
@@ -10,7 +10,7 @@ import {
   assertDirectoryExists,
   assertFileExists,
   assertDirectoryStructure,
-  assertFileContains
+  assertFileContains,
 } from './helpers/fs-assertions.js';
 
 // Mock readline to auto-confirm prompts
@@ -39,22 +39,22 @@ describe('Claude Agent Environment Setup', () => {
   });
 
   describe('Basic Setup', () => {
-    it('should create .claude/subagents directory', async () => {
+    it('should create .claude/agents directory', async () => {
       await setupExisting({
         claudeAgent: true,
         projectName: 'Test Project',
-        jiraKey: 'TEST'
+        jiraKey: 'TEST',
       });
 
       assertDirectoryExists(join(testProject.path, '.claude'));
-      assertDirectoryExists(join(testProject.path, '.claude/subagents'));
+      assertDirectoryExists(join(testProject.path, '.claude/agents'));
     });
 
     it('should create .kiro directory structure', async () => {
       await setupExisting({
         claudeAgent: true,
         projectName: 'Test Project',
-        jiraKey: 'TEST'
+        jiraKey: 'TEST',
       });
 
       assertDirectoryStructure(testProject.path, {
@@ -70,7 +70,7 @@ describe('Claude Agent Environment Setup', () => {
       await setupExisting({
         claudeAgent: true,
         projectName: 'Agent Test',
-        jiraKey: 'AGNT'
+        jiraKey: 'AGNT',
       });
 
       const projectJsonPath = join(testProject.path, '.kiro/project.json');
@@ -84,7 +84,7 @@ describe('Claude Agent Environment Setup', () => {
       await setupExisting({
         claudeAgent: true,
         projectName: 'Test Project',
-        jiraKey: 'TEST'
+        jiraKey: 'TEST',
       });
 
       const envPath = join(testProject.path, '.env');
@@ -94,27 +94,27 @@ describe('Claude Agent Environment Setup', () => {
   });
 
   describe('Claude Agent-specific Structure', () => {
-    it('should have subagents directory structure', async () => {
+    it('should have agents directory structure', async () => {
       await setupExisting({
         claudeAgent: true,
         projectName: 'Test Project',
-        jiraKey: 'TEST'
+        jiraKey: 'TEST',
       });
 
-      const subagentsDir = join(testProject.path, '.claude/subagents');
-      assertDirectoryExists(subagentsDir);
+      const agentsDir = join(testProject.path, '.claude/agents');
+      assertDirectoryExists(agentsDir);
     });
 
     it('should not create Cursor-specific directories', async () => {
       await setupExisting({
         claudeAgent: true,
         projectName: 'Test Project',
-        jiraKey: 'TEST'
+        jiraKey: 'TEST',
       });
 
       const { existsSync } = await import('fs');
       const cursorDir = join(testProject.path, '.cursor');
-      
+
       // .cursor directory should not exist for Claude Agent setup
       expect(existsSync(cursorDir)).toBe(false);
     });
@@ -123,13 +123,13 @@ describe('Claude Agent Environment Setup', () => {
       await setupExisting({
         claudeAgent: true,
         projectName: 'Test Project',
-        jiraKey: 'TEST'
+        jiraKey: 'TEST',
       });
 
       const { existsSync } = await import('fs');
       const claudeRulesDir = join(testProject.path, '.claude/rules');
-      
-      // Basic .claude/rules should not exist for subagents setup
+
+      // Basic .claude/rules should not exist for agents setup
       expect(existsSync(claudeRulesDir)).toBe(false);
     });
   });
@@ -140,7 +140,7 @@ describe('Claude Agent Environment Setup', () => {
         claudeAgent: true,
         lang: 'zh-TW',
         projectName: 'Test Project',
-        jiraKey: 'TEST'
+        jiraKey: 'TEST',
       });
 
       const projectJson = join(testProject.path, '.kiro/project.json');
@@ -148,4 +148,3 @@ describe('Claude Agent Environment Setup', () => {
     });
   });
 });
-

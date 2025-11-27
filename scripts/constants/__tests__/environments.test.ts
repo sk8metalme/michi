@@ -5,7 +5,7 @@ import {
   isSupportedEnvironment,
   getSupportedEnvironments,
   type Environment,
-  type EnvironmentConfig
+  type EnvironmentConfig,
 } from '../environments.js';
 
 describe('environments', () => {
@@ -28,7 +28,7 @@ describe('environments', () => {
 
     it('should have correct structure for claude-agent', () => {
       const config = ENV_CONFIG['claude-agent'];
-      expect(config.rulesDir).toBe('.claude/subagents');
+      expect(config.rulesDir).toBe('.claude/agents');
       expect(config.commandsDir).toBe('.claude/commands/kiro');
       expect(config.templateSource).toBe('claude-agent');
     });
@@ -81,7 +81,14 @@ describe('environments', () => {
     });
 
     it('should return config for all supported environments', () => {
-      const environments: Environment[] = ['claude', 'claude-agent', 'cursor', 'gemini', 'codex', 'cline'];
+      const environments: Environment[] = [
+        'claude',
+        'claude-agent',
+        'cursor',
+        'gemini',
+        'codex',
+        'cline',
+      ];
       for (const env of environments) {
         const config = getEnvironmentConfig(env);
         expect(config).toBeDefined();
@@ -131,10 +138,9 @@ describe('environments', () => {
     it('should return array with correct type', () => {
       const environments = getSupportedEnvironments();
       expect(Array.isArray(environments)).toBe(true);
-      environments.forEach(env => {
+      environments.forEach((env) => {
         expect(isSupportedEnvironment(env)).toBe(true);
       });
     });
   });
 });
-

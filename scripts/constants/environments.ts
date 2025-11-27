@@ -1,6 +1,6 @@
 /**
  * Environment configuration mapping for cc-sdd environments
- * 
+ *
  * Issue #37: 環境別コピー実装
  */
 
@@ -10,44 +10,50 @@ export interface EnvironmentConfig {
   templateSource: string;
 }
 
-export type Environment = 'claude' | 'claude-agent' | 'cursor' | 'gemini' | 'codex' | 'cline';
+export type Environment =
+  | 'claude'
+  | 'claude-agent'
+  | 'cursor'
+  | 'gemini'
+  | 'codex'
+  | 'cline';
 
 export const ENV_CONFIG: Record<Environment, EnvironmentConfig> = {
-  'claude': {
+  claude: {
     rulesDir: '.claude/rules',
     commandsDir: '.claude/commands/kiro',
-    templateSource: 'claude'
+    templateSource: 'claude',
   },
   'claude-agent': {
-    rulesDir: '.claude/subagents',
+    rulesDir: '.claude/agents',
     commandsDir: '.claude/commands/kiro',
-    templateSource: 'claude-agent'
+    templateSource: 'claude-agent',
   },
-  'cursor': {
+  cursor: {
     rulesDir: '.cursor/rules',
     commandsDir: '.cursor/commands/kiro',
-    templateSource: 'cursor'
+    templateSource: 'cursor',
   },
-  'gemini': {
+  gemini: {
     rulesDir: '.gemini',
     commandsDir: '.gemini/extensions',
-    templateSource: 'gemini'
+    templateSource: 'gemini',
   },
-  'codex': {
+  codex: {
     rulesDir: '.codex/docs',
     commandsDir: '.codex/docs',
-    templateSource: 'codex'
+    templateSource: 'codex',
   },
-  'cline': {
+  cline: {
     rulesDir: '.clinerules/rules',
     commandsDir: '.clinerules/commands',
-    templateSource: 'cline'
-  }
+    templateSource: 'cline',
+  },
 };
 
 /**
  * Get environment configuration
- * 
+ *
  * @param env - Environment name
  * @returns Environment configuration
  */
@@ -57,7 +63,7 @@ export const getEnvironmentConfig = (env: Environment): EnvironmentConfig => {
 
 /**
  * Validate if an environment is supported
- * 
+ *
  * @param env - Environment name to validate
  * @returns True if supported, false otherwise
  */
@@ -67,10 +73,9 @@ export const isSupportedEnvironment = (env: string): env is Environment => {
 
 /**
  * Get all supported environments
- * 
+ *
  * @returns Array of supported environment names
  */
 export const getSupportedEnvironments = (): Environment[] => {
   return Object.keys(ENV_CONFIG) as Environment[];
 };
-

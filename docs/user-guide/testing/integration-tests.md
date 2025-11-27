@@ -44,7 +44,7 @@ src/__tests__/integration/setup/
 
 #### Claude Agent環境 (`claude-agent.test.ts`)
 
-- ✅ `.claude/subagents/` ディレクトリ作成
+- ✅ `.claude/agents/` ディレクトリ作成
 - ✅ `.kiro/` ディレクトリ構造作成
 - ✅ `project.json` 作成
 - ✅ `.env` テンプレート作成
@@ -68,11 +68,13 @@ src/__tests__/integration/setup/
 #### プロジェクト名バリデーション
 
 **正常系:**
+
 - ✅ 有効なプロジェクト名
 - ✅ 日本語文字を含むプロジェクト名
 - ✅ 前後の空白はトリム
 
 **異常系:**
+
 - ❌ 空文字列
 - ❌ パストラバーサル文字 (`/`, `\`, `..`)
 - ❌ 制御文字
@@ -81,10 +83,12 @@ src/__tests__/integration/setup/
 #### JIRAキーバリデーション
 
 **正常系:**
+
 - ✅ 2-10文字の大文字英字
 - ✅ 小文字は自動的に大文字に変換
 
 **異常系:**
+
 - ❌ 1文字以下
 - ❌ 11文字以上
 - ❌ 数字を含む
@@ -131,14 +135,17 @@ npm run test:ui
 GitHub Actionsワークフローが `.github/workflows/test-setup.yml` に定義されています。
 
 **実行タイミング:**
+
 - `main`, `develop`, `feature/**` ブランチへのプッシュ
 - `main`, `develop` ブランチへのプルリクエスト
 
 **マトリクス戦略:**
+
 - Node.js 18.x
 - Node.js 20.x
 
 **ステップ:**
+
 1. コードチェックアウト
 2. Node.js セットアップ
 3. 依存関係インストール
@@ -157,6 +164,7 @@ GitHub Actionsワークフローが `.github/workflows/test-setup.yml` に定義
 **原因:** 一時ディレクトリの権限問題
 
 **解決策:**
+
 ```bash
 # 一時ディレクトリの権限を確認
 ls -la /tmp
@@ -172,6 +180,7 @@ rm -rf /tmp/test-project-*
 **原因:** Gitがインストールされていない
 
 **解決策:**
+
 ```bash
 # Gitインストール確認
 git --version
@@ -190,6 +199,7 @@ sudo apt-get install git
 **原因:** 型定義の不一致
 
 **解決策:**
+
 ```bash
 # 型チェック
 npm run type-check
@@ -204,12 +214,14 @@ npm install
 **目標:** 95%以上のカバレッジ
 
 **確認方法:**
+
 ```bash
 npm run test:coverage:setup
 open coverage/lcov-report/index.html
 ```
 
 **改善策:**
+
 1. 未テストのエッジケースを追加
 2. エラーハンドリングのテストを追加
 3. モックが不十分な箇所を特定
@@ -221,6 +233,7 @@ open coverage/lcov-report/index.html
 **原因1:** ローカルとCI環境の違い
 
 **解決策:**
+
 ```bash
 # ローカルでCI環境を再現
 docker run -it -v $(pwd):/app node:20 bash
@@ -232,10 +245,11 @@ npm run test:integration:setup
 **原因2:** タイムアウト
 
 **解決策:** `.github/workflows/test-setup.yml` でタイムアウトを延長
+
 ```yaml
 - name: Run integration tests
   run: npm run test:integration:setup
-  timeout-minutes: 10  # デフォルト: 360分
+  timeout-minutes: 10 # デフォルト: 360分
 ```
 
 ## ベストプラクティス
@@ -252,23 +266,25 @@ npm run test:integration:setup
    - `beforeEach`, `afterEach` でクリーンアップ
 
 3. **意味のあるテスト名**
+
    ```typescript
    // ❌ Bad
-   it('test 1', () => {});
-   
+   it("test 1", () => {});
+
    // ✅ Good
-   it('should create .cursor/rules directory', () => {});
+   it("should create .cursor/rules directory", () => {});
    ```
 
 4. **アサーションは明確に**
+
    ```typescript
    // ❌ Bad
    expect(result).toBe(true);
-   
+
    // ✅ Good
    assertDirectoryExists(
-     join(testProject.path, '.cursor/rules'),
-     'Expected .cursor/rules directory to exist'
+     join(testProject.path, ".cursor/rules"),
+     "Expected .cursor/rules directory to exist",
    );
    ```
 
@@ -294,4 +310,3 @@ npm run test:integration:setup
 - [Vitest公式ドキュメント](https://vitest.dev/)
 - [テスト戦略](../testing-strategy.md)
 - [開発ガイド](../contributing/development.md)
-

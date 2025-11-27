@@ -7,7 +7,7 @@
 import { Command } from 'commander';
 import { fileURLToPath } from 'url';
 import { realpathSync } from 'fs';
-import { syncTasksToJIRA } from '../scripts/jira-sync.js';
+import { syncTasksToJIRA, JIRAClient } from '../scripts/jira-sync.js';
 import { syncToConfluence } from '../scripts/confluence-sync.js';
 import { runPhase } from '../scripts/phase-runner.js';
 import { validatePhase } from '../scripts/validate-phase.js';
@@ -18,6 +18,8 @@ import { WorkflowOrchestrator } from '../scripts/workflow-orchestrator.js';
 import { configInteractive } from '../scripts/config-interactive.js';
 import { validateAndReport } from '../scripts/utils/config-validator.js';
 import { setupExisting } from './commands/setup-existing.js';
+import { convertTasksFile } from '../scripts/utils/tasks-converter.js';
+import { isAIDLCFormat } from '../scripts/utils/aidlc-parser.js';
 import { config } from 'dotenv';
 import { readFileSync, existsSync } from 'fs';
 import { dirname, join } from 'path';
@@ -76,7 +78,10 @@ function getApprovalGates(envVar: string, defaultValue: string[]): string[] {
     return defaultValue;
   }
   // カンマ区切りを配列に変換し、空白をトリム
-  return envValue.split(',').map(role => role.trim()).filter(role => role.length > 0);
+  return envValue
+    .split(',')
+    .map((role) => role.trim())
+    .filter((role) => role.length > 0);
 }
 
 /**
@@ -87,7 +92,9 @@ export function createCLI(): Command {
 
   program
     .name('michi')
-    .description('🛣️  Michi(道) - Managed Intelligent Comprehensive Hub for Integration')
+    .description(
+      '🛣️  Michi(道) - Managed Intelligent Comprehensive Hub for Integration',
+    )
     .version(michiVersion);
 
   // jira:sync コマンド
@@ -99,7 +106,10 @@ export function createCLI(): Command {
       try {
         await syncTasksToJIRA(feature);
       } catch (error) {
-        console.error('❌ JIRA sync failed:', error instanceof Error ? error.message : error);
+        console.error(
+          '❌ JIRA sync failed:',
+          error instanceof Error ? error.message : error,
+        );
         process.exit(1);
       }
     });
@@ -112,9 +122,15 @@ export function createCLI(): Command {
     .argument('[type]', 'Document type (requirements, design)', 'requirements')
     .action(async (feature: string, type?: string) => {
       try {
-        await syncToConfluence(feature, type as 'requirements' | 'design' | 'tasks' | undefined);
+        await syncToConfluence(
+          feature,
+          type as 'requirements' | 'design' | 'tasks' | undefined,
+        );
       } catch (error) {
-        console.error('❌ Confluence sync failed:', error instanceof Error ? error.message : error);
+        console.error(
+          '❌ Confluence sync failed:',
+          error instanceof Error ? error.message : error,
+        );
         process.exit(1);
       }
     });
@@ -124,7 +140,10 @@ export function createCLI(): Command {
     .command('phase:run')
     .description('Run complete phase workflow')
     .argument('<feature>', 'Feature name')
-    .argument('<phase>', 'Phase name (requirements, design, test-type-selection, test-spec, tasks, environment-setup, phase-a, phase-b)')
+    .argument(
+      '<phase>',
+      'Phase name (requirements, design, test-type-selection, test-spec, tasks, environment-setup, phase-a, phase-b)',
+    )
     .action(async (feature: string, phase: string) => {
       const validPhases = [
         'requirements',
@@ -134,7 +153,7 @@ export function createCLI(): Command {
         'tasks',
         'environment-setup',
         'phase-a',
-        'phase-b'
+        'phase-b',
       ];
       if (!validPhases.includes(phase)) {
         console.error(`❌ Invalid phase. Must be: ${validPhases.join(', ')}`);
@@ -142,7 +161,18 @@ export function createCLI(): Command {
       }
 
       try {
-        const result = await runPhase(feature, phase as 'requirements' | 'design' | 'test-type-selection' | 'test-spec' | 'tasks' | 'environment-setup' | 'phase-a' | 'phase-b');
+        const result = await runPhase(
+          feature,
+          phase as
+            | 'requirements'
+            | 'design'
+            | 'test-type-selection'
+            | 'test-spec'
+            | 'tasks'
+            | 'environment-setup'
+            | 'phase-a'
+            | 'phase-b',
+        );
         if (result.success) {
           console.log('\n✅ Phase completed');
         } else {
@@ -150,7 +180,10 @@ export function createCLI(): Command {
           process.exit(1);
         }
       } catch (error) {
-        console.error('❌ Phase execution failed:', error instanceof Error ? error.message : error);
+        console.error(
+          '❌ Phase execution failed:',
+          error instanceof Error ? error.message : error,
+        );
         process.exit(1);
       }
     });
@@ -160,7 +193,10 @@ export function createCLI(): Command {
     .command('validate:phase')
     .description('Validate phase completion')
     .argument('<feature>', 'Feature name')
-    .argument('<phase>', 'Phase name (requirements, design, test-type-selection, test-spec, tasks, environment-setup, phase-a, phase-b)')
+    .argument(
+      '<phase>',
+      'Phase name (requirements, design, test-type-selection, test-spec, tasks, environment-setup, phase-a, phase-b)',
+    )
     .action(async (feature: string, phase: string) => {
       const validPhases = [
         'requirements',
@@ -170,7 +206,7 @@ export function createCLI(): Command {
         'tasks',
         'environment-setup',
         'phase-a',
-        'phase-b'
+        'phase-b',
       ];
       if (!validPhases.includes(phase)) {
         console.error(`❌ Invalid phase. Must be: ${validPhases.join(', ')}`);
@@ -178,10 +214,24 @@ export function createCLI(): Command {
       }
 
       try {
-        const result = validatePhase(feature, phase as 'requirements' | 'design' | 'test-type-selection' | 'test-spec' | 'tasks' | 'environment-setup' | 'phase-a' | 'phase-b');
+        const result = validatePhase(
+          feature,
+          phase as
+            | 'requirements'
+            | 'design'
+            | 'test-type-selection'
+            | 'test-spec'
+            | 'tasks'
+            | 'environment-setup'
+            | 'phase-a'
+            | 'phase-b',
+        );
         process.exit(result.valid ? 0 : 1);
       } catch (error) {
-        console.error('❌ Validation failed:', error instanceof Error ? error.message : error);
+        console.error(
+          '❌ Validation failed:',
+          error instanceof Error ? error.message : error,
+        );
         process.exit(1);
       }
     });
@@ -199,10 +249,15 @@ export function createCLI(): Command {
       }
 
       try {
-        const result = await runPreFlightCheck(phase as 'confluence' | 'jira' | 'all');
+        const result = await runPreFlightCheck(
+          phase as 'confluence' | 'jira' | 'all',
+        );
         process.exit(result.valid ? 0 : 1);
       } catch (error) {
-        console.error('❌ Pre-flight check failed:', error instanceof Error ? error.message : error);
+        console.error(
+          '❌ Pre-flight check failed:',
+          error instanceof Error ? error.message : error,
+        );
         process.exit(1);
       }
     });
@@ -215,7 +270,10 @@ export function createCLI(): Command {
       try {
         await listProjects();
       } catch (error) {
-        console.error('❌ Failed to list projects:', error instanceof Error ? error.message : error);
+        console.error(
+          '❌ Failed to list projects:',
+          error instanceof Error ? error.message : error,
+        );
         process.exit(1);
       }
     });
@@ -228,7 +286,10 @@ export function createCLI(): Command {
       try {
         await createResourceDashboard();
       } catch (error) {
-        console.error('❌ Failed to create dashboard:', error instanceof Error ? error.message : error);
+        console.error(
+          '❌ Failed to create dashboard:',
+          error instanceof Error ? error.message : error,
+        );
         process.exit(1);
       }
     });
@@ -242,18 +303,44 @@ export function createCLI(): Command {
       try {
         const workflowConfig = {
           feature: options.feature,
-          stages: ['requirements', 'design', 'tasks', 'implement', 'test', 'release'] as ('requirements' | 'design' | 'tasks' | 'implement' | 'test' | 'release')[],
+          stages: [
+            'requirements',
+            'design',
+            'tasks',
+            'implement',
+            'test',
+            'release',
+          ] as (
+            | 'requirements'
+            | 'design'
+            | 'tasks'
+            | 'implement'
+            | 'test'
+            | 'release'
+          )[],
           approvalGates: {
-            requirements: getApprovalGates('APPROVAL_GATES_REQUIREMENTS', ['pm', 'director']),
-            design: getApprovalGates('APPROVAL_GATES_DESIGN', ['architect', 'director']),
-            release: getApprovalGates('APPROVAL_GATES_RELEASE', ['sm', 'director'])
-          }
+            requirements: getApprovalGates('APPROVAL_GATES_REQUIREMENTS', [
+              'pm',
+              'director',
+            ]),
+            design: getApprovalGates('APPROVAL_GATES_DESIGN', [
+              'architect',
+              'director',
+            ]),
+            release: getApprovalGates('APPROVAL_GATES_RELEASE', [
+              'sm',
+              'director',
+            ]),
+          },
         };
 
         const orchestrator = new WorkflowOrchestrator(workflowConfig);
         await orchestrator.run();
       } catch (error) {
-        console.error('❌ Workflow failed:', error instanceof Error ? error.message : error);
+        console.error(
+          '❌ Workflow failed:',
+          error instanceof Error ? error.message : error,
+        );
         process.exit(1);
       }
     });
@@ -267,7 +354,10 @@ export function createCLI(): Command {
       try {
         await configInteractive();
       } catch (error) {
-        console.error('❌ Configuration setup failed:', error instanceof Error ? error.message : error);
+        console.error(
+          '❌ Configuration setup failed:',
+          error instanceof Error ? error.message : error,
+        );
         process.exit(1);
       }
     });
@@ -281,7 +371,10 @@ export function createCLI(): Command {
         const valid = validateAndReport();
         process.exit(valid ? 0 : 1);
       } catch (error) {
-        console.error('❌ Validation failed:', error instanceof Error ? error.message : error);
+        console.error(
+          '❌ Validation failed:',
+          error instanceof Error ? error.message : error,
+        );
         process.exit(1);
       }
     });
@@ -303,7 +396,171 @@ export function createCLI(): Command {
       try {
         await setupExisting(options);
       } catch (error) {
-        console.error('❌ Setup failed:', error instanceof Error ? error.message : error);
+        console.error(
+          '❌ Setup failed:',
+          error instanceof Error ? error.message : error,
+        );
+        process.exit(1);
+      }
+    });
+
+  // tasks:convert コマンド
+  program
+    .command('tasks:convert')
+    .description('Convert AI-DLC format tasks.md to Michi workflow format')
+    .argument('<feature>', 'Feature name')
+    .option('--dry-run', 'Preview conversion without modifying files')
+    .option('--backup', 'Create backup of original file')
+    .option('--lang <code>', 'Output language (ja/en)', 'ja')
+    .action(
+      async (
+        feature: string,
+        options: { dryRun?: boolean; backup?: boolean; lang?: string },
+      ) => {
+        try {
+          const kiroDir = '.kiro';
+          const tasksPath = join(kiroDir, 'specs', feature, 'tasks.md');
+
+          if (!existsSync(tasksPath)) {
+            console.error(`❌ tasks.md not found: ${tasksPath}`);
+            process.exit(1);
+          }
+
+          // AI-DLC形式かチェック
+          const content = readFileSync(tasksPath, 'utf-8');
+          if (!isAIDLCFormat(content)) {
+            console.log(
+              'ℹ️  File is not in AI-DLC format (may already be in Michi format)',
+            );
+            console.log('   No conversion needed.');
+            process.exit(0);
+          }
+
+          console.log(
+            '🔄 Converting AI-DLC format to Michi workflow format...',
+          );
+          console.log(`   Input: ${tasksPath}`);
+
+          const result = convertTasksFile(tasksPath, undefined, {
+            dryRun: options.dryRun,
+            backup: options.backup,
+            language: (options.lang || 'ja') as 'ja' | 'en',
+            projectName: feature,
+          });
+
+          if (!result.success) {
+            console.error('❌ Conversion failed:');
+            result.warnings.forEach((w) => console.error(`   ${w}`));
+            process.exit(1);
+          }
+
+          console.log('');
+          console.log('📊 Conversion Statistics:');
+          console.log(
+            `   Original categories: ${result.stats.originalCategories}`,
+          );
+          console.log(`   Original tasks: ${result.stats.originalTasks}`);
+          console.log(`   Converted phases: ${result.stats.convertedPhases}`);
+          console.log(`   Converted stories: ${result.stats.convertedStories}`);
+
+          if (result.backupPath) {
+            console.log(`   Backup created: ${result.backupPath}`);
+          }
+
+          if (result.warnings.length > 0) {
+            console.log('');
+            console.log('⚠️  Warnings:');
+            result.warnings.forEach((w) => console.log(`   ${w}`));
+          }
+
+          if (options.dryRun) {
+            console.log('');
+            console.log('📝 Preview (first 50 lines):');
+            console.log('---');
+            const previewLines = result.convertedContent
+              .split('\n')
+              .slice(0, 50);
+            console.log(previewLines.join('\n'));
+            if (result.convertedContent.split('\n').length > 50) {
+              console.log('... (truncated)');
+            }
+            console.log('---');
+          } else {
+            console.log('');
+            console.log('✅ Conversion completed!');
+            console.log(`   Output: ${tasksPath}`);
+          }
+        } catch (error) {
+          console.error(
+            '❌ Conversion failed:',
+            error instanceof Error ? error.message : error,
+          );
+          process.exit(1);
+        }
+      },
+    );
+
+  // jira:transition コマンド
+  program
+    .command('jira:transition')
+    .description('Change JIRA ticket status')
+    .argument('<issueKey>', 'JIRA issue key (e.g., PROJ-123)')
+    .argument(
+      '<status>',
+      'Target status name (e.g., "In Progress", "Ready for Review")',
+    )
+    .action(async (issueKey: string, status: string) => {
+      try {
+        const url = process.env.ATLASSIAN_URL;
+        const email = process.env.ATLASSIAN_EMAIL;
+        const apiToken = process.env.ATLASSIAN_API_TOKEN;
+
+        if (!url || !email || !apiToken) {
+          console.error('❌ Missing JIRA credentials in .env');
+          console.error(
+            '   Required: ATLASSIAN_URL, ATLASSIAN_EMAIL, ATLASSIAN_API_TOKEN',
+          );
+          process.exit(1);
+        }
+
+        const client = new JIRAClient({ url, email, apiToken });
+        await client.transitionIssue(issueKey, status);
+      } catch (error) {
+        console.error(
+          '❌ JIRA transition failed:',
+          error instanceof Error ? error.message : error,
+        );
+        process.exit(1);
+      }
+    });
+
+  // jira:comment コマンド
+  program
+    .command('jira:comment')
+    .description('Add comment to JIRA ticket')
+    .argument('<issueKey>', 'JIRA issue key (e.g., PROJ-123)')
+    .argument('<comment>', 'Comment text')
+    .action(async (issueKey: string, comment: string) => {
+      try {
+        const url = process.env.ATLASSIAN_URL;
+        const email = process.env.ATLASSIAN_EMAIL;
+        const apiToken = process.env.ATLASSIAN_API_TOKEN;
+
+        if (!url || !email || !apiToken) {
+          console.error('❌ Missing JIRA credentials in .env');
+          console.error(
+            '   Required: ATLASSIAN_URL, ATLASSIAN_EMAIL, ATLASSIAN_API_TOKEN',
+          );
+          process.exit(1);
+        }
+
+        const client = new JIRAClient({ url, email, apiToken });
+        await client.addComment(issueKey, comment);
+      } catch (error) {
+        console.error(
+          '❌ JIRA comment failed:',
+          error instanceof Error ? error.message : error,
+        );
         process.exit(1);
       }
     });
@@ -329,4 +586,3 @@ if (process.argv[1]) {
     }
   }
 }
-
