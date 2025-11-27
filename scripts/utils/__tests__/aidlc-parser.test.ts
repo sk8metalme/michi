@@ -2,25 +2,25 @@
  * aidlc-parser.ts のユニットテスト
  */
 
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { writeFileSync, unlinkSync, mkdirSync, rmdirSync } from "fs";
-import { join } from "path";
-import { tmpdir } from "os";
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { writeFileSync, unlinkSync, mkdirSync, rmdirSync } from 'fs';
+import { join } from 'path';
+import { tmpdir } from 'os';
 import {
   isAIDLCFormat,
   parseAIDLCFormat,
   parseAIDLCFile,
   getAIDLCStats,
-} from "../aidlc-parser.js";
+} from '../aidlc-parser.js';
 
-describe("aidlc-parser", () => {
+describe('aidlc-parser', () => {
   let testDir: string;
   let testFilePath: string;
 
   beforeEach(() => {
     testDir = join(tmpdir(), `test-aidlc-parser-${Date.now()}`);
     mkdirSync(testDir, { recursive: true });
-    testFilePath = join(testDir, "tasks.md");
+    testFilePath = join(testDir, 'tasks.md');
   });
 
   afterEach(() => {
@@ -32,8 +32,8 @@ describe("aidlc-parser", () => {
     }
   });
 
-  describe("isAIDLCFormat", () => {
-    it("AI-DLC形式を正しく検出する", () => {
+  describe('isAIDLCFormat', () => {
+    it('AI-DLC形式を正しく検出する', () => {
       const content = `# Implementation Tasks
 
 ## 1. セットアップ
@@ -49,7 +49,7 @@ describe("aidlc-parser", () => {
       expect(isAIDLCFormat(content)).toBe(true);
     });
 
-    it("完了済みタスクを含むAI-DLC形式を検出する", () => {
+    it('完了済みタスクを含むAI-DLC形式を検出する', () => {
       const content = `# Tasks
 
 ## 1. Setup
@@ -60,7 +60,7 @@ describe("aidlc-parser", () => {
       expect(isAIDLCFormat(content)).toBe(true);
     });
 
-    it("Michiワークフロー形式を正しく拒否する（Phase 0:）", () => {
+    it('Michiワークフロー形式を正しく拒否する（Phase 0:）', () => {
       const content = `# tasks.md
 
 ## Phase 0: 要件定義
@@ -72,7 +72,7 @@ describe("aidlc-parser", () => {
       expect(isAIDLCFormat(content)).toBe(false);
     });
 
-    it("Michiワークフロー形式を正しく拒否する（Phase 0.1:）", () => {
+    it('Michiワークフロー形式を正しく拒否する（Phase 0.1:）', () => {
       const content = `# tasks.md
 
 ## Phase 0.1: 要件定義
@@ -84,7 +84,7 @@ describe("aidlc-parser", () => {
       expect(isAIDLCFormat(content)).toBe(false);
     });
 
-    it("Michiワークフロー形式を正しく拒否する（Phase 2:）", () => {
+    it('Michiワークフロー形式を正しく拒否する（Phase 2:）', () => {
       const content = `# tasks.md
 
 ## Phase 2: TDD実装
@@ -96,7 +96,7 @@ describe("aidlc-parser", () => {
       expect(isAIDLCFormat(content)).toBe(false);
     });
 
-    it("Story構造のみを含む場合を拒否する", () => {
+    it('Story構造のみを含む場合を拒否する', () => {
       const content = `# tasks.md
 
 ### Story 1.1: 要件定義書作成
@@ -106,7 +106,7 @@ describe("aidlc-parser", () => {
       expect(isAIDLCFormat(content)).toBe(false);
     });
 
-    it("AI-DLCパターンがない場合を拒否する", () => {
+    it('AI-DLCパターンがない場合を拒否する', () => {
       const content = `# Implementation Tasks
 
 ## 1. セットアップ
@@ -117,13 +117,13 @@ describe("aidlc-parser", () => {
       expect(isAIDLCFormat(content)).toBe(false);
     });
 
-    it("空のコンテンツを拒否する", () => {
-      expect(isAIDLCFormat("")).toBe(false);
+    it('空のコンテンツを拒否する', () => {
+      expect(isAIDLCFormat('')).toBe(false);
     });
   });
 
-  describe("parseAIDLCFormat", () => {
-    it("タイトルを正しく抽出する", () => {
+  describe('parseAIDLCFormat', () => {
+    it('タイトルを正しく抽出する', () => {
       const content = `# Implementation Tasks: Feature X
 
 ## 1. Setup
@@ -131,10 +131,10 @@ describe("aidlc-parser", () => {
 - [ ] 1.1 Task one
 `;
       const doc = parseAIDLCFormat(content);
-      expect(doc.title).toBe("Implementation Tasks: Feature X");
+      expect(doc.title).toBe('Implementation Tasks: Feature X');
     });
 
-    it("カテゴリを正しくパースする", () => {
+    it('カテゴリを正しくパースする', () => {
       const content = `# Tasks
 
 ## 1. セットアップ
@@ -147,13 +147,13 @@ describe("aidlc-parser", () => {
 `;
       const doc = parseAIDLCFormat(content);
       expect(doc.categories.length).toBe(2);
-      expect(doc.categories[0].id).toBe("1");
-      expect(doc.categories[0].title).toBe("セットアップ");
-      expect(doc.categories[1].id).toBe("2");
-      expect(doc.categories[1].title).toBe("実装");
+      expect(doc.categories[0].id).toBe('1');
+      expect(doc.categories[0].title).toBe('セットアップ');
+      expect(doc.categories[1].id).toBe('2');
+      expect(doc.categories[1].title).toBe('実装');
     });
 
-    it("タスクを正しくパースする", () => {
+    it('タスクを正しくパースする', () => {
       const content = `# Tasks
 
 ## 1. Setup
@@ -166,16 +166,16 @@ describe("aidlc-parser", () => {
       expect(doc.categories[0].tasks.length).toBe(3);
 
       const task1 = doc.categories[0].tasks[0];
-      expect(task1.id).toBe("1.1");
-      expect(task1.title).toBe("Initialize project");
+      expect(task1.id).toBe('1.1');
+      expect(task1.title).toBe('Initialize project');
       expect(task1.completed).toBe(false);
 
       const task3 = doc.categories[0].tasks[2];
-      expect(task3.id).toBe("1.3");
+      expect(task3.id).toBe('1.3');
       expect(task3.completed).toBe(true);
     });
 
-    it("タスクの詳細行を正しくパースする", () => {
+    it('タスクの詳細行を正しくパースする', () => {
       const content = `# Tasks
 
 ## 1. Setup
@@ -188,12 +188,12 @@ describe("aidlc-parser", () => {
       const doc = parseAIDLCFormat(content);
       const task = doc.categories[0].tasks[0];
       expect(task.description.length).toBe(3);
-      expect(task.description[0]).toBe("Create package.json");
-      expect(task.description[1]).toBe("Set up TypeScript");
-      expect(task.description[2]).toBe("Configure ESLint");
+      expect(task.description[0]).toBe('Create package.json');
+      expect(task.description[1]).toBe('Set up TypeScript');
+      expect(task.description[2]).toBe('Configure ESLint');
     });
 
-    it("Requirementsタグを正しく抽出する", () => {
+    it('Requirementsタグを正しく抽出する', () => {
       const content = `# Tasks
 
 ## 1. Setup
@@ -205,11 +205,11 @@ describe("aidlc-parser", () => {
       const doc = parseAIDLCFormat(content);
       const task = doc.categories[0].tasks[0];
       expect(task.requirements.length).toBe(2);
-      expect(task.requirements).toContain("REQ-001");
-      expect(task.requirements).toContain("REQ-002");
+      expect(task.requirements).toContain('REQ-001');
+      expect(task.requirements).toContain('REQ-002');
     });
 
-    it("日本語の要件タグを正しく抽出する", () => {
+    it('日本語の要件タグを正しく抽出する', () => {
       const content = `# Tasks
 
 ## 1. セットアップ
@@ -221,10 +221,10 @@ describe("aidlc-parser", () => {
       const doc = parseAIDLCFormat(content);
       const task = doc.categories[0].tasks[0];
       expect(task.requirements.length).toBe(2);
-      expect(task.requirements).toContain("R-001");
+      expect(task.requirements).toContain('R-001');
     });
 
-    it("(P)並列実行マーカーを正しく検出する", () => {
+    it('(P)並列実行マーカーを正しく検出する', () => {
       const content = `# Tasks
 
 ## 1. Setup
@@ -237,7 +237,7 @@ describe("aidlc-parser", () => {
       expect(doc.categories[0].tasks[1].isParallel).toBe(false);
     });
 
-    it("*並列実行マーカーを正しく検出する", () => {
+    it('*並列実行マーカーを正しく検出する', () => {
       const content = `# Tasks
 
 ## 1. Setup
@@ -250,7 +250,7 @@ describe("aidlc-parser", () => {
       expect(doc.categories[0].tasks[1].isParallel).toBe(false);
     });
 
-    it("サマリーセクションをスキップする", () => {
+    it('サマリーセクションをスキップする', () => {
       const content = `# Tasks
 
 ## 1. Setup
@@ -268,48 +268,48 @@ describe("aidlc-parser", () => {
       expect(doc.categories[0].tasks.length).toBe(1);
     });
 
-    it("rawContentを保持する", () => {
-      const content = "# Tasks\n\n- [ ] 1.1 Task";
+    it('rawContentを保持する', () => {
+      const content = '# Tasks\n\n- [ ] 1.1 Task';
       const doc = parseAIDLCFormat(content);
       expect(doc.rawContent).toBe(content);
     });
   });
 
-  describe("parseAIDLCFile", () => {
-    it("ファイルを正しくパースする", () => {
+  describe('parseAIDLCFile', () => {
+    it('ファイルを正しくパースする', () => {
       const content = `# Implementation Tasks
 
 ## 1. Setup
 
 - [ ] 1.1 Initialize
 `;
-      writeFileSync(testFilePath, content, "utf-8");
+      writeFileSync(testFilePath, content, 'utf-8');
       const doc = parseAIDLCFile(testFilePath);
-      expect(doc.title).toBe("Implementation Tasks");
+      expect(doc.title).toBe('Implementation Tasks');
       expect(doc.categories.length).toBe(1);
     });
 
-    it("AI-DLC形式でないファイルはエラーをスローする", () => {
+    it('AI-DLC形式でないファイルはエラーをスローする', () => {
       const content = `# tasks.md
 
 ## Phase 0: 要件定義
 
 ### Story 0.1: タスク
 `;
-      writeFileSync(testFilePath, content, "utf-8");
+      writeFileSync(testFilePath, content, 'utf-8');
       expect(() => parseAIDLCFile(testFilePath)).toThrow(
         /not in AI-DLC format/,
       );
     });
 
-    it("存在しないファイルはエラーをスローする", () => {
-      const nonExistentPath = join(testDir, "non-existent.md");
+    it('存在しないファイルはエラーをスローする', () => {
+      const nonExistentPath = join(testDir, 'non-existent.md');
       expect(() => parseAIDLCFile(nonExistentPath)).toThrow();
     });
   });
 
-  describe("getAIDLCStats", () => {
-    it("統計情報を正しく計算する", () => {
+  describe('getAIDLCStats', () => {
+    it('統計情報を正しく計算する', () => {
       const content = `# Tasks
 
 ## 1. Setup
@@ -335,8 +335,8 @@ describe("aidlc-parser", () => {
       expect(stats.tasksWithRequirements).toBe(2);
     });
 
-    it("空のドキュメントで0を返す", () => {
-      const doc = parseAIDLCFormat("# Empty");
+    it('空のドキュメントで0を返す', () => {
+      const doc = parseAIDLCFormat('# Empty');
       const stats = getAIDLCStats(doc);
 
       expect(stats.totalCategories).toBe(0);

@@ -17,18 +17,18 @@
  * 参考: https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/#api-rest-api-3-issue-post
  */
 
-import { readFileSync } from "fs";
-import { resolve } from "path";
-import axios from "axios";
-import { config } from "dotenv";
-import { loadProjectMeta } from "./utils/project-meta.js";
-import { validateFeatureNameOrThrow } from "./utils/feature-name-validator.js";
-import { getConfig, getConfigPath } from "./utils/config-loader.js";
-import { validateForJiraSyncAsync } from "./utils/config-validator.js";
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
+import axios from 'axios';
+import { config } from 'dotenv';
+import { loadProjectMeta } from './utils/project-meta.js';
+import { validateFeatureNameOrThrow } from './utils/feature-name-validator.js';
+import { getConfig, getConfigPath } from './utils/config-loader.js';
+import { validateForJiraSyncAsync } from './utils/config-validator.js';
 import {
   updateSpecJsonAfterJiraSync,
   type SpecJson,
-} from "./utils/spec-updater.js";
+} from './utils/spec-updater.js';
 
 config();
 
@@ -44,7 +44,7 @@ function sleep(ms: number): Promise<void> {
  * 環境変数 ATLASSIAN_REQUEST_DELAY で調整可能（デフォルト: 500ms）
  */
 function getRequestDelay(): number {
-  return parseInt(process.env.ATLASSIAN_REQUEST_DELAY || "500", 10);
+  return parseInt(process.env.ATLASSIAN_REQUEST_DELAY || '500', 10);
 }
 
 /**
@@ -60,7 +60,7 @@ interface ADFNode {
 
 interface ADFDocument {
   version: number;
-  type: "doc";
+  type: 'doc';
   content: ADFNode[];
 }
 
@@ -136,10 +136,10 @@ function extractStoryDetails(
   const details: StoryDetails = { title: storyTitle };
 
   // Story セクションを抽出（ReDoS対策: [\s\S]*? → [^]*? に変更）
-  const escapedTitle = storyTitle.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const escapedTitle = storyTitle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const storyPattern = new RegExp(
     `### Story [\\d.]+: ${escapedTitle}\\n([^]*?)(?=\\n### Story|\\n## Phase|$)`,
-    "i",
+    'i',
   );
   const storyMatch = tasksContent.match(storyPattern);
 
@@ -177,9 +177,9 @@ function extractStoryDetails(
   );
   if (criteriaMatch) {
     details.acceptanceCriteria = criteriaMatch[1]
-      .split("\n")
-      .filter((line) => line.trim().startsWith("- ["))
-      .map((line) => line.replace(/^- \[.\]\s*/, "").trim())
+      .split('\n')
+      .filter((line) => line.trim().startsWith('- ['))
+      .map((line) => line.replace(/^- \[.\]\s*/, '').trim())
       .filter((line) => line.length > 0);
   }
 
@@ -189,9 +189,9 @@ function extractStoryDetails(
   );
   if (subtasksMatch) {
     details.subtasks = subtasksMatch[1]
-      .split("\n")
-      .filter((line) => line.trim().startsWith("- ["))
-      .map((line) => line.replace(/^- \[.\]\s*/, "").trim())
+      .split('\n')
+      .filter((line) => line.trim().startsWith('- ['))
+      .map((line) => line.replace(/^- \[.\]\s*/, '').trim())
       .filter((line) => line.length > 0);
   }
 
@@ -215,13 +215,13 @@ function createRichADF(
   // 説明セクション
   if (details.description) {
     content.push({
-      type: "heading",
+      type: 'heading',
       attrs: { level: 2 },
-      content: [{ type: "text", text: "説明" }],
+      content: [{ type: 'text', text: '説明' }],
     });
     content.push({
-      type: "paragraph",
-      content: [{ type: "text", text: details.description }],
+      type: 'paragraph',
+      content: [{ type: 'text', text: details.description }],
     });
   }
 
@@ -234,14 +234,14 @@ function createRichADF(
 
   if (metadata.length > 0) {
     content.push({
-      type: "heading",
+      type: 'heading',
       attrs: { level: 2 },
-      content: [{ type: "text", text: "メタデータ" }],
+      content: [{ type: 'text', text: 'メタデータ' }],
     });
     metadata.forEach((item) => {
       content.push({
-        type: "paragraph",
-        content: [{ type: "text", text: item }],
+        type: 'paragraph',
+        content: [{ type: 'text', text: item }],
       });
     });
   }
@@ -249,23 +249,23 @@ function createRichADF(
   // 完了条件セクション
   if (details.acceptanceCriteria && details.acceptanceCriteria.length > 0) {
     content.push({
-      type: "heading",
+      type: 'heading',
       attrs: { level: 2 },
-      content: [{ type: "text", text: "完了条件" }],
+      content: [{ type: 'text', text: '完了条件' }],
     });
 
     const listItems = details.acceptanceCriteria.map((criterion) => ({
-      type: "listItem",
+      type: 'listItem',
       content: [
         {
-          type: "paragraph",
-          content: [{ type: "text", text: criterion }],
+          type: 'paragraph',
+          content: [{ type: 'text', text: criterion }],
         },
       ],
     }));
 
     content.push({
-      type: "bulletList",
+      type: 'bulletList',
       content: listItems,
     });
   }
@@ -273,48 +273,48 @@ function createRichADF(
   // サブタスクセクション
   if (details.subtasks && details.subtasks.length > 0) {
     content.push({
-      type: "heading",
+      type: 'heading',
       attrs: { level: 2 },
-      content: [{ type: "text", text: "サブタスク" }],
+      content: [{ type: 'text', text: 'サブタスク' }],
     });
 
     const listItems = details.subtasks.map((subtask) => ({
-      type: "listItem",
+      type: 'listItem',
       content: [
         {
-          type: "paragraph",
-          content: [{ type: "text", text: subtask }],
+          type: 'paragraph',
+          content: [{ type: 'text', text: subtask }],
         },
       ],
     }));
 
     content.push({
-      type: "bulletList",
+      type: 'bulletList',
       content: listItems,
     });
   }
 
   // フッター（Phase、GitHubリンク）
   content.push({
-    type: "rule",
+    type: 'rule',
   });
   content.push({
-    type: "paragraph",
+    type: 'paragraph',
     content: [
-      { type: "text", text: "Phase: ", marks: [{ type: "strong" }] },
-      { type: "text", text: phaseLabel },
+      { type: 'text', text: 'Phase: ', marks: [{ type: 'strong' }] },
+      { type: 'text', text: phaseLabel },
     ],
   });
   content.push({
-    type: "paragraph",
+    type: 'paragraph',
     content: [
-      { type: "text", text: "GitHub: ", marks: [{ type: "strong" }] },
+      { type: 'text', text: 'GitHub: ', marks: [{ type: 'strong' }] },
       {
-        type: "text",
+        type: 'text',
         text: githubUrl,
         marks: [
           {
-            type: "link",
+            type: 'link',
             attrs: { href: githubUrl },
           },
         ],
@@ -323,7 +323,7 @@ function createRichADF(
   });
 
   return {
-    type: "doc",
+    type: 'doc',
     version: 1,
     content: content,
   };
@@ -334,16 +334,16 @@ function createRichADF(
  */
 function textToADF(text: string): ADFDocument {
   // 改行で分割して段落を作成
-  const paragraphs = text.split("\n").filter((line) => line.trim().length > 0);
+  const paragraphs = text.split('\n').filter((line) => line.trim().length > 0);
 
   return {
-    type: "doc",
+    type: 'doc',
     version: 1,
     content: paragraphs.map((para) => ({
-      type: "paragraph",
+      type: 'paragraph',
       content: [
         {
-          type: "text",
+          type: 'text',
           text: para.trim(),
         },
       ],
@@ -363,7 +363,7 @@ function getJIRAConfig(): JIRAConfig {
   const apiToken = process.env.ATLASSIAN_API_TOKEN;
 
   if (!url || !email || !apiToken) {
-    throw new Error("Missing JIRA credentials in .env");
+    throw new Error('Missing JIRA credentials in .env');
   }
 
   return { url, email, apiToken };
@@ -377,7 +377,7 @@ class JIRAClient {
   constructor(config: JIRAConfig) {
     this.baseUrl = `${config.url}/rest/api/3`;
     this.auth = Buffer.from(`${config.email}:${config.apiToken}`).toString(
-      "base64",
+      'base64',
     );
     this.requestDelay = getRequestDelay();
   }
@@ -397,11 +397,11 @@ class JIRAClient {
         params: {
           jql,
           maxResults: 100,
-          fields: "summary,issuetype,status,key",
+          fields: 'summary,issuetype,status,key',
         },
         headers: {
           Authorization: `Basic ${this.auth}`,
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
       });
       return response.data.issues || [];
@@ -410,32 +410,32 @@ class JIRAClient {
       if (axios.isAxiosError(error)) {
         const status = error.response?.status;
         const errorMessages = error.response?.data?.errorMessages || [];
-        const message = errorMessages.join(", ") || error.message;
+        const message = errorMessages.join(', ') || error.message;
 
         console.error(`Error searching issues (HTTP ${status}): ${message}`);
 
         if (status === 410) {
           console.error(
-            "💡 Hint: The search API endpoint returned 410 (Gone).",
+            '💡 Hint: The search API endpoint returned 410 (Gone).',
           );
           console.error(
-            "   This may indicate the endpoint has been deprecated or disabled.",
+            '   This may indicate the endpoint has been deprecated or disabled.',
           );
           console.error(
-            "   Check JIRA instance configuration or try alternative search methods.",
+            '   Check JIRA instance configuration or try alternative search methods.',
           );
         } else if (status === 401) {
           console.error(
-            "💡 Hint: Authentication failed. Check ATLASSIAN_API_TOKEN in .env",
+            '💡 Hint: Authentication failed. Check ATLASSIAN_API_TOKEN in .env',
           );
         } else if (status === 403) {
           console.error(
-            "💡 Hint: Permission denied. Check API token permissions in JIRA.",
+            '💡 Hint: Permission denied. Check API token permissions in JIRA.',
           );
         }
       } else {
         console.error(
-          "Error searching issues:",
+          'Error searching issues:',
           error instanceof Error ? error.message : error,
         );
       }
@@ -455,7 +455,7 @@ class JIRAClient {
       {
         headers: {
           Authorization: `Basic ${this.auth}`,
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
       },
     );
@@ -472,7 +472,7 @@ class JIRAClient {
     await axios.put(`${this.baseUrl}/issue/${issueKey}`, payload, {
       headers: {
         Authorization: `Basic ${this.auth}`,
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
     });
   }
@@ -497,7 +497,7 @@ class JIRAClient {
         {
           headers: {
             Authorization: `Basic ${this.auth}`,
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
           },
         },
       );
@@ -515,10 +515,10 @@ class JIRAClient {
       if (!transition) {
         const availableTransitions = transitions
           .map((t: { name: string }) => t.name)
-          .join(", ");
+          .join(', ');
         throw new Error(
           `Transition "${transitionName}" not found for issue ${issueKey}. ` +
-            `Available transitions: ${availableTransitions || "none"}`,
+            `Available transitions: ${availableTransitions || 'none'}`,
         );
       }
 
@@ -534,7 +534,7 @@ class JIRAClient {
         {
           headers: {
             Authorization: `Basic ${this.auth}`,
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
           },
         },
       );
@@ -546,7 +546,7 @@ class JIRAClient {
       if (axios.isAxiosError(error)) {
         const status = error.response?.status;
         const errorMessages = error.response?.data?.errorMessages || [];
-        const message = errorMessages.join(", ") || error.message;
+        const message = errorMessages.join(', ') || error.message;
 
         console.error(
           `Error transitioning issue ${issueKey} (HTTP ${status}): ${message}`,
@@ -558,7 +558,7 @@ class JIRAClient {
           );
         } else if (status === 400) {
           console.error(
-            "💡 Hint: The transition may not be valid from the current status.",
+            '💡 Hint: The transition may not be valid from the current status.',
           );
         }
       }
@@ -578,14 +578,14 @@ class JIRAClient {
     try {
       // Atlassian Document Format (ADF) でコメントを作成
       const commentBody: ADFDocument = {
-        type: "doc",
+        type: 'doc',
         version: 1,
         content: [
           {
-            type: "paragraph",
+            type: 'paragraph',
             content: [
               {
-                type: "text",
+                type: 'text',
                 text: commentText,
               },
             ],
@@ -601,7 +601,7 @@ class JIRAClient {
         {
           headers: {
             Authorization: `Basic ${this.auth}`,
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
           },
         },
       );
@@ -611,7 +611,7 @@ class JIRAClient {
       if (axios.isAxiosError(error)) {
         const status = error.response?.status;
         const errorMessages = error.response?.data?.errorMessages || [];
-        const message = errorMessages.join(", ") || error.message;
+        const message = errorMessages.join(', ') || error.message;
 
         console.error(
           `Error adding comment to ${issueKey} (HTTP ${status}): ${message}`,
@@ -645,7 +645,7 @@ class JIRAClient {
         {
           headers: {
             Authorization: `Basic ${this.auth}`,
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
           },
         },
       );
@@ -682,17 +682,17 @@ async function syncTasksToJIRA(featureName: string): Promise<void> {
   }
 
   if (validation.warnings.length > 0) {
-    console.warn("⚠️  Warnings:");
+    console.warn('⚠️  Warnings:');
     validation.warnings.forEach((warning) => console.warn(`   ${warning}`));
   }
 
   if (validation.errors.length > 0) {
-    console.error("❌ Configuration errors:");
+    console.error('❌ Configuration errors:');
     validation.errors.forEach((error) => console.error(`   ${error}`));
     const configPath = getConfigPath();
     console.error(`\n設定ファイル: ${configPath}`);
     throw new Error(
-      "JIRA同期に必要な設定値が不足しています。上記のエラーを確認して設定を修正してください。",
+      'JIRA同期に必要な設定値が不足しています。上記のエラーを確認して設定を修正してください。',
     );
   }
 
@@ -710,41 +710,41 @@ async function syncTasksToJIRA(featureName: string): Promise<void> {
   let storyIssueTypeId: string | undefined =
     appConfig.jira?.issueTypes?.story || process.env.JIRA_ISSUE_TYPE_STORY;
   console.log(
-    `📋 Story Issue Type ID from config/env: ${storyIssueTypeId || "not found"}`,
+    `📋 Story Issue Type ID from config/env: ${storyIssueTypeId || 'not found'}`,
   );
 
   if (!storyIssueTypeId) {
-    console.log("🔍 Attempting to find Story issue type dynamically...");
+    console.log('🔍 Attempting to find Story issue type dynamically...');
     const foundId =
-      (await client.getIssueTypeId(projectMeta.jiraProjectKey, "Story")) ||
-      (await client.getIssueTypeId(projectMeta.jiraProjectKey, "ストーリー"));
+      (await client.getIssueTypeId(projectMeta.jiraProjectKey, 'Story')) ||
+      (await client.getIssueTypeId(projectMeta.jiraProjectKey, 'ストーリー'));
     storyIssueTypeId = foundId ?? undefined;
     console.log(
-      `📋 Story Issue Type ID from API: ${storyIssueTypeId || "not found"}`,
+      `📋 Story Issue Type ID from API: ${storyIssueTypeId || 'not found'}`,
     );
   }
 
   if (!storyIssueTypeId) {
     throw new Error(
-      "JIRA Story issue type ID is not configured and could not be found in project. " +
-        "Please set JIRA_ISSUE_TYPE_STORY environment variable or configure it in .michi/config.json. " +
-        "You can find the issue type ID in JIRA UI (Settings > Issues > Issue types) or via REST API: " +
-        "GET https://your-domain.atlassian.net/rest/api/3/project/{projectKey}",
+      'JIRA Story issue type ID is not configured and could not be found in project. ' +
+        'Please set JIRA_ISSUE_TYPE_STORY environment variable or configure it in .michi/config.json. ' +
+        'You can find the issue type ID in JIRA UI (Settings > Issues > Issue types) or via REST API: ' +
+        'GET https://your-domain.atlassian.net/rest/api/3/project/{projectKey}',
     );
   }
 
   console.log(`✅ Using Story Issue Type ID: ${storyIssueTypeId}`);
 
   const tasksPath = resolve(`.kiro/specs/${featureName}/tasks.md`);
-  const tasksContent = readFileSync(tasksPath, "utf-8");
+  const tasksContent = readFileSync(tasksPath, 'utf-8');
 
   // spec.jsonを読み込んで既存のEpicキーを確認
   const specPath = resolve(`.kiro/specs/${featureName}/spec.json`);
   let spec: SpecJson = {};
   try {
-    spec = JSON.parse(readFileSync(specPath, "utf-8")) as SpecJson;
+    spec = JSON.parse(readFileSync(specPath, 'utf-8')) as SpecJson;
   } catch {
-    console.error("spec.json not found or invalid");
+    console.error('spec.json not found or invalid');
   }
 
   let epic: { key: string } | undefined;
@@ -752,11 +752,11 @@ async function syncTasksToJIRA(featureName: string): Promise<void> {
   // 既存のEpicをチェック
   if (spec.jira?.epicKey) {
     console.log(`Existing Epic found: ${spec.jira.epicKey}`);
-    console.log("Skipping Epic creation (already exists)");
+    console.log('Skipping Epic creation (already exists)');
     epic = { key: spec.jira.epicKey };
   } else {
     // Epic作成
-    console.log("Creating Epic...");
+    console.log('Creating Epic...');
     const epicSummary = `[${featureName}] ${projectMeta.projectName}`;
 
     // 同じタイトルのEpicがすでに存在するかJQLで検索
@@ -766,14 +766,14 @@ async function syncTasksToJIRA(featureName: string): Promise<void> {
       existingEpics = await client.searchIssues(jql);
     } catch (error) {
       console.error(
-        "❌ Failed to search existing Epics:",
+        '❌ Failed to search existing Epics:',
         error instanceof Error ? error.message : error,
       );
       console.error(
-        "⚠️  Cannot verify idempotency - proceeding with Epic creation",
+        '⚠️  Cannot verify idempotency - proceeding with Epic creation',
       );
       console.error(
-        "   If Epic already exists, manual cleanup may be required",
+        '   If Epic already exists, manual cleanup may be required',
       );
       // 検索失敗時はフォールバック: 新規作成を試みる（重複リスクあり）
       existingEpics = [];
@@ -783,18 +783,18 @@ async function syncTasksToJIRA(featureName: string): Promise<void> {
       console.log(
         `Found existing Epic with similar title: ${existingEpics[0].key}`,
       );
-      console.log("Using existing Epic instead of creating new one");
+      console.log('Using existing Epic instead of creating new one');
       epic = existingEpics[0];
     } else {
       // EpicタイプのIDを取得（日本語JIRAでは "エピック" という名前の場合がある）
       const epicTypeId =
-        (await client.getIssueTypeId(projectMeta.jiraProjectKey, "Epic")) ||
-        (await client.getIssueTypeId(projectMeta.jiraProjectKey, "エピック"));
+        (await client.getIssueTypeId(projectMeta.jiraProjectKey, 'Epic')) ||
+        (await client.getIssueTypeId(projectMeta.jiraProjectKey, 'エピック'));
 
       if (!epicTypeId) {
         throw new Error(
-          "Epic issue type not found in project. " +
-            "Please ensure the project has Epic issue type enabled.",
+          'Epic issue type not found in project. ' +
+            'Please ensure the project has Epic issue type enabled.',
         );
       }
 
@@ -817,7 +817,7 @@ async function syncTasksToJIRA(featureName: string): Promise<void> {
 
   // Epicが確実に設定されていることを確認
   if (!epic) {
-    throw new Error("Epic creation or retrieval failed");
+    throw new Error('Epic creation or retrieval failed');
   }
 
   // 既存のStoryを検索（重複防止）
@@ -829,14 +829,14 @@ async function syncTasksToJIRA(featureName: string): Promise<void> {
     existingStories = await client.searchIssues(storyJql);
   } catch (error) {
     console.error(
-      "❌ Failed to search existing Stories:",
+      '❌ Failed to search existing Stories:',
       error instanceof Error ? error.message : error,
     );
     console.error(
-      "⚠️  Cannot verify idempotency - Story creation may result in duplicates",
+      '⚠️  Cannot verify idempotency - Story creation may result in duplicates',
     );
     console.error(
-      "⚠️  Continuing with story creation (duplicates may be created)...",
+      '⚠️  Continuing with story creation (duplicates may be created)...',
     );
     // 検索失敗時も処理を継続（既存ストーリーなしとして扱う）
     existingStories = [];
@@ -863,8 +863,8 @@ async function syncTasksToJIRA(featureName: string): Promise<void> {
   const phasePattern = /## Phase [\d.A-Z]+:\s*(.+?)(?:（(.+?)）)?/;
 
   // Story作成（フェーズ検出付きパーサー）
-  const lines = tasksContent.split("\n");
-  let currentPhaseLabel = "implementation"; // デフォルトは実装フェーズ
+  const lines = tasksContent.split('\n');
+  let currentPhaseLabel = 'implementation'; // デフォルトは実装フェーズ
   const createdStories: string[] = [];
 
   for (let i = 0; i < lines.length; i++) {
@@ -878,108 +878,108 @@ async function syncTasksToJIRA(featureName: string): Promise<void> {
 
       // Phase番号を抽出（例: "0.1", "2", "A"）
       const phaseNumberMatch = line.match(/## Phase ([\d.A-Z]+):/);
-      const phaseNumber = phaseNumberMatch ? phaseNumberMatch[1] : "";
+      const phaseNumber = phaseNumberMatch ? phaseNumberMatch[1] : '';
 
       // フェーズ番号またはフェーズ名からラベルを決定
       // 新ワークフロー構造に対応
       if (
-        phaseNumber === "0.0" ||
-        phaseName.includes("初期化") ||
-        phaseName.toLowerCase().includes("init")
+        phaseNumber === '0.0' ||
+        phaseName.includes('初期化') ||
+        phaseName.toLowerCase().includes('init')
       ) {
-        currentPhaseLabel = "spec-init";
+        currentPhaseLabel = 'spec-init';
       } else if (
-        phaseNumber === "0.1" ||
-        phaseName.includes("要件定義") ||
-        phaseName.toLowerCase().includes("requirements")
+        phaseNumber === '0.1' ||
+        phaseName.includes('要件定義') ||
+        phaseName.toLowerCase().includes('requirements')
       ) {
-        currentPhaseLabel = "requirements";
+        currentPhaseLabel = 'requirements';
       } else if (
-        phaseNumber === "0.2" ||
-        phaseName.includes("設計") ||
-        phaseName.toLowerCase().includes("design")
+        phaseNumber === '0.2' ||
+        phaseName.includes('設計') ||
+        phaseName.toLowerCase().includes('design')
       ) {
-        currentPhaseLabel = "design";
+        currentPhaseLabel = 'design';
       } else if (
-        phaseNumber === "0.3" ||
-        phaseName.includes("テストタイプ") ||
-        phaseName.toLowerCase().includes("test-type") ||
-        phaseName.toLowerCase().includes("test type")
+        phaseNumber === '0.3' ||
+        phaseName.includes('テストタイプ') ||
+        phaseName.toLowerCase().includes('test-type') ||
+        phaseName.toLowerCase().includes('test type')
       ) {
-        currentPhaseLabel = "test-type-selection";
+        currentPhaseLabel = 'test-type-selection';
       } else if (
-        phaseNumber === "0.4" ||
-        phaseName.includes("テスト仕様") ||
-        phaseName.toLowerCase().includes("test-spec") ||
-        phaseName.toLowerCase().includes("test spec")
+        phaseNumber === '0.4' ||
+        phaseName.includes('テスト仕様') ||
+        phaseName.toLowerCase().includes('test-spec') ||
+        phaseName.toLowerCase().includes('test spec')
       ) {
-        currentPhaseLabel = "test-spec";
+        currentPhaseLabel = 'test-spec';
       } else if (
-        phaseNumber === "0.5" ||
-        phaseName.includes("タスク分割") ||
-        phaseName.toLowerCase().includes("tasks") ||
-        phaseName.toLowerCase().includes("task breakdown")
+        phaseNumber === '0.5' ||
+        phaseName.includes('タスク分割') ||
+        phaseName.toLowerCase().includes('tasks') ||
+        phaseName.toLowerCase().includes('task breakdown')
       ) {
-        currentPhaseLabel = "spec-tasks";
+        currentPhaseLabel = 'spec-tasks';
       } else if (
-        phaseNumber === "0.6" ||
-        phaseName.includes("JIRA") ||
-        phaseName.toLowerCase().includes("jira")
+        phaseNumber === '0.6' ||
+        phaseName.includes('JIRA') ||
+        phaseName.toLowerCase().includes('jira')
       ) {
-        currentPhaseLabel = "jira-sync";
+        currentPhaseLabel = 'jira-sync';
       } else if (
-        phaseNumber === "1" ||
-        phaseName.includes("環境構築") ||
-        phaseName.toLowerCase().includes("environment") ||
-        phaseName.toLowerCase().includes("setup")
+        phaseNumber === '1' ||
+        phaseName.includes('環境構築') ||
+        phaseName.toLowerCase().includes('environment') ||
+        phaseName.toLowerCase().includes('setup')
       ) {
-        currentPhaseLabel = "environment-setup";
+        currentPhaseLabel = 'environment-setup';
       } else if (
-        phaseNumber === "2" ||
-        phaseName.includes("実装") ||
-        phaseName.includes("TDD") ||
-        phaseName.toLowerCase().includes("implementation")
+        phaseNumber === '2' ||
+        phaseName.includes('実装') ||
+        phaseName.includes('TDD') ||
+        phaseName.toLowerCase().includes('implementation')
       ) {
-        currentPhaseLabel = "implementation";
+        currentPhaseLabel = 'implementation';
       } else if (
-        phaseNumber === "A" ||
-        phaseNumber.toLowerCase() === "a" ||
-        phaseName.includes("PR前") ||
-        phaseName.toLowerCase().includes("pr-test") ||
-        phaseName.toLowerCase().includes("pr test")
+        phaseNumber === 'A' ||
+        phaseNumber.toLowerCase() === 'a' ||
+        phaseName.includes('PR前') ||
+        phaseName.toLowerCase().includes('pr-test') ||
+        phaseName.toLowerCase().includes('pr test')
       ) {
-        currentPhaseLabel = "phase-a";
+        currentPhaseLabel = 'phase-a';
       } else if (
-        phaseNumber === "3" ||
-        phaseName.includes("追加QA") ||
-        phaseName.includes("QA") ||
-        phaseName.includes("試験") ||
-        phaseName.toLowerCase().includes("testing") ||
-        phaseName.toLowerCase().includes("additional qa")
+        phaseNumber === '3' ||
+        phaseName.includes('追加QA') ||
+        phaseName.includes('QA') ||
+        phaseName.includes('試験') ||
+        phaseName.toLowerCase().includes('testing') ||
+        phaseName.toLowerCase().includes('additional qa')
       ) {
-        currentPhaseLabel = "additional-qa";
+        currentPhaseLabel = 'additional-qa';
       } else if (
-        phaseNumber === "B" ||
-        phaseNumber.toLowerCase() === "b" ||
-        phaseName.includes("リリース準備テスト") ||
-        phaseName.toLowerCase().includes("release-test") ||
-        phaseName.toLowerCase().includes("release test")
+        phaseNumber === 'B' ||
+        phaseNumber.toLowerCase() === 'b' ||
+        phaseName.includes('リリース準備テスト') ||
+        phaseName.toLowerCase().includes('release-test') ||
+        phaseName.toLowerCase().includes('release test')
       ) {
-        currentPhaseLabel = "phase-b";
+        currentPhaseLabel = 'phase-b';
       } else if (
-        phaseNumber === "4" ||
-        phaseName.includes("リリース準備") ||
-        phaseName.toLowerCase().includes("release-prep") ||
-        phaseName.toLowerCase().includes("release preparation")
+        phaseNumber === '4' ||
+        phaseName.includes('リリース準備') ||
+        phaseName.toLowerCase().includes('release-prep') ||
+        phaseName.toLowerCase().includes('release preparation')
       ) {
-        currentPhaseLabel = "release-prep";
+        currentPhaseLabel = 'release-prep';
       } else if (
-        phaseNumber === "5" ||
-        (phaseName.includes("リリース") && !phaseName.includes("準備")) ||
-        (phaseName.toLowerCase().includes("release") &&
-          !phaseName.toLowerCase().includes("prep"))
+        phaseNumber === '5' ||
+        (phaseName.includes('リリース') && !phaseName.includes('準備')) ||
+        (phaseName.toLowerCase().includes('release') &&
+          !phaseName.toLowerCase().includes('prep'))
       ) {
-        currentPhaseLabel = "release";
+        currentPhaseLabel = 'release';
       }
 
       console.log(
@@ -1030,14 +1030,14 @@ async function syncTasksToJIRA(featureName: string): Promise<void> {
 
       // 優先度のマッピング（デフォルト: Medium）
       const priorityMap: { [key: string]: string } = {
-        High: "High",
-        Medium: "Medium",
-        Low: "Low",
+        High: 'High',
+        Medium: 'Medium',
+        Low: 'Low',
       };
       const priority =
         storyDetails.priority && priorityMap[storyDetails.priority]
           ? priorityMap[storyDetails.priority]
-          : "Medium";
+          : 'Medium';
 
       // 見積もり（Story Points）を取得
       let storyPoints: number | undefined;
@@ -1074,7 +1074,7 @@ async function syncTasksToJIRA(featureName: string): Promise<void> {
       // 環境変数 JIRA_STORY_POINTS_FIELD で設定可能（例: customfield_10016）
       if (storyPoints !== undefined) {
         const storyPointsField =
-          process.env.JIRA_STORY_POINTS_FIELD || "customfield_10016";
+          process.env.JIRA_STORY_POINTS_FIELD || 'customfield_10016';
         storyPayload.fields[storyPointsField] = storyPoints;
       }
 
@@ -1118,7 +1118,7 @@ async function syncTasksToJIRA(featureName: string): Promise<void> {
       // JIRA APIエラーの詳細を表示
       if (error.response?.data) {
         console.error(
-          "  📋 JIRA API Error Details:",
+          '  📋 JIRA API Error Details:',
           JSON.stringify(error.response.data, null, 2),
         );
 
@@ -1126,15 +1126,15 @@ async function syncTasksToJIRA(featureName: string): Promise<void> {
         if (
           error.response.data.errors &&
           Object.keys(error.response.data.errors).some((key) =>
-            key.includes("customfield"),
+            key.includes('customfield'),
           )
         ) {
-          console.error("  ⚠️  Story Pointsフィールドの設定に失敗しました。");
+          console.error('  ⚠️  Story Pointsフィールドの設定に失敗しました。');
           console.error(
-            "  💡 環境変数 JIRA_STORY_POINTS_FIELD を正しいカスタムフィールドIDに設定してください。",
+            '  💡 環境変数 JIRA_STORY_POINTS_FIELD を正しいカスタムフィールドIDに設定してください。',
           );
           console.error(
-            "  💡 JIRA管理画面でStory PointsのカスタムフィールドIDを確認してください。",
+            '  💡 JIRA管理画面でStory PointsのカスタムフィールドIDを確認してください。',
           );
         }
       }
@@ -1151,14 +1151,14 @@ async function syncTasksToJIRA(featureName: string): Promise<void> {
     existingStoryKeys.has(key),
   ).length;
 
-  console.log("\n✅ JIRA sync completed");
+  console.log('\n✅ JIRA sync completed');
   console.log(`   Epic: ${epic.key}`);
   console.log(
     `   Stories: ${createdStories.length} processed (${newStoryCount} new, ${reusedStoryCount} reused)`,
   );
 
   // spec.json を更新
-  const jiraBaseUrl = process.env.ATLASSIAN_URL || "";
+  const jiraBaseUrl = process.env.ATLASSIAN_URL || '';
   try {
     updateSpecJsonAfterJiraSync(featureName, {
       projectKey: projectMeta.jiraProjectKey,
@@ -1168,7 +1168,7 @@ async function syncTasksToJIRA(featureName: string): Promise<void> {
     });
   } catch (error) {
     console.warn(
-      `⚠️  Failed to update spec.json after JIRA sync: ${error instanceof Error ? error.message : "Unknown error"}`,
+      `⚠️  Failed to update spec.json after JIRA sync: ${error instanceof Error ? error.message : 'Unknown error'}`,
     );
     // spec.json更新の失敗はスクリプト全体の失敗とはしない（JIRA同期は成功しているため）
   }
@@ -1179,14 +1179,14 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const args = process.argv.slice(2);
 
   if (args.length === 0) {
-    console.error("Usage: npm run jira:sync <feature-name>");
+    console.error('Usage: npm run jira:sync <feature-name>');
     process.exit(1);
   }
 
   syncTasksToJIRA(args[0])
     .then(() => process.exit(0))
     .catch((error) => {
-      console.error("❌ JIRA sync failed:", error.message);
+      console.error('❌ JIRA sync failed:', error.message);
       process.exit(1);
     });
 }

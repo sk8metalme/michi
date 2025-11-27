@@ -7,14 +7,14 @@
  * - 終了時: PR作成、Epic + 最初の Story を「レビュー待ち」に移動、PRリンクをコメント
  */
 
-import { config } from "dotenv";
-import { JIRAClient } from "./jira-sync.js";
-import { getConfig } from "./utils/config-loader.js";
+import { config } from 'dotenv';
+import { JIRAClient } from './jira-sync.js';
+import { getConfig } from './utils/config-loader.js';
 import {
   getJiraInfoFromSpec,
   checkJiraInfoStatus,
   JiraInfo,
-} from "./utils/spec-loader.js";
+} from './utils/spec-loader.js';
 
 config();
 
@@ -47,9 +47,9 @@ interface StatusMapping {
 function getStatusMapping(): StatusMapping {
   const appConfig = getConfig();
   return {
-    inProgress: appConfig.jira?.statusMapping?.inProgress || "In Progress",
+    inProgress: appConfig.jira?.statusMapping?.inProgress || 'In Progress',
     readyForReview:
-      appConfig.jira?.statusMapping?.readyForReview || "Ready for Review",
+      appConfig.jira?.statusMapping?.readyForReview || 'Ready for Review',
   };
 }
 
@@ -63,7 +63,7 @@ function getJIRAConfig() {
 
   if (!url || !email || !apiToken) {
     throw new Error(
-      "Missing JIRA credentials in .env. Required: ATLASSIAN_URL, ATLASSIAN_EMAIL, ATLASSIAN_API_TOKEN",
+      'Missing JIRA credentials in .env. Required: ATLASSIAN_URL, ATLASSIAN_EMAIL, ATLASSIAN_API_TOKEN',
     );
   }
 
@@ -123,10 +123,10 @@ export class JiraInfoNotFoundError extends Error {
     public readonly missing: string[],
   ) {
     super(
-      `JIRA 情報が見つかりません (${featureName}): ${missing.join(", ")} が不足しています。\n` +
+      `JIRA 情報が見つかりません (${featureName}): ${missing.join(', ')} が不足しています。\n` +
         `先に "michi jira:sync ${featureName}" を実行してください。`,
     );
-    this.name = "JiraInfoNotFoundError";
+    this.name = 'JiraInfoNotFoundError';
   }
 }
 
@@ -164,13 +164,13 @@ export async function runSpecImplStart(
   const jiraInfo = getJiraInfoFromSpec(featureName, projectRoot);
   const status = checkJiraInfoStatus(featureName, projectRoot);
 
-  console.log("📋 JIRA 情報:");
-  console.log(`   Epic: ${jiraInfo.epicKey || "(なし)"}`);
-  console.log(`   Story: ${jiraInfo.firstStoryKey || "(なし)"}`);
+  console.log('📋 JIRA 情報:');
+  console.log(`   Epic: ${jiraInfo.epicKey || '(なし)'}`);
+  console.log(`   Story: ${jiraInfo.firstStoryKey || '(なし)'}`);
 
   // JIRA 連携スキップの場合
   if (skipJira) {
-    console.log("⏭️  JIRA 連携をスキップします");
+    console.log('⏭️  JIRA 連携をスキップします');
     return { jiraInfo: null };
   }
 
@@ -182,7 +182,7 @@ export async function runSpecImplStart(
   // Epic と Story を「進行中」に遷移
   await transitionEpicAndStory(jiraInfo, statusMapping.inProgress);
 
-  console.log("\n✅ spec-impl 開始処理完了");
+  console.log('\n✅ spec-impl 開始処理完了');
   return { jiraInfo };
 }
 
@@ -226,25 +226,25 @@ export async function runSpecImplComplete(
   const jiraInfo = getJiraInfoFromSpec(featureName, projectRoot);
   const status = checkJiraInfoStatus(featureName, projectRoot);
 
-  console.log("📋 JIRA 情報:");
-  console.log(`   Epic: ${jiraInfo.epicKey || "(なし)"}`);
-  console.log(`   Story: ${jiraInfo.firstStoryKey || "(なし)"}`);
+  console.log('📋 JIRA 情報:');
+  console.log(`   Epic: ${jiraInfo.epicKey || '(なし)'}`);
+  console.log(`   Story: ${jiraInfo.firstStoryKey || '(なし)'}`);
 
   // JIRA 連携スキップでない場合、情報をチェック
   if (!skipJira && !status.hasEpic) {
     throw new JiraInfoNotFoundError(featureName, status.missing);
   }
 
-  let prUrl = "";
+  let prUrl = '';
 
   // 1. PR を作成
   try {
-    console.log("\n📝 PR を作成中...");
+    console.log('\n📝 PR を作成中...');
     const prTitle = `feat: ${featureName}`;
-    const jiraBaseUrl = process.env.ATLASSIAN_URL || "";
+    const jiraBaseUrl = process.env.ATLASSIAN_URL || '';
     const jiraLink = jiraInfo.epicKey
       ? `[${jiraInfo.epicKey}](${jiraBaseUrl}/browse/${jiraInfo.epicKey})`
-      : "(JIRA 連携なし)";
+      : '(JIRA 連携なし)';
 
     const prBody = `## 概要
 
@@ -257,17 +257,17 @@ ${jiraLink}
 ---
 *この PR は spec-impl ワークフローで自動作成されました*`;
 
-    const { Octokit } = await import("@octokit/rest");
+    const { Octokit } = await import('@octokit/rest');
     const token = process.env.GITHUB_TOKEN;
     const repo = process.env.GITHUB_REPO;
 
     if (!token || !repo) {
       throw new Error(
-        "Missing GitHub credentials. Required: GITHUB_TOKEN, GITHUB_REPO",
+        'Missing GitHub credentials. Required: GITHUB_TOKEN, GITHUB_REPO',
       );
     }
 
-    const [owner, repoName] = repo.split("/");
+    const [owner, repoName] = repo.split('/');
     const octokit = new Octokit({ auth: token });
 
     const pr = await octokit.pulls.create({
@@ -276,7 +276,7 @@ ${jiraLink}
       title: prTitle,
       body: prBody,
       head: branch,
-      base: "main",
+      base: 'main',
     });
 
     prUrl = pr.data.html_url;
@@ -290,8 +290,8 @@ ${jiraLink}
 
   // JIRA 連携スキップの場合はここで終了
   if (skipJira) {
-    console.log("\n⏭️  JIRA 連携をスキップします");
-    console.log("\n🎉 spec-impl ワークフロー完了");
+    console.log('\n⏭️  JIRA 連携をスキップします');
+    console.log('\n🎉 spec-impl ワークフロー完了');
     console.log(`   PR: ${prUrl}`);
     return { prUrl };
   }
@@ -309,7 +309,7 @@ ${jiraLink}
   // 3. PR リンクを JIRA にコメント
   if (jiraInfo.epicKey) {
     try {
-      console.log("\n💬 JIRA に PR リンクをコメント中...");
+      console.log('\n💬 JIRA に PR リンクをコメント中...');
       const jiraConfig = getJIRAConfig();
       const client = new JIRAClient(jiraConfig);
       const commentText = `PR を作成しました: ${prUrl}
@@ -326,7 +326,7 @@ ${jiraLink}
     }
   }
 
-  console.log("\n🎉 spec-impl ワークフロー完了");
+  console.log('\n🎉 spec-impl ワークフロー完了');
   console.log(`   PR: ${prUrl}`);
   if (jiraInfo.epicKey) {
     console.log(
@@ -355,7 +355,7 @@ export interface SpecImplContext {
  */
 export async function onSpecImplStart(context: SpecImplContext): Promise<void> {
   console.warn(
-    "⚠️  onSpecImplStart は非推奨です。runSpecImplStart() を使用してください。",
+    '⚠️  onSpecImplStart は非推奨です。runSpecImplStart() を使用してください。',
   );
 
   const { featureName, jiraKey } = context;
@@ -378,7 +378,7 @@ export async function onSpecImplEnd(
   context: SpecImplContext,
 ): Promise<{ prUrl: string }> {
   console.warn(
-    "⚠️  onSpecImplEnd は非推奨です。runSpecImplComplete() を使用してください。",
+    '⚠️  onSpecImplEnd は非推奨です。runSpecImplComplete() を使用してください。',
   );
 
   const { featureName, jiraKey, branchName } = context;
@@ -389,20 +389,20 @@ export async function onSpecImplEnd(
   console.log(`📋 対象 JIRA: ${jiraKey}`);
   console.log(`🌿 ブランチ: ${branch}`);
 
-  let prUrl = "";
+  let prUrl = '';
 
   // PR 作成
-  const { Octokit } = await import("@octokit/rest");
+  const { Octokit } = await import('@octokit/rest');
   const token = process.env.GITHUB_TOKEN;
   const repo = process.env.GITHUB_REPO;
 
   if (!token || !repo) {
     throw new Error(
-      "Missing GitHub credentials. Required: GITHUB_TOKEN, GITHUB_REPO",
+      'Missing GitHub credentials. Required: GITHUB_TOKEN, GITHUB_REPO',
     );
   }
 
-  const [owner, repoName] = repo.split("/");
+  const [owner, repoName] = repo.split('/');
   const octokit = new Octokit({ auth: token });
 
   const prTitle = `feat: ${featureName}`;
@@ -423,7 +423,7 @@ ${featureName} の実装
     title: prTitle,
     body: prBody,
     head: branch,
-    base: "main",
+    base: 'main',
   });
 
   prUrl = pr.data.html_url;
@@ -445,7 +445,7 @@ ${featureName} の実装
   await client.addComment(jiraKey, commentText);
   console.log(`✅ ${jiraKey} に PR リンクをコメントしました`);
 
-  console.log("\n🎉 spec-impl ワークフロー完了");
+  console.log('\n🎉 spec-impl ワークフロー完了');
   console.log(`   PR: ${prUrl}`);
   console.log(`   JIRA: ${process.env.ATLASSIAN_URL}/browse/${jiraKey}`);
 
@@ -460,24 +460,24 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const args = process.argv.slice(2);
   const command = args[0];
 
-  if (!command || !["start", "complete"].includes(command)) {
-    console.error("Usage:");
+  if (!command || !['start', 'complete'].includes(command)) {
+    console.error('Usage:');
     console.error(
-      "  npx tsx scripts/spec-impl-workflow.ts start <feature> [--skip-jira]",
+      '  npx tsx scripts/spec-impl-workflow.ts start <feature> [--skip-jira]',
     );
     console.error(
-      "  npx tsx scripts/spec-impl-workflow.ts complete <feature> [--skip-jira] [--branch <name>]",
+      '  npx tsx scripts/spec-impl-workflow.ts complete <feature> [--skip-jira] [--branch <name>]',
     );
     process.exit(1);
   }
 
   const featureName = args[1];
-  const skipJira = args.includes("--skip-jira");
-  const branchIndex = args.indexOf("--branch");
+  const skipJira = args.includes('--skip-jira');
+  const branchIndex = args.indexOf('--branch');
   const branchName = branchIndex !== -1 ? args[branchIndex + 1] : undefined;
 
   if (!featureName) {
-    console.error("Error: feature name is required");
+    console.error('Error: feature name is required');
     process.exit(1);
   }
 
@@ -487,7 +487,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     branchName,
   };
 
-  if (command === "start") {
+  if (command === 'start') {
     runSpecImplStart(options)
       .then(() => process.exit(0))
       .catch((error) => {

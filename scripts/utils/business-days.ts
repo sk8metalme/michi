@@ -4,7 +4,7 @@
  * 土日を除外した営業日の計算と曜日表記を提供
  */
 
-const WEEKDAYS = ["日", "月", "火", "水", "木", "金", "土"];
+const WEEKDAYS = ['日', '月', '火', '水', '木', '金', '土'];
 
 /**
  * 営業日かどうかを判定（土日を除外）
@@ -89,7 +89,7 @@ export function getWeekdayRangeNotation(
     }
   }
 
-  return `（${weekdays.join("")}）`;
+  return `（${weekdays.join('')}）`;
 }
 
 /**

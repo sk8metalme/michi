@@ -8,7 +8,7 @@
  * - 任意の `(P)` 並列実行マーカー
  */
 
-import { readFileSync } from "fs";
+import { readFileSync } from 'fs';
 
 /**
  * AI-DLC形式のタスク
@@ -67,10 +67,10 @@ export function isAIDLCFormat(content: string): boolean {
 
   // Michiワークフロー形式のPhase構造
   const hasPhaseStructure =
-    content.includes("Phase 0:") ||
-    content.includes("Phase 0.1:") ||
-    content.includes("Phase 2:") ||
-    content.includes("## Phase");
+    content.includes('Phase 0:') ||
+    content.includes('Phase 0.1:') ||
+    content.includes('Phase 2:') ||
+    content.includes('## Phase');
 
   // Story構造もチェック
   const hasStoryStructure = /### Story \d+\.\d+:/.test(content);
@@ -85,9 +85,9 @@ export function isAIDLCFormat(content: string): boolean {
  * @returns パースされたドキュメント
  */
 export function parseAIDLCFormat(content: string): AIDLCDocument {
-  const lines = content.split("\n");
+  const lines = content.split('\n');
   const document: AIDLCDocument = {
-    title: "",
+    title: '',
     categories: [],
     rawContent: content,
   };
@@ -108,13 +108,13 @@ export function parseAIDLCFormat(content: string): AIDLCDocument {
 
     // サマリーセクションの検出
     if (
-      trimmedLine.startsWith("## 要件カバレッジ") ||
-      trimmedLine.startsWith("## Requirements Coverage") ||
-      trimmedLine.startsWith("## 並列実行可能") ||
-      trimmedLine.startsWith("## Parallel") ||
-      trimmedLine.startsWith("## タスク見積") ||
-      trimmedLine.startsWith("## Task Estimate") ||
-      trimmedLine === "---"
+      trimmedLine.startsWith('## 要件カバレッジ') ||
+      trimmedLine.startsWith('## Requirements Coverage') ||
+      trimmedLine.startsWith('## 並列実行可能') ||
+      trimmedLine.startsWith('## Parallel') ||
+      trimmedLine.startsWith('## タスク見積') ||
+      trimmedLine.startsWith('## Task Estimate') ||
+      trimmedLine === '---'
     ) {
       inSummarySection = true;
       // 現在のタスクを保存
@@ -163,8 +163,8 @@ export function parseAIDLCFormat(content: string): AIDLCDocument {
       }
 
       const isParallel =
-        trimmedLine.includes("(P)") || taskMatch[2].endsWith("*");
-      const taskId = taskMatch[2].replace("*", "");
+        trimmedLine.includes('(P)') || taskMatch[2].endsWith('*');
+      const taskId = taskMatch[2].replace('*', '');
 
       currentTask = {
         id: taskId,
@@ -172,22 +172,22 @@ export function parseAIDLCFormat(content: string): AIDLCDocument {
         description: [],
         requirements: [],
         isParallel,
-        completed: taskMatch[1] === "x",
+        completed: taskMatch[1] === 'x',
       };
       continue;
     }
 
     // タスクの詳細行（インデントされた行）
-    if (currentTask && line.startsWith("  ") && trimmedLine) {
+    if (currentTask && line.startsWith('  ') && trimmedLine) {
       // Requirements タグの抽出
       const reqMatch = trimmedLine.match(/_Requirements?: (.+)_|_要件: (.+)_/i);
       if (reqMatch) {
         const reqString = reqMatch[1] || reqMatch[2];
-        const requirements = reqString.split(",").map((r) => r.trim());
+        const requirements = reqString.split(',').map((r) => r.trim());
         currentTask.requirements.push(...requirements);
       } else {
         // 通常の詳細行
-        currentTask.description.push(trimmedLine.replace(/^- /, ""));
+        currentTask.description.push(trimmedLine.replace(/^- /, ''));
       }
     }
   }
@@ -240,7 +240,7 @@ function parseSummaryLine(document: AIDLCDocument, line: string): void {
  * @throws ファイルが存在しない、またはAI-DLC形式でない場合
  */
 export function parseAIDLCFile(filePath: string): AIDLCDocument {
-  const content = readFileSync(filePath, "utf-8");
+  const content = readFileSync(filePath, 'utf-8');
 
   if (!isAIDLCFormat(content)) {
     throw new Error(

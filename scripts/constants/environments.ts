@@ -11,43 +11,43 @@ export interface EnvironmentConfig {
 }
 
 export type Environment =
-  | "claude"
-  | "claude-agent"
-  | "cursor"
-  | "gemini"
-  | "codex"
-  | "cline";
+  | 'claude'
+  | 'claude-agent'
+  | 'cursor'
+  | 'gemini'
+  | 'codex'
+  | 'cline';
 
 export const ENV_CONFIG: Record<Environment, EnvironmentConfig> = {
   claude: {
-    rulesDir: ".claude/rules",
-    commandsDir: ".claude/commands/kiro",
-    templateSource: "claude",
+    rulesDir: '.claude/rules',
+    commandsDir: '.claude/commands/kiro',
+    templateSource: 'claude',
   },
-  "claude-agent": {
-    rulesDir: ".claude/agents",
-    commandsDir: ".claude/commands/kiro",
-    templateSource: "claude-agent",
+  'claude-agent': {
+    rulesDir: '.claude/agents',
+    commandsDir: '.claude/commands/kiro',
+    templateSource: 'claude-agent',
   },
   cursor: {
-    rulesDir: ".cursor/rules",
-    commandsDir: ".cursor/commands/kiro",
-    templateSource: "cursor",
+    rulesDir: '.cursor/rules',
+    commandsDir: '.cursor/commands/kiro',
+    templateSource: 'cursor',
   },
   gemini: {
-    rulesDir: ".gemini",
-    commandsDir: ".gemini/extensions",
-    templateSource: "gemini",
+    rulesDir: '.gemini',
+    commandsDir: '.gemini/extensions',
+    templateSource: 'gemini',
   },
   codex: {
-    rulesDir: ".codex/docs",
-    commandsDir: ".codex/docs",
-    templateSource: "codex",
+    rulesDir: '.codex/docs',
+    commandsDir: '.codex/docs',
+    templateSource: 'codex',
   },
   cline: {
-    rulesDir: ".clinerules/rules",
-    commandsDir: ".clinerules/commands",
-    templateSource: "cline",
+    rulesDir: '.clinerules/rules',
+    commandsDir: '.clinerules/commands',
+    templateSource: 'cline',
   },
 };
 

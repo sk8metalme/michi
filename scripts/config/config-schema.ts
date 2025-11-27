@@ -3,21 +3,21 @@
  * Zodを使用して設定ファイルの型安全性を保証
  */
 
-import { z } from "zod";
+import { z } from 'zod';
 
 /**
  * Confluence階層構造のモード
  */
-export const ConfluenceHierarchyModeSchema = z.enum(["simple", "nested"]);
+export const ConfluenceHierarchyModeSchema = z.enum(['simple', 'nested']);
 
 /**
  * Confluenceページ作成粒度
  */
 export const ConfluencePageCreationGranularitySchema = z.enum([
-  "single",
-  "by-section",
-  "by-hierarchy",
-  "manual",
+  'single',
+  'by-section',
+  'by-hierarchy',
+  'manual',
 ]);
 
 /**
@@ -60,13 +60,13 @@ export const ConfluenceHierarchyStructureSchema = z.object({
  */
 export const ConfluenceConfigSchema = z.object({
   pageCreationGranularity:
-    ConfluencePageCreationGranularitySchema.default("single"),
+    ConfluencePageCreationGranularitySchema.default('single'),
   pageTitleFormat: z
     .string()
-    .default("[{projectName}] {featureName} {docTypeLabel}"),
+    .default('[{projectName}] {featureName} {docTypeLabel}'),
   autoLabels: z
     .array(z.string())
-    .default(["{projectLabel}", "{docType}", "{featureName}", "github-sync"]),
+    .default(['{projectLabel}', '{docType}', '{featureName}', 'github-sync']),
   spaces: z
     .object({
       requirements: z.string().optional(),
@@ -81,38 +81,38 @@ export const ConfluenceConfigSchema = z.object({
  * JIRA Story作成粒度
  */
 export const JiraStoryCreationGranularitySchema = z.enum([
-  "all",
-  "by-phase",
-  "selected-phases",
+  'all',
+  'by-phase',
+  'selected-phases',
 ]);
 
 /**
  * JIRA Story Points設定
  */
-export const JiraStoryPointsSchema = z.enum(["auto", "manual", "disabled"]);
+export const JiraStoryPointsSchema = z.enum(['auto', 'manual', 'disabled']);
 
 /**
  * JIRA ステータスマッピングスキーマ
  * spec-impl ワークフローで使用するステータス名
  */
 export const JiraStatusMappingSchema = z.object({
-  inProgress: z.string().default("In Progress"),
-  readyForReview: z.string().default("Ready for Review"),
+  inProgress: z.string().default('In Progress'),
+  readyForReview: z.string().default('Ready for Review'),
 });
 
 /**
  * JIRA設定スキーマ
  */
 export const JiraConfigSchema = z.object({
-  storyCreationGranularity: JiraStoryCreationGranularitySchema.default("all"),
+  storyCreationGranularity: JiraStoryCreationGranularitySchema.default('all'),
   createEpic: z.boolean().default(true),
-  storyPoints: JiraStoryPointsSchema.default("auto"),
+  storyPoints: JiraStoryPointsSchema.default('auto'),
   autoLabels: z
     .array(z.string())
-    .default(["{projectLabel}", "{featureName}", "{phaseLabel}"]),
+    .default(['{projectLabel}', '{featureName}', '{phaseLabel}']),
   issueTypes: z
     .object({
-      epic: z.string().default("Epic"),
+      epic: z.string().default('Epic'),
       story: z.string().nullish().default(null), // null | undefined | string
       subtask: z.string().nullish().default(null), // null | undefined | string
     })
@@ -127,7 +127,7 @@ export const JiraConfigSchema = z.object({
 export const WorkflowConfigSchema = z.object({
   enabledPhases: z
     .array(z.string())
-    .default(["requirements", "design", "tasks"]),
+    .default(['requirements', 'design', 'tasks']),
   approvalGates: z
     .object({
       requirements: z.array(z.string()).optional(),

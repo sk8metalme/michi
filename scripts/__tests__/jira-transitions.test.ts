@@ -2,16 +2,16 @@
  * JIRAClient transitionIssue() と addComment() のテスト
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import axios from "axios";
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import axios from 'axios';
 
 // axiosをモック
-vi.mock("axios");
+vi.mock('axios');
 
 // dotenvをモック
-vi.mock("dotenv", () => ({ config: vi.fn() }));
+vi.mock('dotenv', () => ({ config: vi.fn() }));
 
-describe("JIRAClient transitions", () => {
+describe('JIRAClient transitions', () => {
   const mockAxiosGet = vi.mocked(axios.get);
   const mockAxiosPost = vi.mocked(axios.post);
   const mockAxiosIsAxiosError = vi.mocked(axios.isAxiosError);
@@ -26,15 +26,15 @@ describe("JIRAClient transitions", () => {
     vi.restoreAllMocks();
   });
 
-  describe("transitionIssue", () => {
-    it("利用可能なトランジションを取得してステータスを変更できる", async () => {
+  describe('transitionIssue', () => {
+    it('利用可能なトランジションを取得してステータスを変更できる', async () => {
       // トランジション一覧のモック
       mockAxiosGet.mockResolvedValueOnce({
         data: {
           transitions: [
-            { id: "21", name: "In Progress" },
-            { id: "31", name: "Done" },
-            { id: "41", name: "Ready for Review" },
+            { id: '21', name: 'In Progress' },
+            { id: '31', name: 'Done' },
+            { id: '41', name: 'Ready for Review' },
           ],
         },
       });
@@ -45,43 +45,43 @@ describe("JIRAClient transitions", () => {
       });
 
       // JIRAClientをインポート（モック設定後）
-      const { JIRAClient } = await import("../jira-sync.js");
+      const { JIRAClient } = await import('../jira-sync.js');
       const client = new JIRAClient({
-        url: "https://test.atlassian.net",
-        email: "test@example.com",
-        apiToken: "test-token",
+        url: 'https://test.atlassian.net',
+        email: 'test@example.com',
+        apiToken: 'test-token',
       });
 
-      await client.transitionIssue("PROJ-123", "In Progress");
+      await client.transitionIssue('PROJ-123', 'In Progress');
 
       // GETリクエストの検証
       expect(mockAxiosGet).toHaveBeenCalledWith(
-        "https://test.atlassian.net/rest/api/3/issue/PROJ-123/transitions",
+        'https://test.atlassian.net/rest/api/3/issue/PROJ-123/transitions',
         expect.objectContaining({
           headers: expect.objectContaining({
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
           }),
         }),
       );
 
       // POSTリクエストの検証
       expect(mockAxiosPost).toHaveBeenCalledWith(
-        "https://test.atlassian.net/rest/api/3/issue/PROJ-123/transitions",
-        { transition: { id: "21" } },
+        'https://test.atlassian.net/rest/api/3/issue/PROJ-123/transitions',
+        { transition: { id: '21' } },
         expect.objectContaining({
           headers: expect.objectContaining({
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
           }),
         }),
       );
     });
 
-    it("部分一致でトランジションを検索できる", async () => {
+    it('部分一致でトランジションを検索できる', async () => {
       mockAxiosGet.mockResolvedValueOnce({
         data: {
           transitions: [
-            { id: "21", name: "Start Progress" },
-            { id: "31", name: "Complete" },
+            { id: '21', name: 'Start Progress' },
+            { id: '31', name: 'Complete' },
           ],
         },
       });
@@ -90,98 +90,98 @@ describe("JIRAClient transitions", () => {
         data: {},
       });
 
-      const { JIRAClient } = await import("../jira-sync.js");
+      const { JIRAClient } = await import('../jira-sync.js');
       const client = new JIRAClient({
-        url: "https://test.atlassian.net",
-        email: "test@example.com",
-        apiToken: "test-token",
+        url: 'https://test.atlassian.net',
+        email: 'test@example.com',
+        apiToken: 'test-token',
       });
 
       // "Progress" で部分一致
-      await client.transitionIssue("PROJ-123", "Progress");
+      await client.transitionIssue('PROJ-123', 'Progress');
 
       expect(mockAxiosPost).toHaveBeenCalledWith(
         expect.any(String),
-        { transition: { id: "21" } },
+        { transition: { id: '21' } },
         expect.any(Object),
       );
     });
 
-    it("トランジションが見つからない場合はエラーをスロー", async () => {
+    it('トランジションが見つからない場合はエラーをスロー', async () => {
       mockAxiosGet.mockResolvedValueOnce({
         data: {
           transitions: [
-            { id: "21", name: "In Progress" },
-            { id: "31", name: "Done" },
+            { id: '21', name: 'In Progress' },
+            { id: '31', name: 'Done' },
           ],
         },
       });
 
-      const { JIRAClient } = await import("../jira-sync.js");
+      const { JIRAClient } = await import('../jira-sync.js');
       const client = new JIRAClient({
-        url: "https://test.atlassian.net",
-        email: "test@example.com",
-        apiToken: "test-token",
+        url: 'https://test.atlassian.net',
+        email: 'test@example.com',
+        apiToken: 'test-token',
       });
 
       await expect(
-        client.transitionIssue("PROJ-123", "NonExistent"),
+        client.transitionIssue('PROJ-123', 'NonExistent'),
       ).rejects.toThrow(/Transition "NonExistent" not found/);
     });
 
-    it("利用可能なトランジションがない場合もエラーをスロー", async () => {
+    it('利用可能なトランジションがない場合もエラーをスロー', async () => {
       mockAxiosGet.mockResolvedValueOnce({
         data: {
           transitions: [],
         },
       });
 
-      const { JIRAClient } = await import("../jira-sync.js");
+      const { JIRAClient } = await import('../jira-sync.js');
       const client = new JIRAClient({
-        url: "https://test.atlassian.net",
-        email: "test@example.com",
-        apiToken: "test-token",
+        url: 'https://test.atlassian.net',
+        email: 'test@example.com',
+        apiToken: 'test-token',
       });
 
       await expect(
-        client.transitionIssue("PROJ-123", "In Progress"),
+        client.transitionIssue('PROJ-123', 'In Progress'),
       ).rejects.toThrow(/Available transitions: none/);
     });
   });
 
-  describe("addComment", () => {
-    it("コメントを追加できる", async () => {
+  describe('addComment', () => {
+    it('コメントを追加できる', async () => {
       mockAxiosPost.mockResolvedValueOnce({
         data: {
-          id: "comment-123",
+          id: 'comment-123',
         },
       });
 
-      const { JIRAClient } = await import("../jira-sync.js");
+      const { JIRAClient } = await import('../jira-sync.js');
       const client = new JIRAClient({
-        url: "https://test.atlassian.net",
-        email: "test@example.com",
-        apiToken: "test-token",
+        url: 'https://test.atlassian.net',
+        email: 'test@example.com',
+        apiToken: 'test-token',
       });
 
       await client.addComment(
-        "PROJ-123",
-        "PRを作成しました: https://github.com/...",
+        'PROJ-123',
+        'PRを作成しました: https://github.com/...',
       );
 
       expect(mockAxiosPost).toHaveBeenCalledWith(
-        "https://test.atlassian.net/rest/api/3/issue/PROJ-123/comment",
+        'https://test.atlassian.net/rest/api/3/issue/PROJ-123/comment',
         {
           body: {
-            type: "doc",
+            type: 'doc',
             version: 1,
             content: [
               {
-                type: "paragraph",
+                type: 'paragraph',
                 content: [
                   {
-                    type: "text",
-                    text: "PRを作成しました: https://github.com/...",
+                    type: 'text',
+                    text: 'PRを作成しました: https://github.com/...',
                   },
                 ],
               },
@@ -190,31 +190,31 @@ describe("JIRAClient transitions", () => {
         },
         expect.objectContaining({
           headers: expect.objectContaining({
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
           }),
         }),
       );
     });
 
-    it("APIエラー時は適切なエラーメッセージを表示", async () => {
+    it('APIエラー時は適切なエラーメッセージを表示', async () => {
       mockAxiosPost.mockRejectedValueOnce({
         response: {
           status: 404,
           data: {
-            errorMessages: ["Issue Does Not Exist"],
+            errorMessages: ['Issue Does Not Exist'],
           },
         },
       });
 
-      const { JIRAClient } = await import("../jira-sync.js");
+      const { JIRAClient } = await import('../jira-sync.js');
       const client = new JIRAClient({
-        url: "https://test.atlassian.net",
-        email: "test@example.com",
-        apiToken: "test-token",
+        url: 'https://test.atlassian.net',
+        email: 'test@example.com',
+        apiToken: 'test-token',
       });
 
       await expect(
-        client.addComment("PROJ-999", "test comment"),
+        client.addComment('PROJ-999', 'test comment'),
       ).rejects.toMatchObject({
         response: {
           status: 404,

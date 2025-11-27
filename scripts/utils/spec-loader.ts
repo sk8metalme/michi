@@ -5,7 +5,7 @@
  * Epic/Story のキーを自動取得する
  */
 
-import { loadSpecJson } from "./spec-updater.js";
+import { loadSpecJson } from './spec-updater.js';
 
 /**
  * spec.json から抽出された JIRA 情報
@@ -94,10 +94,10 @@ export function checkJiraInfoStatus(
   const missing: string[] = [];
 
   if (!jiraInfo.epicKey) {
-    missing.push("Epic");
+    missing.push('Epic');
   }
   if (jiraInfo.storyKeys.length === 0) {
-    missing.push("Story");
+    missing.push('Story');
   }
 
   return {
