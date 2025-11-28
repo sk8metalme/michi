@@ -96,7 +96,59 @@ For each Story in tasks.md:
    - Create atomic commits for each Story
    - Use conventional commit format: `feat($FEATURE_NAME): Story title`
 
-### 5. End Processing (PR Creation & JIRA Update)
+### 5. Code Review Phase (Automatic)
+
+**Automatically review the implemented code:**
+
+For each Story implementation:
+
+1. **Code Review (/review)**
+   - Execute `/review` command automatically
+   - Analyze the implementation for code quality issues
+   - Check for best practices and potential bugs
+
+2. **Fix Issues if Found**
+   - If review identifies issues, automatically fix them
+   - Commit the fixes
+   - Re-run `/review` to verify fixes
+   - Repeat until `/review` passes without critical issues
+
+3. **Security Review (/security-review)**
+   - Execute `/security-review` command automatically
+   - Scan for security vulnerabilities
+   - Check for common security issues (SQL injection, XSS, etc.)
+
+4. **Fix Security Issues if Found**
+   - If security issues are identified, automatically fix them
+   - Commit the security fixes
+   - Re-run `/security-review` to verify fixes
+   - Repeat until `/security-review` passes without critical issues
+
+**Review Loop:**
+- Maximum iterations: 3 per review type
+- If issues persist after 3 iterations, report to user and ask for manual intervention
+
+### 6. PR Creation Confirmation
+
+**Ask user before creating PR:**
+
+After all reviews pass successfully, ask the user:
+
+```
+✅ All reviews completed successfully!
+   - Code Review: PASSED
+   - Security Review: PASSED
+
+Would you like to create a Pull Request now? (y/n)
+```
+
+- **If yes**: Proceed to End Processing (Step 7)
+- **If no**: Stop workflow, save current state
+  - User can manually create PR later using:
+    - `jj git push --bookmark <branch-name>`
+    - `gh pr create --head <branch-name> --base main`
+
+### 7. End Processing (PR Creation & JIRA Update)
 
 **Automatically complete the workflow:**
 
@@ -134,9 +186,19 @@ michi spec-impl:complete user-auth PROJ-123
 # JIRA info auto-detected from spec.json
 # Epic + first Story -> "In Progress"
 # TDD implementation
-# PR creation
-# Epic + first Story -> "Ready for Review"
-# PR link commented on JIRA
+# Automatic code review (/review)
+#   - Fix issues if found
+#   - Re-review until passed
+# Automatic security review (/security-review)
+#   - Fix security issues if found
+#   - Re-review until passed
+# Ask user: "Create PR now? (y/n)"
+#   - If yes:
+#     - PR creation
+#     - Epic + first Story -> "Ready for Review"
+#     - PR link commented on JIRA
+#   - If no:
+#     - Save state, exit workflow
 ```
 
 ## JIRA Status Mapping
@@ -165,6 +227,9 @@ To customize, add to `.michi/config.json`:
 
 - **JIRA info not found**: Interactive prompt to skip JIRA integration
 - **JIRA transition fails**: Check available transitions for the current status
+- **Review fails (max iterations exceeded)**: Report issues to user and ask for manual intervention
+- **Security review fails (max iterations exceeded)**: Report vulnerabilities to user and ask for manual intervention
+- **User declines PR creation**: Save current state, workflow stops (user can create PR manually later)
 - **PR creation fails**: Ensure the branch is pushed to remote
 - **JIRA comment fails**: The PR URL is still returned for manual update
 
@@ -174,3 +239,6 @@ To customize, add to `.michi/config.json`:
 - Both Epic AND first Story are updated together
 - The branch name defaults to `feature/{feature-name}`
 - Individual JIRA operations can still be done via `michi jira:transition` and `michi jira:comment`
+- Code reviews (`/review` and `/security-review`) are executed automatically after implementation
+- Review loop has a maximum of 3 iterations per review type to prevent infinite loops
+- User can decline PR creation and manually create it later if needed
