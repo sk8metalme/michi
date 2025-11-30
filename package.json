@@ -87,7 +87,7 @@
     "dotenv": "^17.2.3",
     "exceljs": "^4.4.0",
     "googleapis": "^166.0.0",
-    "inquirer": "^9.2.12",
+    "inquirer": "^13.0.1",
     "jira-client": "^8.2.2",
     "markdown-it": "^14.0.0",
     "turndown": "^7.1.2",
