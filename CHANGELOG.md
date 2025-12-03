@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.0] - 2025-12-03
+
+### Added
+- **Codex統合**: Codex環境のcc-sdd統合とワークフロー機能拡張（#81）
+  - 検証ガイド（`docs/verification-guide.md`）
+  - クイック検証スクリプト（`scripts/quick-verify.sh`）
+  - 新機能テスト（`scripts/test-new-features.ts`）
+  - ワークフローステージテスト（`scripts/test-workflow-stages.ts`）
+  - Confluence承認ユーティリティ（`scripts/utils/confluence-approval.ts`）
+  - リリースノート生成ユーティリティ（`scripts/utils/release-notes-generator.ts`）
+  - テストランナー（`scripts/utils/test-runner.ts`とテストスイート）
+  - Codexテンプレート（`templates/codex/AGENTS.override.md`、`templates/codex/prompts/confluence-sync.md`）
+  - 共通プロジェクト設定テンプレート（`templates/common/.kiro/project.json.template`）
+- **Kiro統合**: Claude Code/Claude AgentにkiroコードレビューとPR確認機能を追加（#79）
+- **Kiro spec-impl**: コードレビューとPR作成確認を追加（#78）
+- **Kiro spec-impl統合**: 統合ワークフローと関連機能を追加（#77）
+- **マルチ環境サポート**: 対話型テスト実行とマルチ環境サポートを追加（#65）
+- **新CLIサポート**: Gemini CLI、Codex CLI、Clineのサポートを追加（#64）
+
+### Changed
+- **依存関係更新**: inquirerを9.3.8から13.0.1にメジャーバージョンアップ（dependabot）
+- **ワークフローオーケストレーター**: `scripts/workflow-orchestrator.ts`を機能拡張
+- **setup-existingコマンド**: `src/commands/setup-existing.ts`を改善
+
+### Refactored
+- **コードクリーンアップ**: 不要なファイルを整理（#75）
+
 ## [0.0.9] - 2025-11-17
 
 ### Added
