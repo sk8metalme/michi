@@ -366,7 +366,7 @@ Confluenceスペース
 npx @sk8metal/michi-cli config:interactive
 
 # または
-npm run config:interactive
+michi config:interactive
 ```
 
 ### 使い方
@@ -397,7 +397,7 @@ npm run config:interactive
 npx @sk8metal/michi-cli config:validate
 
 # または
-npm run config:validate
+michi config:validate
 ```
 
 ## 完全な設定例

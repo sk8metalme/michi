@@ -543,8 +543,8 @@ project = PROJ AND labels = "release"       # リリースタスクのみ
 
 ---
 
-**次のステップ**: 
+**次のステップ**:
 1. tasks.mdを上記テンプレートに従って作成
-2. `npm run phase:run <feature> tasks` 実行
+2. `michi phase:run <feature> tasks` 実行
 3. JIRAに全フェーズのストーリーが自動作成される
 
