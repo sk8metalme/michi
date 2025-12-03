@@ -522,21 +522,25 @@ npm run setup:interactive
 #### Codex CLI
 
 ```bash
-# Step 1: cc-sdd導入（準備中 - 現在はスキップ可能）
-# npx cc-sdd@next --codex --lang ja
+# Step 1: cc-sdd導入（必須）
+npx cc-sdd@latest --codex --lang ja
 
-# Step 2: Michi固有ファイル追加
+# Step 2: Michi拡張をインストール
 npx @sk8metal/michi-cli setup-existing --codex --lang ja
 
 # Step 3: 環境設定
 npm run setup:interactive
 ```
 
-**Codex CLI特有の注意事項**:
+**Codex CLI + cc-sdd統合**:
 
-- Codexは設定ファイル（`~/.codex/config.toml`）中心のアーキテクチャ
-- ルールディレクトリの概念がないため、Michiとの統合は限定的
-- `.codex/docs/` にドキュメント配置のみ対応
+- ✅ **完全対応**: cc-sddとの統合により、Michiワークフロー全機能をサポート
+- ✅ **11個の /kiro:* コマンド**: cc-sddが提供（spec-init, requirements, design, tasks, impl など）
+- ✅ **1個の /prompts:confluence-sync コマンド**: Michi独自（Confluence連携）
+- ✅ **AGENTS.md**: プロジェクトコンテキスト（cc-sdd提供 + Michi拡張）
+- ✅ **`.kiro/` ディレクトリ**: Spec-Driven Development構造
+
+**詳細**: `templates/codex/rules/README.md` を参照
 
 #### Cline (VSCode拡張)
 
