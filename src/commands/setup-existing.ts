@@ -406,6 +406,47 @@ export async function setupExisting(options: SetupOptions): Promise<void> {
     );
   }
 
+  // Codex環境の場合: cc-sddのインストールを促す
+  if (config.environment === 'codex') {
+    console.log('\n📦 Step 3: Setting up Codex CLI integration...');
+    console.log('');
+    console.log('⚠️  Codex CLIではcc-sddのインストールが必要です:');
+    console.log('');
+    console.log('   npx cc-sdd@latest --codex --lang ja');
+    console.log('');
+    console.log('このコマンドにより以下がインストールされます:');
+    console.log('  - 11個の /kiro:* コマンド (.codex/commands/)');
+    console.log('  - AGENTS.md (.codex/docs/)');
+    console.log('  - .kiro/ ディレクトリ構造');
+    console.log('');
+
+    const shouldInstall = await prompt(
+      '今すぐcc-sddをインストールしますか？ [Y/n]: ',
+    );
+
+    if (shouldInstall.toLowerCase() !== 'n') {
+      console.log('\n🚀 Installing cc-sdd...');
+      try {
+        execSync('npx cc-sdd@latest --codex --lang ja', {
+          stdio: 'inherit',
+          cwd: currentDir,
+        });
+        console.log('✅ cc-sdd installed successfully');
+      } catch (error) {
+        console.error('❌ cc-sdd installation failed');
+        console.error(
+          '   Please run manually: npx cc-sdd@latest --codex --lang ja',
+        );
+        throw error;
+      }
+    } else {
+      console.log('⚠️  cc-sddをスキップしました');
+      console.log(
+        '   後で手動で実行してください: npx cc-sdd@latest --codex --lang ja',
+      );
+    }
+  }
+
   // 環境別テンプレートのコピーとレンダリング
   console.log('\n📋 Step 3: Copying and rendering templates...');
 
@@ -467,6 +508,71 @@ export async function setupExisting(options: SetupOptions): Promise<void> {
     }
   } else {
     console.log('   ⚠️  Steering templates not found (skipped)');
+  }
+
+  // Codex環境の場合: Michi独自の拡張ファイルをコピー
+  if (config.environment === 'codex') {
+    console.log('\n🎯 Step 4.1: Installing Michi extensions for Codex...');
+
+    // 1. Confluence同期プロンプトをコピー
+    const confluenceSyncSource = join(
+      templatesDir,
+      'codex/prompts/confluence-sync.md',
+    );
+    const codexPromptsDir = join(currentDir, '.codex/prompts');
+
+    if (existsSync(confluenceSyncSource)) {
+      try {
+        mkdirSync(codexPromptsDir, { recursive: true });
+        cpSync(
+          confluenceSyncSource,
+          join(codexPromptsDir, 'confluence-sync.md'),
+        );
+        console.log('   ✅ Confluence sync command installed');
+        console.log(
+          '      Usage: /prompts:confluence-sync FEATURE=<機能名>',
+        );
+      } catch (error) {
+        console.warn('   ⚠️  Failed to copy confluence-sync.md');
+        if (error instanceof Error && error.message) {
+          console.warn(`   Reason: ${error.message}`);
+        }
+      }
+    } else {
+      console.log(
+        `   ⚠️  Confluence sync template not found: ${confluenceSyncSource}`,
+      );
+    }
+
+    // 2. AGENTS.override.mdをプロジェクトルートにコピー
+    const agentsOverrideSource = join(
+      templatesDir,
+      'codex/AGENTS.override.md',
+    );
+    const agentsOverrideDest = join(currentDir, 'AGENTS.override.md');
+
+    if (existsSync(agentsOverrideSource)) {
+      try {
+        cpSync(agentsOverrideSource, agentsOverrideDest);
+        console.log('   ✅ AGENTS.override.md installed');
+        console.log('      (Michi-specific rules added to Codex AGENTS.md)');
+      } catch (error) {
+        console.warn('   ⚠️  Failed to copy AGENTS.override.md');
+        if (error instanceof Error && error.message) {
+          console.warn(`   Reason: ${error.message}`);
+        }
+      }
+    } else {
+      console.log(
+        `   ⚠️  AGENTS.override.md template not found: ${agentsOverrideSource}`,
+      );
+    }
+
+    console.log('');
+    console.log('📝 Codex extensions summary:');
+    console.log('  ✓ cc-sdd provides: /kiro:* commands (11 total)');
+    console.log('  ✓ Michi adds: /prompts:confluence-sync command');
+    console.log('  ✓ Michi adds: AGENTS.override.md (project-specific rules)');
   }
 
   // Specテンプレートをコピー
@@ -773,12 +879,17 @@ JIRA_ISSUE_TYPE_SUBTASK=10037
     break;
 
   case 'codex':
-    console.log('  3. Codex CLI で開く');
-    console.log('  4. .codex/docs/README.md の制限事項を確認');
-    console.log(
-      '  5. Codex CLI は設定ファイル中心のため、Michiとの統合は限定的',
-    );
-    console.log('     （他の環境の使用を推奨）');
+    console.log('  3. cc-sddとMichi拡張の統合を確認');
+    console.log('     - cc-sdd: /kiro:* コマンド（11個）');
+    console.log('     - Michi: /prompts:confluence-sync コマンド');
+    console.log('     - Michi: AGENTS.override.md（Michi固有ルール）');
+    console.log('  4. 開発開始:');
+    console.log('     /kiro:spec-init FEATURE=<機能名>');
+    console.log('     /kiro:spec-requirements FEATURE=<機能名>');
+    console.log('     /kiro:spec-design FEATURE=<機能名>');
+    console.log('     /prompts:confluence-sync FEATURE=<機能名>');
+    console.log('  5. 環境変数の設定（Confluence連携用）:');
+    console.log('     ATLASSIAN_URL, ATLASSIAN_EMAIL, ATLASSIAN_API_TOKEN');
     break;
 
   case 'cline':

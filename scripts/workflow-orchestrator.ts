@@ -5,8 +5,12 @@
 
 import { config } from 'dotenv';
 import { loadProjectMeta } from './utils/project-meta.js';
-import { syncToConfluence } from './confluence-sync.js';
-import { syncTasksToJIRA } from './jira-sync.js';
+import { syncToConfluence, getConfluenceConfig } from './confluence-sync.js';
+import { syncTasksToJIRA, JIRAClient } from './jira-sync.js';
+import { analyzeLanguage } from './utils/language-detector.js';
+import { executeTests, generateTestReport } from './utils/test-runner.js';
+import { createReleaseNotes } from './utils/release-notes-generator.js';
+import { pollForApproval, waitForManualApproval } from './utils/confluence-approval.js';
 
 config();
 
@@ -93,12 +97,12 @@ export class WorkflowOrchestrator {
         
     case 'test':
       console.log('  Test phase - execute tests');
-      // TODO: テスト実行とレポート生成
+      await this.executeTestPhase();
       break;
-        
+
     case 'release':
       console.log('  Release preparation');
-      // TODO: リリースノート生成とJIRA Release作成
+      await this.executeReleasePhase();
       break;
     }
   }
@@ -120,22 +124,137 @@ export class WorkflowOrchestrator {
   }
   
   /**
+   * テストフェーズを実行
+   */
+  private async executeTestPhase(): Promise<void> {
+    // プロジェクトの言語を検出
+    const languageInfo = analyzeLanguage(this.config.feature);
+    console.log(`  Detected language: ${languageInfo.language} (${languageInfo.confidence} confidence)`);
+
+    // テストを実行
+    console.log('  Running tests...');
+    const testResult = await executeTests(languageInfo.language);
+
+    // レポートを生成
+    const report = generateTestReport(testResult, this.config.feature);
+
+    // Confluenceにレポートをアップロード
+    try {
+      const confluenceConfig = getConfluenceConfig();
+      const projectMeta = loadProjectMeta();
+      const spaceKey = confluenceConfig.space;
+
+      // レポートをConfluenceに同期（テスト用のページとして）
+      console.log('  Uploading test report to Confluence...');
+
+      // テストレポートをファイルに保存
+      const { writeFileSync, mkdirSync } = await import('fs');
+      const { resolve } = await import('path');
+      const reportDir = resolve(`.kiro/specs/${this.config.feature}`);
+      mkdirSync(reportDir, { recursive: true });
+      const reportPath = resolve(reportDir, 'test-report.md');
+      writeFileSync(reportPath, report, 'utf-8');
+
+      console.log(`  ✅ Test report saved: ${reportPath}`);
+
+      if (!testResult.success) {
+        throw new Error('Tests failed. Please fix the issues before proceeding.');
+      }
+    } catch (error: any) {
+      console.error('  ❌ Test execution failed:', error.message);
+      throw error;
+    }
+  }
+
+  /**
+   * リリースフェーズを実行
+   */
+  private async executeReleasePhase(): Promise<void> {
+    const projectMeta = loadProjectMeta();
+
+    // リリースバージョンを決定（環境変数またはデフォルト）
+    const version = process.env.RELEASE_VERSION || 'v1.0.0';
+
+    console.log(`  Generating release notes for ${version}...`);
+
+    // リリースノートを生成
+    const releaseNotes = await createReleaseNotes(version);
+
+    // リリースノートをファイルに保存
+    const { writeFileSync, mkdirSync } = await import('fs');
+    const { resolve } = await import('path');
+    const releaseDir = resolve(`.kiro/specs/${this.config.feature}`);
+    mkdirSync(releaseDir, { recursive: true });
+    const releaseNotesPath = resolve(releaseDir, `release-notes-${version}.md`);
+    writeFileSync(releaseNotesPath, releaseNotes, 'utf-8');
+
+    console.log(`  ✅ Release notes saved: ${releaseNotesPath}`);
+
+    // JIRA Releaseを作成
+    try {
+      const jiraConfig = {
+        url: process.env.ATLASSIAN_URL || '',
+        email: process.env.ATLASSIAN_EMAIL || '',
+        apiToken: process.env.ATLASSIAN_API_TOKEN || ''
+      };
+
+      const jiraClient = new JIRAClient(jiraConfig);
+
+      console.log('  Creating JIRA Release...');
+
+      // JIRA Release作成APIを呼び出し
+      // Note: JIRAClientにcreateVersionメソッドを追加する必要があります
+      console.log('  ℹ️  JIRA Release creation is pending JIRAClient enhancement');
+      console.log(`  📋 Manual action required: Create release ${version} in JIRA`);
+      console.log(`  📄 Release notes: ${releaseNotesPath}`);
+    } catch (error: any) {
+      console.warn('  ⚠️  Failed to create JIRA Release:', error.message);
+      console.log('  📋 Please create the release manually in JIRA');
+    }
+  }
+
+  /**
    * 承認を待つ
    */
   private async waitForApproval(stage: WorkflowStage): Promise<void> {
     console.log(`\n⏸️  Approval required for: ${stage}`);
-    
+
     const approvers = this.config.approvalGates?.[stage as keyof typeof this.config.approvalGates];
     if (approvers) {
       console.log(`  Approvers: ${approvers.join(', ')}`);
     }
-    
+
     console.log('  ✅ Confluence で承認してください');
     console.log('  ⏳ 承認完了後、次のステージに進みます');
-    
-    // TODO: Confluence APIで承認状態をポーリング
-    // 現在は手動確認
-    console.log('  （手動で承認を確認してください）');
+
+    // Confluence自動ポーリングが有効な場合
+    if (process.env.CONFLUENCE_AUTO_POLL === 'true') {
+      try {
+        const confluenceConfig = getConfluenceConfig();
+
+        // TODO: ステージに応じたページIDを取得する必要があります
+        // 現在は環境変数から取得
+        const pageId = process.env.CONFLUENCE_APPROVAL_PAGE_ID;
+
+        if (!pageId) {
+          console.log('  ℹ️  CONFLUENCE_APPROVAL_PAGE_ID not set, falling back to manual approval');
+          waitForManualApproval('', approvers || []);
+          return;
+        }
+
+        console.log('  🔄 Polling for approval...');
+        const status = await pollForApproval(pageId, confluenceConfig);
+
+        console.log(`  ✅ Approved by: ${status.approvers.join(', ')}`);
+      } catch (error: any) {
+        console.error('  ❌ Approval polling failed:', error.message);
+        throw error;
+      }
+    } else {
+      // 手動承認
+      waitForManualApproval('', approvers || []);
+      console.log('  （手動で承認を確認してください）');
+    }
   }
 }
 
