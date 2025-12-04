@@ -331,8 +331,8 @@
 バリデーションを手動で実行する場合：
 
 ```bash
-# 推奨: npmスクリプト経由
-npm run config:validate
+# 推奨: michiコマンド経由
+michi config:validate
 
 # または、npx経由
 npx tsx scripts/utils/config-validator.ts

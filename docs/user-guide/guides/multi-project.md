@@ -220,7 +220,7 @@ ls -la .kiro/specs/
 ### すべてのプロジェクトを一覧表示
 
 ```bash
-npm run project:list
+michi project:list
 ```
 
 出力例：
@@ -239,7 +239,7 @@ npm run project:list
 ### リソースダッシュボード生成
 
 ```bash
-npm run project:dashboard
+michi project:dashboard
 ```
 
 Confluenceに「プロジェクトリソースダッシュボード」ページを作成します。

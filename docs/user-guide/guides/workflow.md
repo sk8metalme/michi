@@ -120,10 +120,10 @@ Cursorで実行：
 
 ```bash
 # 凡例
-npm run confluence:sync <feature> requirements
+michi confluence:sync <feature> requirements
 
 # 具体例
-npm run confluence:sync user-auth requirements
+michi confluence:sync user-auth requirements
 ```
 
 AIが自動的に：
@@ -175,12 +175,10 @@ jj git push
 
 ```bash
 # 凡例
-npm run confluence:sync <feature> design
-npm run excel:sync <feature>
+michi confluence:sync <feature> design
 
 # 具体例
-npm run confluence:sync user-auth design
-npm run excel:sync user-auth
+michi confluence:sync user-auth design
 ```
 
 見積もりExcelファイルが `estimates/<feature>-estimate.xlsx` に出力されます。
@@ -249,10 +247,10 @@ jj git push
 
 ```bash
 # 凡例
-npm run jira:sync <feature>
+michi jira:sync <feature>
 
 # 具体例
-npm run jira:sync user-auth
+michi jira:sync user-auth
 ```
 
 自動的に：
@@ -376,16 +374,6 @@ Phase Aが成功したら、PRを作成します。
 
 ```bash
 # 凡例
-npm run github:create-pr <project-id>/feature/<feature> "[JIRA-XXX] <タイトル>"
-
-# 具体例
-npm run github:create-pr michi/feature/user-auth "[MICHI-123] ユーザー認証実装"
-```
-
-または手動で：
-
-```bash
-# 凡例
 gh pr create --head <project-id>/feature/<feature> --base main \
   --title "[JIRA-XXX] <タイトル>" \
   --body "<説明>"
@@ -500,10 +488,10 @@ gh release create v1.0.0 --title "Release v1.0.0" --notes-file release-notes.md
 
 ```bash
 # 凡例
-npm run workflow:run -- --feature <feature>
+michi workflow:run --feature <feature>
 
 # 具体例
-npm run workflow:run -- --feature user-auth
+michi workflow:run --feature user-auth
 ```
 
 承認ゲートで一時停止し、承認後に次のフェーズに進みます。
