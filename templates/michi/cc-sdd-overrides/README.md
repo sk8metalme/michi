@@ -4,7 +4,7 @@
 
 ## 目的
 
-- **問題**: cc-ssdが生成する`.kiro/settings/`はGit管理外だが、Michi固有のカスタマイズ（日本語、Phase A/B、JIRA/Confluence連携）が必要
+- **問題**: cc-sddが生成する`.kiro/settings/`はGit管理外だが、Michi固有のカスタマイズ（日本語、Phase A/B、JIRA/Confluence連携）が必要
 - **解決**: Michi固有の差分をこのディレクトリで管理し、`setup-existing`実行時に適用
 
 ## ディレクトリ構造
@@ -34,7 +34,7 @@ cc-sdd-overrides/
 
 `setup-existing`コマンド実行時、以下の順序で処理：
 
-1. cc-ssdが汎用テンプレートを生成 → `.kiro/settings/`
+1. cc-sddが汎用テンプレートを生成 → `.kiro/settings/`
 2. Michiがオーバーライドを適用 ← `templates/michi/cc-sdd-overrides/`
 
 結果として、`.kiro/settings/templates/specs/tasks.md`がMichi固有版に上書きされます。
@@ -47,4 +47,4 @@ cc-sdd-overrides/
 ## 参考
 
 - [cc-sdd公式リポジトリ](https://github.com/gotalab/cc-sdd)
-- [setup-existingコマンド実装](../../src/commands/setup-existing.ts)
+- [setup-existingコマンド実装](../../../src/commands/setup-existing.ts)
