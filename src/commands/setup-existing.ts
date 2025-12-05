@@ -48,6 +48,7 @@ interface SetupOptions {
   lang?: string;
   projectName?: string; // camelCase
   jiraKey?: string; // camelCase
+  withAgentSkills?: boolean; // camelCase
 }
 
 interface SetupConfig {
@@ -813,6 +814,44 @@ JIRA_ISSUE_TYPE_SUBTASK=10037
     }
   } else {
     console.log('   ℹ️  .gitignore already contains .env entries');
+  }
+
+  // スキル/サブエージェントのインストール（オプション）
+  if (
+    options.withAgentSkills &&
+    (config.environment === 'claude' || config.environment === 'claude-agent')
+  ) {
+    console.log('\n🎯 Step 7.5: Installing skills and agents...');
+
+    const homeDir = process.env.HOME || process.env.USERPROFILE;
+    if (!homeDir) {
+      console.warn('   ⚠️  Warning: Could not determine home directory');
+    } else {
+      const claudeSkillsDir = join(homeDir, '.claude', 'skills');
+      const claudeAgentsDir = join(homeDir, '.claude', 'agents');
+
+      // スキルのコピー
+      const skillsTemplateDir = join(templatesDir, 'claude', 'skills');
+      if (existsSync(skillsTemplateDir)) {
+        mkdirSync(claudeSkillsDir, { recursive: true });
+        cpSync(skillsTemplateDir, claudeSkillsDir, { recursive: true });
+        console.log(`   ✅ Skills installed to ${claudeSkillsDir}`);
+      } else {
+        console.warn(`   ⚠️  Skills template not found: ${skillsTemplateDir}`);
+      }
+
+      // サブエージェントのコピー
+      const agentsTemplateDir = join(templatesDir, 'claude', 'agents');
+      if (existsSync(agentsTemplateDir)) {
+        mkdirSync(claudeAgentsDir, { recursive: true });
+        cpSync(agentsTemplateDir, claudeAgentsDir, { recursive: true });
+        console.log(`   ✅ Agents installed to ${claudeAgentsDir}`);
+      } else {
+        console.warn(
+          `   ⚠️  Agents template not found: ${agentsTemplateDir}`,
+        );
+      }
+    }
   }
 
   // セットアップバリデーション
