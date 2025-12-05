@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.1] - 2025-12-05
+
+### Fixed
+- **型エラー修正**: `phase-runner.ts`の型安全性を改善（#84）
+  - `EnvironmentAnswers`インターフェースを追加
+  - `answers.suggestedServices`プロパティの型エラー（TS2339）を解消
+  - inquirer.prompt()にジェネリック型パラメータを追加
+- **inquirer v13対応**: 破壊的変更への対応（#84）
+  - `type: 'list'`プロンプトを`type: 'select'`に変更
+  - 影響箇所: `scripts/phase-runner.ts` (2箇所)
+  - すべてのテスト（421件）が正常に動作することを確認
+
+## [0.2.0] - 2025-12-05
+
+### Fixed
+- **セキュリティ脆弱性修正**: jws パッケージの脆弱性（GHSA-869p-cjfg-cm3x）を修正
+
 ## [0.1.0] - 2025-12-03
 
 ### Added

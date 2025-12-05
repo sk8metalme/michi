@@ -827,9 +827,18 @@ async function runEnvironmentSetupPhase(
       ? languageAnalysis.language
       : languageMap[detected.language] || 'その他';
 
-  const answers = await inquirer.prompt([
+  // 型定義: promptの回答 + 追加プロパティ
+  interface EnvironmentAnswers {
+    language: string;
+    ciTool: string;
+    needsDocker: boolean;
+    installDeps?: boolean;
+    suggestedServices?: string[];
+  }
+
+  const answers = await inquirer.prompt<EnvironmentAnswers>([
     {
-      type: 'list',
+      type: 'select',
       name: 'language',
       message:
         languageAnalysis.confidence !== 'low'
@@ -847,7 +856,7 @@ async function runEnvironmentSetupPhase(
       default: defaultLanguage,
     },
     {
-      type: 'list',
+      type: 'select',
       name: 'ciTool',
       message: 'CI/CDツールを選択してください:',
       choices: ['GitHub Actions', 'Screwdriver', 'GitLab CI', 'なし'],
