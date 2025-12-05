@@ -164,7 +164,7 @@ function validateTasks(feature: string): ValidationResult {
     let config;
     try {
       config = loadConfig();
-    } catch (error) {
+    } catch {
       // 設定ファイルの読み込みエラーは無視（デフォルト設定を使用）
       config = { validation: { weekdayNotation: true } };
     }

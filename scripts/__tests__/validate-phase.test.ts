@@ -6,6 +6,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { existsSync, readFileSync } from 'fs';
 import { validatePhase } from '../validate-phase.js';
 import { loadConfig } from '../utils/config-loader.js';
+import type { AppConfig } from '../config/config-schema.js';
 
 // fsモジュールのモック
 vi.mock('fs', () => ({
@@ -193,7 +194,7 @@ describe('validatePhase', () => {
           businessDayCount: true,
           weekendExclusion: true,
         },
-      } as any);
+      } as Partial<AppConfig> as AppConfig);
 
       // Act
       const result = validatePhase('test-feature', 'tasks');
@@ -222,7 +223,7 @@ describe('validatePhase', () => {
           businessDayCount: true,
           weekendExclusion: true,
         },
-      } as any);
+      } as Partial<AppConfig> as AppConfig);
 
       // Act
       const result = validatePhase('test-feature', 'tasks');
@@ -251,7 +252,7 @@ describe('validatePhase', () => {
           businessDayCount: true,
           weekendExclusion: true,
         },
-      } as any);
+      } as Partial<AppConfig> as AppConfig);
 
       // Act
       const result = validatePhase('test-feature', 'tasks');
