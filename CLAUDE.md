@@ -83,7 +83,7 @@ docs/
 - **重要**: `.kiro/settings/` はGit管理外（`.gitignore`に含む）
   - 各開発者がローカルで実行して生成
   - cc-sddのバージョンアップで最新のベストプラクティスを取得
-  - プロジェクト固有の設定は `.kiro/steering/` と `.kiro/specs/` で管理
+  - プロジェクト固有の設定は、ユーザーが `.kiro/steering/` と `.kiro/specs/` を作成して管理
 
 ## 参考リンク
 

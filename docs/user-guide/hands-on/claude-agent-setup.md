@@ -248,11 +248,11 @@ tree -L 3 .kiro .claude
 # ├── settings/                 # cc-sddで生成（Git管理外）
 # │   ├── rules/               # Spec-Driven Development用ルール
 # │   └── templates/           # Spec用テンプレート
-# ├── steering/                # Michiで管理（Gitにコミット）
+# ├── steering/                # ユーザーが作成（プロジェクトでGit管理）
 # │   ├── product.md
 # │   ├── structure.md
 # │   └── tech.md
-# └── specs/                   # 各機能の仕様（Gitにコミット）
+# └── specs/                   # ユーザーが作成（プロジェクトでGit管理）
 #
 # .claude/
 # ├── commands/
