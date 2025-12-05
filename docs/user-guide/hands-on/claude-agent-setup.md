@@ -78,10 +78,18 @@ npx cc-sdd@latest --claude --lang ja
 **実行結果の確認**:
 
 ```
-✅ .claude/rules/ ディレクトリが作成される
-✅ 共通ルールファイルが生成される
-✅ AGENTS.md が生成される
+✅ .kiro/settings/ - Spec-Driven Development用のルールとテンプレート
+✅ .claude/rules/ - Claude固有のルールファイル（廃止予定）
+✅ AGENTS.md - エージェント設定（廃止予定）
 ```
+
+**重要な注意事項**:
+
+> `.kiro/settings/`配下のファイルは**cc-sddツールによって自動生成される汎用テンプレート**です。
+> - これらのファイルは`.gitignore`に含まれており、**Git管理されません**
+> - 各開発者が`npx cc-sdd@latest --claude --lang ja`を実行して生成します
+> - cc-sddのバージョンアップにより、最新のベストプラクティスが自動的に反映されます
+> - プロジェクト固有の設定は`.kiro/steering/`と`.kiro/specs/`に記載します
 
 ### Step 4: Michi固有ファイルの追加
 
@@ -118,13 +126,14 @@ JIRAプロジェクトキー（例: PRJA）: DEMO
 **実行結果の確認**:
 
 ```
-✅ .kiro/settings/templates/ - Specテンプレート
 ✅ .kiro/steering/ - Steeringテンプレート
 ✅ .kiro/project.json - プロジェクトメタデータ
 ✅ .claude/agents/ - Subagent設定ファイル
 ✅ .claude/commands/michi/ - Michi専用コマンド
 ✅ .env - 環境変数テンプレート（権限: 600）
 ```
+
+**注記**: `.kiro/settings/`はStep 3で実行した`cc-sdd`によって生成済みです。
 
 ### Step 5: 環境変数の設定
 
@@ -235,17 +244,15 @@ tree -L 3 .kiro .claude
 
 # 期待される構造:
 # .kiro/
-# ├── project.json
-# ├── settings/
-# │   └── templates/
-# │       ├── design.md
-# │       ├── requirements.md
-# │       └── tasks.md
-# ├── steering/
+# ├── project.json              # Michiで管理（Gitにコミット）
+# ├── settings/                 # cc-sddで生成（Git管理外）
+# │   ├── rules/               # Spec-Driven Development用ルール
+# │   └── templates/           # Spec用テンプレート
+# ├── steering/                # Michiで管理（Gitにコミット）
 # │   ├── product.md
 # │   ├── structure.md
 # │   └── tech.md
-# └── specs/
+# └── specs/                   # 各機能の仕様（Gitにコミット）
 #
 # .claude/
 # ├── commands/

@@ -287,6 +287,46 @@ function copyAndRenderTemplates(
 }
 
 /**
+ * cc-sdd-overridesディレクトリからオーバーライドを適用
+ * @param sourceDir オーバーライドソースディレクトリ
+ * @param destDir 上書き先ディレクトリ
+ * @param context テンプレートコンテキスト
+ */
+function applyOverrides(
+  sourceDir: string,
+  destDir: string,
+  context: ReturnType<typeof createTemplateContext>,
+): void {
+  if (!existsSync(sourceDir)) {
+    return;
+  }
+
+  const entries = readdirSync(sourceDir, { withFileTypes: true });
+
+  for (const entry of entries) {
+    const sourcePath = join(sourceDir, entry.name);
+    const destPath = join(destDir, entry.name);
+
+    if (entry.isDirectory()) {
+      mkdirSync(destPath, { recursive: true });
+      applyOverrides(sourcePath, destPath, context);
+    } else if (entry.isFile()) {
+      // テンプレートレンダリングを適用（.md, .jsonファイル）
+      if (entry.name.endsWith('.md') || entry.name.endsWith('.json')) {
+        const content = readFileSync(sourcePath, 'utf-8');
+        const rendered = renderTemplate(content, context);
+        writeFileSync(destPath, rendered, 'utf-8');
+        if (process.env.DEBUG) {
+          console.log(`   📄 Override applied: ${entry.name}`);
+        }
+      } else {
+        cpSync(sourcePath, destPath);
+      }
+    }
+  }
+}
+
+/**
  * setup-existing コマンドのメイン処理
  */
 export async function setupExisting(options: SetupOptions): Promise<void> {
@@ -625,8 +665,31 @@ export async function setupExisting(options: SetupOptions): Promise<void> {
     console.log('   ⚠️  Spec rules not found (skipped)');
   }
 
+  // cc-sdd-overridesによる上書き
+  const ccSddOverridesDir = join(
+    templatesDir,
+    'michi',
+    'cc-sdd-overrides',
+    'settings',
+  );
+  if (existsSync(ccSddOverridesDir)) {
+    console.log('\n📋 Step 5.1: Applying Michi cc-sdd overrides...');
+    try {
+      applyOverrides(
+        ccSddOverridesDir,
+        join(currentDir, '.kiro/settings'),
+        templateContext,
+      );
+      console.log('   ✅ cc-sdd overrides applied');
+    } catch (error) {
+      throw new Error(
+        `Failed to apply cc-sdd overrides: ${error instanceof Error ? error.message : error}`,
+      );
+    }
+  }
+
   // kiro-spec-tasksテンプレートを上書き（cc-sddのAI-DLC形式をMichiワークフロー形式に置換）
-  console.log('\n📋 Step 5.1: Overriding kiro-spec-tasks template...');
+  console.log('\n📋 Step 5.2: Overriding kiro-spec-tasks command template...');
   const kiroSpecTasksSource = join(
     templatesDir,
     envConfig.templateSource,
