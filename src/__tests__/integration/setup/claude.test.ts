@@ -133,5 +133,100 @@ describe('Claude Environment Setup', () => {
       assertFileContains(projectJson, '"language": "en"');
     });
   });
+
+  describe('Agent Skills Installation', () => {
+    let originalHome: string | undefined;
+    let tempHome: string;
+
+    beforeEach(() => {
+      // Mock HOME environment variable to use a temp directory
+      originalHome = process.env.HOME;
+      tempHome = join(testProject.path, '.test-home');
+      process.env.HOME = tempHome;
+    });
+
+    afterEach(() => {
+      // Restore original HOME
+      if (originalHome !== undefined) {
+        process.env.HOME = originalHome;
+      } else {
+        delete process.env.HOME;
+      }
+    });
+
+    it('should install skills and agents when --with-agent-skills is specified', async () => {
+      await setupExisting({
+        claude: true,
+        projectName: 'Test Project',
+        jiraKey: 'TEST',
+        withAgentSkills: true
+      });
+
+      // Verify skills directory
+      const skillsDir = join(tempHome, '.claude/skills');
+      assertDirectoryExists(skillsDir);
+      assertDirectoryExists(join(skillsDir, 'design-review'));
+      assertDirectoryExists(join(skillsDir, 'e2e-first-planning'));
+      assertDirectoryExists(join(skillsDir, 'oss-license'));
+      assertDirectoryExists(join(skillsDir, 'stable-version'));
+
+      // Verify skill files
+      assertFileExists(join(skillsDir, 'design-review/SKILL.md'));
+      assertFileExists(join(skillsDir, 'e2e-first-planning/SKILL.md'));
+      assertFileExists(join(skillsDir, 'oss-license/SKILL.md'));
+      assertFileExists(join(skillsDir, 'stable-version/SKILL.md'));
+
+      // Verify agents directory
+      const agentsDir = join(tempHome, '.claude/agents');
+      assertDirectoryExists(agentsDir);
+      assertDirectoryExists(join(agentsDir, 'design-reviewer'));
+      assertDirectoryExists(join(agentsDir, 'e2e-first-planner'));
+      assertDirectoryExists(join(agentsDir, 'oss-license-checker'));
+      assertDirectoryExists(join(agentsDir, 'pr-resolver'));
+      assertDirectoryExists(join(agentsDir, 'stable-version-auditor'));
+
+      // Verify agent files
+      assertFileExists(join(agentsDir, 'design-reviewer/AGENT.md'));
+      assertFileExists(join(agentsDir, 'e2e-first-planner/AGENT.md'));
+      assertFileExists(join(agentsDir, 'oss-license-checker/AGENT.md'));
+      assertFileExists(join(agentsDir, 'pr-resolver/AGENT.md'));
+      assertFileExists(join(agentsDir, 'stable-version-auditor/AGENT.md'));
+    });
+
+    it('should not install skills and agents when --with-agent-skills is not specified', async () => {
+      await setupExisting({
+        claude: true,
+        projectName: 'Test Project',
+        jiraKey: 'TEST'
+        // withAgentSkills: false (default)
+      });
+
+      const { existsSync } = await import('fs');
+      const skillsDir = join(tempHome, '.claude/skills');
+      const agentsDir = join(tempHome, '.claude/agents');
+
+      // Skills and agents should not be installed
+      expect(existsSync(skillsDir)).toBe(false);
+      expect(existsSync(agentsDir)).toBe(false);
+    });
+
+    it('should verify PROACTIVELY keyword in agent descriptions', async () => {
+      await setupExisting({
+        claude: true,
+        projectName: 'Test Project',
+        jiraKey: 'TEST',
+        withAgentSkills: true
+      });
+
+      const agentsDir = join(tempHome, '.claude/agents');
+
+      // Check each agent has PROACTIVELY in description
+      assertFileContains(join(agentsDir, 'design-reviewer/AGENT.md'), 'PROACTIVELY');
+      assertFileContains(join(agentsDir, 'e2e-first-planner/AGENT.md'), 'PROACTIVELY');
+      assertFileContains(join(agentsDir, 'oss-license-checker/AGENT.md'), 'PROACTIVELY');
+      assertFileContains(join(agentsDir, 'pr-resolver/AGENT.md'), 'PROACTIVELY');
+      assertFileContains(join(agentsDir, 'stable-version-auditor/AGENT.md'), 'PROACTIVELY');
+    });
+  });
 });
 
