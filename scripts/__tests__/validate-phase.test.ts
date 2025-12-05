@@ -5,6 +5,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { existsSync, readFileSync } from 'fs';
 import { validatePhase } from '../validate-phase.js';
+import { loadConfig } from '../utils/config-loader.js';
 
 // fsモジュールのモック
 vi.mock('fs', () => ({
@@ -18,6 +19,17 @@ vi.mock('../utils/project-meta.js', () => ({
     projectId: 'test-project',
     projectName: 'テストプロジェクト',
     jiraProjectKey: 'TEST',
+  })),
+}));
+
+// config-loaderのモック
+vi.mock('../utils/config-loader.js', () => ({
+  loadConfig: vi.fn(() => ({
+    validation: {
+      weekdayNotation: true,
+      businessDayCount: true,
+      weekendExclusion: true,
+    },
   })),
 }));
 
@@ -159,6 +171,93 @@ describe('validatePhase', () => {
       // Assert
       expect(result.valid).toBe(true); // 警告だけなのでvalid
       expect(result.warnings).toContain(
+        '⚠️  tasks.mdに曜日表記（月、火、水...）が含まれていません',
+      );
+    });
+
+    it('tasksフェーズ: 日本語曜日表記を受け入れる', () => {
+      // Arrange
+      vi.mocked(existsSync).mockReturnValue(true);
+      vi.mocked(readFileSync).mockImplementation((path) => {
+        if (String(path).includes('tasks.md')) {
+          return 'Day 1（月）:\n  - タスク1\nDay 2（火）:\n  - タスク2\n土日休み';
+        }
+        return JSON.stringify({
+          milestones: { design: { completed: true } },
+          jira: { epicKey: 'TEST-1', storyKeys: ['TEST-2'] },
+        });
+      });
+      vi.mocked(loadConfig).mockReturnValue({
+        validation: {
+          weekdayNotation: true,
+          businessDayCount: true,
+          weekendExclusion: true,
+        },
+      } as any);
+
+      // Act
+      const result = validatePhase('test-feature', 'tasks');
+
+      // Assert
+      expect(result.warnings).not.toContain(
+        '⚠️  tasks.mdに曜日表記（月、火、水...）が含まれていません',
+      );
+    });
+
+    it('tasksフェーズ: 英語曜日表記を受け入れる', () => {
+      // Arrange
+      vi.mocked(existsSync).mockReturnValue(true);
+      vi.mocked(readFileSync).mockImplementation((path) => {
+        if (String(path).includes('tasks.md')) {
+          return 'Day 1 (Mon):\n  - Task 1\nDay 2 (Tue):\n  - Task 2\nWeekends excluded';
+        }
+        return JSON.stringify({
+          milestones: { design: { completed: true } },
+          jira: { epicKey: 'TEST-1', storyKeys: ['TEST-2'] },
+        });
+      });
+      vi.mocked(loadConfig).mockReturnValue({
+        validation: {
+          weekdayNotation: true,
+          businessDayCount: true,
+          weekendExclusion: true,
+        },
+      } as any);
+
+      // Act
+      const result = validatePhase('test-feature', 'tasks');
+
+      // Assert
+      expect(result.warnings).not.toContain(
+        '⚠️  tasks.mdに曜日表記（月、火、水...）が含まれていません',
+      );
+    });
+
+    it('tasksフェーズ: バリデーション無効化設定を尊重する', () => {
+      // Arrange
+      vi.mocked(existsSync).mockReturnValue(true);
+      vi.mocked(readFileSync).mockImplementation((path) => {
+        if (String(path).includes('tasks.md')) {
+          return 'タスク一覧（曜日表記なし）'; // 営業日表記がない
+        }
+        return JSON.stringify({
+          milestones: { design: { completed: true } },
+          jira: { epicKey: 'TEST-1', storyKeys: ['TEST-2'] },
+        });
+      });
+      vi.mocked(loadConfig).mockReturnValue({
+        validation: {
+          weekdayNotation: false, // バリデーション無効化
+          businessDayCount: true,
+          weekendExclusion: true,
+        },
+      } as any);
+
+      // Act
+      const result = validatePhase('test-feature', 'tasks');
+
+      // Assert
+      expect(result.warnings).not.toContain(
         '⚠️  tasks.mdに曜日表記（月、火、水...）が含まれていません',
       );
     });

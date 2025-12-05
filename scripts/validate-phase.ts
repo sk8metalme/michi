@@ -6,6 +6,7 @@
 import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
 import { validateFeatureName } from './utils/feature-name-validator.js';
+import { loadConfig } from './utils/config-loader.js';
 
 type Phase =
   | 'requirements'
@@ -159,11 +160,28 @@ function validateTasks(feature: string): ValidationResult {
   if (!existsSync(tasksPath)) {
     errors.push('❌ tasks.md が作成されていません');
   } else {
-    // 営業日表記チェック
-    const tasksContent = readFileSync(tasksPath, 'utf-8');
-    if (!tasksContent.includes('（月）') && !tasksContent.includes('（火）')) {
-      warnings.push('⚠️  tasks.mdに曜日表記（月、火、水...）が含まれていません');
+    // 設定読み込み（バリデーション設定）
+    let config;
+    try {
+      config = loadConfig();
+    } catch (error) {
+      // 設定ファイルの読み込みエラーは無視（デフォルト設定を使用）
+      config = { validation: { weekdayNotation: true } };
     }
+
+    // 営業日表記チェック（設定で無効化可能）
+    const tasksContent = readFileSync(tasksPath, 'utf-8');
+
+    if (config.validation?.weekdayNotation !== false) {
+      // 日本語または英語の曜日表記をチェック
+      const hasJapaneseWeekday = ['（月）', '（火）'].some(p => tasksContent.includes(p));
+      const hasEnglishWeekday = ['(Mon)', '(Tue)'].some(p => tasksContent.includes(p));
+
+      if (!hasJapaneseWeekday && !hasEnglishWeekday) {
+        warnings.push('⚠️  tasks.mdに曜日表記（月、火、水...）が含まれていません');
+      }
+    }
+
     if (!tasksContent.includes('Day 1') && !tasksContent.includes('Day1')) {
       warnings.push('⚠️  tasks.mdに営業日カウント（Day 1, Day 2...）が含まれていません');
     }

@@ -138,12 +138,22 @@ export const WorkflowConfigSchema = z.object({
 });
 
 /**
+ * バリデーション設定スキーマ
+ */
+export const ValidationConfigSchema = z.object({
+  weekdayNotation: z.boolean().default(true),
+  businessDayCount: z.boolean().default(true),
+  weekendExclusion: z.boolean().default(true),
+});
+
+/**
  * 全体設定スキーマ
  */
 export const AppConfigSchema = z.object({
   confluence: ConfluenceConfigSchema.optional(),
   jira: JiraConfigSchema.optional(),
   workflow: WorkflowConfigSchema.optional(),
+  validation: ValidationConfigSchema.optional(),
 });
 
 /**
@@ -166,4 +176,5 @@ export type JiraStoryPoints = z.infer<typeof JiraStoryPointsSchema>;
 export type JiraStatusMapping = z.infer<typeof JiraStatusMappingSchema>;
 export type JiraConfig = z.infer<typeof JiraConfigSchema>;
 export type WorkflowConfig = z.infer<typeof WorkflowConfigSchema>;
+export type ValidationConfig = z.infer<typeof ValidationConfigSchema>;
 export type AppConfig = z.infer<typeof AppConfigSchema>;
