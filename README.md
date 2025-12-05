@@ -4,6 +4,7 @@
 
 AI駆動開発ワークフロー自動化プラットフォーム
 
+[![npm version](https://badge.fury.io/js/@sk8metal%2Fmichi-cli.svg?icon=si%3Anpm)](https://badge.fury.io/js/@sk8metal%2Fmichi-cli)
 [![CI](https://github.com/sk8metalme/michi/actions/workflows/ci.yml/badge.svg)](https://github.com/sk8metalme/michi/actions/workflows/ci.yml)
 [![Test Setup](https://github.com/sk8metalme/michi/actions/workflows/test-setup.yml/badge.svg)](https://github.com/sk8metalme/michi/actions/workflows/test-setup.yml)
 [![Security](https://github.com/sk8metalme/michi/actions/workflows/security.yml/badge.svg)](https://github.com/sk8metalme/michi/actions/workflows/security.yml)
