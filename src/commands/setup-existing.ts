@@ -48,7 +48,7 @@ interface SetupOptions {
   lang?: string;
   projectName?: string; // camelCase
   jiraKey?: string; // camelCase
-  withAgentSkills?: boolean; // camelCase
+  agentSkills?: boolean; // camelCase (デフォルトtrue、--no-agent-skillsでfalse)
 }
 
 interface SetupConfig {
@@ -879,9 +879,9 @@ JIRA_ISSUE_TYPE_SUBTASK=10037
     console.log('   ℹ️  .gitignore already contains .env entries');
   }
 
-  // スキル/サブエージェントのインストール（オプション）
+  // スキル/サブエージェントのインストール（デフォルト有効）
   if (
-    options.withAgentSkills &&
+    options.agentSkills !== false &&
     (config.environment === 'claude' || config.environment === 'claude-agent')
   ) {
     console.log('\n🎯 Step 7.5: Installing skills and agents...');

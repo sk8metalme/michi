@@ -392,7 +392,7 @@ export function createCLI(): Command {
     .option('--lang <code>', 'Language code (default: ja)', 'ja')
     .option('--project-name <name>', 'Project name')
     .option('--jira-key <key>', 'JIRA project key')
-    .option('--with-agent-skills', 'Install agent skills and sub-agents to ~/.claude/')
+    .option('--no-agent-skills', 'Skip installing agent skills and sub-agents to ~/.claude/')
     .action(async (options) => {
       try {
         await setupExisting(options);

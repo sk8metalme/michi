@@ -154,12 +154,12 @@ describe('Claude Environment Setup', () => {
       }
     });
 
-    it('should install skills and agents when --with-agent-skills is specified', async () => {
+    it('should install skills and agents by default', async () => {
       await setupExisting({
         claude: true,
         projectName: 'Test Project',
-        jiraKey: 'TEST',
-        withAgentSkills: true
+        jiraKey: 'TEST'
+        // agentSkills: true (default)
       });
 
       // Verify skills directory
@@ -193,12 +193,12 @@ describe('Claude Environment Setup', () => {
       assertFileExists(join(agentsDir, 'stable-version-auditor/AGENT.md'));
     });
 
-    it('should not install skills and agents when --with-agent-skills is not specified', async () => {
+    it('should not install skills and agents when --no-agent-skills is specified', async () => {
       await setupExisting({
         claude: true,
         projectName: 'Test Project',
-        jiraKey: 'TEST'
-        // withAgentSkills: false (default)
+        jiraKey: 'TEST',
+        agentSkills: false  // --no-agent-skills
       });
 
       const { existsSync } = await import('fs');
@@ -214,8 +214,8 @@ describe('Claude Environment Setup', () => {
       await setupExisting({
         claude: true,
         projectName: 'Test Project',
-        jiraKey: 'TEST',
-        withAgentSkills: true
+        jiraKey: 'TEST'
+        // agentSkills: true (default)
       });
 
       const agentsDir = join(tempHome, '.claude/agents');
