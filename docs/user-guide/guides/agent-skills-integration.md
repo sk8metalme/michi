@@ -186,13 +186,17 @@ Michiの既存コマンドは、適切なタイミングでこれらのスラッ
 
 **症状**: コマンド実行時に「スキルが見つかりません」エラー
 
+**原因**:
+- セットアップ時に`--no-agent-skills`オプションを使用した
+- `~/.claude/skills/`または`~/.claude/agents/`が削除された
+
 **解決策**:
 ```bash
 # スキル/サブエージェントを再インストール
-npx @sk8metal/michi-cli setup-existing \
-  --claude \
-  --with-agent-skills
+npx @sk8metal/michi-cli setup-existing --claude --lang ja
 ```
+
+**Note**: デフォルトでスキル/サブエージェントがインストールされます。`--no-agent-skills`オプションを使用しないでください。
 
 ### サブエージェントが自動発動しない
 

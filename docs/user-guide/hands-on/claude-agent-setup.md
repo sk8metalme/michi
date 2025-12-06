@@ -93,9 +93,29 @@ npx cc-sdd@latest --claude --lang ja
 
 ### Step 4: Michi固有ファイルの追加
 
+#### 基本セットアップ
+
 ```bash
 # Michi専用のファイルを追加（Claude Subagents向け）
 npx @sk8metal/michi-cli setup-existing --claude-agent --lang ja
+```
+
+このコマンドは、デフォルトで以下を実行します：
+1. Michiワークフロー用のファイル・ディレクトリを作成
+2. プロジェクト固有のSubagent設定を`.claude/agents/`に配置
+3. **汎用スキル/サブエージェントを `~/.claude/` にインストール**（自動）
+4. スラッシュコマンドを `.claude/commands/michi/` に配置
+
+#### オプション設定
+
+**スキル/サブエージェントのインストールをスキップする場合**:
+
+```bash
+# --no-agent-skills オプションを使用
+npx @sk8metal/michi-cli setup-existing \
+  --claude-agent \
+  --lang ja \
+  --no-agent-skills
 ```
 
 **対話的プロンプト**:
@@ -128,12 +148,29 @@ JIRAプロジェクトキー（例: PRJA）: DEMO
 ```
 ✅ .kiro/steering/ - Steeringテンプレート
 ✅ .kiro/project.json - プロジェクトメタデータ
-✅ .claude/agents/ - Subagent設定ファイル
+✅ .claude/agents/ - Subagent設定ファイル（プロジェクト固有）
 ✅ .claude/commands/michi/ - Michi専用コマンド
+✅ ~/.claude/skills/ - AI開発支援スキル（汎用、自動インストール）
+✅ ~/.claude/agents/ - 汎用サブエージェント（自動インストール）
 ✅ .env - 環境変数テンプレート（権限: 600）
 ```
 
-**注記**: `.kiro/settings/`はStep 3で実行した`cc-sdd`によって生成済みです。
+**注記**:
+- `.kiro/settings/`はStep 3で実行した`cc-sdd`によって生成済みです
+- `.claude/agents/`（プロジェクト内）と`~/.claude/agents/`（ホームディレクトリ）は異なります（詳細は下記参照）
+
+#### 💡 プロジェクト固有 vs 汎用のサブエージェント
+
+**重要**: `--claude-agent`環境では、2種類のサブエージェントが使用されます：
+
+| 種類 | 場所 | 用途 | 管理 |
+|------|------|------|------|
+| **プロジェクト固有** | `.claude/agents/` | プロジェクト独自の開発フロー・ルール | プロジェクトごとにカスタマイズ |
+| **汎用** | `~/.claude/agents/` | design-review、oss-license等の一般的な開発支援 | 全プロジェクトで共通利用 |
+
+両方のサブエージェントが同時に利用可能で、名前の衝突はありません。
+
+`--claude` vs `--claude-agent`の詳細な違いについては、[Claude Codeセットアップガイド](./claude-setup.md#-claude-vs-claude-agent-の違い)を参照してください。
 
 ### Step 5: 環境変数の設定
 
@@ -331,8 +368,10 @@ Use the developer agent to implement the health-check-endpoint feature
 - [ ] `michi --version` が正常に動作する
 - [ ] `.kiro/project.json` が存在し、正しい内容が含まれている
 - [ ] `.env` ファイルが存在し、認証情報が設定されている
-- [ ] `.claude/agents/` ディレクトリにSubagent設定ファイルが存在する
+- [ ] `.claude/agents/` ディレクトリにSubagent設定ファイル（プロジェクト固有）が存在する
 - [ ] `.claude/commands/michi/` ディレクトリにコマンドファイルが存在する
+- [ ] `~/.claude/skills/` ディレクトリに汎用スキルが存在する（`--no-agent-skills`を使用しなかった場合）
+- [ ] `~/.claude/agents/` ディレクトリに汎用サブエージェントが存在する（`--no-agent-skills`を使用しなかった場合）
 - [ ] `gh auth status` が成功する
 - [ ] Claude Code内で `/agents` でSubagentが表示される
 
@@ -459,6 +498,24 @@ cat .claude/agents/manager-agent.md
    ```
 
 2. Claude Codeを再起動して、`/agents`コマンドでエージェントが表示されるか確認
+
+#### スキル/サブエージェント（汎用）が見つからない
+
+**症状**: コマンド実行時に「スキルが見つかりません」エラー
+
+**原因**:
+- セットアップ時に`--no-agent-skills`オプションを使用した
+- `~/.claude/skills/`または`~/.claude/agents/`が削除された
+
+**解決策**:
+```bash
+# スキル/サブエージェントを再インストール
+npx @sk8metal/michi-cli setup-existing --claude-agent --lang ja
+```
+
+**Note**: デフォルトでスキル/サブエージェントがインストールされます。`--no-agent-skills`オプションを使用しないでください。
+
+**重要**: `.claude/agents/`（プロジェクト固有）と`~/.claude/agents/`（汎用）は異なります。汎用スキル/サブエージェントは`~/.claude/`配下にインストールされます。
 
 #### エージェント呼び出しが機能しない
 

@@ -83,9 +83,28 @@ npx cc-sdd@latest --claude --lang ja
 
 ### Step 4: Michi固有ファイルの追加
 
+#### 基本セットアップ
+
 ```bash
 # Michi専用のファイルを追加
 npx @sk8metal/michi-cli setup-existing --claude --lang ja
+```
+
+このコマンドは、デフォルトで以下を実行します：
+1. Michiワークフロー用のファイル・ディレクトリを作成
+2. **スキル/サブエージェントを `~/.claude/` にインストール**（自動）
+3. スラッシュコマンドを `.claude/commands/michi/` に配置
+
+#### オプション設定
+
+**スキル/サブエージェントのインストールをスキップする場合**:
+
+```bash
+# --no-agent-skills オプションを使用
+npx @sk8metal/michi-cli setup-existing \
+  --claude \
+  --lang ja \
+  --no-agent-skills
 ```
 
 **対話的プロンプト**:
@@ -120,8 +139,24 @@ JIRAプロジェクトキー（例: PRJA）: DEMO
 ✅ .kiro/steering/ - Steeringテンプレート
 ✅ .kiro/project.json - プロジェクトメタデータ
 ✅ .claude/commands/michi/ - Michi専用コマンド
+✅ ~/.claude/skills/ - AI開発支援スキル（自動インストール）
+✅ ~/.claude/agents/ - 汎用サブエージェント（自動インストール）
 ✅ .env - 環境変数テンプレート（権限: 600）
 ```
+
+#### 💡 `--claude` vs `--claude-agent` の違い
+
+Michiは2つのClaude Code環境をサポートしています：
+
+| 項目 | `--claude` | `--claude-agent` |
+|------|-----------|-----------------|
+| **用途** | ルールベースのClaude Code環境 | サブエージェント活用環境 |
+| **プロジェクト内ディレクトリ** | `.claude/rules/` | `.claude/agents/` |
+| **テンプレート** | `templates/claude/` | `templates/claude-agent/` |
+| **推奨ユーザー** | Claude Codeの標準利用者 | カスタムサブエージェントを開発したいユーザー |
+| **スキル/サブエージェント** | `~/.claude/`に汎用スキルをインストール（共通） | `~/.claude/`に汎用スキルをインストール（共通） |
+
+**重要**: どちらの環境でも、デフォルトで汎用スキル/サブエージェント（design-review、oss-license等）が`~/.claude/`にインストールされます。これらはプロジェクト固有のカスタムサブエージェント（`--claude-agent`で配置される）とは別のものです。
 
 ### Step 5: 環境変数の設定
 
@@ -261,6 +296,8 @@ claude rules list
 - [ ] `.env` ファイルが存在し、認証情報が設定されている
 - [ ] `.claude/rules/` ディレクトリにルールファイルが存在する
 - [ ] `.claude/commands/michi/` ディレクトリにコマンドファイルが存在する
+- [ ] `~/.claude/skills/` ディレクトリにスキルが存在する（`--no-agent-skills`を使用しなかった場合）
+- [ ] `~/.claude/agents/` ディレクトリにサブエージェントが存在する（`--no-agent-skills`を使用しなかった場合）
 - [ ] `gh auth status` が成功する
 - [ ] `claude rules list` でMichiのルールが表示される
 
@@ -345,6 +382,22 @@ ls -la .claude/commands/michi/
 # ファイルが存在するか確認
 cat .claude/commands/michi/confluence-sync.md
 ```
+
+#### スキル/サブエージェントが見つからない
+
+**症状**: コマンド実行時に「スキルが見つかりません」エラー
+
+**原因**:
+- セットアップ時に`--no-agent-skills`オプションを使用した
+- `~/.claude/skills/`または`~/.claude/agents/`が削除された
+
+**解決策**:
+```bash
+# スキル/サブエージェントを再インストール
+npx @sk8metal/michi-cli setup-existing --claude --lang ja
+```
+
+**Note**: デフォルトでスキル/サブエージェントがインストールされます。`--no-agent-skills`オプションを使用しないでください。
 
 #### 環境変数が読み込まれない
 
