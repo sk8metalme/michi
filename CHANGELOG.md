@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2025-12-07
+
+### Changed
+- **デフォルトでagent skillsをインストール**: Claude Code環境（`--claude`/`--claude-agent`）で、スキル/サブエージェントがデフォルトでインストールされるように変更
+  - 従来の`--with-agent-skills`オプションを`--no-agent-skills`オプションに変更
+  - `~/.claude/skills/`と`~/.claude/agents/`に汎用スキル/サブエージェントを自動インストール
+  - スキップしたい場合は`--no-agent-skills`オプションを使用
+  - 影響箇所: `src/cli.ts`, `src/commands/setup-existing.ts`
+
+### Improved
+- **セットアップガイドの大幅な改善**: ドキュメント全体の品質と一貫性を向上
+  - `--claude` vs `--claude-agent`の違いを明確化
+  - プロジェクト固有vs汎用のサブエージェントの説明を追加
+  - セットアップ完了チェックリストにスキル/サブエージェントの確認項目を追加
+  - トラブルシューティングセクションを充実
+  - デフォルト動作の説明を各所に追加
+  - 影響箇所:
+    - `docs/user-guide/guides/agent-skills-integration.md`
+    - `docs/user-guide/hands-on/claude-setup.md`
+    - `docs/user-guide/hands-on/claude-agent-setup.md`
+    - その他8つのドキュメントファイル
+
 ## [0.2.1] - 2025-12-05
 
 ### Fixed
