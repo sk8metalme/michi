@@ -303,6 +303,8 @@ npm install
 
 ### Steering
 
+**注意**: `/kiro:steering`コマンドで作成（セットアップ時には自動生成されません）
+
 - `.kiro/steering/product.md`
 - `.kiro/steering/tech.md`
 - `.kiro/steering/structure.md`

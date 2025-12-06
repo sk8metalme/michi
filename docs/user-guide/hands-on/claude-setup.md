@@ -76,9 +76,9 @@ npx cc-sdd@latest --claude --lang ja
 **実行結果の確認**:
 
 ```
-✅ .claude/rules/ ディレクトリが作成される
-✅ 共通ルールファイルが生成される
-✅ AGENTS.md が生成される
+✅ .kiro/settings/rules/ - Spec-Driven Development用のルールファイル
+✅ .kiro/settings/templates/ - Spec用テンプレート（requirements.md, design.md等）
+✅ CLAUDE.md - プロジェクトルートへのメインルールファイル
 ```
 
 ### Step 4: Michi固有ファイルの追加
@@ -217,17 +217,18 @@ tree -L 3 .kiro .claude
 
 # 期待される構造:
 # .kiro/
-# ├── project.json
-# ├── settings/
-# │   └── templates/
+# ├── project.json              # Michiで管理（Gitにコミット）
+# ├── settings/                 # cc-sddで生成（Git管理外）
+# │   ├── rules/               # Spec-Driven Development用ルール
+# │   └── templates/           # Spec用テンプレート
 # │       ├── design.md
 # │       ├── requirements.md
 # │       └── tasks.md
-# ├── steering/
+# ├── steering/                # /kiro:steeringコマンドで作成（Git管理）
 # │   ├── product.md
 # │   ├── structure.md
 # │   └── tech.md
-# └── specs/
+# └── specs/                   # /kiro:spec-initで作成（Git管理）
 #
 # .claude/
 # ├── commands/
@@ -388,7 +389,7 @@ gh auth setup-git
 
 ## 🔗 外部リンク
 
-- [Claude Code公式ドキュメント](https://claude.ai/code)
+- [Claude Code公式ドキュメント](https://docs.anthropic.com/en/docs/claude-code)
 - [cc-sdd公式ドキュメント](https://github.com/gotalab/cc-sdd)
 - [Michi GitHubリポジトリ](https://github.com/sk8metalme/michi)
 

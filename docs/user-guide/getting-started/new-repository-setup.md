@@ -128,7 +128,7 @@ npm run setup:interactive
 1. **cc-sdd導入（Step 1）**:
    - `.kiro/settings/` - テンプレート設定
    - `.cursor/commands/kiro/` または `.claude/commands/kiro/` - 11のスラッシュコマンド
-   - `AGENTS.md` または `CLAUDE.md` - プロジェクト設定
+   - `CLAUDE.md` - プロジェクト設定
 
 2. **Michi固有ファイル追加（Step 2）**:
    - 共通ルール（`.cursor/rules/` または `.claude/rules/`）

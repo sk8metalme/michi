@@ -60,7 +60,7 @@ npx cc-sdd@next --lang ja --windsurf
 **実行内容:**
 - `.kiro/settings/` にテンプレート作成
 - `.cursor/commands/kiro/` または `.claude/commands/kiro/` にコマンド作成
-- `AGENTS.md` または `CLAUDE.md` にプロジェクト設定追加
+- `CLAUDE.md` にプロジェクト設定追加
 
 **cc-sdd準拠アーキテクチャ（Issue #35）:**
 - Michiは**単一の英語テンプレート + プレースホルダー**でcc-sdd準拠を実現
@@ -97,7 +97,7 @@ cc-sddは、AI駆動開発ワークフローのコアフレームワークです
 
 - `.kiro/settings/` - テンプレート設定
 - `.cursor/commands/kiro/` - 11のスラッシュコマンド
-- `AGENTS.md` - プロジェクト設定
+- `CLAUDE.md` - プロジェクト設定
 
 **実行例（IDE別）**:
 

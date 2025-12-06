@@ -90,11 +90,10 @@ ls -la .kiro/
 以下のディレクトリ/ファイルが存在するはずです：
 
 ```
-drwxr-xr-x  5 user  staff  160 Jan 15 10:00 .
+drwxr-xr-x  4 user  staff  128 Jan 15 10:00 .
 drwxr-xr-x  10 user  staff  320 Jan 15 10:00 ..
 -rw-r--r--  1 user  staff  512 Jan 15 10:00 project.json
 drwxr-xr-x  3 user  staff   96 Jan 15 10:00 settings
-drwxr-xr-x  4 user  staff  128 Jan 15 10:00 steering
 drwxr-xr-x  2 user  staff   64 Jan 15 10:00 specs
 ```
 
@@ -102,8 +101,9 @@ drwxr-xr-x  2 user  staff   64 Jan 15 10:00 specs
 
 - ✅ `.kiro/project.json` が存在
 - ✅ `.kiro/settings/templates/` が存在
-- ✅ `.kiro/steering/` が存在
 - ✅ `.kiro/specs/` が存在（空でもOK）
+
+**注意**: `.kiro/steering/` は `/kiro:steering` コマンドで必要に応じて作成します（セットアップ直後には存在しません）。
 
 → **すべて存在する場合、Step 1に進んでください**
 

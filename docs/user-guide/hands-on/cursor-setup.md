@@ -78,9 +78,9 @@ npx cc-sdd@latest --cursor --lang ja
 **実行結果の確認**:
 
 ```
-✅ .cursor/rules/ ディレクトリが作成される
-✅ 共通ルールファイルが生成される
-✅ AGENTS.md が生成される
+✅ .kiro/settings/rules/ - Spec-Driven Development用のルールファイル
+✅ .kiro/settings/templates/ - Spec用テンプレート（requirements.md, design.md等）
+✅ CLAUDE.md - プロジェクトルートへのメインルールファイル
 ```
 
 ### Step 4: Michi固有ファイルの追加
@@ -254,17 +254,18 @@ tree -L 3 .kiro .cursor
 
 # 期待される構造:
 # .kiro/
-# ├── project.json
-# ├── settings/
-# │   └── templates/
+# ├── project.json              # Michiで管理（Gitにコミット）
+# ├── settings/                 # cc-sddで生成（Git管理外）
+# │   ├── rules/               # Spec-Driven Development用ルール
+# │   └── templates/           # Spec用テンプレート
 # │       ├── design.md
 # │       ├── requirements.md
 # │       └── tasks.md
-# ├── steering/
+# ├── steering/                # /kiro:steeringコマンドで作成（Git管理）
 # │   ├── product.md
 # │   ├── structure.md
 # │   └── tech.md
-# └── specs/
+# └── specs/                   # /kiro:spec-initで作成（Git管理）
 #
 # .cursor/
 # ├── commands/

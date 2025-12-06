@@ -40,7 +40,7 @@
 
 - [ ] Michiがインストールされている
   ```bash
-  michi --version  # 0.0.9以上
+  michi --version  # 0.2.0以上
   ```
 
 - [ ] Michiコマンドが実行できる
@@ -62,10 +62,11 @@
   # requirements.md, design.md, tasks.md が存在
   ```
 
-- [ ] `.kiro/steering/` が存在する
+- [ ] `.kiro/steering/` が存在する（オプション: `/kiro:steering`コマンドで作成）
   ```bash
   ls -la .kiro/steering/
-  # product.md, tech.md, structure.md が存在
+  # セットアップ直後は存在しない。必要に応じて /kiro:steering コマンドで作成
+  # 作成後は product.md, tech.md, structure.md が存在
   ```
 
 - [ ] 環境別ルールファイルが存在する（Cursor IDEの場合）
