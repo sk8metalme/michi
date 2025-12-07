@@ -121,20 +121,6 @@ function question(rl: readline.Interface, query: string): Promise<string> {
 }
 
 /**
- * Yes/No質問
- */
-async function confirm(rl: readline.Interface, prompt: string, defaultValue: boolean = true): Promise<boolean> {
-  const defaultText = defaultValue ? '[Y/n]' : '[y/N]';
-  const answer = await question(rl, `${prompt} ${defaultText}: `);
-
-  if (!answer) {
-    return defaultValue;
-  }
-
-  return answer.toLowerCase() === 'y' || answer.toLowerCase() === 'yes';
-}
-
-/**
  * 選択肢を表示
  */
 async function select<T extends { value: string; label: string }>(
@@ -676,11 +662,6 @@ async function main(): Promise<number> {
     console.log('Phase Bテスト（手動回帰、負荷、セキュリティ）を対話的に作成します。\n');
 
     // テストタイプを選択
-    const testTypeChoices = TEST_TYPES.map(t => ({
-      value: t.value,
-      label: `${t.label} - ${t.description}`
-    }));
-
     console.log('テストタイプを選択してください:');
     TEST_TYPES.forEach((t, index) => {
       console.log(`  ${index + 1}. ${t.label}`);

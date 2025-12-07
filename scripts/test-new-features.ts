@@ -3,7 +3,7 @@
  */
 
 import { executeTests, generateTestReport } from './utils/test-runner.js';
-import { createReleaseNotes, getCommits, generateReleaseNotes, formatReleaseNotes } from './utils/release-notes-generator.js';
+import { getCommits, generateReleaseNotes, formatReleaseNotes } from './utils/release-notes-generator.js';
 import { getApprovalStatus } from './utils/confluence-approval.js';
 
 async function testTestRunner() {

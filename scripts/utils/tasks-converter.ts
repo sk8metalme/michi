@@ -4,8 +4,7 @@
  * AI-DLC形式のtasks.mdをMichiが期待するPhase構造に変換
  */
 
-import { writeFileSync, copyFileSync, existsSync } from 'fs';
-import { join, dirname } from 'path';
+import { writeFileSync } from 'fs';
 import type {
   AIDLCDocument,
   AIDLCCategory,
@@ -20,7 +19,6 @@ import { readFileSync } from 'fs';
 import {
   getWeekdayNotation,
   getWeekdayRangeNotation,
-  getWeekNumber,
   ensureBusinessDay,
 } from './business-days.js';
 
@@ -77,8 +75,8 @@ interface PhaseMapping {
  */
 function mapCategoryToPhase(
   category: AIDLCCategory,
-  index: number,
-  totalCategories: number,
+  _index: number,
+  _totalCategories: number,
 ): PhaseMapping {
   const title = category.title.toLowerCase();
 
@@ -364,7 +362,7 @@ export function convertToMichiFormat(
     const group = phaseGroups.get(mapping.phaseId)!;
 
     // タスクをStoryに変換
-    category.tasks.forEach((task, taskIndex) => {
+    category.tasks.forEach(task => {
       const storyContent = convertTaskToStory(
         task,
         mapping.phaseId,

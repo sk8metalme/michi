@@ -299,7 +299,7 @@ ${jiraLink}
   // 2. Epic と Story を「レビュー待ち」に遷移
   try {
     await transitionEpicAndStory(jiraInfo, statusMapping.readyForReview);
-  } catch (error) {
+  } catch (_error) {
     console.error(
       `⚠️  JIRA ステータス更新に失敗しましたが、PR は作成されています: ${prUrl}`,
     );

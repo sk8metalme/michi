@@ -8,10 +8,7 @@ import { join } from 'path';
 import {
   extractComponents,
   extractFlows,
-  extractRequirements,
-  type Component,
-  type Flow,
-  type Requirement
+  extractRequirements
 } from './utils/markdown-parser.js';
 import {
   loadTestSpecTemplate,
@@ -24,9 +21,8 @@ import {
  * 単体テスト仕様書を生成
  */
 export async function generateUnitTestSpec(feature: string, projectRoot: string = process.cwd()): Promise<string> {
-  const requirementsPath = join(projectRoot, '.kiro', 'specs', feature, 'requirements.md');
   const designPath = join(projectRoot, '.kiro', 'specs', feature, 'design.md');
-  
+
   if (!existsSync(designPath)) {
     throw new Error(`design.mdが見つかりません: ${designPath}`);
   }
@@ -229,7 +225,7 @@ export async function generateE2ETestSpec(feature: string, projectRoot: string =
         'テストユーザーが作成されている',
         'テストデータが準備されている'
       ],
-      steps: req.acceptanceCriteria.slice(0, 3).map((ac, idx) => 
+      steps: req.acceptanceCriteria.slice(0, 3).map(ac =>
         `${ac.substring(0, 100)}...を実行`
       ),
       expectedResults: req.acceptanceCriteria.map(ac => 

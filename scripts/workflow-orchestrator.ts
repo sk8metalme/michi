@@ -6,7 +6,7 @@
 import { config } from 'dotenv';
 import { loadProjectMeta } from './utils/project-meta.js';
 import { syncToConfluence, getConfluenceConfig } from './confluence-sync.js';
-import { syncTasksToJIRA, JIRAClient } from './jira-sync.js';
+import { syncTasksToJIRA } from './jira-sync.js';
 import { analyzeLanguage } from './utils/language-detector.js';
 import { executeTests, generateTestReport } from './utils/test-runner.js';
 import { createReleaseNotes } from './utils/release-notes-generator.js';
@@ -140,10 +140,6 @@ export class WorkflowOrchestrator {
 
     // Confluenceにレポートをアップロード
     try {
-      const confluenceConfig = getConfluenceConfig();
-      const projectMeta = loadProjectMeta();
-      const spaceKey = confluenceConfig.space;
-
       // レポートをConfluenceに同期（テスト用のページとして）
       console.log('  Uploading test report to Confluence...');
 
@@ -170,8 +166,6 @@ export class WorkflowOrchestrator {
    * リリースフェーズを実行
    */
   private async executeReleasePhase(): Promise<void> {
-    const projectMeta = loadProjectMeta();
-
     // リリースバージョンを決定（環境変数またはデフォルト）
     const version = process.env.RELEASE_VERSION || 'v1.0.0';
 
@@ -192,14 +186,6 @@ export class WorkflowOrchestrator {
 
     // JIRA Releaseを作成
     try {
-      const jiraConfig = {
-        url: process.env.ATLASSIAN_URL || '',
-        email: process.env.ATLASSIAN_EMAIL || '',
-        apiToken: process.env.ATLASSIAN_API_TOKEN || ''
-      };
-
-      const jiraClient = new JIRAClient(jiraConfig);
-
       console.log('  Creating JIRA Release...');
 
       // JIRA Release作成APIを呼び出し

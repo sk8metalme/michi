@@ -41,19 +41,6 @@ export function validateTasksFormat(tasksPath: string): void {
 
   // 2. フェーズ構造の検証（新旧両方をサポート）
 
-  // 新ワークフロー構造（推奨）
-  const newWorkflowPhases = [
-    'Phase 0.1:', // 要件定義
-    'Phase 0.2:', // 設計
-    'Phase 1:',   // 環境構築（任意）
-    'Phase 2:',   // TDD実装
-    'Phase A:',   // PR前自動テスト（任意）
-    'Phase 3:',   // 追加QA（任意）
-    'Phase B:',   // リリース準備テスト（任意）
-    'Phase 4:',   // リリース準備
-    'Phase 5:',   // リリース
-  ];
-
   // 旧6-Phase構造（互換性のためサポート）
   const legacyPhases = [
     'Phase 0: 要件定義（Requirements）',
