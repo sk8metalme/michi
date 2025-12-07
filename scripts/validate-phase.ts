@@ -7,6 +7,7 @@ import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
 import { validateFeatureName } from './utils/feature-name-validator.js';
 import { loadConfig } from './utils/config-loader.js';
+import { type SpecJson } from './utils/spec-updater.js';
 
 type Phase =
   | 'requirements'
@@ -28,7 +29,7 @@ interface ValidationResult {
 /**
  * spec.jsonを読み込み
  */
-function loadSpecJson(feature: string): any {
+function loadSpecJson(feature: string): SpecJson {
   const specPath = join(process.cwd(), '.kiro', 'specs', feature, 'spec.json');
   
   if (!existsSync(specPath)) {
@@ -58,11 +59,12 @@ function validateRequirements(feature: string): ValidationResult {
   }
   
   // 2. spec.json読み込み
-  let spec: any;
+  let spec: SpecJson;
   try {
     spec = loadSpecJson(feature);
-  } catch (error: any) {
-    errors.push(`❌ spec.json読み込みエラー: ${error.message}`);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    errors.push(`❌ spec.json読み込みエラー: ${message}`);
     return { phase: 'requirements', valid: false, errors, warnings };
   }
   
@@ -110,11 +112,12 @@ function validateDesign(feature: string): ValidationResult {
   }
   
   // 2. spec.json読み込み
-  let spec: any;
+  let spec: SpecJson;
   try {
     spec = loadSpecJson(feature);
-  } catch (error: any) {
-    errors.push(`❌ spec.json読み込みエラー: ${error.message}`);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    errors.push(`❌ spec.json読み込みエラー: ${message}`);
     return { phase: 'design', valid: false, errors, warnings };
   }
   
@@ -191,11 +194,12 @@ function validateTasks(feature: string): ValidationResult {
   }
   
   // 2. spec.json読み込み
-  let spec: any;
+  let spec: SpecJson;
   try {
     spec = loadSpecJson(feature);
-  } catch (error: any) {
-    errors.push(`❌ spec.json読み込みエラー: ${error.message}`);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    errors.push(`❌ spec.json読み込みエラー: ${message}`);
     return { phase: 'tasks', valid: false, errors, warnings };
   }
   

@@ -1109,7 +1109,7 @@ async function syncTasksToJIRA(featureName: string): Promise<void> {
 
       // Epic Linkは手動設定が必要（JIRA Cloudの制約）
       console.log(`  ℹ️  Epic: ${epic.key} に手動でリンクしてください`);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(
         `  ❌ Failed to create Story "${storyTitle}":`,
         error instanceof Error ? error.message : error,

@@ -61,8 +61,9 @@ export class WorkflowOrchestrator {
         }
         
         console.log(`✅ Stage completed: ${stage}`);
-      } catch (error: any) {
-        console.error(`❌ Stage failed: ${stage}`, error.message);
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : String(error);
+        console.error(`❌ Stage failed: ${stage}`, message);
         throw error;
       }
     }
@@ -156,8 +157,9 @@ export class WorkflowOrchestrator {
       if (!testResult.success) {
         throw new Error('Tests failed. Please fix the issues before proceeding.');
       }
-    } catch (error: any) {
-      console.error('  ❌ Test execution failed:', error.message);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.error('  ❌ Test execution failed:', message);
       throw error;
     }
   }
@@ -193,8 +195,9 @@ export class WorkflowOrchestrator {
       console.log('  ℹ️  JIRA Release creation is pending JIRAClient enhancement');
       console.log(`  📋 Manual action required: Create release ${version} in JIRA`);
       console.log(`  📄 Release notes: ${releaseNotesPath}`);
-    } catch (error: any) {
-      console.warn('  ⚠️  Failed to create JIRA Release:', error.message);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.warn('  ⚠️  Failed to create JIRA Release:', message);
       console.log('  📋 Please create the release manually in JIRA');
     }
   }
@@ -232,8 +235,9 @@ export class WorkflowOrchestrator {
         const status = await pollForApproval(pageId, confluenceConfig);
 
         console.log(`  ✅ Approved by: ${status.approvers.join(', ')}`);
-      } catch (error: any) {
-        console.error('  ❌ Approval polling failed:', error.message);
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : String(error);
+        console.error('  ❌ Approval polling failed:', message);
         throw error;
       }
     } else {
@@ -275,8 +279,9 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   
   orchestrator.run()
     .then(() => process.exit(0))
-    .catch((error) => {
-      console.error('❌ Workflow failed:', error.message);
+    .catch((error: unknown) => {
+      const message = error instanceof Error ? error.message : String(error);
+      console.error('❌ Workflow failed:', message);
       process.exit(1);
     });
 }

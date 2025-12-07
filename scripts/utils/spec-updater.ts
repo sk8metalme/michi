@@ -29,6 +29,13 @@ export interface SpecJson {
       url?: string;
       title?: string;
     };
+    // 旧形式フィールド（後方互換性のため）
+    requirementsPageId?: string;
+    requirementsUrl?: string;
+    designPageId?: string;
+    designUrl?: string;
+    tasksPageId?: string;
+    tasksUrl?: string;
   };
   jira?: {
     projectKey?: string;
@@ -48,6 +55,16 @@ export interface SpecJson {
     designCompleted?: boolean;
     tasksCompleted?: boolean;
     jiraSyncCompleted?: boolean;
+    // 旧形式フィールド（後方互換性のため）
+    requirements?: {
+      completed?: boolean;
+    };
+    design?: {
+      completed?: boolean;
+    };
+    tasks?: {
+      completed?: boolean;
+    };
   };
   lastUpdated?: string;
 }
@@ -144,14 +161,14 @@ export function updateSpecJsonAfterConfluenceSync(
 
   // 旧形式（後方互換性のため併記）
   if (docType === 'requirements') {
-    (spec.confluence as any).requirementsPageId = pageInfo.pageId;
-    (spec.confluence as any).requirementsUrl = pageInfo.url;
+    spec.confluence.requirementsPageId = pageInfo.pageId;
+    spec.confluence.requirementsUrl = pageInfo.url;
   } else if (docType === 'design') {
-    (spec.confluence as any).designPageId = pageInfo.pageId;
-    (spec.confluence as any).designUrl = pageInfo.url;
+    spec.confluence.designPageId = pageInfo.pageId;
+    spec.confluence.designUrl = pageInfo.url;
   } else if (docType === 'tasks') {
-    (spec.confluence as any).tasksPageId = pageInfo.pageId;
-    (spec.confluence as any).tasksUrl = pageInfo.url;
+    spec.confluence.tasksPageId = pageInfo.pageId;
+    spec.confluence.tasksUrl = pageInfo.url;
   }
 
   // マイルストーンを更新
@@ -163,24 +180,24 @@ export function updateSpecJsonAfterConfluenceSync(
   if (docType === 'requirements') {
     spec.milestones.requirementsCompleted = true;
     // 旧形式（後方互換性のため併記）
-    if (!(spec.milestones as any).requirements) {
-      (spec.milestones as any).requirements = {};
+    if (!spec.milestones.requirements) {
+      spec.milestones.requirements = {};
     }
-    (spec.milestones as any).requirements.completed = true;
+    spec.milestones.requirements.completed = true;
   } else if (docType === 'design') {
     spec.milestones.designCompleted = true;
     // 旧形式（後方互換性のため併記）
-    if (!(spec.milestones as any).design) {
-      (spec.milestones as any).design = {};
+    if (!spec.milestones.design) {
+      spec.milestones.design = {};
     }
-    (spec.milestones as any).design.completed = true;
+    spec.milestones.design.completed = true;
   } else if (docType === 'tasks') {
     spec.milestones.tasksCompleted = true;
     // 旧形式（後方互換性のため併記）
-    if (!(spec.milestones as any).tasks) {
-      (spec.milestones as any).tasks = {};
+    if (!spec.milestones.tasks) {
+      spec.milestones.tasks = {};
     }
-    (spec.milestones as any).tasks.completed = true;
+    spec.milestones.tasks.completed = true;
   }
 
   saveSpecJson(featureName, spec, projectRoot);

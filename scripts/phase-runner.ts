@@ -74,9 +74,10 @@ async function runRequirementsPhase(feature: string): Promise<PhaseRunResult> {
     confluenceUrl = await syncToConfluence(feature, 'requirements');
     confluenceCreated = true;
     console.log('✅ Confluenceページ作成成功');
-  } catch (error: any) {
-    errors.push(`Confluenceページ作成失敗: ${error.message}`);
-    console.error('❌ Confluenceページ作成失敗:', error.message);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    errors.push(`Confluenceページ作成失敗: ${message}`);
+    console.error('❌ Confluenceページ作成失敗:', message);
   }
 
   // Step 3: バリデーション
@@ -160,9 +161,10 @@ async function runDesignPhase(feature: string): Promise<PhaseRunResult> {
     confluenceUrl = await syncToConfluence(feature, 'design');
     confluenceCreated = true;
     console.log('✅ Confluenceページ作成成功');
-  } catch (error: any) {
-    errors.push(`Confluenceページ作成失敗: ${error.message}`);
-    console.error('❌ Confluenceページ作成失敗:', error.message);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    errors.push(`Confluenceページ作成失敗: ${message}`);
+    console.error('❌ Confluenceページ作成失敗:', message);
   }
 
   // Step 3: バリデーション
@@ -334,9 +336,10 @@ async function runTasksPhase(feature: string): Promise<PhaseRunResult> {
   try {
     validateTasksFormat(tasksPath);
     console.log('✅ tasks.mdフォーマット検証成功');
-  } catch (error: any) {
-    errors.push(`フォーマット検証失敗: ${error.message}`);
-    console.error('❌ フォーマット検証失敗:', error.message);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    errors.push(`フォーマット検証失敗: ${message}`);
+    console.error('❌ フォーマット検証失敗:', message);
     return {
       phase: 'tasks',
       success: false,
@@ -353,9 +356,10 @@ async function runTasksPhase(feature: string): Promise<PhaseRunResult> {
     await syncTasksToJIRA(feature);
     jiraCreated = true;
     console.log('✅ JIRA Epic/Story作成成功');
-  } catch (error: any) {
-    errors.push(`JIRA作成失敗: ${error.message}`);
-    console.error('❌ JIRA作成失敗:', error.message);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    errors.push(`JIRA作成失敗: ${message}`);
+    console.error('❌ JIRA作成失敗:', message);
   }
 
   // Step 3: バリデーション
@@ -584,9 +588,10 @@ async function runTestTypeSelectionPhase(
       writeFileSync(specPath, JSON.stringify(spec, null, 2), 'utf-8');
       console.log('✅ spec.jsonを更新しました');
     }
-  } catch (error: any) {
-    errors.push(`spec.json更新失敗: ${error.message}`);
-    console.warn(`⚠️  spec.json更新失敗: ${error.message}`);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    errors.push(`spec.json更新失敗: ${message}`);
+    console.warn(`⚠️  spec.json更新失敗: ${message}`);
   }
 
   // 選択結果のサマリーを表示
@@ -696,9 +701,10 @@ async function runTestSpecPhase(feature: string): Promise<PhaseRunResult> {
       await generateTestSpec(feature, testType);
       console.log(`   ✅ ${testType}テスト仕様書: ${testType}-test-spec.md`);
       generatedSpecs.push(testType);
-    } catch (error: any) {
-      errors.push(`${testType}テスト仕様書生成失敗: ${error.message}`);
-      console.error(`   ❌ ${testType}テスト仕様書生成失敗: ${error.message}`);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      errors.push(`${testType}テスト仕様書生成失敗: ${message}`);
+      console.error(`   ❌ ${testType}テスト仕様書生成失敗: ${message}`);
     }
   }
 
@@ -716,9 +722,10 @@ async function runTestSpecPhase(feature: string): Promise<PhaseRunResult> {
       spec.lastUpdated = new Date().toISOString();
       writeFileSync(specPath, JSON.stringify(spec, null, 2), 'utf-8');
       console.log('\n✅ spec.jsonを更新しました');
-    } catch (error: any) {
-      errors.push(`spec.json更新失敗: ${error.message}`);
-      console.warn(`⚠️  spec.json更新失敗: ${error.message}`);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      errors.push(`spec.json更新失敗: ${message}`);
+      console.warn(`⚠️  spec.json更新失敗: ${message}`);
     }
   }
 
@@ -888,9 +895,10 @@ async function runEnvironmentSetupPhase(
   try {
     const { generateCIConfig } = await import('./utils/ci-generator.js');
     await generateCIConfig(feature, answers);
-  } catch (error: any) {
-    errors.push(`CI/CD設定生成失敗: ${error.message}`);
-    console.error(`   ❌ CI/CD設定生成失敗: ${error.message}`);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    errors.push(`CI/CD設定生成失敗: ${message}`);
+    console.error(`   ❌ CI/CD設定生成失敗: ${message}`);
   }
 
   try {
@@ -898,9 +906,10 @@ async function runEnvironmentSetupPhase(
       './utils/test-config-generator.js'
     );
     await generateTestConfig(feature, answers);
-  } catch (error: any) {
-    errors.push(`テスト設定生成失敗: ${error.message}`);
-    console.error(`   ❌ テスト設定生成失敗: ${error.message}`);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    errors.push(`テスト設定生成失敗: ${message}`);
+    console.error(`   ❌ テスト設定生成失敗: ${message}`);
   }
 
   if (answers.needsDocker) {
@@ -909,9 +918,10 @@ async function runEnvironmentSetupPhase(
         './utils/docker-generator.js'
       );
       await generateDockerCompose(feature, answers.suggestedServices || []);
-    } catch (error: any) {
-      errors.push(`Docker Compose生成失敗: ${error.message}`);
-      console.error(`   ❌ Docker Compose生成失敗: ${error.message}`);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      errors.push(`Docker Compose生成失敗: ${message}`);
+      console.error(`   ❌ Docker Compose生成失敗: ${message}`);
     }
   }
 
@@ -961,8 +971,9 @@ async function runEnvironmentSetupPhase(
         try {
           execSync(command, { stdio: 'inherit', cwd: process.cwd() });
           console.log('   ✅ 依存関係のインストール完了');
-        } catch (error: any) {
-          console.warn(`   ⚠️  依存関係インストール失敗: ${error.message}`);
+        } catch (error: unknown) {
+          const message = error instanceof Error ? error.message : String(error);
+          console.warn(`   ⚠️  依存関係インストール失敗: ${message}`);
           console.warn(
             '   💡 プロジェクト初期化後に手動でインストールしてください',
           );
@@ -986,9 +997,10 @@ async function runEnvironmentSetupPhase(
       spec.lastUpdated = new Date().toISOString();
       writeFileSync(specPath, JSON.stringify(spec, null, 2), 'utf-8');
       console.log('\n✅ spec.jsonを更新しました');
-    } catch (error: any) {
-      errors.push(`spec.json更新失敗: ${error.message}`);
-      console.warn(`⚠️  spec.json更新失敗: ${error.message}`);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      errors.push(`spec.json更新失敗: ${message}`);
+      console.warn(`⚠️  spec.json更新失敗: ${message}`);
     }
   }
 
@@ -1135,9 +1147,10 @@ async function runPhaseBPhase(feature: string): Promise<PhaseRunResult> {
           console.error(`   ❌ ${result.testType}: ${result.error}`);
           errors.push(`${result.testType}テスト生成失敗: ${result.error}`);
         }
-      } catch (error: any) {
-        errors.push(`${testType}テスト生成失敗: ${error.message}`);
-        console.error(`❌ ${testType}テスト生成失敗:`, error.message);
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : String(error);
+        errors.push(`${testType}テスト生成失敗: ${message}`);
+        console.error(`❌ ${testType}テスト生成失敗:`, message);
       }
     }
   }
@@ -1298,8 +1311,9 @@ if (import.meta.url === `file://${process.argv[1]}`) {
         process.exit(1);
       }
     })
-    .catch((error) => {
-      console.error(`\n❌ フェーズ実行エラー: ${error.message}`);
+    .catch((error: unknown) => {
+      const message = error instanceof Error ? error.message : String(error);
+      console.error(`\n❌ フェーズ実行エラー: ${message}`);
       process.exit(1);
     });
 }
