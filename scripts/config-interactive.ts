@@ -5,8 +5,57 @@
 
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import * as readline from 'readline';
-import { loadProjectMeta } from './utils/project-meta.js';
+import { loadProjectMeta, ProjectMeta } from './utils/project-meta.js';
 import { validateProjectConfig } from './utils/config-validator.js';
+
+/**
+ * Confluence階層設定
+ */
+interface ConfluenceHierarchyConfig {
+  mode?: 'simple' | 'nested';
+  parentPageTitle?: string;
+  structure?: unknown;
+}
+
+/**
+ * Confluence設定結果
+ */
+interface ConfluenceConfigResult {
+  pageCreationGranularity: string;
+  pageTitleFormat?: string;
+  hierarchy?: ConfluenceHierarchyConfig;
+}
+
+/**
+ * JIRA設定結果
+ */
+interface JiraConfigResult {
+  createEpic: boolean;
+  storyCreationGranularity: string;
+  selectedPhases?: string[];
+  storyPoints: string;
+}
+
+/**
+ * ワークフロー設定結果
+ */
+interface WorkflowConfigResult {
+  enabledPhases: string[];
+  approvalGates?: {
+    requirements?: string[];
+    design?: string[];
+    release?: string[];
+  };
+}
+
+/**
+ * プロジェクト設定全体
+ */
+interface ProjectConfig {
+  confluence?: ConfluenceConfigResult;
+  jira?: JiraConfigResult;
+  workflow?: WorkflowConfigResult;
+}
 
 /**
  * readlineインターフェースを作成
@@ -137,8 +186,8 @@ async function multiSelect(
  */
 async function getConfluenceConfig(
   rl: readline.Interface,
-  _projectMeta: any,
-): Promise<any> {
+  _projectMeta: ProjectMeta,
+): Promise<ConfluenceConfigResult> {
   console.log('\n📄 Confluence設定');
   console.log('='.repeat(60));
 
@@ -172,7 +221,7 @@ async function getConfluenceConfig(
     'single',
   );
 
-  const config: any = {
+  const config: ConfluenceConfigResult = {
     pageCreationGranularity: granularity,
   };
 
@@ -249,7 +298,7 @@ async function getConfluenceConfig(
 /**
  * JIRA設定を対話的に取得
  */
-async function getJiraConfig(rl: readline.Interface): Promise<any> {
+async function getJiraConfig(rl: readline.Interface): Promise<JiraConfigResult> {
   console.log('\n📋 JIRA設定');
   console.log('='.repeat(60));
 
@@ -280,9 +329,10 @@ async function getJiraConfig(rl: readline.Interface): Promise<any> {
     'all',
   );
 
-  const config: any = {
+  const config: JiraConfigResult = {
     createEpic,
     storyCreationGranularity: granularity,
+    storyPoints: 'auto',  // デフォルト値（後で上書きされる）
   };
 
   if (granularity === 'selected-phases') {
@@ -334,7 +384,7 @@ async function getJiraConfig(rl: readline.Interface): Promise<any> {
 /**
  * ワークフロー設定を対話的に取得
  */
-async function getWorkflowConfig(rl: readline.Interface): Promise<any> {
+async function getWorkflowConfig(rl: readline.Interface): Promise<WorkflowConfigResult> {
   console.log('\n⚙️  ワークフロー設定');
   console.log('='.repeat(60));
 
@@ -351,7 +401,7 @@ async function getWorkflowConfig(rl: readline.Interface): Promise<any> {
     ['requirements', 'design', 'tasks'],
   );
 
-  const config: any = {
+  const config: WorkflowConfigResult = {
     enabledPhases,
   };
 
@@ -427,7 +477,7 @@ async function main(): Promise<void> {
     // 既存の設定ファイルを確認
     const { getConfigPath } = await import('./utils/config-loader.js');
     const configPath = getConfigPath();
-    let existingConfig: any = null;
+    let existingConfig: ProjectConfig | null = null;
 
     if (existsSync(configPath)) {
       console.log('⚠️  既存の設定ファイルが見つかりました。');
@@ -440,7 +490,7 @@ async function main(): Promise<void> {
 
       try {
         const content = readFileSync(configPath, 'utf-8');
-        existingConfig = JSON.parse(content);
+        existingConfig = JSON.parse(content) as ProjectConfig;
         console.log('既存の設定を読み込みました。\n');
       } catch {
         console.log(
@@ -450,7 +500,7 @@ async function main(): Promise<void> {
     }
 
     // 設定を対話的に取得
-    const config: any = existingConfig || {};
+    const config: ProjectConfig = existingConfig || {};
 
     // Confluence設定
     const configureConfluence = await confirm(

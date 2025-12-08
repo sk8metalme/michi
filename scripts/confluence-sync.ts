@@ -18,6 +18,56 @@ import { updateSpecJsonAfterConfluenceSync, loadSpecJson } from './utils/spec-up
 config();
 
 /**
+ * Confluence APIページレスポンス
+ */
+interface ConfluencePage {
+  id: string;
+  title: string;
+  type: string;
+  version?: {
+    number: number;
+  };
+  _links?: {
+    webui: string;
+  };
+  ancestors?: Array<{ id: string }>;
+  results?: ConfluencePage[];
+}
+
+/**
+ * Confluenceエラーオブジェクト
+ */
+interface ConfluenceError extends Error {
+  response?: {
+    status: number;
+    data: unknown;
+  };
+  config?: {
+    url?: string;
+    params?: unknown;
+  };
+}
+
+/**
+ * Confluenceページ作成ペイロード
+ */
+interface ConfluenceCreatePagePayload {
+  type: 'page';
+  title: string;
+  space: { key: string };
+  body: {
+    storage: {
+      value: string;
+      representation: 'storage';
+    };
+  };
+  metadata: {
+    labels: Array<{ name: string }>;
+  };
+  ancestors?: Array<{ id: string }>;
+}
+
+/**
  * リクエスト間のスリープ処理（レートリミット対策）
  */
 function sleep(ms: number): Promise<void> {
@@ -75,7 +125,7 @@ class ConfluenceClient {
    * @param title ページタイトル
    * @param parentId 親ページID（オプション）。指定された場合、その親ページの子ページのみを検索
    */
-  async searchPage(spaceKey: string, title: string, parentId?: string): Promise<any | null> {
+  async searchPage(spaceKey: string, title: string, parentId?: string): Promise<ConfluencePage | null> {
     // レートリミット対策: リクエスト前に待機
     await sleep(this.requestDelay);
     
@@ -129,27 +179,34 @@ class ConfluenceClient {
       }
       
       return null;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const isAxiosError = axios.isAxiosError(error);
+
       // 404エラーは既存ページがないことを意味するので、nullを返す
-      if (error.response?.status === 404) {
+      if (isAxiosError && error.response?.status === 404) {
         return null;
       }
-      
+
       // その他のエラーは詳細をログ出力
-      console.error('Error searching page:', error.message);
-      if (error.response) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.error('Error searching page:', message);
+
+      if (isAxiosError && error.response) {
         console.error('  Status:', error.response.status);
         console.error('  Data:', JSON.stringify(error.response.data, null, 2));
       }
-      
+
       // 404以外のエラーは再スロー（認証、権限、ネットワーク、サーバーエラーなど）
       // エラーの詳細情報を含めて再スロー
-      if (error.response) {
+      if (isAxiosError && error.response) {
         // HTTPレスポンスがある場合（4xx/5xxエラー）
-        const enhancedError = new Error(
-          `Confluence API error: ${error.message} (status: ${error.response.status})`
+        const enhancedError: ConfluenceError = new Error(
+          `Confluence API error: ${message} (status: ${error.response.status})`
         );
-        (enhancedError as any).response = error.response;
+        enhancedError.response = {
+          status: error.response.status,
+          data: error.response.data
+        };
         throw enhancedError;
       } else {
         // ネットワークエラーなど、レスポンスがない場合
@@ -161,11 +218,11 @@ class ConfluenceClient {
   /**
    * ページを作成
    */
-  async createPage(spaceKey: string, title: string, content: string, labels: string[] = [], parentId?: string): Promise<any> {
+  async createPage(spaceKey: string, title: string, content: string, labels: string[] = [], parentId?: string): Promise<ConfluencePage> {
     // レートリミット対策: リクエスト前に待機
     await sleep(this.requestDelay);
-    
-    const payload: any = {
+
+    const payload: ConfluenceCreatePagePayload = {
       type: 'page',
       title,
       space: { key: spaceKey },
@@ -204,14 +261,14 @@ class ConfluenceClient {
     content: string,
     labels: string[] = [],
     parentId: string
-  ): Promise<any> {
+  ): Promise<ConfluencePage> {
     return this.createPage(spaceKey, title, content, labels, parentId);
   }
   
   /**
    * ページを更新
    */
-  async updatePage(pageId: string, title: string, content: string, version: number): Promise<any> {
+  async updatePage(pageId: string, title: string, content: string, version: number): Promise<ConfluencePage> {
     // レートリミット対策: リクエスト前に待機
     await sleep(this.requestDelay);
     
@@ -264,25 +321,32 @@ class ConfluenceClient {
       }
       
       return null; // ルートページ
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const isAxiosError = axios.isAxiosError(error);
+
       // 404エラーはページが存在しないことを意味する
-      if (error.response?.status === 404) {
+      if (isAxiosError && error.response?.status === 404) {
         return null;
       }
-      
+
       // その他のエラーは詳細をログ出力
-      console.error('Error getting page parent:', error.message);
-      if (error.response) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.error('Error getting page parent:', message);
+
+      if (isAxiosError && error.response) {
         console.error('  Status:', error.response.status);
         console.error('  Data:', JSON.stringify(error.response.data, null, 2));
       }
-      
+
       // 404以外のエラーは再スロー
-      if (error.response) {
-        const enhancedError = new Error(
-          `Confluence API error: ${error.message} (status: ${error.response.status})`
+      if (isAxiosError && error.response) {
+        const enhancedError: ConfluenceError = new Error(
+          `Confluence API error: ${message} (status: ${error.response.status})`
         );
-        (enhancedError as any).response = error.response;
+        enhancedError.response = {
+          status: error.response.status,
+          data: error.response.data
+        };
         throw enhancedError;
       } else {
         throw error;
@@ -454,7 +518,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   }
   
   const featureName = args[0];
-  const docType = (args[1] as any) || 'requirements';
+  const docType = (args[1] as 'requirements' | 'design' | 'tasks' | undefined) || 'requirements';
   
   syncToConfluence(featureName, docType)
     .then(() => {
