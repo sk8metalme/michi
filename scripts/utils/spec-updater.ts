@@ -42,6 +42,11 @@ export interface SpecJson {
     epicKey?: string;
     epicUrl?: string;
     storyKeys?: string[];
+    // 旧形式フィールド（後方互換性のため）
+    stories?: {
+      created?: number;
+      total?: number;
+    };
   };
   environmentSetup?: {
     completed?: boolean;

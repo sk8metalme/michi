@@ -20,7 +20,7 @@ config();
 /**
  * Confluence APIページレスポンス
  */
-interface ConfluencePage {
+export interface ConfluencePage {
   id: string;
   title: string;
   type: string;

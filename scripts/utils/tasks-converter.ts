@@ -4,7 +4,7 @@
  * AI-DLC形式のtasks.mdをMichiが期待するPhase構造に変換
  */
 
-import { writeFileSync } from 'fs';
+import { writeFileSync, copyFileSync } from 'fs';
 import type {
   AIDLCDocument,
   AIDLCCategory,

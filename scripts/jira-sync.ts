@@ -824,7 +824,7 @@ function detectPhaseLabel(line: string): string | null {
  * @returns Story Issue Type ID
  */
 async function getStoryIssueTypeId(
-  appConfig: { jira?: { issueTypes?: { story?: string } } },
+  appConfig: { jira?: { issueTypes?: { story?: string | null } } & Record<string, unknown> } & Record<string, unknown>,
   projectMeta: { jiraProjectKey: string },
   client: JIRAClient,
 ): Promise<string> {
@@ -1025,13 +1025,13 @@ async function syncTasksToJIRA(featureName: string): Promise<void> {
 
   const existingStorySummaries = new Set(
     existingStories
-      .filter((s: JIRAIssue) => s?.fields?.summary)
-      .map((s: JIRAIssue) => s.fields.summary),
+      .filter((s: JiraIssue) => s?.fields?.summary)
+      .map((s: JiraIssue) => s.fields!.summary),
   );
   const existingStoryKeys = new Set(
     existingStories
-      .filter((s: JIRAIssue) => s?.key)
-      .map((s: JIRAIssue) => s.key),
+      .filter((s: JiraIssue) => s?.key)
+      .map((s: JiraIssue) => s.key),
   );
 
   console.log(
@@ -1129,7 +1129,7 @@ async function syncTasksToJIRA(featureName: string): Promise<void> {
       }
 
       // JIRAペイロードを作成（issue type IDは既に取得済み）
-      const storyPayload: JiraIssuePayload = {
+      const storyPayload: JIRAIssuePayload = {
         fields: {
           project: { key: projectMeta.jiraProjectKey },
           summary: storySummary,
@@ -1196,16 +1196,17 @@ async function syncTasksToJIRA(featureName: string): Promise<void> {
       );
 
       // JIRA APIエラーの詳細を表示
-      if (error.response?.data) {
+      const errorObj = error as { response?: { data?: { errors?: Record<string, unknown> } } };
+      if (errorObj.response?.data) {
         console.error(
           '  📋 JIRA API Error Details:',
-          JSON.stringify(error.response.data, null, 2),
+          JSON.stringify(errorObj.response.data, null, 2),
         );
 
         // Story Pointsフィールドのエラーの場合、警告を表示
         if (
-          error.response.data.errors &&
-          Object.keys(error.response.data.errors).some((key) =>
+          errorObj.response.data.errors &&
+          Object.keys(errorObj.response.data.errors).some((key) =>
             key.includes('customfield'),
           )
         ) {

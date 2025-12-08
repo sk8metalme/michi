@@ -55,13 +55,14 @@ export async function executeTests(
     };
   } catch (error: unknown) {
     const duration = (Date.now() - startTime) / 1000;
+    const errorObj = error as { stdout?: string; message?: string };
 
     return {
       success: false,
       language,
       command,
-      output: error.stdout || '',
-      error: error.message || String(error),
+      output: errorObj.stdout || '',
+      error: errorObj.message || String(error),
       duration,
       timestamp
     };

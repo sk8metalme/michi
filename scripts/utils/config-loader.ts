@@ -18,15 +18,18 @@ config();
  */
 function deepMerge<T extends Record<string, unknown>>(target: T, source: Partial<T>): T {
   const result = { ...target };
-  
+
   for (const key in source) {
     if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
-      result[key] = deepMerge(result[key] || {} as T[Extract<keyof T, string>], source[key] as Partial<T[Extract<keyof T, string>]>);
+      result[key] = deepMerge(
+        (result[key] || {}) as any,
+        source[key] as any
+      ) as T[Extract<keyof T, string>];
     } else if (source[key] !== undefined) {
       result[key] = source[key] as T[Extract<keyof T, string>];
     }
   }
-  
+
   return result;
 }
 

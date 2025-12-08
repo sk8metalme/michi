@@ -3,7 +3,7 @@
  * 各パターン（single, by-section, by-hierarchy, manual）に対応
  */
 
-import type { ConfluenceClient } from '../confluence-sync.js';
+import type { ConfluenceClient, ConfluencePage } from '../confluence-sync.js';
 import { convertMarkdownToConfluence, createConfluencePage } from '../markdown-to-confluence.js';
 import type { ProjectMetadata } from './project-meta.js';
 import type { ConfluenceConfig } from '../config/config-schema.js';
@@ -24,17 +24,6 @@ export interface PageCreationResult {
 export interface HierarchyCreationResult {
   pages: PageCreationResult[];
   parentPageId?: string;
-}
-
-/**
- * Confluence APIが返すページオブジェクト
- */
-interface ConfluencePage {
-  id: string;
-  _links: {
-    webui: string;
-  };
-  title?: string;
 }
 
 /**
@@ -280,19 +269,19 @@ export async function createSinglePage(
       existingPage.id,
       pageTitle,
       fullContent,
-      existingPage.version.number
+      existingPage.version!.number
     );
     console.log(`✅ Page updated: ${pageTitle}`);
   } else {
     page = await client.createPage(spaceKey, pageTitle, fullContent, labels);
     console.log(`✅ Page created: ${pageTitle}`);
   }
-  
+
   const baseUrl = process.env.ATLASSIAN_URL || '';
   return {
     pages: [{
       id: page.id,
-      url: `${baseUrl}/wiki${page._links.webui}`,
+      url: `${baseUrl}/wiki${page._links!.webui}`,
       pageId: page.id,
       title: pageTitle
     }]
@@ -352,18 +341,18 @@ export async function createBySectionPages(
         existingPage.id,
         pageTitle,
         fullContent,
-        existingPage.version.number
+        existingPage.version!.number
       );
       console.log(`✅ Page updated: ${pageTitle}`);
     } else {
       page = await client.createPage(spaceKey, pageTitle, fullContent, labels);
       console.log(`✅ Page created: ${pageTitle}`);
     }
-    
+
     const baseUrl = process.env.ATLASSIAN_URL || '';
     pages.push({
       id: page.id,
-      url: `${baseUrl}/wiki${page._links.webui}`,
+      url: `${baseUrl}/wiki${page._links!.webui}`,
       pageId: page.id,
       title: pageTitle
     });
@@ -463,12 +452,12 @@ export async function createByHierarchySimplePages(
 
   let childPage: ConfluencePage;
   if (existingChild) {
-    console.log(`📄 Found existing child page: ${existingChild.id} (version ${existingChild.version.number})`);
+    console.log(`📄 Found existing child page: ${existingChild.id} (version ${existingChild.version!.number})`);
     childPage = await client.updatePage(
       existingChild.id,
       childPageTitle,
       fullContent,
-      existingChild.version.number
+      existingChild.version!.number
     );
     console.log(`✅ Child page updated: ${childPageTitle}`);
   } else {
@@ -482,12 +471,12 @@ export async function createByHierarchySimplePages(
     );
     console.log(`✅ Child page created: ${childPageTitle} (under ${parentTitle})`);
   }
-  
+
   const baseUrl = process.env.ATLASSIAN_URL || '';
   return {
     pages: [{
       id: childPage.id,
-      url: `${baseUrl}/wiki${childPage._links.webui}`,
+      url: `${baseUrl}/wiki${childPage._links!.webui}`,
       pageId: childPage.id,
       title: childPageTitle
     }],
@@ -606,7 +595,7 @@ export async function createByHierarchyNestedPages(
         existingSectionPage.id,
         sectionPageTitle,
         fullContent,
-        existingSectionPage.version.number
+        existingSectionPage.version!.number
       );
       console.log(`✅ Section page updated: ${sectionPageTitle}`);
     } else {
@@ -619,11 +608,11 @@ export async function createByHierarchyNestedPages(
       );
       console.log(`✅ Section page created: ${sectionPageTitle} (under ${docTypeParentTitle})`);
     }
-    
+
     const baseUrl = process.env.ATLASSIAN_URL || '';
     pages.push({
       id: sectionPage.id,
-      url: `${baseUrl}/wiki${sectionPage._links.webui}`,
+      url: `${baseUrl}/wiki${sectionPage._links!.webui}`,
       pageId: sectionPage.id,
       title: sectionPageTitle
     });
@@ -749,7 +738,7 @@ export async function createManualPages(
           existingPage.id,
           pageTitle,
           fullContent,
-          existingPage.version.number
+          existingPage.version!.number
         );
         console.log(`✅ Page updated: ${pageTitle}`);
       } else {
@@ -767,11 +756,11 @@ export async function createManualPages(
           console.log(`✅ Page created: ${pageTitle}`);
         }
       }
-      
+
       const baseUrl = process.env.ATLASSIAN_URL || '';
       pages.push({
         id: page.id,
-        url: `${baseUrl}/wiki${page._links.webui}`,
+        url: `${baseUrl}/wiki${page._links!.webui}`,
         pageId: page.id,
         title: pageTitle
       });
