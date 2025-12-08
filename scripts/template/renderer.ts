@@ -80,7 +80,7 @@ export const renderTemplate = (
  * // Result: { lang: "ja", dir: ".kiro" }
  * ```
  */
-export const renderJsonTemplate = <T = any>(
+export const renderJsonTemplate = <T = unknown>(
   template: string,
   context: TemplateContext
 ): T => {

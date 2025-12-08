@@ -27,6 +27,17 @@ export interface HierarchyCreationResult {
 }
 
 /**
+ * Confluence APIが返すページオブジェクト
+ */
+interface ConfluencePage {
+  id: string;
+  _links: {
+    webui: string;
+  };
+  title?: string;
+}
+
+/**
  * タイトルに変数を展開
  */
 function expandTitleTemplate(
@@ -262,8 +273,8 @@ export async function createSinglePage(
   
   // 既存ページを検索
   const existingPage = await client.searchPage(spaceKey, pageTitle);
-  
-  let page: any;
+
+  let page: ConfluencePage;
   if (existingPage) {
     page = await client.updatePage(
       existingPage.id,
@@ -334,8 +345,8 @@ export async function createBySectionPages(
     
     // 既存ページを検索
     const existingPage = await client.searchPage(spaceKey, pageTitle);
-    
-    let page: any;
+
+    let page: ConfluencePage;
     if (existingPage) {
       page = await client.updatePage(
         existingPage.id,
@@ -449,8 +460,8 @@ export async function createByHierarchySimplePages(
       }
     }
   }
-  
-  let childPage: any;
+
+  let childPage: ConfluencePage;
   if (existingChild) {
     console.log(`📄 Found existing child page: ${existingChild.id} (version ${existingChild.version.number})`);
     childPage = await client.updatePage(
@@ -588,8 +599,8 @@ export async function createByHierarchyNestedPages(
     // 既存のセクションページを検索（docTypeParentIdで絞り込んで検索）
     // これにより、同じタイトルでも別機能のページがヒットすることを防ぐ
     const existingSectionPage = await client.searchPage(spaceKey, sectionPageTitle, docTypeParentId);
-    
-    let sectionPage: any;
+
+    let sectionPage: ConfluencePage;
     if (existingSectionPage) {
       sectionPage = await client.updatePage(
         existingSectionPage.id,
@@ -731,8 +742,8 @@ export async function createManualPages(
       
       // 既存ページを検索（親ページIDが指定されている場合は絞り込んで検索）
       const existingPage = await client.searchPage(spaceKey, pageTitle, parentPageId);
-      
-      let page: any;
+
+      let page: ConfluencePage;
       if (existingPage) {
         page = await client.updatePage(
           existingPage.id,

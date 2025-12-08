@@ -33,6 +33,33 @@ import {
 config();
 
 /**
+ * JIRA Issue基本型
+ */
+interface JiraIssue {
+  id: string;
+  key: string;
+  fields?: {
+    summary?: string;
+    [key: string]: unknown;
+  };
+}
+
+/**
+ * JIRA Issue作成ペイロード
+ */
+interface JiraIssuePayload {
+  fields: {
+    project: { key: string };
+    summary: string;
+    description?: unknown;
+    issuetype: { id: string };
+    labels?: string[];
+    priority?: { name: string };
+    [key: string]: unknown;
+  };
+}
+
+/**
  * リクエスト間のスリープ処理（レートリミット対策）
  */
 function sleep(ms: number): Promise<void> {
@@ -824,7 +851,7 @@ async function syncTasksToJIRA(featureName: string): Promise<void> {
   // ラベルで検索（summary検索では "Story: タイトル" 形式に一致しないため）
   // issuetype検索にはIDを使用（名前は言語依存のため）
   const storyJql = `project = ${projectMeta.jiraProjectKey} AND issuetype = ${storyIssueTypeId} AND labels = "${featureName}"`;
-  let existingStories: any[] = [];
+  let existingStories: JiraIssue[] = [];
   try {
     existingStories = await client.searchIssues(storyJql);
   } catch (error) {
@@ -999,7 +1026,7 @@ async function syncTasksToJIRA(featureName: string): Promise<void> {
     if (existingStorySummaries.has(storySummary)) {
       console.log(`Skipping Story (already exists): ${storyTitle}`);
       const existing = existingStories.find(
-        (s: any) => s?.fields?.summary === storySummary,
+        (s: JiraIssue) => s?.fields?.summary === storySummary,
       );
       if (existing) {
         createdStories.push(existing.key);
@@ -1049,7 +1076,7 @@ async function syncTasksToJIRA(featureName: string): Promise<void> {
       }
 
       // JIRAペイロードを作成（issue type IDは既に取得済み）
-      const storyPayload: any = {
+      const storyPayload: JiraIssuePayload = {
         fields: {
           project: { key: projectMeta.jiraProjectKey },
           summary: storySummary,

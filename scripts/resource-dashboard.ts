@@ -70,7 +70,7 @@ async function createResourceDashboard(): Promise<void> {
               const { data } = await octokit.repos.getContent({
                 owner: org,
                 repo: repo.name,
-                path: `projects/${(projectEntry as any).name}/.kiro/project.json`
+                path: `projects/${(projectEntry as { name: string }).name}/.kiro/project.json`
               });
 
               if ('content' in data) {

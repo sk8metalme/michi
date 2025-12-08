@@ -101,8 +101,9 @@ export async function getCommits(
     }
 
     return commits;
-  } catch (error: any) {
-    console.error('Failed to get commits:', error.message);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error('Failed to get commits:', message);
     return [];
   }
 }

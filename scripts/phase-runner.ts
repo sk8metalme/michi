@@ -24,6 +24,11 @@ type Phase =
   | 'phase-a'
   | 'phase-b';
 
+interface TestTypeSelection {
+  selectedTypes?: string[];
+  timestamp?: string;
+}
+
 interface PhaseRunResult {
   phase: Phase;
   success: boolean;
@@ -409,7 +414,7 @@ async function runTestTypeSelectionPhase(
   const selectionPath = join(specDir, 'test-type-selection.json');
 
   // 既存の選択を読み込む（存在する場合）
-  let existingSelection: any = null;
+  let existingSelection: TestTypeSelection | null = null;
   if (existsSync(selectionPath)) {
     try {
       existingSelection = JSON.parse(readFileSync(selectionPath, 'utf-8'));
@@ -484,7 +489,7 @@ async function runTestTypeSelectionPhase(
     {
       type: 'confirm',
       name: 'confirm',
-      message: (answers: any) => {
+      message: (answers: { testTypes: string[] }) => {
         // 必須テストを自動的に追加
         const required = ['unit', 'lint', 'build'];
         const selected = [...new Set([...required, ...answers.testTypes])];

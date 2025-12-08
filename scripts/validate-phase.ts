@@ -470,8 +470,9 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   try {
     const result = validatePhase(feature, phase as Phase);
     process.exit(result.valid ? 0 : 1);
-  } catch (error: any) {
-    console.error(`\n❌ Validation error: ${error.message}`);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error(`\n❌ Validation error: ${message}`);
     process.exit(1);
   }
 }

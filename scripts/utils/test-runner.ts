@@ -53,7 +53,7 @@ export async function executeTests(
       duration,
       timestamp
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     const duration = (Date.now() - startTime) / 1000;
 
     return {

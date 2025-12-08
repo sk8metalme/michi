@@ -100,38 +100,46 @@ export async function getProjectIssueTypes(
     });
 
     const issueTypes = response.data.issueTypes || [];
-    
-    return issueTypes.map((it: any) => ({
+
+    return issueTypes.map((it: Partial<IssueTypeInfo> & { id: string; name: string }) => ({
       id: it.id,
       name: it.name,
       description: it.description || undefined,
       iconUrl: it.iconUrl || undefined,
       subtask: it.subtask || false
     }));
-  } catch (error: any) {
+  } catch (error: unknown) {
     // エラーをログに記録（デバッグ用）
-    if (error.response) {
-      // HTTPエラー（4xx, 5xx）
-      const status = error.response.status;
-      const statusText = error.response.statusText;
-      
-      if (status === 401) {
-        console.error('❌ JIRA認証に失敗しました。認証情報を確認してください。');
-      } else if (status === 403) {
-        console.error('❌ JIRAへのアクセス権限がありません。');
-      } else if (status === 404) {
-        console.error(`❌ JIRAプロジェクト "${projectKey}" が見つかりません。`);
+    // axios.isAxiosError()またはerror.response/requestの存在で判定
+    if (axios.isAxiosError(error) || (typeof error === 'object' && error !== null && ('response' in error || 'request' in error))) {
+      const axiosError = error as { response?: { status: number; statusText: string }; request?: unknown; message?: string };
+      if (axiosError.response) {
+        // HTTPエラー（4xx, 5xx）
+        const status = axiosError.response.status;
+        const statusText = axiosError.response.statusText;
+
+        if (status === 401) {
+          console.error('❌ JIRA認証に失敗しました。認証情報を確認してください。');
+        } else if (status === 403) {
+          console.error('❌ JIRAへのアクセス権限がありません。');
+        } else if (status === 404) {
+          console.error(`❌ JIRAプロジェクト "${projectKey}" が見つかりません。`);
+        } else {
+          console.error(`❌ JIRA APIエラー: ${status} ${statusText}`);
+        }
+      } else if (axiosError.request) {
+        // ネットワークエラー
+        console.error('❌ JIRA APIへの接続に失敗しました。ネットワークを確認してください。');
       } else {
-        console.error(`❌ JIRA APIエラー: ${status} ${statusText}`);
+        // その他のエラー
+        const message = axiosError.message || String(error);
+        console.error(`❌ エラー: ${message}`);
       }
-    } else if (error.request) {
-      // ネットワークエラー
-      console.error('❌ JIRA APIへの接続に失敗しました。ネットワークを確認してください。');
     } else {
-      // その他のエラー
-      console.error(`❌ エラー: ${error.message}`);
+      const message = error instanceof Error ? error.message : String(error);
+      console.error(`❌ エラー: ${message}`);
     }
-    
+
     return null;
   }
 }

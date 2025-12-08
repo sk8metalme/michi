@@ -16,6 +16,13 @@ interface PreFlightResult {
   warnings: string[];
 }
 
+interface ProjectMeta {
+  projectId?: string;
+  projectName?: string;
+  jiraProjectKey?: string;
+  [key: string]: unknown;
+}
+
 /**
  * .env設定をチェック
  */
@@ -78,7 +85,7 @@ function checkProjectJson(): { errors: string[], warnings: string[] } {
     return { errors, warnings };
   }
   
-  let projectMeta: any;
+  let projectMeta: ProjectMeta;
   try {
     projectMeta = JSON.parse(readFileSync(projectJsonPath, 'utf-8'));
   } catch {
@@ -125,16 +132,18 @@ async function checkConfluenceSpace(spaceKey: string): Promise<{ errors: string[
     if (response.data) {
       console.log(`  ✅ Confluenceスペース確認: ${spaceKey} (${response.data.name})`);
     }
-  } catch (error: any) {
-    if (error.response?.status === 404) {
+  } catch (error: unknown) {
+    const isAxiosError = axios.isAxiosError(error);
+    if (isAxiosError && error.response?.status === 404) {
       errors.push(`❌ Confluenceスペースが存在しません: ${spaceKey}`);
       errors.push(`   → Confluenceで新しいスペースを作成: ${url}/wiki/spaces`);
       errors.push('   → または、.envのCONFLUENCE_PRD_SPACEを修正してください');
-    } else if (error.response?.status === 401) {
+    } else if (isAxiosError && error.response?.status === 401) {
       errors.push('❌ Confluence認証エラー（.envの認証情報を確認）');
       errors.push(`   → API Token管理: ${url.replace('atlassian.net', 'atlassian.net/manage/profile/security/api-tokens')}`);
     } else {
-      warnings.push(`⚠️  Confluenceスペースチェック失敗: ${error.message}`);
+      const message = error instanceof Error ? error.message : String(error);
+      warnings.push(`⚠️  Confluenceスペースチェック失敗: ${message}`);
     }
   }
   
@@ -169,18 +178,20 @@ async function checkJiraProject(projectKey: string): Promise<{ errors: string[],
     if (response.data) {
       console.log(`  ✅ JIRAプロジェクト確認: ${projectKey} (${response.data.name})`);
     }
-  } catch (error: any) {
-    if (error.response?.status === 404) {
+  } catch (error: unknown) {
+    const isAxiosError = axios.isAxiosError(error);
+    if (isAxiosError && error.response?.status === 404) {
       errors.push(`❌ JIRAプロジェクトが存在しません: ${projectKey}`);
       errors.push(`   → JIRAプロジェクト作成: ${url}/jira/projects/create`);
       errors.push(`   → プロジェクト一覧: ${url}/jira/settings/projects`);
       errors.push('   → または、.kiro/project.jsonのjiraProjectKeyを修正してください');
       errors.push(`      現在の設定: "${projectKey}" → 実際に存在するキーに変更`);
-    } else if (error.response?.status === 401) {
+    } else if (isAxiosError && error.response?.status === 401) {
       errors.push('❌ JIRA認証エラー（.envの認証情報を確認）');
       errors.push('   → API Token管理: https://id.atlassian.com/manage-profile/security/api-tokens');
     } else {
-      warnings.push(`⚠️  JIRAプロジェクトチェック失敗: ${error.message}`);
+      const message = error instanceof Error ? error.message : String(error);
+      warnings.push(`⚠️  JIRAプロジェクトチェック失敗: ${message}`);
     }
   }
   

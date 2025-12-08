@@ -56,7 +56,7 @@ export async function getApprovalStatus(
     // 承認ラベルをチェック
     // Confluenceでは通常、承認はカスタムラベルやメタデータで管理される
     // ここでは "approved" ラベルの存在で判定
-    const hasApprovedLabel = labels.some((label: any) =>
+    const hasApprovedLabel = labels.some((label: { name: string }) =>
       label.name === 'approved' || label.name === '承認済み'
     );
 
@@ -97,8 +97,9 @@ export async function getApprovalStatus(
       pageId,
       pageTitle
     };
-  } catch (error: any) {
-    console.error('Failed to get approval status:', error.message);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error('Failed to get approval status:', message);
     throw error;
   }
 }
@@ -134,13 +135,14 @@ export async function pollForApproval(
 
       // 次のチェックまで待機
       await new Promise(resolve => setTimeout(resolve, interval));
-    } catch (error: any) {
+    } catch (error: unknown) {
       // エラーがタイムアウト以外の場合はリトライ
-      if (error.message.includes('timeout')) {
+      const message = error instanceof Error ? error.message : String(error);
+      if (message.includes('timeout')) {
         throw error;
       }
 
-      console.warn('Error checking approval status, will retry:', error.message);
+      console.warn('Error checking approval status, will retry:', message);
       await new Promise(resolve => setTimeout(resolve, interval));
     }
   }

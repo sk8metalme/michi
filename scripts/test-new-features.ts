@@ -32,8 +32,9 @@ async function testTestRunner() {
     console.log(report.substring(0, 500) + '...');
 
     return true;
-  } catch (error: any) {
-    console.error('❌ テストランナーエラー:', error.message);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error('❌ テストランナーエラー:', message);
     return false;
   }
 }
@@ -74,8 +75,9 @@ async function testReleaseNotesGenerator() {
       console.log('⚠️  コミットが見つかりませんでした');
       return false;
     }
-  } catch (error: any) {
-    console.error('❌ リリースノート生成エラー:', error.message);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error('❌ リリースノート生成エラー:', message);
     return false;
   }
 }
@@ -123,8 +125,9 @@ async function testConfluenceApproval() {
     console.log(`  承認者: ${status.approvers.join(', ') || 'なし'}`);
 
     return true;
-  } catch (error: any) {
-    console.error('❌ Confluence承認状態確認エラー:', error.message);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error('❌ Confluence承認状態確認エラー:', message);
     return false;
   }
 }

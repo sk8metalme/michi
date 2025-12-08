@@ -57,7 +57,7 @@ async function listProjects(): Promise<void> {
               const { data } = await octokit.repos.getContent({
                 owner: org,
                 repo: repo.name,
-                path: `projects/${(projectEntry as any).name}/.kiro/project.json`
+                path: `projects/${(projectEntry as { name: string }).name}/.kiro/project.json`
               });
 
               if ('content' in data) {
@@ -74,7 +74,7 @@ async function listProjects(): Promise<void> {
               }
             } catch (error) {
               // プロジェクトディレクトリに.kiro/project.jsonがない場合はスキップ
-              console.warn(`⚠️  Skipping project ${(projectEntry as any).name} in ${repo.name}:`, error instanceof Error ? error.message : 'Unknown error');
+              console.warn(`⚠️  Skipping project ${(projectEntry as { name: string }).name} in ${repo.name}:`, error instanceof Error ? error.message : 'Unknown error');
               continue;
             }
           }

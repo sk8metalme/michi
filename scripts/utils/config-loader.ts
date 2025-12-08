@@ -16,7 +16,7 @@ config();
  * 深いマージ（Deep Merge）
  * オブジェクトを再帰的にマージする
  */
-function deepMerge<T extends Record<string, any>>(target: T, source: Partial<T>): T {
+function deepMerge<T extends Record<string, unknown>>(target: T, source: Partial<T>): T {
   const result = { ...target };
   
   for (const key in source) {
@@ -60,7 +60,7 @@ function expandEnvVars(str: string): string {
  * 設定オブジェクト内の文字列値を環境変数で展開
  * 循環参照を防ぐため、処理済みオブジェクトを追跡
  */
-function expandEnvVarsInConfig(config: any, visited: WeakSet<object> = new WeakSet()): any {
+function expandEnvVarsInConfig(config: unknown, visited: WeakSet<object> = new WeakSet()): unknown {
   if (typeof config === 'string') {
     return expandEnvVars(config);
   }
@@ -77,9 +77,9 @@ function expandEnvVarsInConfig(config: any, visited: WeakSet<object> = new WeakS
     }
     
     visited.add(config);
-    const result: any = {};
-    for (const key in config) {
-      result[key] = expandEnvVarsInConfig(config[key], visited);
+    const result: Record<string, unknown> = {};
+    for (const key in config as Record<string, unknown>) {
+      result[key] = expandEnvVarsInConfig((config as Record<string, unknown>)[key], visited);
     }
     visited.delete(config);
     return result;
@@ -113,7 +113,8 @@ function loadDefaultConfig(): AppConfig {
     return AppConfigSchema.parse(expanded);
   } catch (error) {
     if (error instanceof SyntaxError) {
-      throw new Error(`Invalid JSON in default config file ${defaultConfigPath}: ${error.message}\nLine: ${(error as any).line}, Column: ${(error as any).column}`);
+      // SyntaxErrorには標準的なlineやcolumnプロパティはないため、messageのみ使用
+      throw new Error(`Invalid JSON in default config file ${defaultConfigPath}: ${error.message}`);
     }
     if (error instanceof Error && error.name === 'ZodError') {
       throw new Error(`Default config validation failed: ${error.message}\nFile: ${defaultConfigPath}`);

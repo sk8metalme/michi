@@ -210,7 +210,7 @@ async function aggregateEstimates(): Promise<void> {
               const specs = await octokit.paginate('GET /repos/{owner}/{repo}/contents/{path}', {
                 owner: org,
                 repo: repo.name,
-                path: `projects/${(projectEntry as any).name}/.kiro/specs`,
+                path: `projects/${(projectEntry as { name: string }).name}/.kiro/specs`,
                 per_page: 100
               });
               
@@ -222,8 +222,8 @@ async function aggregateEstimates(): Promise<void> {
                       'name' in spec) {
                     // design.md を取得
                     try {
-                      const projectName = (projectEntry as any).name;
-                      const specName = (spec as any).name;
+                      const projectName = (projectEntry as { name: string }).name;
+                      const specName = (spec as { name: string }).name;
                       const { data: designFile } = await octokit.repos.getContent({
                         owner: org,
                         repo: repo.name,
