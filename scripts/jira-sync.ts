@@ -695,6 +695,252 @@ class JIRAClient {
   }
 }
 
+/**
+ * Phase行からフェーズラベルを検出
+ * @param line Markdown行
+ * @returns フェーズラベル、または検出されない場合はnull
+ */
+function detectPhaseLabel(line: string): string | null {
+  const phasePattern = /## Phase [\d.A-Z]+:\s*(.+?)(?:（(.+?)）)?/;
+  const phaseMatch = line.match(phasePattern);
+  if (!phaseMatch) return null;
+
+  const phaseTitle = phaseMatch[1]; // フェーズタイトル全体
+  const phaseName = phaseMatch[2] || phaseTitle; // 括弧内のラベル（例: Requirements）または全体
+
+  // Phase番号を抽出（例: "0.1", "2", "A"）
+  const phaseNumberMatch = line.match(/## Phase ([\d.A-Z]+):/);
+  const phaseNumber = phaseNumberMatch ? phaseNumberMatch[1] : '';
+
+  // フェーズ番号またはフェーズ名からラベルを決定
+  if (
+    phaseNumber === '0.0' ||
+    phaseName.includes('初期化') ||
+    phaseName.toLowerCase().includes('init')
+  ) {
+    return 'spec-init';
+  } else if (
+    phaseNumber === '0.1' ||
+    phaseName.includes('要件定義') ||
+    phaseName.toLowerCase().includes('requirements')
+  ) {
+    return 'requirements';
+  } else if (
+    phaseNumber === '0.2' ||
+    phaseName.includes('設計') ||
+    phaseName.toLowerCase().includes('design')
+  ) {
+    return 'design';
+  } else if (
+    phaseNumber === '0.3' ||
+    phaseName.includes('テストタイプ') ||
+    phaseName.toLowerCase().includes('test-type') ||
+    phaseName.toLowerCase().includes('test type')
+  ) {
+    return 'test-type-selection';
+  } else if (
+    phaseNumber === '0.4' ||
+    phaseName.includes('テスト仕様') ||
+    phaseName.toLowerCase().includes('test-spec') ||
+    phaseName.toLowerCase().includes('test spec')
+  ) {
+    return 'test-spec';
+  } else if (
+    phaseNumber === '0.5' ||
+    phaseName.includes('タスク分割') ||
+    phaseName.toLowerCase().includes('tasks') ||
+    phaseName.toLowerCase().includes('task breakdown')
+  ) {
+    return 'spec-tasks';
+  } else if (
+    phaseNumber === '0.6' ||
+    phaseName.includes('JIRA') ||
+    phaseName.toLowerCase().includes('jira')
+  ) {
+    return 'jira-sync';
+  } else if (
+    phaseNumber === '1' ||
+    phaseName.includes('環境構築') ||
+    phaseName.toLowerCase().includes('environment') ||
+    phaseName.toLowerCase().includes('setup')
+  ) {
+    return 'environment-setup';
+  } else if (
+    phaseNumber === '2' ||
+    phaseName.includes('実装') ||
+    phaseName.includes('TDD') ||
+    phaseName.toLowerCase().includes('implementation')
+  ) {
+    return 'implementation';
+  } else if (
+    phaseNumber === 'A' ||
+    phaseNumber.toLowerCase() === 'a' ||
+    phaseName.includes('PR前') ||
+    phaseName.toLowerCase().includes('pr-test') ||
+    phaseName.toLowerCase().includes('pr test')
+  ) {
+    return 'phase-a';
+  } else if (
+    phaseNumber === '3' ||
+    phaseName.includes('追加QA') ||
+    phaseName.includes('QA') ||
+    phaseName.includes('試験') ||
+    phaseName.toLowerCase().includes('testing') ||
+    phaseName.toLowerCase().includes('additional qa')
+  ) {
+    return 'additional-qa';
+  } else if (
+    phaseNumber === 'B' ||
+    phaseNumber.toLowerCase() === 'b' ||
+    phaseName.includes('リリース準備テスト') ||
+    phaseName.toLowerCase().includes('release-test') ||
+    phaseName.toLowerCase().includes('release test')
+  ) {
+    return 'phase-b';
+  } else if (
+    phaseNumber === '4' ||
+    phaseName.includes('リリース準備') ||
+    phaseName.toLowerCase().includes('release-prep') ||
+    phaseName.toLowerCase().includes('release preparation')
+  ) {
+    return 'release-prep';
+  } else if (
+    phaseNumber === '5' ||
+    (phaseName.includes('リリース') && !phaseName.includes('準備')) ||
+    (phaseName.toLowerCase().includes('release') &&
+      !phaseName.toLowerCase().includes('prep'))
+  ) {
+    return 'release';
+  }
+
+  return null;
+}
+
+/**
+ * Story Issue Type IDを取得
+ * @param appConfig アプリケーション設定
+ * @param projectMeta プロジェクトメタデータ
+ * @param client JIRAクライアント
+ * @returns Story Issue Type ID
+ */
+async function getStoryIssueTypeId(
+  appConfig: { jira?: { issueTypes?: { story?: string } } },
+  projectMeta: { jiraProjectKey: string },
+  client: JIRAClient,
+): Promise<string> {
+  // StoryタイプのIDを動的に取得（日本語JIRAでは "ストーリー" という名前の場合がある）
+  let storyIssueTypeId: string | undefined =
+    appConfig.jira?.issueTypes?.story || process.env.JIRA_ISSUE_TYPE_STORY;
+  console.log(
+    `📋 Story Issue Type ID from config/env: ${storyIssueTypeId || 'not found'}`,
+  );
+
+  if (!storyIssueTypeId) {
+    console.log('🔍 Attempting to find Story issue type dynamically...');
+    const foundId =
+      (await client.getIssueTypeId(projectMeta.jiraProjectKey, 'Story')) ||
+      (await client.getIssueTypeId(projectMeta.jiraProjectKey, 'ストーリー'));
+    storyIssueTypeId = foundId ?? undefined;
+    console.log(
+      `📋 Story Issue Type ID from API: ${storyIssueTypeId || 'not found'}`,
+    );
+  }
+
+  if (!storyIssueTypeId) {
+    throw new Error(
+      'JIRA Story issue type ID is not configured and could not be found in project. ' +
+        'Please set JIRA_ISSUE_TYPE_STORY environment variable or configure it in .michi/config.json. ' +
+        'You can find the issue type ID in JIRA UI (Settings > Issues > Issue types) or via REST API: ' +
+        'GET https://your-domain.atlassian.net/rest/api/3/project/{projectKey}',
+    );
+  }
+
+  console.log(`✅ Using Story Issue Type ID: ${storyIssueTypeId}`);
+  return storyIssueTypeId;
+}
+
+/**
+ * Epic を取得または作成
+ * @param featureName 機能名
+ * @param spec spec.json の内容
+ * @param projectMeta プロジェクトメタデータ
+ * @param client JIRAクライアント
+ * @returns Epic キー
+ */
+async function getOrCreateEpic(
+  featureName: string,
+  spec: SpecJson,
+  projectMeta: { projectName: string; jiraProjectKey: string; repository: string; confluenceLabels: string[] },
+  client: JIRAClient,
+): Promise<{ key: string }> {
+  // 既存のEpicをチェック
+  if (spec.jira?.epicKey) {
+    console.log(`Existing Epic found: ${spec.jira.epicKey}`);
+    console.log('Skipping Epic creation (already exists)');
+    return { key: spec.jira.epicKey };
+  }
+
+  // Epic作成
+  console.log('Creating Epic...');
+  const epicSummary = `[${featureName}] ${projectMeta.projectName}`;
+
+  // 同じタイトルのEpicがすでに存在するかJQLで検索
+  const jql = `project = ${projectMeta.jiraProjectKey} AND issuetype = Epic AND summary ~ "${featureName}"`;
+  let existingEpics: JIRAIssue[] = [];
+  try {
+    existingEpics = await client.searchIssues(jql);
+  } catch (error) {
+    console.error(
+      '❌ Failed to search existing Epics:',
+      error instanceof Error ? error.message : error,
+    );
+    console.error(
+      '⚠️  Cannot verify idempotency - proceeding with Epic creation',
+    );
+    console.error(
+      '   If Epic already exists, manual cleanup may be required',
+    );
+    // 検索失敗時はフォールバック: 新規作成を試みる（重複リスクあり）
+    existingEpics = [];
+  }
+
+  if (existingEpics.length > 0) {
+    console.log(
+      `Found existing Epic with similar title: ${existingEpics[0].key}`,
+    );
+    console.log('Using existing Epic instead of creating new one');
+    return existingEpics[0];
+  }
+
+  // EpicタイプのIDを取得（日本語JIRAでは "エピック" という名前の場合がある）
+  const epicTypeId =
+    (await client.getIssueTypeId(projectMeta.jiraProjectKey, 'Epic')) ||
+    (await client.getIssueTypeId(projectMeta.jiraProjectKey, 'エピック'));
+
+  if (!epicTypeId) {
+    throw new Error(
+      'Epic issue type not found in project. ' +
+        'Please ensure the project has Epic issue type enabled.',
+    );
+  }
+
+  const epicDescription = `機能: ${featureName}\nGitHub: ${projectMeta.repository}/tree/main/.kiro/specs/${featureName}`;
+
+  const epicPayload = {
+    fields: {
+      project: { key: projectMeta.jiraProjectKey },
+      summary: epicSummary,
+      description: textToADF(epicDescription), // ADF形式に変換
+      issuetype: { id: epicTypeId }, // IDを使用（nameではなく）
+      labels: projectMeta.confluenceLabels,
+    },
+  };
+
+  const epic = await client.createIssue(epicPayload);
+  console.log(`✅ Epic created: ${epic.key}`);
+  return epic;
+}
+
 async function syncTasksToJIRA(featureName: string): Promise<void> {
   console.log(`Syncing tasks for feature: ${featureName}`);
 
@@ -733,34 +979,12 @@ async function syncTasksToJIRA(featureName: string): Promise<void> {
   const config = getJIRAConfig();
   const client = new JIRAClient(config);
 
-  // StoryタイプのIDを動的に取得（日本語JIRAでは "ストーリー" という名前の場合がある）
-  let storyIssueTypeId: string | undefined =
-    appConfig.jira?.issueTypes?.story || process.env.JIRA_ISSUE_TYPE_STORY;
-  console.log(
-    `📋 Story Issue Type ID from config/env: ${storyIssueTypeId || 'not found'}`,
+  // StoryタイプのIDを取得
+  const storyIssueTypeId = await getStoryIssueTypeId(
+    appConfig,
+    projectMeta,
+    client,
   );
-
-  if (!storyIssueTypeId) {
-    console.log('🔍 Attempting to find Story issue type dynamically...');
-    const foundId =
-      (await client.getIssueTypeId(projectMeta.jiraProjectKey, 'Story')) ||
-      (await client.getIssueTypeId(projectMeta.jiraProjectKey, 'ストーリー'));
-    storyIssueTypeId = foundId ?? undefined;
-    console.log(
-      `📋 Story Issue Type ID from API: ${storyIssueTypeId || 'not found'}`,
-    );
-  }
-
-  if (!storyIssueTypeId) {
-    throw new Error(
-      'JIRA Story issue type ID is not configured and could not be found in project. ' +
-        'Please set JIRA_ISSUE_TYPE_STORY environment variable or configure it in .michi/config.json. ' +
-        'You can find the issue type ID in JIRA UI (Settings > Issues > Issue types) or via REST API: ' +
-        'GET https://your-domain.atlassian.net/rest/api/3/project/{projectKey}',
-    );
-  }
-
-  console.log(`✅ Using Story Issue Type ID: ${storyIssueTypeId}`);
 
   const tasksPath = resolve(`.kiro/specs/${featureName}/tasks.md`);
   const tasksContent = readFileSync(tasksPath, 'utf-8');
@@ -774,78 +998,8 @@ async function syncTasksToJIRA(featureName: string): Promise<void> {
     console.error('spec.json not found or invalid');
   }
 
-  let epic: { key: string } | undefined;
-
-  // 既存のEpicをチェック
-  if (spec.jira?.epicKey) {
-    console.log(`Existing Epic found: ${spec.jira.epicKey}`);
-    console.log('Skipping Epic creation (already exists)');
-    epic = { key: spec.jira.epicKey };
-  } else {
-    // Epic作成
-    console.log('Creating Epic...');
-    const epicSummary = `[${featureName}] ${projectMeta.projectName}`;
-
-    // 同じタイトルのEpicがすでに存在するかJQLで検索
-    const jql = `project = ${projectMeta.jiraProjectKey} AND issuetype = Epic AND summary ~ "${featureName}"`;
-    let existingEpics: JIRAIssue[] = [];
-    try {
-      existingEpics = await client.searchIssues(jql);
-    } catch (error) {
-      console.error(
-        '❌ Failed to search existing Epics:',
-        error instanceof Error ? error.message : error,
-      );
-      console.error(
-        '⚠️  Cannot verify idempotency - proceeding with Epic creation',
-      );
-      console.error(
-        '   If Epic already exists, manual cleanup may be required',
-      );
-      // 検索失敗時はフォールバック: 新規作成を試みる（重複リスクあり）
-      existingEpics = [];
-    }
-
-    if (existingEpics.length > 0) {
-      console.log(
-        `Found existing Epic with similar title: ${existingEpics[0].key}`,
-      );
-      console.log('Using existing Epic instead of creating new one');
-      epic = existingEpics[0];
-    } else {
-      // EpicタイプのIDを取得（日本語JIRAでは "エピック" という名前の場合がある）
-      const epicTypeId =
-        (await client.getIssueTypeId(projectMeta.jiraProjectKey, 'Epic')) ||
-        (await client.getIssueTypeId(projectMeta.jiraProjectKey, 'エピック'));
-
-      if (!epicTypeId) {
-        throw new Error(
-          'Epic issue type not found in project. ' +
-            'Please ensure the project has Epic issue type enabled.',
-        );
-      }
-
-      const epicDescription = `機能: ${featureName}\nGitHub: ${projectMeta.repository}/tree/main/.kiro/specs/${featureName}`;
-
-      const epicPayload = {
-        fields: {
-          project: { key: projectMeta.jiraProjectKey },
-          summary: epicSummary,
-          description: textToADF(epicDescription), // ADF形式に変換
-          issuetype: { id: epicTypeId }, // IDを使用（nameではなく）
-          labels: projectMeta.confluenceLabels,
-        },
-      };
-
-      epic = await client.createIssue(epicPayload);
-      console.log(`✅ Epic created: ${epic.key}`);
-    }
-  }
-
-  // Epicが確実に設定されていることを確認
-  if (!epic) {
-    throw new Error('Epic creation or retrieval failed');
-  }
+  // Epic を取得または作成
+  const epic = await getOrCreateEpic(featureName, spec, projectMeta, client);
 
   // 既存のStoryを検索（重複防止）
   // ラベルで検索（summary検索では "Story: タイトル" 形式に一致しないため）
@@ -898,116 +1052,15 @@ async function syncTasksToJIRA(featureName: string): Promise<void> {
     const line = lines[i];
 
     // フェーズ検出
-    const phaseMatch = line.match(phasePattern);
-    if (phaseMatch) {
-      const phaseTitle = phaseMatch[1]; // フェーズタイトル全体
-      const phaseName = phaseMatch[2] || phaseTitle; // 括弧内のラベル（例: Requirements）または全体
+    const detectedPhase = detectPhaseLabel(line);
+    if (detectedPhase) {
+      currentPhaseLabel = detectedPhase;
 
-      // Phase番号を抽出（例: "0.1", "2", "A"）
+      // ログ出力用にphaseTitle と phaseNumber を抽出
+      const phaseMatch = line.match(phasePattern);
+      const phaseTitle = phaseMatch ? phaseMatch[1] : '';
       const phaseNumberMatch = line.match(/## Phase ([\d.A-Z]+):/);
       const phaseNumber = phaseNumberMatch ? phaseNumberMatch[1] : '';
-
-      // フェーズ番号またはフェーズ名からラベルを決定
-      // 新ワークフロー構造に対応
-      if (
-        phaseNumber === '0.0' ||
-        phaseName.includes('初期化') ||
-        phaseName.toLowerCase().includes('init')
-      ) {
-        currentPhaseLabel = 'spec-init';
-      } else if (
-        phaseNumber === '0.1' ||
-        phaseName.includes('要件定義') ||
-        phaseName.toLowerCase().includes('requirements')
-      ) {
-        currentPhaseLabel = 'requirements';
-      } else if (
-        phaseNumber === '0.2' ||
-        phaseName.includes('設計') ||
-        phaseName.toLowerCase().includes('design')
-      ) {
-        currentPhaseLabel = 'design';
-      } else if (
-        phaseNumber === '0.3' ||
-        phaseName.includes('テストタイプ') ||
-        phaseName.toLowerCase().includes('test-type') ||
-        phaseName.toLowerCase().includes('test type')
-      ) {
-        currentPhaseLabel = 'test-type-selection';
-      } else if (
-        phaseNumber === '0.4' ||
-        phaseName.includes('テスト仕様') ||
-        phaseName.toLowerCase().includes('test-spec') ||
-        phaseName.toLowerCase().includes('test spec')
-      ) {
-        currentPhaseLabel = 'test-spec';
-      } else if (
-        phaseNumber === '0.5' ||
-        phaseName.includes('タスク分割') ||
-        phaseName.toLowerCase().includes('tasks') ||
-        phaseName.toLowerCase().includes('task breakdown')
-      ) {
-        currentPhaseLabel = 'spec-tasks';
-      } else if (
-        phaseNumber === '0.6' ||
-        phaseName.includes('JIRA') ||
-        phaseName.toLowerCase().includes('jira')
-      ) {
-        currentPhaseLabel = 'jira-sync';
-      } else if (
-        phaseNumber === '1' ||
-        phaseName.includes('環境構築') ||
-        phaseName.toLowerCase().includes('environment') ||
-        phaseName.toLowerCase().includes('setup')
-      ) {
-        currentPhaseLabel = 'environment-setup';
-      } else if (
-        phaseNumber === '2' ||
-        phaseName.includes('実装') ||
-        phaseName.includes('TDD') ||
-        phaseName.toLowerCase().includes('implementation')
-      ) {
-        currentPhaseLabel = 'implementation';
-      } else if (
-        phaseNumber === 'A' ||
-        phaseNumber.toLowerCase() === 'a' ||
-        phaseName.includes('PR前') ||
-        phaseName.toLowerCase().includes('pr-test') ||
-        phaseName.toLowerCase().includes('pr test')
-      ) {
-        currentPhaseLabel = 'phase-a';
-      } else if (
-        phaseNumber === '3' ||
-        phaseName.includes('追加QA') ||
-        phaseName.includes('QA') ||
-        phaseName.includes('試験') ||
-        phaseName.toLowerCase().includes('testing') ||
-        phaseName.toLowerCase().includes('additional qa')
-      ) {
-        currentPhaseLabel = 'additional-qa';
-      } else if (
-        phaseNumber === 'B' ||
-        phaseNumber.toLowerCase() === 'b' ||
-        phaseName.includes('リリース準備テスト') ||
-        phaseName.toLowerCase().includes('release-test') ||
-        phaseName.toLowerCase().includes('release test')
-      ) {
-        currentPhaseLabel = 'phase-b';
-      } else if (
-        phaseNumber === '4' ||
-        phaseName.includes('リリース準備') ||
-        phaseName.toLowerCase().includes('release-prep') ||
-        phaseName.toLowerCase().includes('release preparation')
-      ) {
-        currentPhaseLabel = 'release-prep';
-      } else if (
-        phaseNumber === '5' ||
-        (phaseName.includes('リリース') && !phaseName.includes('準備')) ||
-        (phaseName.toLowerCase().includes('release') &&
-          !phaseName.toLowerCase().includes('prep'))
-      ) {
-        currentPhaseLabel = 'release';
-      }
 
       console.log(
         `📌 Phase detected: ${phaseTitle} (number: ${phaseNumber}, label: ${currentPhaseLabel})`,
