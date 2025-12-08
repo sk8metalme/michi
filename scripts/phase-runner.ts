@@ -213,128 +213,122 @@ async function runDesignPhase(feature: string): Promise<PhaseRunResult> {
 }
 
 /**
- * タスク分割フェーズを実行
+ * タスク分割フェーズの前提条件をチェック
  */
-async function runTasksPhase(feature: string): Promise<PhaseRunResult> {
-  console.log('\n📝 Phase: Tasks（タスク分割）');
-  console.log('='.repeat(60));
-
+async function checkTasksPrerequisites(
+  feature: string
+): Promise<{ valid: boolean; errors: string[] }> {
   const errors: string[] = [];
-  let jiraCreated = false;
 
-  // Step 0: プリフライトチェック
+  // プリフライトチェック
   console.log('\n🔍 プリフライトチェック...');
   const preFlightResult = await runPreFlightCheck('jira');
 
   if (!preFlightResult.valid) {
     console.log('\n❌ プリフライトチェック失敗:');
     preFlightResult.errors.forEach((e) => console.log(`  ${e}`));
-    return {
-      phase: 'tasks',
-      success: false,
-      confluenceCreated: false,
-      jiraCreated: false,
-      validationPassed: false,
-      errors: preFlightResult.errors,
-    };
+    return { valid: false, errors: preFlightResult.errors };
   }
 
   console.log('✅ プリフライトチェック成功');
 
-  // Step 1: tasks.md存在確認
+  // tasks.md存在確認
   const tasksPath = join(process.cwd(), '.kiro', 'specs', feature, 'tasks.md');
   if (!existsSync(tasksPath)) {
     errors.push(
       'tasks.mdが存在しません。先に/kiro:spec-tasks を実行してください',
     );
-    return {
-      phase: 'tasks',
-      success: false,
-      confluenceCreated: false,
-      jiraCreated: false,
-      validationPassed: false,
-      errors,
-    };
+    return { valid: false, errors };
   }
 
   console.log('✅ tasks.md 存在確認');
+  return { valid: true, errors: [] };
+}
 
-  // Step 1.5: AI-DLC形式検出と変換提案
+/**
+ * AI-DLC形式を検出して変換を提案
+ */
+async function detectAndConvertAIDLCFormat(
+  feature: string,
+  tasksPath: string
+): Promise<{ success: boolean; errors: string[] }> {
+  const errors: string[] = [];
+
   console.log('\n🔍 tasks.mdフォーマット検証中...');
   const { isAIDLCFormat } = await import('./utils/aidlc-parser.js');
   const tasksContent = readFileSync(tasksPath, 'utf-8');
 
-  if (isAIDLCFormat(tasksContent)) {
-    console.log('\n⚠️  AI-DLC形式が検出されました');
-    console.log('   tasks.mdはMichiワークフロー形式ではなくAI-DLC形式です。');
-    console.log('');
-    console.log('🔄 変換オプション:');
-    console.log(`   michi tasks:convert ${feature} --dry-run  # プレビュー`);
-    console.log(
-      `   michi tasks:convert ${feature} --backup   # バックアップ付きで変換`,
-    );
-    console.log(`   michi tasks:convert ${feature}            # 直接変換`);
-    console.log('');
-
-    // 対話的に変換を提案
-    const shouldConvert = await inquirer.prompt([
-      {
-        type: 'confirm',
-        name: 'convert',
-        message: 'AI-DLC形式をMichiワークフロー形式に変換しますか？',
-        default: true,
-      },
-    ]);
-
-    if (shouldConvert.convert) {
-      console.log('\n🔄 AI-DLC形式をMichiワークフロー形式に変換中...');
-      const { convertTasksFile } = await import('./utils/tasks-converter.js');
-      const result = convertTasksFile(tasksPath, undefined, {
-        backup: true,
-        language: 'ja',
-        projectName: feature,
-      });
-
-      if (result.success) {
-        console.log('✅ 変換成功！');
-        console.log(`   元ファイル: ${result.backupPath}`);
-        console.log(`   変換後: ${tasksPath}`);
-        console.log(
-          `   統計: ${result.stats.originalTasks}タスク → ${result.stats.convertedStories}ストーリー`,
-        );
-      } else {
-        errors.push('AI-DLC形式の変換に失敗しました');
-        result.warnings.forEach((w) => errors.push(w));
-        console.error('❌ 変換失敗');
-        return {
-          phase: 'tasks',
-          success: false,
-          confluenceCreated: false,
-          jiraCreated: false,
-          validationPassed: false,
-          errors,
-        };
-      }
-    } else {
-      console.log('\n⏭️  変換をスキップしました');
-      console.log(
-        '   AI-DLC形式のままではJIRA連携が正常に動作しない可能性があります。',
-      );
-      errors.push(
-        'tasks.mdがAI-DLC形式のため、フォーマット検証をスキップしました',
-      );
-      return {
-        phase: 'tasks',
-        success: false,
-        confluenceCreated: false,
-        jiraCreated: false,
-        validationPassed: false,
-        errors,
-      };
-    }
+  if (!isAIDLCFormat(tasksContent)) {
+    return { success: true, errors: [] };
   }
 
-  // Step 1.6: tasks.mdフォーマット検証
+  console.log('\n⚠️  AI-DLC形式が検出されました');
+  console.log('   tasks.mdはMichiワークフロー形式ではなくAI-DLC形式です。');
+  console.log('');
+  console.log('🔄 変換オプション:');
+  console.log(`   michi tasks:convert ${feature} --dry-run  # プレビュー`);
+  console.log(
+    `   michi tasks:convert ${feature} --backup   # バックアップ付きで変換`,
+  );
+  console.log(`   michi tasks:convert ${feature}            # 直接変換`);
+  console.log('');
+
+  // 対話的に変換を提案
+  const shouldConvert = await inquirer.prompt([
+    {
+      type: 'confirm',
+      name: 'convert',
+      message: 'AI-DLC形式をMichiワークフロー形式に変換しますか？',
+      default: true,
+    },
+  ]);
+
+  if (!shouldConvert.convert) {
+    console.log('\n⏭️  変換をスキップしました');
+    console.log(
+      '   AI-DLC形式のままではJIRA連携が正常に動作しない可能性があります。',
+    );
+    errors.push(
+      'tasks.mdがAI-DLC形式のため、フォーマット検証をスキップしました',
+    );
+    return { success: false, errors };
+  }
+
+  console.log('\n🔄 AI-DLC形式をMichiワークフロー形式に変換中...');
+  const { convertTasksFile } = await import('./utils/tasks-converter.js');
+  const result = convertTasksFile(tasksPath, undefined, {
+    backup: true,
+    language: 'ja',
+    projectName: feature,
+  });
+
+  if (result.success) {
+    console.log('✅ 変換成功！');
+    console.log(`   元ファイル: ${result.backupPath}`);
+    console.log(`   変換後: ${tasksPath}`);
+    console.log(
+      `   統計: ${result.stats.originalTasks}タスク → ${result.stats.convertedStories}ストーリー`,
+    );
+    return { success: true, errors: [] };
+  }
+
+  errors.push('AI-DLC形式の変換に失敗しました');
+  result.warnings.forEach((w) => errors.push(w));
+  console.error('❌ 変換失敗');
+  return { success: false, errors };
+}
+
+/**
+ * tasks.mdのフォーマット検証とJIRA同期
+ */
+async function validateTasksFormatAndSyncJIRA(
+  feature: string,
+  tasksPath: string
+): Promise<{ jiraCreated: boolean; errors: string[] }> {
+  const errors: string[] = [];
+  let jiraCreated = false;
+
+  // フォーマット検証
   const { validateTasksFormat } = await import(
     './utils/tasks-format-validator.js'
   );
@@ -345,17 +339,10 @@ async function runTasksPhase(feature: string): Promise<PhaseRunResult> {
     const message = error instanceof Error ? error.message : String(error);
     errors.push(`フォーマット検証失敗: ${message}`);
     console.error('❌ フォーマット検証失敗:', message);
-    return {
-      phase: 'tasks',
-      success: false,
-      confluenceCreated: false,
-      jiraCreated: false,
-      validationPassed: false,
-      errors,
-    };
+    return { jiraCreated: false, errors };
   }
 
-  // Step 2: JIRA Epic/Story作成
+  // JIRA Epic/Story作成
   console.log('\n📤 JIRA Epic/Story作成中...');
   try {
     await syncTasksToJIRA(feature);
@@ -367,12 +354,16 @@ async function runTasksPhase(feature: string): Promise<PhaseRunResult> {
     console.error('❌ JIRA作成失敗:', message);
   }
 
-  // Step 3: バリデーション
-  console.log('\n🔍 バリデーション実行中...');
-  const validation = validatePhase(feature, 'tasks');
-  errors.push(...validation.errors);
+  return { jiraCreated, errors };
+}
 
-  // Step 4: 結果サマリー
+/**
+ * タスク分割フェーズのサマリーを表示
+ */
+function displayTasksPhaseSummary(
+  jiraCreated: boolean,
+  validation: { valid: boolean; errors: string[] }
+): void {
   console.log('\n' + '='.repeat(60));
   console.log('📊 タスク分割フェーズ完了チェック:');
   console.log('  ✅ tasks.md: 作成済み');
@@ -388,6 +379,58 @@ async function runTasksPhase(feature: string): Promise<PhaseRunResult> {
     console.log('📢 開発チームに実装開始を通知してください');
     console.log('🚀 次のステップ: /kiro:spec-impl <feature>');
   }
+}
+
+/**
+ * タスク分割フェーズを実行
+ */
+async function runTasksPhase(feature: string): Promise<PhaseRunResult> {
+  console.log('\n📝 Phase: Tasks（タスク分割）');
+  console.log('='.repeat(60));
+
+  const errors: string[] = [];
+  let jiraCreated = false;
+  const tasksPath = join(process.cwd(), '.kiro', 'specs', feature, 'tasks.md');
+
+  // 前提条件チェック
+  const prereqCheck = await checkTasksPrerequisites(feature);
+  if (!prereqCheck.valid) {
+    return {
+      phase: 'tasks',
+      success: false,
+      confluenceCreated: false,
+      jiraCreated: false,
+      validationPassed: false,
+      errors: prereqCheck.errors,
+    };
+  }
+
+  // AI-DLC形式検出と変換
+  const convertResult = await detectAndConvertAIDLCFormat(feature, tasksPath);
+  if (!convertResult.success) {
+    errors.push(...convertResult.errors);
+    return {
+      phase: 'tasks',
+      success: false,
+      confluenceCreated: false,
+      jiraCreated: false,
+      validationPassed: false,
+      errors,
+    };
+  }
+
+  // フォーマット検証とJIRA同期
+  const syncResult = await validateTasksFormatAndSyncJIRA(feature, tasksPath);
+  jiraCreated = syncResult.jiraCreated;
+  errors.push(...syncResult.errors);
+
+  // バリデーション
+  console.log('\n🔍 バリデーション実行中...');
+  const validation = validatePhase(feature, 'tasks');
+  errors.push(...validation.errors);
+
+  // サマリー表示
+  displayTasksPhaseSummary(jiraCreated, validation);
 
   return {
     phase: 'tasks',
@@ -400,36 +443,36 @@ async function runTasksPhase(feature: string): Promise<PhaseRunResult> {
 }
 
 /**
- * テストタイプ選択フェーズを実行（Phase 0.3）
- * 対話的にテストタイプを選択
+ * 既存のテストタイプ選択を読み込む
  */
-async function runTestTypeSelectionPhase(
-  feature: string,
-): Promise<PhaseRunResult> {
-  console.log('\n🧪 Phase 0.3: Test Type Selection（テストタイプ選択）');
-  console.log('='.repeat(60));
-
-  const errors: string[] = [];
-  const specDir = join(process.cwd(), '.kiro', 'specs', feature);
-  const selectionPath = join(specDir, 'test-type-selection.json');
-
-  // 既存の選択を読み込む（存在する場合）
-  let existingSelection: TestTypeSelection | null = null;
-  if (existsSync(selectionPath)) {
-    try {
-      existingSelection = JSON.parse(readFileSync(selectionPath, 'utf-8'));
-      console.log('\n📋 既存の選択が見つかりました:');
-      console.log(
-        `   選択済みテストタイプ: ${existingSelection.selectedTypes?.join(', ') || 'なし'}`,
-      );
-    } catch {
-      console.warn('⚠️  既存の選択ファイルの読み込みに失敗しました');
-    }
+function loadExistingTestTypeSelection(
+  selectionPath: string
+): TestTypeSelection | null {
+  if (!existsSync(selectionPath)) {
+    return null;
   }
 
+  try {
+    const existingSelection = JSON.parse(readFileSync(selectionPath, 'utf-8'));
+    console.log('\n📋 既存の選択が見つかりました:');
+    console.log(
+      `   選択済みテストタイプ: ${existingSelection.selectedTypes?.join(', ') || 'なし'}`,
+    );
+    return existingSelection;
+  } catch {
+    console.warn('⚠️  既存の選択ファイルの読み込みに失敗しました');
+    return null;
+  }
+}
+
+/**
+ * テストタイプの対話的選択を収集
+ */
+async function collectTestTypeSelection(
+  existingSelection: TestTypeSelection | null
+): Promise<{ testTypes: string[]; confirm: boolean }> {
   console.log('\n📚 プロジェクト要件に応じてテストタイプを選択してください\n');
 
-  // 対話的な質問
   const answers = await inquirer.prompt([
     {
       type: 'checkbox',
@@ -440,8 +483,8 @@ async function runTestTypeSelectionPhase(
         {
           name: '単体テスト (Unit Tests) - 必須 [Phase A]',
           value: 'unit',
-          checked: true, // 必須のためデフォルトで選択
-          disabled: true, // 必須のため変更不可
+          checked: true,
+          disabled: true,
         },
         {
           name: 'Lint実行 - 必須 [Phase A]',
@@ -481,16 +524,12 @@ async function runTestTypeSelectionPhase(
             existingSelection?.selectedTypes?.includes('security') || false,
         },
       ],
-      validate: () => {
-        // disabled項目は自動的に含まれるため、バリデーションは常に成功
-        return true;
-      },
+      validate: () => true,
     },
     {
       type: 'confirm',
       name: 'confirm',
       message: (answers: { testTypes: string[] }) => {
-        // 必須テストを自動的に追加
         const required = ['unit', 'lint', 'build'];
         const selected = [...new Set([...required, ...answers.testTypes])];
         const optional = selected.filter((t: string) => !required.includes(t));
@@ -503,26 +542,27 @@ async function runTestTypeSelectionPhase(
     },
   ]);
 
-  // 必須テストを自動的に追加（disabled項目はanswers.testTypesに含まれないため）
+  // 必須テストを自動的に追加
   const requiredTests = ['unit', 'lint', 'build'];
   answers.testTypes = [...new Set([...requiredTests, ...answers.testTypes])];
 
-  if (!answers.confirm) {
-    console.log('\n❌ 選択がキャンセルされました');
-    return {
-      phase: 'test-type-selection' as Phase,
-      success: false,
-      confluenceCreated: false,
-      jiraCreated: false,
-      validationPassed: false,
-      errors: ['ユーザーが選択をキャンセルしました'],
-    };
-  }
+  return answers;
+}
 
+/**
+ * テストタイプ選択を保存してspec.jsonを更新
+ */
+function saveTestTypeSelectionAndUpdateSpec(
+  feature: string,
+  testTypes: string[],
+  specDir: string,
+  selectionPath: string,
+  errors: string[]
+): void {
   // 選択結果を保存
   const selection = {
     feature,
-    selectedTypes: answers.testTypes,
+    selectedTypes: testTypes,
     selectedAt: new Date().toISOString(),
     testTypes: {
       unit: {
@@ -544,25 +584,25 @@ async function runTestTypeSelectionPhase(
         description: 'ビルド実行',
       },
       integration: {
-        enabled: answers.testTypes.includes('integration'),
+        enabled: testTypes.includes('integration'),
         required: false,
         phase: 'B',
         description: '統合テスト',
       },
       e2e: {
-        enabled: answers.testTypes.includes('e2e'),
+        enabled: testTypes.includes('e2e'),
         required: false,
         phase: 'B',
         description: 'E2Eテスト',
       },
       performance: {
-        enabled: answers.testTypes.includes('performance'),
+        enabled: testTypes.includes('performance'),
         required: false,
         phase: 'B',
         description: '性能テスト',
       },
       security: {
-        enabled: answers.testTypes.includes('security'),
+        enabled: testTypes.includes('security'),
         required: false,
         phase: 'B',
         description: 'セキュリティテスト',
@@ -586,7 +626,7 @@ async function runTestTypeSelectionPhase(
       const spec = JSON.parse(readFileSync(specPath, 'utf-8'));
       spec.testTypeSelection = {
         completed: true,
-        selectedTypes: answers.testTypes,
+        selectedTypes: testTypes,
         selectedAt: selection.selectedAt,
       };
       spec.lastUpdated = new Date().toISOString();
@@ -598,12 +638,16 @@ async function runTestTypeSelectionPhase(
     errors.push(`spec.json更新失敗: ${message}`);
     console.warn(`⚠️  spec.json更新失敗: ${message}`);
   }
+}
 
-  // 選択結果のサマリーを表示
+/**
+ * テストタイプ選択のサマリーを表示
+ */
+function displayTestTypeSelectionSummary(feature: string, testTypes: string[]): void {
   console.log('\n' + '='.repeat(60));
   console.log('📊 選択結果サマリー:');
   console.log(`   必須テスト: ${['unit', 'lint', 'build'].join(', ')}`);
-  const optional = answers.testTypes.filter(
+  const optional = testTypes.filter(
     (t: string) => !['unit', 'lint', 'build'].includes(t),
   );
   if (optional.length > 0) {
@@ -621,6 +665,46 @@ async function runTestTypeSelectionPhase(
 
   console.log('\n' + '='.repeat(60));
   console.log('✅ Phase 0.3: テストタイプ選択が完了しました');
+}
+
+/**
+ * テストタイプ選択フェーズを実行（Phase 0.3）
+ * 対話的にテストタイプを選択
+ */
+async function runTestTypeSelectionPhase(
+  feature: string,
+): Promise<PhaseRunResult> {
+  console.log('\n🧪 Phase 0.3: Test Type Selection（テストタイプ選択）');
+  console.log('='.repeat(60));
+
+  const errors: string[] = [];
+  const specDir = join(process.cwd(), '.kiro', 'specs', feature);
+  const selectionPath = join(specDir, 'test-type-selection.json');
+
+  // 既存の選択を読み込む
+  const existingSelection = loadExistingTestTypeSelection(selectionPath);
+
+  // テストタイプの選択を収集
+  const answers = await collectTestTypeSelection(existingSelection);
+
+  // キャンセルチェック
+  if (!answers.confirm) {
+    console.log('\n❌ 選択がキャンセルされました');
+    return {
+      phase: 'test-type-selection' as Phase,
+      success: false,
+      confluenceCreated: false,
+      jiraCreated: false,
+      validationPassed: false,
+      errors: ['ユーザーが選択をキャンセルしました'],
+    };
+  }
+
+  // 選択結果を保存してspec.jsonを更新
+  saveTestTypeSelectionAndUpdateSpec(feature, answers.testTypes, specDir, selectionPath, errors);
+
+  // サマリー表示
+  displayTestTypeSelectionSummary(feature, answers.testTypes);
 
   return {
     phase: 'test-type-selection' as Phase,
@@ -765,17 +849,9 @@ async function runTestSpecPhase(feature: string): Promise<PhaseRunResult> {
 }
 
 /**
- * 環境構築フェーズを実行（Phase 1）
- * 対話的に環境を構築し、必要な設定ファイルを生成
+ * プロジェクト検出と言語/Docker要件を分析
  */
-async function runEnvironmentSetupPhase(
-  feature: string,
-): Promise<PhaseRunResult> {
-  console.log('\n⚙️  Phase 1: Environment Setup（環境構築）');
-  console.log('='.repeat(60));
-
-  const errors: string[] = [];
-
+async function detectAndAnalyzeProject(feature: string) {
   // Step 1: プロジェクト検出
   const { detectProject } = await import('./utils/project-detector.js');
   const detected = detectProject();
@@ -820,7 +896,17 @@ async function runEnvironmentSetupPhase(
     }
   }
 
-  // Step 4: 対話的質問
+  return { detected, languageAnalysis, dockerAnalysis };
+}
+
+/**
+ * 環境構築の対話的質問を収集
+ */
+async function collectEnvironmentAnswers(
+  detected: ReturnType<typeof import('./utils/project-detector.js').detectProject>,
+  languageAnalysis: ReturnType<typeof import('./utils/language-detector.js').analyzeLanguage>,
+  dockerAnalysis: ReturnType<typeof import('./utils/docker-requirement-detector.js').analyzeDockerRequirement>
+) {
   console.log('\n📚 環境構築を対話的に設定します\n');
 
   const languageMap: Record<string, string> = {
@@ -894,7 +980,17 @@ async function runEnvironmentSetupPhase(
   // Docker Composeの推奨サービスを保存
   answers.suggestedServices = dockerAnalysis.suggestedServices;
 
-  // Step 3: 設定ファイル生成
+  return answers;
+}
+
+/**
+ * 環境構築の設定ファイルを生成
+ */
+async function generateEnvironmentConfigs(
+  feature: string,
+  answers: { language: string; ciTool: string; needsDocker: boolean; suggestedServices?: string[] },
+  errors: string[]
+) {
   console.log('\n🤖 設定ファイルを生成中...');
 
   try {
@@ -929,87 +1025,114 @@ async function runEnvironmentSetupPhase(
       console.error(`   ❌ Docker Compose生成失敗: ${message}`);
     }
   }
+}
 
-  // Step 4: 依存関係インストール（オプション）
-  if (answers.installDeps) {
-    console.log('\n📦 依存関係をインストール中...');
-
-    const { execSync } = await import('child_process');
-
-    // 言語別のビルドファイル存在確認
-    const buildFileChecks: Record<string, string> = {
-      'Node.js/TypeScript': 'package.json',
-      Java: 'build.gradle',
-      PHP: 'composer.json',
-      Python: 'requirements.txt',
-      Go: 'go.mod',
-      Rust: 'Cargo.toml',
-    };
-
-    const buildFile = buildFileChecks[answers.language];
-    if (!buildFile || !existsSync(buildFile)) {
-      console.log(
-        `   ℹ️  ${buildFile || 'ビルドファイル'}が見つかりません（スキップ）`,
-      );
-      console.log(
-        '   💡 実際のプロジェクトでは、先にプロジェクトを初期化してください',
-      );
-    } else {
-      const commands: Record<string, string> = {
-        'Node.js/TypeScript':
-          detected.packageManager === 'pnpm'
-            ? 'pnpm install'
-            : detected.packageManager === 'yarn'
-              ? 'yarn install'
-              : 'npm install',
-        Java: existsSync('./gradlew')
-          ? './gradlew build --no-daemon'
-          : 'gradle build',
-        PHP: 'composer install',
-        Python: 'pip install -r requirements.txt',
-        Go: 'go mod download',
-        Rust: 'cargo fetch',
-      };
-
-      const command = commands[answers.language];
-      if (command) {
-        try {
-          execSync(command, { stdio: 'inherit', cwd: process.cwd() });
-          console.log('   ✅ 依存関係のインストール完了');
-        } catch (error: unknown) {
-          const message = error instanceof Error ? error.message : String(error);
-          console.warn(`   ⚠️  依存関係インストール失敗: ${message}`);
-          console.warn(
-            '   💡 プロジェクト初期化後に手動でインストールしてください',
-          );
-        }
-      }
-    }
+/**
+ * 依存関係を自動インストール
+ */
+async function installDependencies(
+  answers: { language: string; installDeps?: boolean },
+  detected: { packageManager?: string }
+) {
+  if (!answers.installDeps) {
+    return;
   }
 
-  // Step 5: spec.json更新
-  const specPath = join(process.cwd(), '.kiro', 'specs', feature, 'spec.json');
-  if (existsSync(specPath)) {
+  console.log('\n📦 依存関係をインストール中...');
+
+  const { execSync } = await import('child_process');
+
+  // 言語別のビルドファイル存在確認
+  const buildFileChecks: Record<string, string> = {
+    'Node.js/TypeScript': 'package.json',
+    Java: 'build.gradle',
+    PHP: 'composer.json',
+    Python: 'requirements.txt',
+    Go: 'go.mod',
+    Rust: 'Cargo.toml',
+  };
+
+  const buildFile = buildFileChecks[answers.language];
+  if (!buildFile || !existsSync(buildFile)) {
+    console.log(
+      `   ℹ️  ${buildFile || 'ビルドファイル'}が見つかりません（スキップ）`,
+    );
+    console.log(
+      '   💡 実際のプロジェクトでは、先にプロジェクトを初期化してください',
+    );
+    return;
+  }
+
+  const commands: Record<string, string> = {
+    'Node.js/TypeScript':
+      detected.packageManager === 'pnpm'
+        ? 'pnpm install'
+        : detected.packageManager === 'yarn'
+          ? 'yarn install'
+          : 'npm install',
+    Java: existsSync('./gradlew')
+      ? './gradlew build --no-daemon'
+      : 'gradle build',
+    PHP: 'composer install',
+    Python: 'pip install -r requirements.txt',
+    Go: 'go mod download',
+    Rust: 'cargo fetch',
+  };
+
+  const command = commands[answers.language];
+  if (command) {
     try {
-      const spec = JSON.parse(readFileSync(specPath, 'utf-8'));
-      spec.environmentSetup = {
-        completed: true,
-        language: answers.language,
-        ciTool: answers.ciTool,
-        dockerCompose: answers.needsDocker,
-        completedAt: new Date().toISOString(),
-      };
-      spec.lastUpdated = new Date().toISOString();
-      writeFileSync(specPath, JSON.stringify(spec, null, 2), 'utf-8');
-      console.log('\n✅ spec.jsonを更新しました');
+      execSync(command, { stdio: 'inherit', cwd: process.cwd() });
+      console.log('   ✅ 依存関係のインストール完了');
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : String(error);
-      errors.push(`spec.json更新失敗: ${message}`);
-      console.warn(`⚠️  spec.json更新失敗: ${message}`);
+      console.warn(`   ⚠️  依存関係インストール失敗: ${message}`);
+      console.warn(
+        '   💡 プロジェクト初期化後に手動でインストールしてください',
+      );
     }
   }
+}
 
-  // Step 6: サマリー表示
+/**
+ * spec.jsonを更新
+ */
+async function updateEnvironmentSpecJson(
+  feature: string,
+  answers: { language: string; ciTool: string; needsDocker: boolean },
+  errors: string[]
+) {
+  const specPath = join(process.cwd(), '.kiro', 'specs', feature, 'spec.json');
+  if (!existsSync(specPath)) {
+    return;
+  }
+
+  try {
+    const spec = JSON.parse(readFileSync(specPath, 'utf-8'));
+    spec.environmentSetup = {
+      completed: true,
+      language: answers.language,
+      ciTool: answers.ciTool,
+      dockerCompose: answers.needsDocker,
+      completedAt: new Date().toISOString(),
+    };
+    spec.lastUpdated = new Date().toISOString();
+    writeFileSync(specPath, JSON.stringify(spec, null, 2), 'utf-8');
+    console.log('\n✅ spec.jsonを更新しました');
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    errors.push(`spec.json更新失敗: ${message}`);
+    console.warn(`⚠️  spec.json更新失敗: ${message}`);
+  }
+}
+
+/**
+ * 環境構築のサマリーを表示
+ */
+function displayEnvironmentSummary(
+  feature: string,
+  answers: { language: string; ciTool: string; needsDocker: boolean }
+) {
   console.log('\n' + '='.repeat(60));
   console.log('📊 環境構築完了:');
   console.log(`   言語: ${answers.language}`);
@@ -1022,6 +1145,37 @@ async function runEnvironmentSetupPhase(
 
   console.log('\n' + '='.repeat(60));
   console.log('✅ Phase 1: 環境構築が完了しました');
+}
+
+/**
+ * 環境構築フェーズを実行（Phase 1）
+ * 対話的に環境を構築し、必要な設定ファイルを生成
+ */
+async function runEnvironmentSetupPhase(
+  feature: string,
+): Promise<PhaseRunResult> {
+  console.log('\n⚙️  Phase 1: Environment Setup（環境構築）');
+  console.log('='.repeat(60));
+
+  const errors: string[] = [];
+
+  // プロジェクト検出と分析
+  const { detected, languageAnalysis, dockerAnalysis } = await detectAndAnalyzeProject(feature);
+
+  // 対話的質問の収集
+  const answers = await collectEnvironmentAnswers(detected, languageAnalysis, dockerAnalysis);
+
+  // 設定ファイル生成
+  await generateEnvironmentConfigs(feature, answers, errors);
+
+  // 依存関係インストール
+  await installDependencies(answers, detected);
+
+  // spec.json更新
+  await updateEnvironmentSpecJson(feature, answers, errors);
+
+  // サマリー表示
+  displayEnvironmentSummary(feature, answers);
 
   return {
     phase: 'environment-setup' as Phase,
@@ -1083,17 +1237,9 @@ async function runPhaseAPhase(feature: string): Promise<PhaseRunResult> {
 }
 
 /**
- * リリース準備テストフェーズを実行（Phase B）
- * テスト実行ファイルを自動生成し、手動テストチェックリストを表示
+ * Phase B対象のテストタイプを読み込み
  */
-async function runPhaseBPhase(feature: string): Promise<PhaseRunResult> {
-  console.log('\n🔍 Phase B: リリース準備テスト（Release Tests）');
-  console.log('='.repeat(60));
-
-  const errors: string[] = [];
-  const generatedFiles: string[] = [];
-
-  // Step 1: テストタイプ選択の読み込み
+function loadPhaseBTestTypes(feature: string): string[] {
   const selectionPath = join(
     process.cwd(),
     '.kiro',
@@ -1124,43 +1270,71 @@ async function runPhaseBPhase(feature: string): Promise<PhaseRunResult> {
     ];
   }
 
-  // Step 2: Phase B対象のテストタイプを抽出
+  // Phase B対象のテストタイプを抽出（Phase Aのテストを除外）
   const phaseBTypes = selectedTypes.filter(
     (t) => !['unit', 'lint', 'build'].includes(t),
   );
 
   if (phaseBTypes.length > 0) {
     console.log(`\n📝 Phase B対象テスト: ${phaseBTypes.join(', ')}`);
+  }
 
-    // Step 3: テスト実行ファイルを生成
-    console.log('\n🤖 テスト実行ファイルを自動生成中...');
+  return phaseBTypes;
+}
 
-    const { generateTestExecution } = await import(
-      './test-execution-generator.js'
-    );
+/**
+ * Phase Bのテスト実行ファイルを生成
+ */
+async function generatePhaseBTestFiles(
+  feature: string,
+  phaseBTypes: string[]
+): Promise<{ generatedFiles: string[]; errors: string[] }> {
+  const generatedFiles: string[] = [];
+  const errors: string[] = [];
 
-    for (const testType of phaseBTypes) {
-      try {
-        const result = await generateTestExecution(feature, testType);
+  if (phaseBTypes.length === 0) {
+    return { generatedFiles, errors };
+  }
 
-        if (result.success) {
-          console.log(
-            `   ✅ ${result.testType}: ${result.files.length}ファイル生成`,
-          );
-          generatedFiles.push(...result.files);
-        } else {
-          console.error(`   ❌ ${result.testType}: ${result.error}`);
-          errors.push(`${result.testType}テスト生成失敗: ${result.error}`);
-        }
-      } catch (error: unknown) {
-        const message = error instanceof Error ? error.message : String(error);
-        errors.push(`${testType}テスト生成失敗: ${message}`);
-        console.error(`❌ ${testType}テスト生成失敗:`, message);
+  console.log('\n🤖 テスト実行ファイルを自動生成中...');
+
+  const { generateTestExecution } = await import(
+    './test-execution-generator.js'
+  );
+
+  for (const testType of phaseBTypes) {
+    try {
+      const result = await generateTestExecution(feature, testType);
+
+      if (result.success) {
+        console.log(
+          `   ✅ ${result.testType}: ${result.files.length}ファイル生成`,
+        );
+        generatedFiles.push(...result.files);
+      } else {
+        console.error(`   ❌ ${result.testType}: ${result.error}`);
+        errors.push(`${result.testType}テスト生成失敗: ${result.error}`);
       }
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      errors.push(`${testType}テスト生成失敗: ${message}`);
+      console.error(`❌ ${testType}テスト生成失敗:`, message);
     }
   }
 
-  // Step 4: 生成されたファイルのサマリー
+  return { generatedFiles, errors };
+}
+
+/**
+ * Phase Bのチェックリストとサマリーを表示
+ */
+function displayPhaseBChecklist(
+  feature: string,
+  phaseBTypes: string[],
+  generatedFiles: string[],
+  errors: string[]
+): void {
+  // 生成されたファイルのサマリー
   const testExecutionDir = join(
     process.cwd(),
     '.kiro',
@@ -1176,7 +1350,7 @@ async function runPhaseBPhase(feature: string): Promise<PhaseRunResult> {
     });
   }
 
-  // Step 5: チェックリスト表示
+  // チェックリスト表示
   console.log('\n' + '='.repeat(60));
   console.log('📋 リリース準備テストチェックリスト:\n');
 
@@ -1223,10 +1397,31 @@ async function runPhaseBPhase(feature: string): Promise<PhaseRunResult> {
     errors.forEach((err) => console.log(`   - ${err}`));
     console.log('📢 エラーを修正してから再実行してください');
   }
+}
+
+/**
+ * リリース準備テストフェーズを実行（Phase B）
+ * テスト実行ファイルを自動生成し、手動テストチェックリストを表示
+ */
+async function runPhaseBPhase(feature: string): Promise<PhaseRunResult> {
+  console.log('\n🔍 Phase B: リリース準備テスト（Release Tests）');
+  console.log('='.repeat(60));
+
+  // Phase B対象のテストタイプを読み込み
+  const phaseBTypes = loadPhaseBTestTypes(feature);
+
+  // テスト実行ファイルを生成
+  const { generatedFiles, errors } = await generatePhaseBTestFiles(
+    feature,
+    phaseBTypes,
+  );
+
+  // チェックリストとサマリーを表示
+  displayPhaseBChecklist(feature, phaseBTypes, generatedFiles, errors);
 
   return {
     phase: 'phase-b' as Phase,
-    success,
+    success: errors.length === 0,
     confluenceCreated: false,
     jiraCreated: false,
     validationPassed: true,
