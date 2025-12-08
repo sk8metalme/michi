@@ -540,13 +540,13 @@ async function collectTestTypeSelection(
       },
       default: true,
     },
-  ]);
+  ] as any);
 
   // 必須テストを自動的に追加
   const requiredTests = ['unit', 'lint', 'build'];
   answers.testTypes = [...new Set([...requiredTests, ...answers.testTypes])];
 
-  return answers;
+  return answers as { testTypes: string[]; confirm: boolean };
 }
 
 /**

@@ -218,7 +218,7 @@ function validateTasks(feature: string): ValidationResult {
   // spec.jira.storyKeys 配列をチェック（新フォーマット）
   // または spec.jira.stories.created（旧フォーマット）をチェック
   const hasStories = spec.jira?.storyKeys && Array.isArray(spec.jira.storyKeys) && spec.jira.storyKeys.length > 0;
-  const hasLegacyStories = spec.jira?.stories && spec.jira.stories.created > 0;
+  const hasLegacyStories = spec.jira?.stories && spec.jira.stories.created !== undefined && spec.jira.stories.created > 0;
   
   if (!hasStories && !hasLegacyStories) {
     errors.push('❌ JIRA Storyが1つも作成されていません');
@@ -226,7 +226,7 @@ function validateTasks(feature: string): ValidationResult {
   } else if (spec.jira?.storyKeys && spec.jira.storyKeys.length > 0) {
     // 新フォーマット: storyKeys配列が存在する場合
     // 成功として扱う（警告なし）
-  } else if (spec.jira?.stories && spec.jira.stories.created < spec.jira.stories.total) {
+  } else if (spec.jira?.stories && spec.jira.stories.created !== undefined && spec.jira.stories.total !== undefined && spec.jira.stories.created < spec.jira.stories.total) {
     // 旧フォーマット: 一部未作成の場合のみ警告
     warnings.push(`⚠️  JIRA Storyが一部未作成: ${spec.jira.stories.created}/${spec.jira.stories.total}`);
   }

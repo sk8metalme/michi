@@ -154,16 +154,16 @@ async function createResourceDashboard(): Promise<void> {
         existingPage.id,
         pageTitle,
         dashboardContent,
-        existingPage.version.number
+        existingPage.version!.number
       );
       const baseUrl = process.env.ATLASSIAN_URL || '';
-      pageUrl = `${baseUrl}/wiki${updated._links.webui}`;
+      pageUrl = `${baseUrl}/wiki${updated._links!.webui}`;
       console.log(`✅ Dashboard page updated: ${pageUrl}`);
     } else {
       // 新規ページを作成
       const created = await client.createPage(spaceKey, pageTitle, dashboardContent, ['dashboard', 'resource-management']);
       const baseUrl = process.env.ATLASSIAN_URL || '';
-      pageUrl = `${baseUrl}/wiki${created._links.webui}`;
+      pageUrl = `${baseUrl}/wiki${created._links!.webui}`;
       console.log(`✅ Dashboard page created: ${pageUrl}`);
     }
   } catch (error) {

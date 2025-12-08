@@ -5,7 +5,7 @@
 
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import * as readline from 'readline';
-import { loadProjectMeta, ProjectMeta } from './utils/project-meta.js';
+import { loadProjectMeta, ProjectMetadata } from './utils/project-meta.js';
 import { validateProjectConfig } from './utils/config-validator.js';
 
 /**
@@ -186,7 +186,7 @@ async function multiSelect(
  */
 async function getConfluenceConfig(
   rl: readline.Interface,
-  _projectMeta: ProjectMeta,
+  _projectMeta: ProjectMetadata,
 ): Promise<ConfluenceConfigResult> {
   console.log('\n📄 Confluence設定');
   console.log('='.repeat(60));
@@ -268,7 +268,7 @@ async function getConfluenceConfig(
         'simple',
       );
 
-      config.hierarchy.mode = mode;
+      config.hierarchy.mode = mode as 'simple' | 'nested';
     }
 
     const parentTitle = await question(
