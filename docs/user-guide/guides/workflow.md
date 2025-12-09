@@ -8,54 +8,59 @@
 
 ## ワークフロー全体像
 
+> **注**: このワークフローは cc-sdd (Spec-Driven Development) の標準フローを Michi が拡張したものです。
+> - **cc-sdd 標準**: Phase 0.0-0.2, 0.5 (`/kiro:*` コマンド)
+> - **Michi 固有拡張**: Phase 0.3-0.4, 0.6-0.7, Phase 1-5, Phase A/B (テスト計画・実行、JIRA/Confluence連携)
+
 ```
-Phase 0.0: 仕様の初期化 (/kiro:spec-init)
+Phase 0.0: 仕様の初期化 (/kiro:spec-init) ← cc-sdd 標準
    ↓
-Phase 0.1: 要件定義 (/kiro:spec-requirements)
-   ↓ GitHub → Confluence同期
+Phase 0.1: 要件定義 (/kiro:spec-requirements) ← cc-sdd 標準
+   ↓ GitHub → Confluence同期 ← Michi 固有
    ↓ 企画・部長が承認
 
-Phase 0.2: 設計 (/kiro:spec-design)
-   ↓ GitHub → Confluence同期
-   ↓ 見積もり生成 → Excel出力
+Phase 0.2: 設計 (/michi:spec-design または /kiro:spec-design)
+   ↓ /michi:spec-design 推奨（Phase 0.3-0.4 ガイダンス付き）
+   ↓ GitHub → Confluence同期 ← Michi 固有
+   ↓ 見積もり生成 → Excel出力 ← Michi 固有
    ↓ アーキテクト・部長が承認
 
-Phase 0.3: テストタイプの選択
+Phase 0.3: テストタイプの選択 ← Michi 固有（重要）
    ↓ テスト計画フローに従う
 
-Phase 0.4: テスト仕様書の作成
+Phase 0.4: テスト仕様書の作成 ← Michi 固有（重要）
    ↓ テンプレートを使用
 
-Phase 0.5: タスク分割 (/kiro:spec-tasks)
+Phase 0.5: タスク分割 (/kiro:spec-tasks) ← cc-sdd 標準
    ↓ tasks.md生成
 
-Phase 0.6: タスクのJIRA同期
+Phase 0.6: タスクのJIRA同期 ← Michi 固有
    ↓ Epic/Story/Subtask自動作成
 
-Phase 0.7: Confluence同期
+Phase 0.7: Confluence同期 ← Michi 固有
    ↓
-Phase 1: 環境構築・基盤整備
+Phase 1: 環境構築・基盤整備 ← Michi 固有
    ↓ テスト環境セットアップ
 
-Phase 2: TDD実装 (/kiro:spec-impl)
+Phase 2: TDD実装 (/kiro:spec-impl) ← cc-sdd 標準
    ↓ テスト → コード → リファクタリング
 
-Phase A: PR作成前の自動テスト（CI/CD）
+Phase A: PR作成前の自動テスト（CI/CD） ← Michi 固有
    ↓ 単体テスト + Lint + ビルド
    ↓ GitHub PR作成
    ↓ PRマージ
 
-Phase 3: 追加の品質保証（PRマージ後）
+Phase 3: 追加の品質保証（PRマージ後） ← Michi 固有
    ↓ 静的解析・セキュリティスキャン
 
-Phase B: リリース準備時の手動テスト
+Phase B: リリース準備時の手動テスト ← Michi 固有
    ↓ 統合・E2E・パフォーマンス・セキュリティ
 
-Phase 4: リリース準備ドキュメント作成 (/kiro:release-prep)
+Phase 4: リリース準備ドキュメント作成 (/kiro:release-prep) ← Michi 固有
    ↓ Confluenceリリース手順書
    ↓ リリースJIRA起票
 
-Phase 5: リリース実行
+Phase 5: リリース実行 ← Michi 固有
    ↓ タグ作成 → CI/CD → GitHub Release作成
 ```
 
@@ -145,12 +150,17 @@ AIが自動的に：
 #### Phase 0.2 Step 1: 設計書の生成
 
 ```bash
-# 凡例
+# 推奨: Michi 拡張版（Phase 0.3-0.4 ガイダンス付き）
+/michi:spec-design <feature>
+
+# または cc-sdd 標準版
 /kiro:spec-design <feature>
 
 # 具体例
-/kiro:spec-design user-auth
+/michi:spec-design user-auth
 ```
+
+**推奨**: `/michi:spec-design` を使用すると、設計完了後に Phase 0.3-0.4（テスト計画）へのガイダンスが自動的に表示されます。
 
 AIが以下を生成：
 
@@ -189,9 +199,13 @@ michi confluence:sync user-auth design
 
 ### Phase 0.3-0.4: テスト計画
 
+> **Michi 固有機能**: Phase 0.3-0.4 は Michi 独自の拡張フェーズです。cc-sdd 標準には含まれません。
+>
+> `/michi:spec-design` コマンドを使用すると、設計完了後に自動的にこのフェーズへのガイダンスが表示されます。
+
 #### Phase 0.3: テストタイプの選択
 
-Phase 0.2（設計）完了後、Phase 0.4（テスト仕様書作成）の前に、どのテストタイプが必要かを決定します。
+Phase 0.2（設計）完了後、Phase 0.5（タスク分割）の前に、どのテストタイプが必要かを決定します。
 
 詳細は [テスト計画フロー](../testing/test-planning-flow.md#phase-03-テストタイプの選択) を参照してください。
 

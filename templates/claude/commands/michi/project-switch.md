@@ -1,9 +1,13 @@
 ---
 name: /michi:project-switch
-description: Switch between projects
+description: Switch between projects (Michi-specific feature)
 ---
 
 # Project Switch Command
+
+> **Michi 固有機能**: このコマンドは Michi 独自の機能です。cc-sdd 標準には含まれません。
+>
+> マルチプロジェクト環境で、異なるプロジェクト間を切り替えるための機能です。
 
 **Important**: Generate output in language specified in {{KIRO_DIR}}/project.json.
 

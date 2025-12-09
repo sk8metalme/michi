@@ -1,9 +1,13 @@
 ---
 name: /michi:confluence-sync
-description: Sync specifications to Confluence
+description: Sync specifications to Confluence (Michi-specific feature)
 ---
 
 # Confluence Sync Command
+
+> **Michi 固有機能**: このコマンドは Michi 独自の機能です。cc-sdd 標準には含まれません。
+>
+> 仕様書（requirements.md, design.md）を Confluence に同期し、承認ワークフローを実現します。
 
 **Important**: Generate output in language specified in {{KIRO_DIR}}/project.json.
 
