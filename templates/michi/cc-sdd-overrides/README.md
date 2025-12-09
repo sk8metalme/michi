@@ -12,6 +12,8 @@
 ```
 cc-sdd-overrides/
 └── settings/
+    ├── rules/
+    │   └── design-review-michi.md  # Michi固有の設計レビュールール
     └── templates/
         └── specs/
             ├── tasks.md   # Michi固有のタスクテンプレート
@@ -19,6 +21,12 @@ cc-sdd-overrides/
 ```
 
 ## Michi固有の要素
+
+### design-review-michi.md
+- cc-sdd 標準の `design-review.md` を拡張
+- Phase 0.3-0.4（テスト計画）の準備状況評価を追加
+- Testing Strategy セクションの詳細度、トレーサビリティ、非機能要件への対応を評価
+- `/michi:validate-design` コマンドで使用
 
 ### tasks.md
 - 日本語で記述

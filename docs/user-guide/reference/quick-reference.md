@@ -128,20 +128,31 @@ gh pr create --head <project-id>/feature/<feature> --base main
 
 ## コマンド一覧
 
-| コマンド                                 | 説明                       | 分類       |
-| ---------------------------------------- | -------------------------- | ---------- |
-| `/kiro:spec-init <description>`          | 仕様初期化                 | cc-sdd     |
-| `/kiro:spec-requirements <feature>`      | 要件定義生成               | cc-sdd     |
-| `/kiro:spec-design <feature>`            | 設計生成                   | cc-sdd     |
-| `/kiro:spec-tasks <feature>`             | タスク分割                 | cc-sdd     |
-| `/kiro:spec-impl <feature> <tasks>`      | TDD実装                    | cc-sdd     |
-| `/kiro:spec-status <feature>`            | 進捗確認                   | cc-sdd     |
-| `/kiro:steering`                         | Steering作成/更新          | cc-sdd     |
-| `/kiro:steering-custom`                  | カスタムSteering作成       | cc-sdd     |
-| `/kiro:validate-gap <feature>`           | 既存コードと要件の差異分析 | cc-sdd     |
-| `/kiro:validate-design <feature>`        | 設計の品質レビューと検証   | cc-sdd     |
-| `/kiro:confluence-sync <feature> [type]` | Confluence同期             | Michi only |
-| `/kiro:project-switch <project_id>`      | プロジェクト切り替え       | Michi only |
+### cc-sdd 標準コマンド
+
+| コマンド                                 | 説明                       |
+| ---------------------------------------- | -------------------------- |
+| `/kiro:spec-init <description>`          | 仕様初期化                 |
+| `/kiro:spec-requirements <feature>`      | 要件定義生成               |
+| `/kiro:spec-design <feature>`            | 設計生成（cc-sdd標準版）   |
+| `/kiro:spec-tasks <feature>`             | タスク分割                 |
+| `/kiro:spec-impl <feature> <tasks>`      | TDD実装                    |
+| `/kiro:spec-status <feature>`            | 進捗確認                   |
+| `/kiro:steering`                         | Steering作成/更新          |
+| `/kiro:steering-custom`                  | カスタムSteering作成       |
+| `/kiro:validate-gap <feature>`           | 既存コードと要件の差異分析 |
+| `/kiro:validate-design <feature>`        | 設計の品質レビューと検証   |
+
+### Michi 拡張コマンド
+
+> **注**: これらのコマンドは Michi 独自の拡張機能です。cc-sdd 標準には含まれません。
+
+| コマンド                                 | 説明                                           |
+| ---------------------------------------- | ---------------------------------------------- |
+| `/michi:spec-design <feature>`           | 設計生成（Phase 0.3-0.4 ガイダンス付き）⭐推奨 |
+| `/michi:validate-design <feature>`       | 設計レビュー（テスト計画完了確認付き）         |
+| `/michi:confluence-sync <feature> [type]` | Confluence同期                                 |
+| `/michi:project-switch <project_id>`      | プロジェクト切り替え                           |
 
 ## Michi CLIコマンド一覧
 
@@ -185,7 +196,7 @@ gh pr create --head <project-id>/feature/<feature> --base main
 ### 方法1: Cursorコマンド
 
 ```
-/kiro:project-switch <project-id>
+/michi:project-switch <project-id>
 ```
 
 ### 方法2: ターミナル

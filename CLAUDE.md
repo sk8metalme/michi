@@ -76,6 +76,11 @@ docs/
 - カスタムコマンド: `templates/claude/commands/`
 
 ### cc-sdd（Spec-Driven Development Core）
+
+> **cc-sdd とは**: Spec-Driven Developmentの基盤フレームワーク。ルール・テンプレートを提供。
+>
+> **Michi との関係**: Michi は cc-sdd を拡張し、テスト計画（Phase 0.3-0.4）、JIRA/Confluence連携、Phase A/B テスト実行などの機能を追加したフレームワークです。
+
 - **役割**: Spec-Driven Developmentのルール・テンプレートを提供
 - **リポジトリ**: https://github.com/gotalab/cc-sdd
 - **セットアップ**: `npx cc-sdd@latest --claude --lang ja`
@@ -85,6 +90,31 @@ docs/
   - cc-sddのバージョンアップで最新のベストプラクティスを取得
   - プロジェクト固有の設定は、ユーザーが `.kiro/steering/` と `.kiro/specs/` を作成して管理
 
+### Michi 固有拡張（cc-sddへの追加機能）
+
+Michiは cc-sdd の標準ワークフローを以下の機能で拡張します：
+
+#### テスト計画拡張
+- **Phase 0.3**: テストタイプの選択（単体/統合/E2E/パフォーマンス/セキュリティ）
+- **Phase 0.4**: テスト仕様書の作成（テンプレート使用）
+- **Phase 1**: 環境構築・基盤整備（テスト環境セットアップ）
+- **Phase A**: PR作成前の自動テスト（単体テスト + Lint + ビルド）
+- **Phase B**: リリース準備時の手動テスト（統合/E2E/パフォーマンス/セキュリティ）
+- **Phase 3**: 追加の品質保証（PRマージ後）
+
+#### 外部ツール連携
+- **Phase 0.6**: タスクのJIRA同期（Epic/Story/Subtask自動作成）
+- **Phase 0.7**: Confluence同期（要件定義・設計書のMarkdown→Confluence変換）
+- **Phase 4-5**: リリース準備と実行（Confluenceリリース手順書、JIRAリリースチケット）
+
+#### Michi 固有コマンド
+- `/michi:spec-design {feature}`: Phase 0.3-0.4 ガイダンス付き設計書生成（推奨）
+- `/michi:validate-design {feature}`: テスト計画完了確認付き設計レビュー
+- `/michi:confluence-sync {feature} {type}`: Confluence同期
+- `/michi:project-switch {project}`: マルチプロジェクト切り替え
+
+詳細は [ワークフローガイド](docs/user-guide/guides/workflow.md) を参照してください。
+
 ## 参考リンク
 
 - [ユーザーガイド](docs/user-guide/README.md)
@@ -92,7 +122,9 @@ docs/
 - [リリースフロー](docs/user-guide/release/release-flow.md)
 
 
-# AI-DLC and Spec-Driven Development
+# cc-sdd 標準ワークフロー（AI-DLC and Spec-Driven Development）
+
+> **注**: 以下は cc-sdd 標準の基本ワークフローです。Michi を使用する場合は、上記の「Michi 固有拡張」セクションで説明されている Phase 0.3-0.4, Phase A/B などの追加フェーズを考慮してください。
 
 Kiro-style Spec Driven Development implementation on AI-DLC (AI Development Life Cycle)
 
@@ -114,14 +146,18 @@ Kiro-style Spec Driven Development implementation on AI-DLC (AI Development Life
 ## Development Guidelines
 - Think in English, generate responses in Japanese. All Markdown content written to project files (e.g., requirements.md, design.md, tasks.md, research.md, validation reports) MUST be written in the target language configured for this specification (see spec.json.language).
 
-## Minimal Workflow
+## Minimal Workflow (cc-sdd 標準)
+
+> **Michi 使用時の推奨**: 以下のコマンドで `/kiro:spec-design` の代わりに `/michi:spec-design` を使用すると、Phase 0.3-0.4（テスト計画）へのガイダンスが自動的に表示されます。
+
 - Phase 0 (optional): `/kiro:steering`, `/kiro:steering-custom`
 - Phase 1 (Specification):
   - `/kiro:spec-init "description"`
   - `/kiro:spec-requirements {feature}`
   - `/kiro:validate-gap {feature}` (optional: for existing codebase)
-  - `/kiro:spec-design {feature} [-y]`
-  - `/kiro:validate-design {feature}` (optional: design review)
+  - `/michi:spec-design {feature} [-y]` ← **Michi推奨** (または `/kiro:spec-design`)
+  - **Phase 0.3-0.4**: テスト計画（Michi固有） ← **重要: タスク生成前に実施**
+  - `/michi:validate-design {feature}` (optional: design review with test planning check)
   - `/kiro:spec-tasks {feature} [-y]`
 - Phase 2 (Implementation): `/kiro:spec-impl {feature} [tasks]`
   - `/kiro:validate-impl {feature}` (optional: after implementation)
