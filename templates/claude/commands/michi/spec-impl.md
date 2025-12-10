@@ -42,7 +42,7 @@ Options:
 
 ## 実行フロー
 
-```
+```plaintext
 Phase 0: コンテキストロード（kiro:spec-impl継承）
     ↓
 Phase 1: 事前品質監査（Michi拡張）
@@ -94,6 +94,15 @@ fi
 if echo "$@" | grep -q -- '--mutation'; then
     MUTATION=true
 fi
+
+# レポート出力用の変数初期化
+COMPLETED_TASKS=0
+TOTAL_TASKS=0
+OSS_LICENSE_STATUS="UNKNOWN"
+VERSION_AUDIT_STATUS="UNKNOWN"
+DESIGN_REVIEW_STATUS="SKIPPED"
+CODE_REVIEW_CRITICAL=0
+DESIGN_REVIEW_CRITICAL=0
 ```
 
 #### Step 1.2: サブエージェント並行起動
@@ -106,7 +115,7 @@ fi
 Phase 1では以下の3つのサブエージェントを**並行起動**します：
 
 ### 1. oss-license-checker
-```
+```yaml
 Task tool:
   subagent_type: oss-license-checker
   prompt: |
@@ -129,7 +138,7 @@ Task tool:
 ```
 
 ### 2. stable-version-auditor
-```
+```yaml
 Task tool:
   subagent_type: stable-version-auditor
   prompt: |
@@ -152,48 +161,48 @@ Task tool:
 ```
 
 ### 3. Frontend検出
-```
-並行実行タスク:
-  ローカル検出ロジック（Task toolは使用せず、直接実行）:
+```bash
+# 並行実行タスク:
+# ローカル検出ロジック（Task toolは使用せず、直接実行）
 
-  # Frontend変更を検出
-  FRONTEND_DETECTED=false
+# Frontend変更を検出
+FRONTEND_DETECTED=false
 
-  # 対象ファイル拡張子
-  if find . -type f \( \
-      -name "*.tsx" -o \
-      -name "*.jsx" -o \
-      -name "*.vue" -o \
-      -name "*.svelte" \
-    \) | head -1 | grep -q .; then
-      FRONTEND_DETECTED=true
-  fi
+# 対象ファイル拡張子
+if find . -type f \( \
+    -name "*.tsx" -o \
+    -name "*.jsx" -o \
+    -name "*.vue" -o \
+    -name "*.svelte" \
+  \) | head -1 | grep -q .; then
+    FRONTEND_DETECTED=true
+fi
 
-  # CSSファイル
-  if find . -type f \( \
-      -name "*.css" -o \
-      -name "*.scss" -o \
-      -name "*.sass" -o \
-      -name "*.less" \
-    \) | head -1 | grep -q .; then
-      FRONTEND_DETECTED=true
-  fi
+# CSSファイル
+if find . -type f \( \
+    -name "*.css" -o \
+    -name "*.scss" -o \
+    -name "*.sass" -o \
+    -name "*.less" \
+  \) | head -1 | grep -q .; then
+    FRONTEND_DETECTED=true
+fi
 
-  # Tailwind設定
-  if [ -f "tailwind.config.js" ] || [ -f "tailwind.config.ts" ]; then
-      FRONTEND_DETECTED=true
-  fi
+# Tailwind設定
+if [ -f "tailwind.config.js" ] || [ -f "tailwind.config.ts" ]; then
+    FRONTEND_DETECTED=true
+fi
 
-  # Frontendディレクトリ
-  if [ -d "components" ] || [ -d "pages" ] || [ -d "views" ]; then
-      FRONTEND_DETECTED=true
-  fi
+# Frontendディレクトリ
+if [ -d "components" ] || [ -d "pages" ] || [ -d "views" ]; then
+    FRONTEND_DETECTED=true
+fi
 
-  echo "Frontend detected: $FRONTEND_DETECTED"
+echo "Frontend detected: $FRONTEND_DETECTED"
 ```
 
 **並行実行の実装例**:
-```
+```plaintext
 単一メッセージで以下を実行:
 - Task tool（oss-license-checker）
 - Task tool（stable-version-auditor）
@@ -532,11 +541,10 @@ case "$LANGUAGE" in
             exit 1
         fi
 
-        # JaCoCo coverage report parsing
+        # JaCoCo coverage report parsing (堅牢な実装)
         if [ -f "build/reports/jacoco/test/jacocoTestReport.xml" ]; then
-            COVERAGE=$(grep -oP '<counter type="LINE".*?covered="\K[0-9]+' build/reports/jacoco/test/jacocoTestReport.xml | awk '{sum+=$1} END {print sum}')
-            TOTAL=$(grep -oP '<counter type="LINE".*?missed="[0-9]+" covered="\K[0-9]+' build/reports/jacoco/test/jacocoTestReport.xml | awk '{sum+=$1} END {print sum}')
-            COVERAGE=$(echo "scale=2; $COVERAGE * 100 / ($COVERAGE + $TOTAL)" | bc)
+            COVERAGE=$(grep -oP '<counter type="LINE"\s+missed="\K[0-9]+|covered="\K[0-9]+' build/reports/jacoco/test/jacocoTestReport.xml | \
+                awk 'NR==1{m=$1} NR==2{c=$1} END {if(m+c>0) printf "%.1f", c*100/(m+c); else print 100}')
         else
             echo "⚠ JaCoCo report not found, skipping coverage check"
             COVERAGE=100
@@ -562,11 +570,15 @@ case "$LANGUAGE" in
             exit 1
         fi
 
-        # Clover XML coverage parsing
+        # Clover XML coverage parsing (堅牢な実装)
         if [ -f "coverage/clover.xml" ]; then
-            COVERAGE=$(grep -oP '<metrics.*?statements="\K[0-9]+' coverage/clover.xml | awk '{sum+=$1} END {print sum}')
-            TOTAL=$(grep -oP '<metrics.*?coveredstatements="\K[0-9]+' coverage/clover.xml | awk '{sum+=$1} END {print sum}')
-            COVERAGE=$(echo "scale=2; $TOTAL * 100 / $COVERAGE" | bc)
+            TOTAL_STATEMENTS=$(grep -oP '<metrics.*?statements="\K[0-9]+' coverage/clover.xml | awk '{sum+=$1} END {print sum}')
+            COVERED_STATEMENTS=$(grep -oP '<metrics.*?coveredstatements="\K[0-9]+' coverage/clover.xml | awk '{sum+=$1} END {print sum}')
+            if [ -n "$TOTAL_STATEMENTS" ] && [ "$TOTAL_STATEMENTS" -gt 0 ]; then
+                COVERAGE=$(echo "scale=1; $COVERED_STATEMENTS * 100 / $TOTAL_STATEMENTS" | bc)
+            else
+                COVERAGE=100
+            fi
         else
             echo "⚠ Clover report not found, skipping coverage check"
             COVERAGE=100
@@ -594,27 +606,37 @@ fi
 if [ "$MUTATION" = true ]; then
     echo "=== Mutation Testing ==="
 
-    # 言語検出
-    if [ -f "package.json" ]; then
-        echo "🔍 Node.js/TypeScript detected → Stryker"
-        npx stryker run
-        MUTATION_SCORE=$(cat reports/mutation/mutation.json | jq '.mutationScore')
+    # Step 4.1 で検出済みの $LANGUAGE 変数を再利用
+    case "$LANGUAGE" in
+        nodejs)
+            echo "🔍 Node.js/TypeScript → Stryker"
+            npx stryker run
+            MUTATION_SCORE=$(cat reports/mutation/mutation.json | jq '.mutationScore')
+            ;;
 
-    elif [ -f "build.gradle" ]; then
-        echo "🔍 Java detected → PITest"
-        ./gradlew pitest
-        MUTATION_SCORE=$(cat build/reports/pitest/index.html | grep -oP 'mutation score: \K[0-9]+')
+        java)
+            echo "🔍 Java → PITest"
+            ./gradlew pitest
+            MUTATION_SCORE=$(cat build/reports/pitest/index.html | grep -oP 'mutation score: \K[0-9]+')
+            ;;
 
-    elif [ -f "pyproject.toml" ]; then
-        echo "🔍 Python detected → mutmut"
-        mutmut run
-        MUTATION_SCORE=$(mutmut show | grep -oP 'score: \K[0-9]+')
+        python)
+            echo "🔍 Python → mutmut"
+            mutmut run
+            MUTATION_SCORE=$(mutmut show | grep -oP 'score: \K[0-9]+')
+            ;;
 
-    elif [ -f "composer.json" ]; then
-        echo "🔍 PHP detected → Infection"
-        ./vendor/bin/infection
-        MUTATION_SCORE=$(cat infection.json | jq '.mutation_score')
-    fi
+        php)
+            echo "🔍 PHP → Infection"
+            ./vendor/bin/infection
+            MUTATION_SCORE=$(cat infection.json | jq '.mutation_score')
+            ;;
+
+        *)
+            echo "❌ Mutation Testing not supported for: $LANGUAGE"
+            exit 1
+            ;;
+    esac
 
     # Mutation Score判定（80%以上）
     if (( $(echo "$MUTATION_SCORE < 80" | bc -l) )); then
