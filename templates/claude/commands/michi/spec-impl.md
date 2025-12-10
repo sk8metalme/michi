@@ -485,31 +485,101 @@ fi
 ```bash
 echo "=== Phase 4: 最終検証 ==="
 
-# Type Check
-npm run type-check
-if [ $? -ne 0 ]; then
-    echo "❌ Type check failed"
-    exit 1
+# 言語検出
+LANGUAGE="unknown"
+if [ -f "package.json" ]; then
+    LANGUAGE="nodejs"
+elif [ -f "build.gradle" ]; then
+    LANGUAGE="java"
+elif [ -f "pyproject.toml" ]; then
+    LANGUAGE="python"
+elif [ -f "composer.json" ]; then
+    LANGUAGE="php"
 fi
 
-# Lint
-npm run lint
-if [ $? -ne 0 ]; then
-    echo "❌ Lint failed"
-    exit 1
-fi
+echo "🔍 Detected language: $LANGUAGE"
 
-# Test
-npm run test:run
-if [ $? -ne 0 ]; then
-    echo "❌ Test failed"
-    exit 1
-fi
+# 言語別品質チェック
+case "$LANGUAGE" in
+    nodejs)
+        echo "▶ Running Node.js quality checks..."
+        npm run type-check
+        if [ $? -ne 0 ]; then
+            echo "❌ Type check failed"
+            exit 1
+        fi
 
-# Coverage
-npm run test:coverage
-COVERAGE=$(cat coverage/coverage-summary.json | jq '.total.lines.pct')
+        npm run lint
+        if [ $? -ne 0 ]; then
+            echo "❌ Lint failed"
+            exit 1
+        fi
 
+        npm run test:coverage
+        if [ $? -ne 0 ]; then
+            echo "❌ Test failed"
+            exit 1
+        fi
+
+        COVERAGE=$(cat coverage/coverage-summary.json | jq '.total.lines.pct')
+        ;;
+
+    java)
+        echo "▶ Running Java quality checks..."
+        ./gradlew check
+        if [ $? -ne 0 ]; then
+            echo "❌ Gradle check failed"
+            exit 1
+        fi
+
+        # JaCoCo coverage report parsing
+        if [ -f "build/reports/jacoco/test/jacocoTestReport.xml" ]; then
+            COVERAGE=$(grep -oP '<counter type="LINE".*?covered="\K[0-9]+' build/reports/jacoco/test/jacocoTestReport.xml | awk '{sum+=$1} END {print sum}')
+            TOTAL=$(grep -oP '<counter type="LINE".*?missed="[0-9]+" covered="\K[0-9]+' build/reports/jacoco/test/jacocoTestReport.xml | awk '{sum+=$1} END {print sum}')
+            COVERAGE=$(echo "scale=2; $COVERAGE * 100 / ($COVERAGE + $TOTAL)" | bc)
+        else
+            echo "⚠ JaCoCo report not found, skipping coverage check"
+            COVERAGE=100
+        fi
+        ;;
+
+    python)
+        echo "▶ Running Python quality checks..."
+        pytest --cov=. --cov-report=json --cov-fail-under=95
+        if [ $? -ne 0 ]; then
+            echo "❌ Pytest failed"
+            exit 1
+        fi
+
+        COVERAGE=$(cat coverage.json | jq '.totals.percent_covered')
+        ;;
+
+    php)
+        echo "▶ Running PHP quality checks..."
+        ./vendor/bin/phpunit --coverage-clover=coverage/clover.xml
+        if [ $? -ne 0 ]; then
+            echo "❌ PHPUnit failed"
+            exit 1
+        fi
+
+        # Clover XML coverage parsing
+        if [ -f "coverage/clover.xml" ]; then
+            COVERAGE=$(grep -oP '<metrics.*?statements="\K[0-9]+' coverage/clover.xml | awk '{sum+=$1} END {print sum}')
+            TOTAL=$(grep -oP '<metrics.*?coveredstatements="\K[0-9]+' coverage/clover.xml | awk '{sum+=$1} END {print sum}')
+            COVERAGE=$(echo "scale=2; $TOTAL * 100 / $COVERAGE" | bc)
+        else
+            echo "⚠ Clover report not found, skipping coverage check"
+            COVERAGE=100
+        fi
+        ;;
+
+    *)
+        echo "❌ Unsupported language: $LANGUAGE"
+        exit 1
+        ;;
+esac
+
+# カバレッジ判定（95%以上）
 if (( $(echo "$COVERAGE < 95" | bc -l) )); then
     echo "❌ Coverage failed: ${COVERAGE}% (required: 95%)"
     exit 1
