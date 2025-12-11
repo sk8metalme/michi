@@ -10,6 +10,10 @@ argument-hint: <feature-name> [task-numbers] [--mutation] [--skip-license] [--sk
 ## Base Command Reference
 @.claude/commands/kiro/spec-impl.md
 
+## Development Guidelines
+
+{{DEV_GUIDELINES}}
+
 ---
 
 ## Michi Extension: Quality Automation & Parallel Execution

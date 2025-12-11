@@ -142,14 +142,12 @@ export function createCLI(): Command {
     .argument('<feature>', 'Feature name')
     .argument(
       '<phase>',
-      'Phase name (requirements, design, test-type-selection, test-spec, tasks, environment-setup, phase-a, phase-b)',
+      'Phase name (requirements, design, tasks, environment-setup, phase-a, phase-b)',
     )
     .action(async (feature: string, phase: string) => {
       const validPhases = [
         'requirements',
         'design',
-        'test-type-selection',
-        'test-spec',
         'tasks',
         'environment-setup',
         'phase-a',
@@ -166,8 +164,6 @@ export function createCLI(): Command {
           phase as
             | 'requirements'
             | 'design'
-            | 'test-type-selection'
-            | 'test-spec'
             | 'tasks'
             | 'environment-setup'
             | 'phase-a'
@@ -195,14 +191,12 @@ export function createCLI(): Command {
     .argument('<feature>', 'Feature name')
     .argument(
       '<phase>',
-      'Phase name (requirements, design, test-type-selection, test-spec, tasks, environment-setup, phase-a, phase-b)',
+      'Phase name (requirements, design, tasks, environment-setup, phase-a, phase-b)',
     )
     .action(async (feature: string, phase: string) => {
       const validPhases = [
         'requirements',
         'design',
-        'test-type-selection',
-        'test-spec',
         'tasks',
         'environment-setup',
         'phase-a',
@@ -219,8 +213,6 @@ export function createCLI(): Command {
           phase as
             | 'requirements'
             | 'design'
-            | 'test-type-selection'
-            | 'test-spec'
             | 'tasks'
             | 'environment-setup'
             | 'phase-a'

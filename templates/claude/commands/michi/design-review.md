@@ -5,6 +5,10 @@ description: UIコンポーネントのデザイン品質をレビューする
 
 # デザインレビュー
 
+## Development Guidelines
+
+{{DEV_GUIDELINES}}
+
 このコマンドは、UIコンポーネントやフロントエンドコードのデザイン品質をレビューします。
 
 ## サブエージェント呼び出し

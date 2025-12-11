@@ -5,6 +5,10 @@ description: 依存パッケージのOSSライセンスを確認する
 
 # ライセンス確認
 
+## Development Guidelines
+
+{{DEV_GUIDELINES}}
+
 このコマンドは、プロジェクトの依存パッケージのOSSライセンスを確認し、ライセンス互換性をチェックします。
 
 ## サブエージェント呼び出し

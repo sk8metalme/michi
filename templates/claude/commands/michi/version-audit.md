@@ -5,6 +5,10 @@ description: 依存パッケージのStableバージョンを確認する
 
 # バージョン確認
 
+## Development Guidelines
+
+{{DEV_GUIDELINES}}
+
 このコマンドは、プロジェクトの依存パッケージのバージョンを確認し、Stable/LTSバージョンの使用を推奨します。
 
 ## サブエージェント呼び出し

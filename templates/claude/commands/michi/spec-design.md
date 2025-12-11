@@ -1,4 +1,5 @@
 ---
+name: /michi:spec-design
 description: Create comprehensive technical design for a specification (Michi version with test planning flow)
 allowed-tools: Bash, Glob, Grep, LS, Read, Write, Edit, MultiEdit, Update, WebSearch, WebFetch
 argument-hint: <feature-name> [-y]
@@ -8,6 +9,10 @@ argument-hint: <feature-name> [-y]
 
 ## Base Command Reference
 @.claude/commands/kiro/spec-design.md
+
+## Development Guidelines
+
+{{DEV_GUIDELINES}}
 
 ## Michi Extension: Next Phase Guidance
 
@@ -19,22 +24,34 @@ argument-hint: <feature-name> [-y]
 
 #### 1. Phase 0.3: テストタイプの選択
 
-設計書の Testing Strategy セクションを基に、必要なテストタイプを決定してください。
+設計書の Testing Strategy セクションを基に、必要なテストタイプを決定します。
 
-**参照ドキュメント**: `docs/user-guide/testing/test-planning-flow.md`
+**実行方法:**
 
-**選択肢**:
+**推奨: 統合AIコマンド**
+```bash
+/michi:test-planning {feature-name}
+```
+Phase 0.3とPhase 0.4を統合的に実行します。AIが対話的にテストタイプを選択し、テスト仕様書を作成します。
+
+**選択可能なテストタイプ:**
 - 単体テスト (Unit Test)
 - 統合テスト (Integration Test)
 - E2Eテスト (End-to-End Test)
 - パフォーマンステスト (Performance Test)
 - セキュリティテスト (Security Test)
 
+**参照ドキュメント**: `docs/user-guide/testing/test-planning-flow.md`
+
 #### 2. Phase 0.4: テスト仕様書の作成
 
-選択したテストタイプに応じて、テンプレートを使用してテスト仕様書を作成してください。
+Phase 0.3で選択したテストタイプに基づいて、テスト仕様書を作成します。
 
-**テンプレート**:
+**実行方法:**
+
+`/michi:test-planning` を使用した場合、Phase 0.4も自動的に実行されます。
+
+**テンプレート:**
 - 単体テスト: `docs/user-guide/templates/test-specs/unit-test-spec-template.md`
 - 統合テスト: `docs/user-guide/templates/test-specs/integration-test-spec-template.md`
 - E2Eテスト: `docs/user-guide/templates/test-specs/e2e-test-spec-template.md`

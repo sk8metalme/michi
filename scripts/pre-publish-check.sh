@@ -142,23 +142,8 @@ echo_success "Test feature initialized"
 # ========================================
 echo_step "Testing New Phases (0.3-0.4, 1, A, B)"
 
-# Phase 0.3: テストタイプ選択
-echo_info "Testing Phase 0.3: test-type-selection"
-if npm run phase:run "${TEST_FEATURE}" test-type-selection > /dev/null 2>&1; then
-  echo_success "Phase 0.3 succeeded"
-else
-  echo_error "Phase 0.3 failed"
-  exit 1
-fi
-
-# Phase 0.4: テスト仕様書作成
-echo_info "Testing Phase 0.4: test-spec"
-if npm run phase:run "${TEST_FEATURE}" test-spec > /dev/null 2>&1; then
-  echo_success "Phase 0.4 succeeded"
-else
-  echo_error "Phase 0.4 failed"
-  exit 1
-fi
+# Phase 0.3-0.4: Test planning is now handled by AI command /michi:test-planning
+# (CLI commands removed)
 
 # Phase 1: 環境構築
 echo_info "Testing Phase 1: environment-setup"
@@ -192,23 +177,7 @@ fi
 # ========================================
 echo_step "Testing Phase Validations"
 
-# Phase 0.3
-echo_info "Validating Phase 0.3"
-if npm run validate:phase "${TEST_FEATURE}" test-type-selection > /dev/null 2>&1; then
-  echo_success "Phase 0.3 validation passed"
-else
-  echo_error "Phase 0.3 validation failed"
-  exit 1
-fi
-
-# Phase 0.4
-echo_info "Validating Phase 0.4"
-if npm run validate:phase "${TEST_FEATURE}" test-spec > /dev/null 2>&1; then
-  echo_success "Phase 0.4 validation passed"
-else
-  echo_error "Phase 0.4 validation failed"
-  exit 1
-fi
+# Phase 0.3-0.4: Validation removed (test planning is now handled by AI command)
 
 # Phase 1
 echo_info "Validating Phase 1"

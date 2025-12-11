@@ -1,5 +1,9 @@
 # kiro:spec-impl - Spec Implementation Command
 
+## Development Guidelines
+
+{{DEV_GUIDELINES}}
+
 ## Overview
 
 This command implements the specifications defined in `tasks.md` following TDD (Test-Driven Development) practices with automatic JIRA integration.
