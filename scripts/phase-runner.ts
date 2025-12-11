@@ -17,8 +17,6 @@ import inquirer from 'inquirer';
 type Phase =
   | 'requirements'
   | 'design'
-  | 'test-type-selection'
-  | 'test-spec'
   | 'tasks'
   | 'environment-setup'
   | 'phase-a'
@@ -442,411 +440,8 @@ async function runTasksPhase(feature: string): Promise<PhaseRunResult> {
   };
 }
 
-/**
- * 既存のテストタイプ選択を読み込む
- */
-function loadExistingTestTypeSelection(
-  selectionPath: string
-): TestTypeSelection | null {
-  if (!existsSync(selectionPath)) {
-    return null;
-  }
 
-  try {
-    const existingSelection = JSON.parse(readFileSync(selectionPath, 'utf-8'));
-    console.log('\n📋 既存の選択が見つかりました:');
-    console.log(
-      `   選択済みテストタイプ: ${existingSelection.selectedTypes?.join(', ') || 'なし'}`,
-    );
-    return existingSelection;
-  } catch {
-    console.warn('⚠️  既存の選択ファイルの読み込みに失敗しました');
-    return null;
-  }
-}
 
-/**
- * テストタイプの対話的選択を収集
- */
-async function collectTestTypeSelection(
-  existingSelection: TestTypeSelection | null
-): Promise<{ testTypes: string[]; confirm: boolean }> {
-  console.log('\n📚 プロジェクト要件に応じてテストタイプを選択してください\n');
-
-  const answers = await inquirer.prompt([
-    {
-      type: 'checkbox',
-      name: 'testTypes',
-      message:
-        '実施するテストタイプを選択してください（スペースキーで選択/解除、Enterで確定）:',
-      choices: [
-        {
-          name: '単体テスト (Unit Tests) - 必須 [Phase A]',
-          value: 'unit',
-          checked: true,
-          disabled: true,
-        },
-        {
-          name: 'Lint実行 - 必須 [Phase A]',
-          value: 'lint',
-          checked: true,
-          disabled: true,
-        },
-        {
-          name: 'ビルド実行 - 必須 [Phase A]',
-          value: 'build',
-          checked: true,
-          disabled: true,
-        },
-        new inquirer.Separator('--- 推奨テスト ---'),
-        {
-          name: '統合テスト (Integration Tests) - 推奨 [Phase 3/B]',
-          value: 'integration',
-          checked:
-            existingSelection?.selectedTypes?.includes('integration') || false,
-        },
-        {
-          name: 'E2Eテスト (End-to-End Tests) - 推奨 [Phase 3/B]',
-          value: 'e2e',
-          checked: existingSelection?.selectedTypes?.includes('e2e') || false,
-        },
-        new inquirer.Separator('--- 任意テスト ---'),
-        {
-          name: '性能テスト (Performance Tests) - 任意 [Phase B]',
-          value: 'performance',
-          checked:
-            existingSelection?.selectedTypes?.includes('performance') || false,
-        },
-        {
-          name: 'セキュリティテスト (Security Tests) - 任意 [Phase B]',
-          value: 'security',
-          checked:
-            existingSelection?.selectedTypes?.includes('security') || false,
-        },
-      ],
-      validate: () => true,
-    },
-    {
-      type: 'confirm',
-      name: 'confirm',
-      message: (answers: { testTypes: string[] }) => {
-        const required = ['unit', 'lint', 'build'];
-        const selected = [...new Set([...required, ...answers.testTypes])];
-        const optional = selected.filter((t: string) => !required.includes(t));
-        if (optional.length === 0) {
-          return '必須テストのみが選択されています。この選択で進めますか？';
-        }
-        return `選択したテストタイプ: ${selected.join(', ')}\nこの選択で進めますか？`;
-      },
-      default: true,
-    },
-  ] as any);
-
-  // 必須テストを自動的に追加
-  const requiredTests = ['unit', 'lint', 'build'];
-  answers.testTypes = [...new Set([...requiredTests, ...answers.testTypes])];
-
-  return answers as { testTypes: string[]; confirm: boolean };
-}
-
-/**
- * テストタイプ選択を保存してspec.jsonを更新
- */
-function saveTestTypeSelectionAndUpdateSpec(
-  feature: string,
-  testTypes: string[],
-  specDir: string,
-  selectionPath: string,
-  errors: string[]
-): void {
-  // 選択結果を保存
-  const selection = {
-    feature,
-    selectedTypes: testTypes,
-    selectedAt: new Date().toISOString(),
-    testTypes: {
-      unit: {
-        enabled: true,
-        required: true,
-        phase: 'A',
-        description: '単体テスト',
-      },
-      lint: {
-        enabled: true,
-        required: true,
-        phase: 'A',
-        description: 'Lint実行',
-      },
-      build: {
-        enabled: true,
-        required: true,
-        phase: 'A',
-        description: 'ビルド実行',
-      },
-      integration: {
-        enabled: testTypes.includes('integration'),
-        required: false,
-        phase: 'B',
-        description: '統合テスト',
-      },
-      e2e: {
-        enabled: testTypes.includes('e2e'),
-        required: false,
-        phase: 'B',
-        description: 'E2Eテスト',
-      },
-      performance: {
-        enabled: testTypes.includes('performance'),
-        required: false,
-        phase: 'B',
-        description: '性能テスト',
-      },
-      security: {
-        enabled: testTypes.includes('security'),
-        required: false,
-        phase: 'B',
-        description: 'セキュリティテスト',
-      },
-    },
-  };
-
-  // ディレクトリが存在しない場合は作成
-  if (!existsSync(specDir)) {
-    mkdirSync(specDir, { recursive: true });
-  }
-
-  // 選択結果を保存
-  writeFileSync(selectionPath, JSON.stringify(selection, null, 2), 'utf-8');
-  console.log(`\n✅ テストタイプ選択を保存しました: ${selectionPath}`);
-
-  // spec.jsonを更新
-  try {
-    const specPath = join(specDir, 'spec.json');
-    if (existsSync(specPath)) {
-      const spec = JSON.parse(readFileSync(specPath, 'utf-8'));
-      spec.testTypeSelection = {
-        completed: true,
-        selectedTypes: testTypes,
-        selectedAt: selection.selectedAt,
-      };
-      spec.lastUpdated = new Date().toISOString();
-      writeFileSync(specPath, JSON.stringify(spec, null, 2), 'utf-8');
-      console.log('✅ spec.jsonを更新しました');
-    }
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : String(error);
-    errors.push(`spec.json更新失敗: ${message}`);
-    console.warn(`⚠️  spec.json更新失敗: ${message}`);
-  }
-}
-
-/**
- * テストタイプ選択のサマリーを表示
- */
-function displayTestTypeSelectionSummary(feature: string, testTypes: string[]): void {
-  console.log('\n' + '='.repeat(60));
-  console.log('📊 選択結果サマリー:');
-  console.log(`   必須テスト: ${['unit', 'lint', 'build'].join(', ')}`);
-  const optional = testTypes.filter(
-    (t: string) => !['unit', 'lint', 'build'].includes(t),
-  );
-  if (optional.length > 0) {
-    console.log(`   追加テスト: ${optional.join(', ')}`);
-  } else {
-    console.log('   追加テスト: なし');
-  }
-
-  console.log('\n📖 次のステップ:');
-  console.log('   1. Phase 0.4: テスト仕様書作成へ進む');
-  console.log('      michi phase:run ' + feature + ' test-spec');
-  console.log(
-    '   2. 詳細ガイド: docs/user-guide/testing/test-planning-flow.md',
-  );
-
-  console.log('\n' + '='.repeat(60));
-  console.log('✅ Phase 0.3: テストタイプ選択が完了しました');
-}
-
-/**
- * テストタイプ選択フェーズを実行（Phase 0.3）
- * 対話的にテストタイプを選択
- */
-async function runTestTypeSelectionPhase(
-  feature: string,
-): Promise<PhaseRunResult> {
-  console.log('\n🧪 Phase 0.3: Test Type Selection（テストタイプ選択）');
-  console.log('='.repeat(60));
-
-  const errors: string[] = [];
-  const specDir = join(process.cwd(), '.kiro', 'specs', feature);
-  const selectionPath = join(specDir, 'test-type-selection.json');
-
-  // 既存の選択を読み込む
-  const existingSelection = loadExistingTestTypeSelection(selectionPath);
-
-  // テストタイプの選択を収集
-  const answers = await collectTestTypeSelection(existingSelection);
-
-  // キャンセルチェック
-  if (!answers.confirm) {
-    console.log('\n❌ 選択がキャンセルされました');
-    return {
-      phase: 'test-type-selection' as Phase,
-      success: false,
-      confluenceCreated: false,
-      jiraCreated: false,
-      validationPassed: false,
-      errors: ['ユーザーが選択をキャンセルしました'],
-    };
-  }
-
-  // 選択結果を保存してspec.jsonを更新
-  saveTestTypeSelectionAndUpdateSpec(feature, answers.testTypes, specDir, selectionPath, errors);
-
-  // サマリー表示
-  displayTestTypeSelectionSummary(feature, answers.testTypes);
-
-  return {
-    phase: 'test-type-selection' as Phase,
-    success: true,
-    confluenceCreated: false,
-    jiraCreated: false,
-    validationPassed: true,
-    errors,
-  };
-}
-
-/**
- * テスト仕様書作成フェーズを実行（Phase 0.4）
- * 自動生成: test-type-selectionから選択されたテストタイプの仕様書を生成
- */
-async function runTestSpecPhase(feature: string): Promise<PhaseRunResult> {
-  console.log('\n📝 Phase 0.4: Test Specification（テスト仕様書作成）');
-  console.log('='.repeat(60));
-
-  const errors: string[] = [];
-
-  // Step 1: テストタイプ選択の読み込み
-  const selectionPath = join(
-    process.cwd(),
-    '.kiro',
-    'specs',
-    feature,
-    'test-type-selection.json',
-  );
-  if (!existsSync(selectionPath)) {
-    errors.push(
-      'test-type-selection.jsonが存在しません。先にtest-type-selectionフェーズを実行してください',
-    );
-    return {
-      phase: 'test-spec' as Phase,
-      success: false,
-      confluenceCreated: false,
-      jiraCreated: false,
-      validationPassed: false,
-      errors,
-    };
-  }
-
-  let selection: { selectedTypes?: string[] };
-  let testTypes: string[] = [];
-
-  try {
-    selection = JSON.parse(readFileSync(selectionPath, 'utf-8'));
-    testTypes = selection.selectedTypes || [];
-  } catch (error) {
-    errors.push(
-      `test-type-selection.jsonの読み込みまたはパースに失敗しました: ${error instanceof Error ? error.message : String(error)}`,
-    );
-    return {
-      phase: 'test-spec' as Phase,
-      success: false,
-      confluenceCreated: false,
-      jiraCreated: false,
-      validationPassed: false,
-      errors,
-    };
-  }
-
-  console.log(`\n✅ 選択されたテストタイプ: ${testTypes.join(', ')}`);
-
-  // Step 2: 各テストタイプのテスト仕様書を生成
-  console.log('\n🤖 テスト仕様書を自動生成中...');
-
-  const specDir = join(process.cwd(), '.kiro', 'specs', feature, 'test-specs');
-  mkdirSync(specDir, { recursive: true });
-
-  const { generateTestSpec } = await import('./test-spec-generator.js');
-  const generatedSpecs: string[] = [];
-
-  for (const testType of testTypes) {
-    // lint/buildはテスト仕様書不要（CI設定で対応）
-    if (testType === 'lint' || testType === 'build') {
-      console.log(`   ⏭️  ${testType}: スキップ（CI設定で対応）`);
-      continue;
-    }
-
-    try {
-      await generateTestSpec(feature, testType);
-      console.log(`   ✅ ${testType}テスト仕様書: ${testType}-test-spec.md`);
-      generatedSpecs.push(testType);
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : String(error);
-      errors.push(`${testType}テスト仕様書生成失敗: ${message}`);
-      console.error(`   ❌ ${testType}テスト仕様書生成失敗: ${message}`);
-    }
-  }
-
-  // Step 3: spec.json更新
-  const specPath = join(process.cwd(), '.kiro', 'specs', feature, 'spec.json');
-  if (existsSync(specPath)) {
-    try {
-      const spec = JSON.parse(readFileSync(specPath, 'utf-8'));
-      spec.testSpecification = {
-        completed: true,
-        generatedAt: new Date().toISOString(),
-        testTypes: testTypes,
-        generatedSpecs: generatedSpecs,
-      };
-      spec.lastUpdated = new Date().toISOString();
-      writeFileSync(specPath, JSON.stringify(spec, null, 2), 'utf-8');
-      console.log('\n✅ spec.jsonを更新しました');
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : String(error);
-      errors.push(`spec.json更新失敗: ${message}`);
-      console.warn(`⚠️  spec.json更新失敗: ${message}`);
-    }
-  }
-
-  // Step 4: サマリー表示
-  console.log('\n' + '='.repeat(60));
-  console.log('📊 テスト仕様書作成完了:');
-  console.log(`   生成されたファイル: ${generatedSpecs.length}件`);
-  console.log(`   保存先: .kiro/specs/${feature}/test-specs/`);
-
-  if (generatedSpecs.length > 0) {
-    console.log('\n📄 生成されたファイル:');
-    generatedSpecs.forEach((type) => {
-      console.log(`   - ${type}-test-spec.md`);
-    });
-  }
-
-  console.log('\n📖 次のステップ:');
-  console.log('   1. Phase 0.5: タスク分割へ進む');
-  console.log(`      michi phase:run ${feature} tasks`);
-
-  console.log('\n' + '='.repeat(60));
-  console.log('✅ Phase 0.4: テスト仕様書作成が完了しました');
-
-  return {
-    phase: 'test-spec' as Phase,
-    success: errors.length === 0 && generatedSpecs.length > 0,
-    confluenceCreated: false,
-    jiraCreated: false,
-    validationPassed: true,
-    errors,
-  };
-}
 
 /**
  * プロジェクト検出と言語/Docker要件を分析
@@ -1444,10 +1039,6 @@ export async function runPhase(
     return await runRequirementsPhase(feature);
   case 'design':
     return await runDesignPhase(feature);
-  case 'test-type-selection':
-    return await runTestTypeSelectionPhase(feature);
-  case 'test-spec':
-    return await runTestSpecPhase(feature);
   case 'tasks':
     return await runTasksPhase(feature);
   case 'environment-setup':
@@ -1471,12 +1062,11 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     console.error('\nAvailable Phases:');
     console.error('  requirements       - Phase 0.1: 要件定義');
     console.error('  design             - Phase 0.2: 設計');
-    console.error('  test-type-selection- Phase 0.3: テストタイプ選択（任意）');
-    console.error('  test-spec          - Phase 0.4: テスト仕様書作成（任意）');
     console.error('  tasks              - Phase 0.5-0.6: タスク分割・JIRA同期');
     console.error('  environment-setup  - Phase 1: 環境構築（任意）');
     console.error('  phase-a            - Phase A: PR前自動テスト（任意）');
     console.error('  phase-b            - Phase B: リリース準備テスト（任意）');
+    console.error('\nNote: For test planning (Phase 0.3-0.4), use /michi:test-planning AI command');
     process.exit(1);
   }
 
@@ -1485,8 +1075,6 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const validPhases = [
     'requirements',
     'design',
-    'test-type-selection',
-    'test-spec',
     'tasks',
     'environment-setup',
     'phase-a',
@@ -1496,7 +1084,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   if (!validPhases.includes(phase)) {
     console.error(`Invalid phase: ${phase}`);
     console.error(
-      'Must be one of: requirements, design, test-type-selection, test-spec, tasks, environment-setup, phase-a, phase-b',
+      'Must be one of: requirements, design, tasks, environment-setup, phase-a, phase-b',
     );
     process.exit(1);
   }

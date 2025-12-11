@@ -208,23 +208,8 @@ fi
 
 echo_info "Testing phase:run commands..."
 
-# Phase 0.3: test-type-selection
-echo_info "Testing phase:run test-type-selection"
-if "$MICHI_CMD" phase:run test-feature test-type-selection > /dev/null 2>&1; then
-  echo_success "phase:run test-type-selection succeeded"
-else
-  echo_error "phase:run test-type-selection failed"
-  exit 1
-fi
-
-# Phase 0.4: test-spec
-echo_info "Testing phase:run test-spec"
-if "$MICHI_CMD" phase:run test-feature test-spec > /dev/null 2>&1; then
-  echo_success "phase:run test-spec succeeded"
-else
-  echo_error "phase:run test-spec failed"
-  exit 1
-fi
+# Phase 0.3-0.4: test planning is now handled by AI command /michi:test-planning
+# (CLI commands removed)
 
 # Phase 1: environment-setup
 echo_info "Testing phase:run environment-setup"
@@ -260,23 +245,7 @@ echo_step "Testing Validation Commands"
 
 echo_info "Testing validate:phase commands..."
 
-# Phase 0.3
-echo_info "Validating test-type-selection"
-if "$MICHI_CMD" validate:phase test-feature test-type-selection > /dev/null 2>&1; then
-  echo_success "validate:phase test-type-selection succeeded"
-else
-  echo_error "validate:phase test-type-selection failed"
-  exit 1
-fi
-
-# Phase 0.4
-echo_info "Validating test-spec"
-if "$MICHI_CMD" validate:phase test-feature test-spec > /dev/null 2>&1; then
-  echo_success "validate:phase test-spec succeeded"
-else
-  echo_error "validate:phase test-spec failed"
-  exit 1
-fi
+# Phase 0.3-0.4: validation removed (test planning is now handled by AI command)
 
 # Phase 1
 echo_info "Validating environment-setup"

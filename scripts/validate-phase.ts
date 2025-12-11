@@ -12,8 +12,6 @@ import { type SpecJson } from './utils/spec-updater.js';
 type Phase =
   | 'requirements'
   | 'design'
-  | 'test-type-selection'
-  | 'test-spec'
   | 'tasks'
   | 'environment-setup'
   | 'phase-a'
@@ -244,59 +242,6 @@ function validateTasks(feature: string): ValidationResult {
   };
 }
 
-/**
- * テストタイプ選択フェーズのバリデーション（Phase 0.3）
- * マニュアル対応フェーズ - バリデーション不要（常に成功）
- */
-function validateTestTypeSelection(feature: string): ValidationResult {
-  const errors: string[] = [];
-  const warnings: string[] = [];
-
-  // feature名のバリデーション
-  const nameValidation = validateFeatureName(feature);
-  if (!nameValidation.valid) {
-    errors.push(...nameValidation.errors);
-  }
-
-  warnings.push('⚠️  このフェーズはマニュアル対応です。ガイダンスに従ってテストタイプを選択してください');
-
-  return {
-    phase: 'test-type-selection',
-    valid: errors.length === 0,
-    errors,
-    warnings
-  };
-}
-
-/**
- * テスト仕様書作成フェーズのバリデーション（Phase 0.4）
- * マニュアル対応フェーズ - バリデーション不要（常に成功）
- */
-function validateTestSpec(feature: string): ValidationResult {
-  const errors: string[] = [];
-  const warnings: string[] = [];
-
-  // feature名のバリデーション
-  const nameValidation = validateFeatureName(feature);
-  if (!nameValidation.valid) {
-    errors.push(...nameValidation.errors);
-  }
-
-  // テスト仕様書ディレクトリの存在チェック（任意）
-  const testSpecDir = join(process.cwd(), 'docs', 'testing', 'specs', feature);
-  if (!existsSync(testSpecDir)) {
-    warnings.push('⚠️  テスト仕様書ディレクトリがありません: docs/testing/specs/' + feature);
-  }
-
-  warnings.push('⚠️  このフェーズはマニュアル対応です。テンプレートを使用してテスト仕様書を作成してください');
-
-  return {
-    phase: 'test-spec',
-    valid: errors.length === 0,
-    errors,
-    warnings
-  };
-}
 
 /**
  * 環境構築フェーズのバリデーション（Phase 1）
@@ -385,12 +330,6 @@ export function validatePhase(feature: string, phase: Phase): ValidationResult {
   case 'design':
     result = validateDesign(feature);
     break;
-  case 'test-type-selection':
-    result = validateTestTypeSelection(feature);
-    break;
-  case 'test-spec':
-    result = validateTestSpec(feature);
-    break;
   case 'tasks':
     result = validateTasks(feature);
     break;
@@ -439,12 +378,11 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     console.error('\nAvailable Phases:');
     console.error('  requirements       - Phase 0.1: 要件定義');
     console.error('  design             - Phase 0.2: 設計');
-    console.error('  test-type-selection- Phase 0.3: テストタイプ選択（任意）');
-    console.error('  test-spec          - Phase 0.4: テスト仕様書作成（任意）');
     console.error('  tasks              - Phase 0.5-0.6: タスク分割・JIRA同期');
     console.error('  environment-setup  - Phase 1: 環境構築（任意）');
     console.error('  phase-a            - Phase A: PR前自動テスト（任意）');
     console.error('  phase-b            - Phase B: リリース準備テスト（任意）');
+    console.error('\nNote: For test planning (Phase 0.3-0.4), use /michi:test-planning AI command');
     process.exit(1);
   }
 
@@ -453,8 +391,6 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const validPhases = [
     'requirements',
     'design',
-    'test-type-selection',
-    'test-spec',
     'tasks',
     'environment-setup',
     'phase-a',
@@ -463,7 +399,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 
   if (!validPhases.includes(phase)) {
     console.error(`Invalid phase: ${phase}`);
-    console.error('Must be one of: requirements, design, test-type-selection, test-spec, tasks, environment-setup, phase-a, phase-b');
+    console.error('Must be one of: requirements, design, tasks, environment-setup, phase-a, phase-b');
     process.exit(1);
   }
   
