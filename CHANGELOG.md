@@ -5,6 +5,49 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2025-12-11
+
+### Added
+- **統合initコマンド**: `michi init` コマンドを追加（セットアップフローを統合）
+  - 対話式プロジェクトセットアップ
+  - 環境別設定（Cursor, Claude Code, Claude Agent）の自動生成
+  - 影響箇所: 新規コマンド実装
+- **多言語サポート強化**: DEV_GUIDELINESプレースホルダーによる多言語対応
+  - Phase 4品質チェックでの多言語サポート
+  - `/michi:spec-impl` コマンドの多言語機能
+- **TDD実装の品質自動化**: `/michi:spec-impl` コマンドに自動品質チェック機能を追加
+  - ライセンス監査
+  - バージョン監査
+  - 自動修正ループ
+  - コードレビュー統合
+
+### Changed
+- **config:interactiveコマンドの削除**: `michi init` に統合
+  - ドキュメント全体を新しいコマンドに合わせて更新
+  - 影響箇所: CLI、ドキュメント
+
+### Fixed
+- **initコマンドの改善**: コードレビューフィードバックへの対応
+  - エラーハンドリングの改善
+  - バリデーションの強化
+- **テンプレート修正**: test-planning.mdをphase-runner.tsの期待値に合わせて修正
+  - テスト計画フローの整合性向上
+
+### Refactored
+- **TypeScript型安全性の完全達成**: 96個の型エラーを完全修正（96→0）
+  - any型警告の完全解消
+  - 型アノテーションの追加
+  - 影響箇所: プロジェクト全体
+- **コード品質向上**: ヘルパー関数の抽出とモジュール化
+  - syncTasksToJIRA関数を509→300行に削減（40%削減）
+  - phase runner関数のリファクタリング
+  - 未使用変数とインポートの削除
+
+### Docs
+- **再発防止策ドキュメント**: Phase 0.3-0.4欠落の再発防止策を文書化
+  - テスト計画フェーズの重要性を明確化
+  - ワークフロー改善ガイドライン
+
 ## [0.3.0] - 2025-12-07
 
 ### Changed
