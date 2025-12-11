@@ -137,7 +137,7 @@ async function main(): Promise<void> {
     console.log('\n🎉 グローバル設定が完了しました！');
     console.log('   この設定はすべてのプロジェクトに適用されます。');
     console.log('   プロジェクト固有の設定で上書きしたい場合は:');
-    console.log('   npm run config:interactive');
+    console.log('   グローバル設定をコピーして .michi/config.json として編集してください');
   } catch (error) {
     console.error(
       '❌ エラーが発生しました:',
