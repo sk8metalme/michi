@@ -45,21 +45,6 @@ interface JiraIssue {
 }
 
 /**
- * JIRA Issue作成ペイロード
- */
-interface JiraIssuePayload {
-  fields: {
-    project: { key: string };
-    summary: string;
-    description?: unknown;
-    issuetype: { id: string };
-    labels?: string[];
-    priority?: { name: string };
-    [key: string]: unknown;
-  };
-}
-
-/**
  * リクエスト間のスリープ処理（レートリミット対策）
  */
 function sleep(ms: number): Promise<void> {

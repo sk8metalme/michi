@@ -3,7 +3,7 @@
  * 各フェーズを実行し、Confluence/JIRA作成を確実に実行
  */
 
-import { existsSync, writeFileSync, readFileSync, mkdirSync } from 'fs';
+import { existsSync, writeFileSync, readFileSync } from 'fs';
 import { join, relative } from 'path';
 import { syncToConfluence } from './confluence-sync.js';
 import { syncTasksToJIRA } from './jira-sync.js';
@@ -21,11 +21,6 @@ type Phase =
   | 'environment-setup'
   | 'phase-a'
   | 'phase-b';
-
-interface TestTypeSelection {
-  selectedTypes?: string[];
-  timestamp?: string;
-}
 
 interface PhaseRunResult {
   phase: Phase;
