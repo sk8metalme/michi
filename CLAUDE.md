@@ -61,6 +61,45 @@ docs/
 - JIRAでリリースチケットを起票
 - セマンティックバージョニング（v<major>.<minor>.<patch>）を使用
 
+#### 自動リリースフロー（GitHub Actions）
+Michiプロジェクトでは、リリースタグをpushすると自動的にnpm publishとGitHub Releaseが作成されます。
+
+**トリガー条件**: `v*` 形式のタグがpushされたとき
+
+**自動実行される処理**（`.github/workflows/release.yml`）:
+1. 依存関係インストール（`npm ci`）
+2. テスト実行（`npm run test:run`）
+3. Lint実行（`npm run lint`）
+4. 型チェック実行（`npm run type-check`）
+5. ビルド（`npm run build`）
+6. **npm publish**（`NPM_TOKEN` を使用）
+7. **GitHub Release作成**
+
+**手動でのリリース手順**:
+```bash
+# 1. リリースブランチを作成
+git checkout -b release/vX.Y.Z
+
+# 2. CHANGELOG.mdとpackage.jsonを更新
+# （バージョン番号の更新）
+
+# 3. コミット・プッシュ・PR作成
+git commit -m "chore: bump version to X.Y.Z"
+git push -u origin release/vX.Y.Z
+gh pr create --title "Release vX.Y.Z" --body "..."
+
+# 4. PRマージ後、mainブランチでタグを作成・プッシュ
+git checkout main
+git pull origin main
+git tag -a vX.Y.Z -m "Release version X.Y.Z"
+git push origin vX.Y.Z  # ← この時点で自動的にnpm publishとGitHub Release作成が実行される
+```
+
+**注意事項**:
+- タグpush後、GitHub Actionsのワークフロー実行状況を確認すること
+- npm publishに失敗した場合は、NPM_TOKENの有効期限を確認
+- 手動でGitHub Releaseを作成した場合、自動作成されたReleaseと重複する可能性がある
+
 
 ## AI開発ツール連携
 
