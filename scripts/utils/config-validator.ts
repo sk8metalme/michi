@@ -5,7 +5,7 @@
 import { existsSync, readFileSync } from 'fs';
 import { AppConfigSchema } from '../config/config-schema.js';
 import type { ZodIssue } from 'zod';
-import { getConfig, getConfigPath } from './config-loader.js';
+import { getConfig, getConfigPath, getGlobalConfigPath } from './config-loader.js';
 import { loadProjectMeta } from './project-meta.js';
 import {
   getProjectIssueTypes,
@@ -526,6 +526,71 @@ export async function validateForJiraSyncAsync(
   }
 
   return result;
+}
+
+/**
+ * グローバル設定ファイルをバリデーション
+ */
+export function validateGlobalConfig(): ValidationResult {
+  const errors: string[] = [];
+  const warnings: string[] = [];
+  const info: string[] = [];
+
+  const globalConfigPath = getGlobalConfigPath();
+
+  if (!existsSync(globalConfigPath)) {
+    info.push('Global config file not found. This is optional.');
+    return {
+      valid: true,
+      errors: [],
+      warnings: [],
+      info,
+    };
+  }
+
+  try {
+    const content = readFileSync(globalConfigPath, 'utf-8');
+    const parsed = JSON.parse(content);
+
+    // スキーマでバリデーション
+    const result = AppConfigSchema.safeParse(parsed);
+
+    if (!result.success) {
+      result.error.issues.forEach((error: ZodIssue) => {
+        const path = error.path.map(String).join('.');
+        errors.push(`${path}: ${error.message}`);
+      });
+
+      return {
+        valid: false,
+        errors,
+        warnings: [],
+        info: [],
+      };
+    }
+
+    return {
+      valid: errors.length === 0,
+      errors,
+      warnings,
+      info: [],
+    };
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      errors.push(`Invalid JSON in global config: ${error.message}`);
+    } else {
+      errors.push(
+        `Error reading global config file: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+    }
+
+    return {
+      valid: false,
+      errors,
+      warnings: [],
+      info: [],
+    };
+  }
 }
 
 // CLI実行

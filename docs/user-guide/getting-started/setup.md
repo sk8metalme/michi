@@ -186,9 +186,36 @@ curl -o .env https://raw.githubusercontent.com/sk8metalme/michi/main/env.example
 wget -O .env https://raw.githubusercontent.com/sk8metalme/michi/main/env.example
 ```
 
-**注意**: 
+**注意**:
 - `.env` ファイルは作業するプロジェクトのルートディレクトリに作成されます
 - 別のディレクトリにいる場合は、まずプロジェクトルートに移動してください
+
+## Step 3.5: 設定の作成と管理
+
+Michiには2段階の設定があります。
+
+| 設定レベル | コマンド | 出力先 | タイミング |
+|---------|---------|--------|-----------|
+| **グローバル設定** | `npm run config:global` | `~/.michi/config.json` | 初回セットアップ時（推奨） |
+| **プロジェクト設定** | `michi init` または手動作成 | `.michi/config.json` | プロジェクトごとのカスタマイズ時 |
+
+### グローバル設定のメリット
+
+`npm run config:global` を使用すると、以下の設定を全プロジェクトで共有できます：
+- Confluence階層構造設定
+- JIRA Story作成粒度
+- ワークフロー承認ゲート
+
+### プロジェクト固有の設定
+
+プロジェクト固有の設定は以下の方法で作成できます：
+1. **自動コピー**: `michi init` 実行時にグローバル設定から自動コピー
+2. **手動作成**: グローバル設定をコピーして `.michi/config.json` として編集
+
+**推奨フロー:**
+1. 初回: `npm run config:global` でグローバル設定を作成
+2. プロジェクトごと: `michi init` で初期化（グローバル設定を自動コピー）
+3. カスタマイズ: 必要に応じて `.michi/config.json` を手動編集
 
 ### 3-2. 認証情報の設定
 
@@ -783,8 +810,9 @@ APPROVAL_GATES_RELEASE=リリースマネージャー,QAリード,部長
 
 1. **`spec.json`**: 機能固有の設定（最優先）
 2. **`.michi/config.json`**: プロジェクト固有の設定
-3. **環境変数**: システム環境変数または`.env`ファイル
-4. **デフォルト値**: スキーマで定義されたデフォルト値
+3. **`~/.michi/config.json`**: グローバル設定
+4. **環境変数**: システム環境変数または`.env`ファイル
+5. **デフォルト値**: スキーマで定義されたデフォルト値
 
 #### よくある設定パターン
 
