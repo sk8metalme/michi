@@ -61,7 +61,7 @@ Before running this command, ensure:
    ```json
    {
      "featureName": "{feature}",
-     "selectedTestTypes": ["unit", "integration", "e2e", "performance", "security"],
+     "selectedTypes": ["unit", "integration", "e2e", "performance", "security"],
      "timestamp": "2025-12-09T12:00:00Z",
      "phase": "0.3"
    }
@@ -168,18 +168,6 @@ This will generate implementation tasks based on requirements, design, and test 
 - **Design not approved**: Display error and guide user to complete Phase 0.2 first
 - **Template read failure**: Use fallback structure and warn user
 - **User cancels selection**: Save partial progress and allow resumption
-
-## CLI Command Alternative
-
-If you prefer to use CLI commands instead of this integrated AI command:
-
-```bash
-# Phase 0.3
-michi phase:run {feature-name} test-type-selection
-
-# Phase 0.4
-michi phase:run {feature-name} test-spec
-```
 
 ---
 
