@@ -15,7 +15,6 @@ import { runPreFlightCheck } from '../scripts/pre-flight-check.js';
 import { listProjects } from '../scripts/list-projects.js';
 import { createResourceDashboard } from '../scripts/resource-dashboard.js';
 import { WorkflowOrchestrator } from '../scripts/workflow-orchestrator.js';
-import { configInteractive } from '../scripts/config-interactive.js';
 import { validateAndReport } from '../scripts/utils/config-validator.js';
 import { setupExisting } from './commands/setup-existing.js';
 import { initProject } from './commands/init.js';
@@ -332,23 +331,6 @@ export function createCLI(): Command {
       } catch (error) {
         console.error(
           '❌ Workflow failed:',
-          error instanceof Error ? error.message : error,
-        );
-        process.exit(1);
-      }
-    });
-
-  // config:interactive コマンド
-  program
-    .command('config:interactive')
-    .alias('config:init')
-    .description('Interactive configuration setup for .michi/config.json')
-    .action(async () => {
-      try {
-        await configInteractive();
-      } catch (error) {
-        console.error(
-          '❌ Configuration setup failed:',
           error instanceof Error ? error.message : error,
         );
         process.exit(1);
