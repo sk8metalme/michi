@@ -35,6 +35,10 @@ export async function select(
   defaultValue?: string,
   maxRetries: number = 3,
 ): Promise<string> {
+  if (choices.length === 0) {
+    throw new Error('select: choices must contain at least one option');
+  }
+
   console.log(`\n${prompt}`);
   choices.forEach((choice, index) => {
     const defaultMark = defaultValue === choice.value ? ' (デフォルト)' : '';
@@ -69,10 +73,12 @@ export async function select(
   }
 
   // 最大試行回数に達した場合はデフォルト値または最初の選択肢を返す
+  // 注: choices.length > 0 は関数冒頭で保証されている
+  const fallbackValue = defaultValue || choices[0].value;
   console.log(
-    `⚠️  最大試行回数に達しました。デフォルト値を使用します: ${defaultValue || choices[0].value}`,
+    `⚠️  最大試行回数に達しました。デフォルト値を使用します: ${fallbackValue}`,
   );
-  return defaultValue || choices[0].value;
+  return fallbackValue;
 }
 
 /**
