@@ -18,6 +18,7 @@ import { WorkflowOrchestrator } from '../scripts/workflow-orchestrator.js';
 import { configInteractive } from '../scripts/config-interactive.js';
 import { validateAndReport } from '../scripts/utils/config-validator.js';
 import { setupExisting } from './commands/setup-existing.js';
+import { initProject } from './commands/init.js';
 import { convertTasksFile } from '../scripts/utils/tasks-converter.js';
 import { isAIDLCFormat } from '../scripts/utils/aidlc-parser.js';
 import { config } from 'dotenv';
@@ -365,6 +366,35 @@ export function createCLI(): Command {
       } catch (error) {
         console.error(
           '❌ Validation failed:',
+          error instanceof Error ? error.message : error,
+        );
+        process.exit(1);
+      }
+    });
+
+  // init コマンド（統合セットアップ）
+  program
+    .command('init')
+    .description('Initialize new project with Michi workflow')
+    .option('--name <project-id>', 'Project ID')
+    .option('--project-name <name>', 'Project name')
+    .option('--jira-key <key>', 'JIRA project key')
+    .option('--michi-path <path>', 'Path to Michi repository (for template copying)')
+    .option('--skip-config', 'Skip workflow configuration setup')
+    .option('-y, --yes', 'Skip confirmation prompts')
+    .option('--cursor', 'Use Cursor IDE environment')
+    .option('--claude', 'Use Claude Code environment')
+    .option('--claude-agent', 'Use Claude Code Subagents environment')
+    .option('--gemini', 'Use Gemini CLI environment')
+    .option('--codex', 'Use Codex CLI environment')
+    .option('--cline', 'Use Cline environment')
+    .option('--lang <code>', 'Language code (default: ja)', 'ja')
+    .action(async (options) => {
+      try {
+        await initProject(options);
+      } catch (error) {
+        console.error(
+          '❌ Initialization failed:',
           error instanceof Error ? error.message : error,
         );
         process.exit(1);

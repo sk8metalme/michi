@@ -4,83 +4,65 @@
 
 ## 新規プロジェクト作成
 
-### パターンA: 既存リポジトリにMichi共通ルール・コマンドを追加（最も簡単 ⭐）
+### 推奨: `michi init` コマンド（最も簡単 ⭐）
 
 ```bash
-# 既存プロジェクトに移動
+# 既存リポジトリに移動
 cd /path/to/existing-repo
 
-# Michiの共通ルール・コマンド・テンプレートをコピー
-npx tsx /path/to/michi/scripts/setup-existing-project.ts --michi-path /path/to/michi
+# 1コマンドで初期設定完了
+michi init --michi-path /path/to/michi
 ```
 
-このスクリプトが自動的に：
+このコマンドが自動的に：
 
-- 共通ルール（`.cursor/rules/`）をコピー
-- カスタムコマンド（`.cursor/commands/kiro/`）をコピー
+- プロジェクトメタデータ（`.kiro/project.json`）を作成
+- 環境変数テンプレート（`.env`）を作成
+- 共通ルール・コマンドをコピー（`--michi-path` 指定時）
 - Steeringテンプレート（`.kiro/steering/`）をコピー
 - Specテンプレート（`.kiro/settings/templates/`）をコピー
+- ワークフロー設定（`.michi/config.json`）を作成
+  - グローバル設定（`~/.michi/config.json`）があればコピー
+  - なければ対話的に設定
+
+**オプション**:
+
+```bash
+# 非対話モード（プロジェクト名とJIRAキーを指定）
+michi init \
+  --name "project-id" \
+  --project-name "プロジェクト名" \
+  --jira-key "PRJA" \
+  --michi-path /path/to/michi \
+  -y
+
+# ワークフロー設定をスキップ
+michi init --michi-path /path/to/michi --skip-config
+
+# 環境を指定（デフォルト: Cursor）
+michi init --michi-path /path/to/michi --cursor
+michi init --michi-path /path/to/michi --claude
+```
 
 **次のステップ**:
 
-1. cc-sddを導入: `npx cc-sdd@latest --lang ja --cursor`
-2. 設定を対話的に作成: `npm run setup:interactive`
+1. `.env` ファイルの内容を確認・編集
+2. `.michi/config.json` の内容を確認（必要に応じて編集）
+3. 開発開始: `/kiro:spec-init <機能説明>`
 
-### パターンB: 新規リポジトリを作成してセットアップ
+### 代替: 個別セットアップ
 
-```bash
-# Michiから実行
-cd /path/to/michi
-
-# 凡例
-npm run create-project -- \
-  --name "<project-id>" \
-  --project-name "<project-name>" \
-  --jira-key "<jira-key>"
-
-# 具体例
-npm run create-project -- \
-  --name "20240115-payment-api" \
-  --project-name "プロジェクトA" \
-  --jira-key "PRJA"
-```
-
-**リポジトリ名**: `--name`で指定した値がそのままGitHubリポジトリ名として使用されます。
-
-**例**:
-
-- `--name "20240115-payment-api"` → GitHubリポジトリ: `org/20240115-payment-api`
-- `--name "payment-api"` → GitHubリポジトリ: `org/payment-api`
-
-**注意**: リポジトリ名はkebab-case（小文字、ハイフン区切り）を推奨します。
-
-### パターンC: 完全手動セットアップ
+グローバル設定を先に作成する場合:
 
 ```bash
-# 1. リポジトリ作成・クローン
-gh repo create org/repo-name --private
-jj git clone https://github.com/org/repo-name
-cd repo-name
+# 1. グローバル設定を作成（組織で一度だけ）
+michi config:global
 
-# 2. cc-sdd導入
-npx cc-sdd@latest --cursor --lang ja --yes
+# 2. プロジェクト初期設定
+cd /path/to/project
+michi init --michi-path /path/to/michi
 
-# 3. プロジェクトメタデータ作成
-cat > .kiro/project.json << 'EOF'
-{
-  "projectId": "repo-name",
-  "projectName": "プロジェクト名",
-  "jiraProjectKey": "PRJX",
-  "confluenceLabels": ["project:x", "service:y"]
-}
-EOF
-
-# 4. Michiから共通ルール・コマンド・テンプレートをコピー
-npx tsx /path/to/michi/scripts/setup-existing-project.ts \
-  --michi-path /path/to/michi
-
-# 5. npm install
-# 6. 初期コミット
+# グローバル設定が自動的にコピーされます
 ```
 
 詳細: [新規リポジトリセットアップガイド](../getting-started/new-repository-setup.md)
@@ -160,6 +142,8 @@ gh pr create --head <project-id>/feature/<feature> --base main
 
 | コマンド                                    | 説明                                              |
 | ------------------------------------------- | ------------------------------------------------- |
+| `michi init`                                | プロジェクト初期設定（推奨）⭐                    |
+| `michi config:global`                       | グローバル設定作成（~/.michi/config.json）        |
 | `michi jira:sync <feature>`                 | JIRA連携（tasks.md → Epic/Stories）               |
 | `michi confluence:sync <feature> [type]`    | Confluence同期（requirements/design）             |
 | `michi phase:run <feature> <phase>`         | フェーズ実行（requirements/design/tasks）         |
@@ -168,7 +152,6 @@ gh pr create --head <project-id>/feature/<feature> --base main
 | `michi project:list`                        | プロジェクト一覧                                  |
 | `michi project:dashboard`                   | リソースダッシュボード生成                        |
 | `michi workflow:run --feature <name>`       | 統合ワークフロー実行                              |
-| `michi config:interactive`                  | 対話式設定ツール（.michi/config.json作成）        |
 | `michi config:validate`                     | 設定ファイルのバリデーション                      |
 | `michi tasks:convert <feature>`             | AI-DLC形式のtasks.mdをMichiワークフロー形式に変換 |
 | `michi jira:transition <issueKey> <status>` | JIRAチケットのステータス変更                      |

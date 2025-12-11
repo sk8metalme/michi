@@ -6,11 +6,26 @@
 import { readFileSync, existsSync, statSync } from 'fs';
 import { resolve, relative, isAbsolute } from 'path';
 import { fileURLToPath } from 'url';
+import { homedir } from 'os';
 import { config } from 'dotenv';
 import { AppConfigSchema, type AppConfig } from '../config/config-schema.js';
 
 // 環境変数読み込み
 config();
+
+/**
+ * グローバル設定ファイルのパス定数
+ */
+const GLOBAL_CONFIG_DIR = '.michi';
+const GLOBAL_CONFIG_FILE = 'config.json';
+
+/**
+ * グローバル設定ファイルのパスを取得
+ */
+export function getGlobalConfigPath(): string {
+  const home = homedir();
+  return resolve(home, GLOBAL_CONFIG_DIR, GLOBAL_CONFIG_FILE);
+}
 
 /**
  * 深いマージ（Deep Merge）
@@ -170,23 +185,23 @@ function resolveConfigPath(projectRoot: string): string {
  */
 function loadProjectConfig(projectRoot: string = process.cwd()): Partial<AppConfig> | null {
   const projectConfigPath = resolveConfigPath(projectRoot);
-  
+
   // パストラバーサル対策: パスを検証
   if (!validateConfigPath(projectConfigPath, projectRoot)) {
     throw new Error(`Invalid config path: ${projectConfigPath} is outside project root`);
   }
-  
+
   if (!existsSync(projectConfigPath)) {
     return null;
   }
-  
+
   try {
     const content = readFileSync(projectConfigPath, 'utf-8');
     const parsed = JSON.parse(content);
-    
+
     // 環境変数を展開
     const expanded = expandEnvVarsInConfig(parsed);
-    
+
     // 部分的な設定なので、スキーマで厳密にバリデーションしない
     // ただし、存在するキーについては型チェック
     return expanded as Partial<AppConfig>;
@@ -202,24 +217,62 @@ function loadProjectConfig(projectRoot: string = process.cwd()): Partial<AppConf
 }
 
 /**
+ * グローバル設定を読み込む
+ */
+function loadGlobalConfig(): Partial<AppConfig> | null {
+  const globalConfigPath = getGlobalConfigPath();
+
+  if (!existsSync(globalConfigPath)) {
+    return null;
+  }
+
+  try {
+    const content = readFileSync(globalConfigPath, 'utf-8');
+    const parsed = JSON.parse(content);
+
+    // 環境変数を展開
+    const expanded = expandEnvVarsInConfig(parsed);
+
+    return expanded as Partial<AppConfig>;
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      console.warn(`⚠️  Invalid JSON in global config ${globalConfigPath}: ${error.message}`);
+    } else {
+      console.warn(`⚠️  Failed to load global config: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+    return null;
+  }
+}
+
+/**
  * 設定を読み込んでマージ
- * 
+ *
  * マージ順序:
  * 1. デフォルト設定
- * 2. プロジェクト固有設定（上書き）
- * 3. 環境変数（最終上書き、既存の動作を維持）
+ * 2. グローバル設定（上書き）
+ * 3. プロジェクト固有設定（上書き）
+ * 4. 環境変数（最終上書き、既存の動作を維持）
  */
 export function loadConfig(projectRoot: string = process.cwd()): AppConfig {
   // デフォルト設定を読み込み
   const defaultConfig = loadDefaultConfig();
-  
+
+  // グローバル設定を読み込み
+  const globalConfig = loadGlobalConfig();
+
   // プロジェクト固有設定を読み込み
   const projectConfig = loadProjectConfig(projectRoot);
-  
-  // マージ（プロジェクト設定がデフォルトを上書き）
-  const mergedConfig: AppConfig = projectConfig
-    ? deepMerge(defaultConfig, projectConfig)
-    : defaultConfig;
+
+  // マージ（デフォルト → グローバル → プロジェクト）
+  let mergedConfig: AppConfig = defaultConfig;
+
+  if (globalConfig) {
+    mergedConfig = deepMerge(mergedConfig, globalConfig);
+  }
+
+  if (projectConfig) {
+    mergedConfig = deepMerge(mergedConfig, projectConfig);
+  }
   
   // 環境変数で最終上書き（条件付き）
   // 注意: config.jsonにspaces設定がある場合は環境変数を無視（config.jsonを優先）
@@ -270,14 +323,16 @@ let cachedConfig: AppConfig | null = null;
 let cachedProjectRoot: string | null = null;
 let cachedConfigMtime: number | null = null;
 let cachedDefaultConfigMtime: number | null = null;
+let cachedGlobalConfigMtime: number | null = null;
 
 export function getConfig(projectRoot: string = process.cwd()): AppConfig {
   const projectConfigPath = resolveConfigPath(projectRoot);
+  const globalConfigPath = getGlobalConfigPath();
   const currentFileUrl = import.meta.url;
   const currentFilePath = fileURLToPath(currentFileUrl);
   const currentDir = resolve(currentFilePath, '..');
   const defaultConfigPath = resolve(currentDir, '../config/default-config.json');
-  
+
   // デフォルト設定ファイルの更新時刻をチェック
   let defaultConfigChanged = false;
   try {
@@ -299,7 +354,27 @@ export function getConfig(projectRoot: string = process.cwd()): AppConfig {
     defaultConfigChanged = true;
     cachedDefaultConfigMtime = null;
   }
-  
+
+  // グローバル設定ファイルの更新時刻をチェック
+  let globalConfigChanged = false;
+  try {
+    if (existsSync(globalConfigPath)) {
+      const globalStats = statSync(globalConfigPath);
+      if (cachedGlobalConfigMtime !== globalStats.mtimeMs) {
+        globalConfigChanged = true;
+        cachedGlobalConfigMtime = globalStats.mtimeMs;
+      }
+    } else {
+      if (cachedGlobalConfigMtime !== null) {
+        globalConfigChanged = true;
+        cachedGlobalConfigMtime = null;
+      }
+    }
+  } catch {
+    globalConfigChanged = true;
+    cachedGlobalConfigMtime = null;
+  }
+
   // プロジェクト設定ファイルの更新時刻をチェック
   let projectConfigChanged = false;
   try {
@@ -321,12 +396,13 @@ export function getConfig(projectRoot: string = process.cwd()): AppConfig {
     projectConfigChanged = true;
     cachedConfigMtime = null;
   }
-  
+
   // キャッシュが有効で、設定ファイルが変更されていない場合はキャッシュを返す
   if (
     cachedConfig &&
     cachedProjectRoot === projectRoot &&
     !defaultConfigChanged &&
+    !globalConfigChanged &&
     !projectConfigChanged
   ) {
     return cachedConfig;
@@ -347,6 +423,7 @@ export function clearConfigCache(): void {
   cachedProjectRoot = null;
   cachedConfigMtime = null;
   cachedDefaultConfigMtime = null;
+  cachedGlobalConfigMtime = null;
 }
 
 /**
