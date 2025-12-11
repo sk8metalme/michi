@@ -5,6 +5,10 @@ description: E2Eファースト方式でタスク分割を計画する
 
 # E2Eプランニング
 
+## Development Guidelines
+
+{{DEV_GUIDELINES}}
+
 このコマンドは、E2Eファースト方式でタスク分割を計画し、早期に動作確認可能な実装計画を策定します。
 
 ## サブエージェント呼び出し

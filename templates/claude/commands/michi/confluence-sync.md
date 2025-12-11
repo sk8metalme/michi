@@ -9,7 +9,9 @@ description: Sync specifications to Confluence (Michi-specific feature)
 >
 > 仕様書（requirements.md, design.md）を Confluence に同期し、承認ワークフローを実現します。
 
-**Important**: Generate output in language specified in {{KIRO_DIR}}/project.json.
+## Development Guidelines
+
+{{DEV_GUIDELINES}}
 
 ## Usage
 

@@ -5,7 +5,9 @@ description: Generate tasks.md from design specification in Michi workflow forma
 
 # Generate Tasks from Design Specification
 
-**Important**: Generate output in the language specified in `{{KIRO_DIR}}/project.json`.
+## Development Guidelines
+
+{{DEV_GUIDELINES}}
 
 ## Overview
 

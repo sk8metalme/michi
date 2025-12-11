@@ -9,7 +9,9 @@ description: Switch between projects (Michi-specific feature)
 >
 > マルチプロジェクト環境で、異なるプロジェクト間を切り替えるための機能です。
 
-**Important**: Generate output in language specified in {{KIRO_DIR}}/project.json.
+## Development Guidelines
+
+{{DEV_GUIDELINES}}
 
 ## Usage
 

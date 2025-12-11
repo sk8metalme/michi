@@ -1,4 +1,5 @@
 ---
+name: /michi:validate-design
 description: Interactive technical design validation with test planning readiness check (Michi version)
 allowed-tools: Bash, Glob, Grep, LS, Read, Write, Edit, MultiEdit, Update, WebSearch, WebFetch, AskUserQuestion
 argument-hint: <feature-name>
@@ -8,6 +9,10 @@ argument-hint: <feature-name>
 
 ## Base Command Reference
 @.claude/commands/kiro/validate-design.md
+
+## Development Guidelines
+
+{{DEV_GUIDELINES}}
 
 ## Michi Extension: Test Planning Readiness Check
 
