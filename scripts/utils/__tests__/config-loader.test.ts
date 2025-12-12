@@ -32,6 +32,9 @@ describe('config-loader', () => {
     // 環境変数をバックアップ
     originalEnv = { ...process.env };
 
+    // HOMEディレクトリをテスト用に変更（グローバル設定の影響を排除）
+    process.env.HOME = testProjectRoot;
+
     // キャッシュをクリア（クリーンな状態から開始）
     clearConfigCache();
   });
