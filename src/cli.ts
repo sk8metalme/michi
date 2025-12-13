@@ -18,6 +18,7 @@ import { WorkflowOrchestrator } from '../scripts/workflow-orchestrator.js';
 import { validateAndReport } from '../scripts/utils/config-validator.js';
 import { setupExisting } from './commands/setup-existing.js';
 import { initProject } from './commands/init.js';
+import { migrate } from './commands/migrate.js';
 import { convertTasksFile } from '../scripts/utils/tasks-converter.js';
 import { isAIDLCFormat } from '../scripts/utils/aidlc-parser.js';
 import { config } from 'dotenv';
@@ -354,13 +355,32 @@ export function createCLI(): Command {
       }
     });
 
+  // config:check-security コマンド
+  program
+    .command('config:check-security')
+    .description('Check security of environment variables and configuration')
+    .action(async () => {
+      try {
+        const { configValidate } = await import('./commands/config-validate.js');
+        await configValidate();
+        process.exit(0);
+      } catch (error) {
+        console.error(
+          '❌ Security check failed:',
+          error instanceof Error ? error.message : error,
+        );
+        process.exit(1);
+      }
+    });
+
   // init コマンド（統合セットアップ）
   program
     .command('init')
-    .description('Initialize new project with Michi workflow')
+    .description('Initialize new or existing project with Michi workflow')
     .option('--name <project-id>', 'Project ID')
     .option('--project-name <name>', 'Project name')
     .option('--jira-key <key>', 'JIRA project key')
+    .option('--existing', 'Initialize existing project mode (auto-detects by default)')
     .option('--michi-path <path>', 'Path to Michi repository (for template copying)')
     .option('--skip-config', 'Skip workflow configuration setup')
     .option('-y, --yes', 'Skip confirmation prompts')
@@ -383,10 +403,10 @@ export function createCLI(): Command {
       }
     });
 
-  // setup-existing コマンド
+  // setup-existing コマンド (非推奨)
   program
     .command('setup-existing')
-    .description('Add Michi workflow to existing repository')
+    .description('[DEPRECATED] Use "michi init --existing" instead')
     .option('--cursor', 'Use Cursor IDE environment')
     .option('--claude', 'Use Claude Code environment')
     .option('--claude-agent', 'Use Claude Code Subagents environment')
@@ -398,11 +418,36 @@ export function createCLI(): Command {
     .option('--jira-key <key>', 'JIRA project key')
     .option('--no-agent-skills', 'Skip installing agent skills and sub-agents to ~/.claude/')
     .action(async (options) => {
+      console.warn('⚠️  このコマンドは非推奨です。代わりに "michi init --existing" を使用してください。');
+      console.warn('   This command is deprecated. Please use "michi init --existing" instead.');
+      console.log('');
+
       try {
         await setupExisting(options);
       } catch (error) {
         console.error(
           '❌ Setup failed:',
+          error instanceof Error ? error.message : error,
+        );
+        process.exit(1);
+      }
+    });
+
+  // migrate コマンド
+  program
+    .command('migrate')
+    .description('Migrate .env to new 3-layer configuration format')
+    .option('--dry-run', 'Preview changes without modifying files')
+    .option('--backup-dir <dir>', 'Specify backup directory')
+    .option('--force', 'Skip confirmation prompts')
+    .option('--verbose', 'Show detailed logs')
+    .option('--rollback <dir>', 'Restore from backup directory')
+    .action(async (options) => {
+      try {
+        await migrate(options);
+      } catch (error) {
+        console.error(
+          '❌ Migration failed:',
           error instanceof Error ? error.message : error,
         );
         process.exit(1);

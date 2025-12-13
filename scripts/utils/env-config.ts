@@ -62,11 +62,6 @@ const ENV_CONFIG: EnvValue[] = [
     sensitive: true,
   },
   {
-    key: 'GITHUB_REPO',
-    description: 'GitHubリポジトリ (例: owner/repo)',
-    required: false,
-  },
-  {
     key: 'CONFLUENCE_PRD_SPACE',
     description: 'Confluence PRDスペースキー',
     required: false,
@@ -435,7 +430,7 @@ export function generateEnvContent(values: Map<string, string>): string {
 
   // GitHub設定
   content += '\n# GitHub設定\n';
-  const githubKeys = ['GITHUB_ORG', 'GITHUB_TOKEN', 'GITHUB_REPO'];
+  const githubKeys = ['GITHUB_ORG', 'GITHUB_TOKEN'];
   for (const key of githubKeys) {
     const value = values.get(key) || '';
     content += `${key}=${value}\n`;
@@ -477,7 +472,7 @@ export function generateEnvContent(values: Map<string, string>): string {
 export async function configureEnvInteractive(
   existingValues?: Map<string, string>,
   jiraKey?: string,
-  repoUrl?: string,
+  _repoUrl?: string,
 ): Promise<Map<string, string>> {
   const rl = readline.createInterface({
     input: process.stdin,
@@ -499,13 +494,6 @@ export async function configureEnvInteractive(
       // 自動設定項目
       if (config.key === 'JIRA_PROJECT_KEYS' && jiraKey && !existingValue) {
         existingValue = jiraKey;
-      }
-      if (config.key === 'GITHUB_REPO' && repoUrl && !existingValue) {
-        // URLからリポジトリ名を抽出 (例: https://github.com/owner/repo -> owner/repo)
-        const match = repoUrl.match(/github\.com[/:]([\w-]+\/[\w-]+)/);
-        if (match) {
-          existingValue = match[1];
-        }
       }
 
       // JIRA Issue Type ID設定時は、プロジェクトキーを渡す

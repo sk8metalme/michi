@@ -25,7 +25,7 @@ This command implements the specifications defined in `tasks.md` following TDD (
    - `ATLASSIAN_EMAIL`: JIRA user email
    - `ATLASSIAN_API_TOKEN`: JIRA API token
    - `GITHUB_TOKEN`: GitHub API token
-   - `GITHUB_REPO`: GitHub repository (owner/repo format)
+   - ~~`GITHUB_REPO`: GitHub repository (owner/repo format)~~ **Deprecated (v0.5.0+)**: Repository info is now automatically loaded from `.kiro/project.json`
 
 ## Execution Flow
 

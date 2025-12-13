@@ -15,13 +15,23 @@ interface PROptions {
 }
 
 async function createPR(options: PROptions): Promise<void> {
+  const { getRepositoryInfo } = await import('./utils/project-meta.js');
   const token = process.env.GITHUB_TOKEN;
-  const repo = process.env.GITHUB_REPO;
-  
-  if (!token || !repo) {
-    throw new Error('Missing GitHub credentials');
+
+  if (!token) {
+    throw new Error('Missing GitHub credentials. Required: GITHUB_TOKEN');
   }
-  
+
+  // .kiro/project.json から repository 情報を取得
+  let repo: string;
+  try {
+    repo = getRepositoryInfo();
+  } catch (error) {
+    throw new Error(
+      `Failed to get repository info from .kiro/project.json: ${error instanceof Error ? error.message : error}`,
+    );
+  }
+
   const [owner, repoName] = repo.split('/');
   const octokit = new Octokit({ auth: token });
   

@@ -316,7 +316,7 @@ ATLASSIAN_API_TOKEN=your-token-here
 # GitHub設定
 GITHUB_ORG=your-org
 GITHUB_TOKEN=ghp_xxx
-GITHUB_REPO=your-org/20240115-payment-api
+# Note: リポジトリ情報は .kiro/project.json の repository フィールドで管理されます
 
 # Confluence共有スペース
 CONFLUENCE_PRD_SPACE=PRD

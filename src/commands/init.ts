@@ -50,6 +50,7 @@ interface InitOptions {
   michiPath?: string;
   skipConfig?: boolean;
   yes?: boolean;
+  existing?: boolean; // 既存プロジェクトモード
   cursor?: boolean;
   claude?: boolean;
   claudeAgent?: boolean;
@@ -148,6 +149,20 @@ async function prompt(question: string): Promise<string> {
 }
 
 /**
+ * 既存プロジェクトかどうかを検出
+ */
+function detectExistingProject(currentDir: string): boolean {
+  const indicators = [
+    'package.json',    // Node.js
+    'pom.xml',         // Java/Maven
+    'build.gradle',    // Java/Gradle
+    'composer.json',   // PHP
+  ];
+
+  return indicators.some((file) => existsSync(join(currentDir, file)));
+}
+
+/**
  * 環境を決定（オプションまたは対話的）
  */
 async function determineEnvironment(options: InitOptions): Promise<Environment> {
@@ -192,7 +207,7 @@ async function determineEnvironment(options: InitOptions): Promise<Environment> 
 /**
  * オプションから設定を構築（対話的プロンプトを含む）
  */
-async function buildConfig(options: InitOptions, currentDir: string): Promise<InitConfig> {
+async function buildConfig(options: InitOptions, currentDir: string, isExistingMode: boolean): Promise<InitConfig> {
   // 環境を決定
   const environment = await determineEnvironment(options);
 
@@ -202,7 +217,8 @@ async function buildConfig(options: InitOptions, currentDir: string): Promise<In
     throw new Error(`Unsupported language: ${langCode}`);
   }
 
-  const projectIdDefault = options.name || basename(currentDir);
+  // 既存プロジェクトモードの場合、ディレクトリ名をデフォルトとして使用
+  const projectIdDefault = isExistingMode ? basename(currentDir) : (options.name || basename(currentDir));
 
   // プロジェクトID
   let projectId = options.name;
@@ -412,8 +428,22 @@ export async function initProject(options: InitOptions): Promise<void> {
 
   const currentDir = process.cwd();
 
+  // 既存プロジェクトの自動検出
+  let isExistingMode = options.existing || false;
+
+  if (!isExistingMode && !options.yes && detectExistingProject(currentDir)) {
+    console.log('⚠️  既存のプロジェクトが検出されました');
+    console.log('   既存プロジェクトモードで初期化しますか？ (Y/n)');
+    const answer = await prompt('選択: ');
+    isExistingMode = answer.toLowerCase() !== 'n';
+  }
+
+  if (isExistingMode) {
+    console.log('📦 既存プロジェクトモード');
+  }
+
   // 設定を構築（対話的プロンプトを含む）
-  const config = await buildConfig(options, currentDir);
+  const config = await buildConfig(options, currentDir, isExistingMode);
 
   console.log(`📁 現在のディレクトリ: ${currentDir}`);
   console.log(`📦 プロジェクトID: ${config.projectId}`);
@@ -498,7 +528,8 @@ export async function initProject(options: InitOptions): Promise<void> {
   // Step 3: .env テンプレート作成
   console.log('\n🔐 Step 3: Creating .env template...');
 
-  const envTemplate = `# Atlassian設定（MCP + REST API共通）
+  if (!existsSync('.env')) {
+    const envTemplate = `# Atlassian設定（MCP + REST API共通）
 ATLASSIAN_URL=https://your-domain.atlassian.net
 ATLASSIAN_EMAIL=your-email@company.com
 ATLASSIAN_API_TOKEN=your-token-here
@@ -506,7 +537,6 @@ ATLASSIAN_API_TOKEN=your-token-here
 # GitHub設定
 GITHUB_ORG=your-org
 GITHUB_TOKEN=ghp_xxx
-GITHUB_REPO=${repoUrl.replace('https://github.com/', '')}
 
 # Confluence共有スペース
 CONFLUENCE_PRD_SPACE=PRD
@@ -521,7 +551,6 @@ JIRA_ISSUE_TYPE_STORY=10036
 JIRA_ISSUE_TYPE_SUBTASK=10037
 `;
 
-  if (!existsSync('.env')) {
     writeFileSync('.env', envTemplate, 'utf-8');
     chmodSync('.env', 0o600);
     console.log('   ✅ .env template created (permissions: 600)');
