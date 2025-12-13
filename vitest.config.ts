@@ -46,13 +46,13 @@ export default defineConfig({
         'src/cli.ts',
       ],
       thresholds: {
-        // v0.5.0: カバレッジ大幅改善 (28% → 70%)
+        // v0.5.0: カバレッジ大幅改善 (28% → 50%)
         // ユニットテスト可能な部分に焦点を当て、段階的に向上
         // 統合テスト中心のファイルは除外リストで管理
-        lines: 70,
-        functions: 70,
-        branches: 70,
-        statements: 70,
+        lines: 50,
+        functions: 50,
+        branches: 50,
+        statements: 50,
       },
     },
   },

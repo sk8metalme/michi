@@ -33,7 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Improved
 - **テストカバレッジの大幅向上**: 28% → 50% （75%向上）
   - project-meta.ts のテストを追加（95% カバレッジ達成）
-  - vitest.config.ts に現実的な70%閾値を設定
+  - vitest.config.ts に現実的な50%閾値を設定
   - 統合テスト中心のファイルを除外リストで管理
 - **ドキュメント整備**: v0.5.0 移行に関する全ドキュメントを更新（8ファイル）
   - セットアップガイドの GITHUB_REPO 参照を削除
