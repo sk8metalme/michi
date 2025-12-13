@@ -67,3 +67,30 @@ Team: ${meta.team.join(', ')}
 `.trim();
 }
 
+/**
+ * GitHub リポジトリ情報を取得
+ * repository フィールドから owner/repo 形式を抽出
+ *
+ * @param projectRoot プロジェクトルートディレクトリ（デフォルト: カレントディレクトリ）
+ * @returns owner/repo 形式のリポジトリ情報
+ * @throws リポジトリ情報が見つからない、または無効な形式の場合
+ */
+export function getRepositoryInfo(projectRoot: string = process.cwd()): string {
+  const meta = loadProjectMeta(projectRoot);
+
+  if (!meta.repository) {
+    throw new Error('Repository information not found in project.json');
+  }
+
+  // URL形式から owner/repo を抽出
+  // 例: https://github.com/owner/repo.git -> owner/repo
+  // 例: git@github.com:owner/repo.git -> owner/repo
+  const match = meta.repository.match(/github\.com[:/]([\w-]+\/[\w-]+)(\.git)?/);
+
+  if (!match) {
+    throw new Error(`Invalid GitHub repository format: ${meta.repository}`);
+  }
+
+  return match[1];
+}
+

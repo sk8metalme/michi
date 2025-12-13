@@ -32,6 +32,11 @@ vi.mock('../utils/config-loader.js', () => ({
   })),
 }));
 
+// project-metaをモック
+vi.mock('../utils/project-meta.js', () => ({
+  getRepositoryInfo: vi.fn(() => 'owner/repo'),
+}));
+
 // spec-loaderをモック
 const mockGetJiraInfoFromSpec = vi.fn();
 const mockCheckJiraInfoStatus = vi.fn();
@@ -62,7 +67,6 @@ describe('spec-impl-workflow', () => {
     process.env.ATLASSIAN_EMAIL = 'test@example.com';
     process.env.ATLASSIAN_API_TOKEN = 'test-token';
     process.env.GITHUB_TOKEN = 'github-token';
-    process.env.GITHUB_REPO = 'owner/repo';
   });
 
   afterEach(() => {
@@ -71,7 +75,6 @@ describe('spec-impl-workflow', () => {
     delete process.env.ATLASSIAN_EMAIL;
     delete process.env.ATLASSIAN_API_TOKEN;
     delete process.env.GITHUB_TOKEN;
-    delete process.env.GITHUB_REPO;
   });
 
   // ==========================================================================

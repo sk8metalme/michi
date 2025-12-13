@@ -802,7 +802,6 @@ ATLASSIAN_API_TOKEN=your-token-here
 # GitHub設定
 GITHUB_ORG=your-org
 GITHUB_TOKEN=ghp_xxx
-GITHUB_REPO=${repoUrl.replace('https://github.com/', '')}
 
 # Confluence共有スペース
 CONFLUENCE_PRD_SPACE=PRD

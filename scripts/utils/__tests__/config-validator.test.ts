@@ -393,6 +393,8 @@ describe('config-validator', () => {
       writeFileSync(
         projectJsonPath,
         JSON.stringify({
+          projectId: 'test-project',
+          projectName: 'Test Project',
           jiraProjectKey: 'TEST',
         }),
       );

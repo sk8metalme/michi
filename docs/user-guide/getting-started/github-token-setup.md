@@ -230,8 +230,9 @@ nano .env
 # GitHub設定
 GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 GITHUB_ORG=your-organization  # または your-username
-GITHUB_REPO=your-org/your-repo
 ```
+
+> **Note (v0.5.0以降)**: `GITHUB_REPO` 環境変数は廃止されました。リポジトリ情報は `.kiro/project.json` の `repository` フィールドから自動的に取得されます。
 
 **セキュリティ**:
 ```bash

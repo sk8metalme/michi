@@ -1,0 +1,286 @@
+/**
+ * security-validator.ts
+ * セキュリティ検証ユーティリティ
+ *
+ * 環境変数やAPIトークンなど機密情報のバリデーションとセキュリティチェックを行います。
+ */
+
+import { statSync } from 'fs';
+
+/**
+ * バリデーション結果
+ */
+export interface ValidationResult {
+  isValid: boolean;
+  errors: string[];
+  warnings: string[];
+}
+
+/**
+ * APIトークン形式の検証
+ */
+export function validateAtlassianToken(token: string): ValidationResult {
+  const errors: string[] = [];
+  const warnings: string[] = [];
+
+  if (!token || token.trim() === '') {
+    errors.push('Atlassian API token is empty');
+    return { isValid: false, errors, warnings };
+  }
+
+  if (token.includes(' ')) {
+    errors.push('Atlassian API token contains spaces');
+  }
+
+  if (token === 'your-token-here' || token === 'test-token' || token === 'token123') {
+    errors.push('Atlassian API token is a placeholder value');
+  }
+
+  if (token.length < 20) {
+    warnings.push('Atlassian API token seems too short (expected >20 characters)');
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+    warnings,
+  };
+}
+
+/**
+ * GitHub Personal Access Token の検証
+ */
+export function validateGitHubToken(token: string): ValidationResult {
+  const errors: string[] = [];
+  const warnings: string[] = [];
+
+  if (!token || token.trim() === '') {
+    errors.push('GitHub token is empty');
+  } else if (token.includes(' ')) {
+    errors.push('GitHub token contains spaces');
+  } else if (!token.startsWith('ghp_') && !token.startsWith('github_pat_')) {
+    warnings.push('GitHub token does not start with expected prefix (ghp_ or github_pat_)');
+  } else if (token === 'ghp_xxx' || token === 'your-github-token' || token === 'github-token') {
+    errors.push('GitHub token is a placeholder value');
+  } else if (token.length < 30) {
+    warnings.push('GitHub token seems too short');
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+    warnings,
+  };
+}
+
+/**
+ * メールアドレス形式の検証
+ */
+export function validateEmail(email: string): ValidationResult {
+  const errors: string[] = [];
+  const warnings: string[] = [];
+
+  if (!email || email.trim() === '') {
+    errors.push('Email is empty');
+  } else {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      errors.push('Email format is invalid');
+    } else if (
+      email === 'user@example.com' ||
+      email.includes('your-email') ||
+      email === 'test@example.com'
+    ) {
+      errors.push('Email is a placeholder value');
+    }
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+    warnings,
+  };
+}
+
+/**
+ * URL形式の検証
+ */
+export function validateUrl(url: string, expectedDomain?: string): ValidationResult {
+  const errors: string[] = [];
+  const warnings: string[] = [];
+
+  if (!url || url.trim() === '') {
+    errors.push('URL is empty');
+  } else {
+    try {
+      const parsedUrl = new URL(url);
+
+      if (parsedUrl.protocol !== 'https:' && parsedUrl.protocol !== 'http:') {
+        errors.push(`Invalid URL protocol: ${parsedUrl.protocol} (expected https: or http:)`);
+      }
+
+      if (parsedUrl.protocol === 'http:') {
+        warnings.push('URL uses insecure http:// protocol (consider using https://)');
+      }
+
+      if (expectedDomain && !parsedUrl.hostname.includes(expectedDomain)) {
+        errors.push(`URL hostname ${parsedUrl.hostname} does not contain expected domain: ${expectedDomain}`);
+      }
+
+      if (url === 'https://example.com' || url === 'https://your-domain.atlassian.net') {
+        errors.push('URL is a placeholder value');
+      }
+    } catch (error) {
+      errors.push(`URL parsing failed: ${error instanceof Error ? error.message : error}`);
+    }
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+    warnings,
+  };
+}
+
+/**
+ * Atlassian URL の検証
+ */
+export function validateAtlassianUrl(url: string): ValidationResult {
+  const result = validateUrl(url, 'atlassian.net');
+
+  if (result.isValid) {
+    try {
+      const parsedUrl = new URL(url);
+      if (!parsedUrl.hostname.endsWith('.atlassian.net')) {
+        result.errors.push('Atlassian URL must end with .atlassian.net');
+        result.isValid = false;
+      }
+    } catch {
+      // Already handled in validateUrl
+    }
+  }
+
+  return result;
+}
+
+/**
+ * GitHub リポジトリ URL の検証
+ */
+export function validateGitHubRepositoryUrl(url: string): ValidationResult {
+  const errors: string[] = [];
+  const warnings: string[] = [];
+
+  if (!url || url.trim() === '') {
+    errors.push('Repository URL is empty');
+  } else {
+    // GitHub URL 形式のパターン
+    const httpsPattern = /^https:\/\/github\.com\/[\w-]+\/[\w-]+(\.git)?$/;
+    const sshPattern = /^git@github\.com:[\w-]+\/[\w-]+(\.git)?$/;
+
+    if (!httpsPattern.test(url) && !sshPattern.test(url)) {
+      errors.push(
+        'Repository URL must be in format: https://github.com/owner/repo.git or git@github.com:owner/repo.git',
+      );
+    }
+
+    if (url.includes('your-org') || url.includes('your-repo')) {
+      errors.push('Repository URL contains placeholder values');
+    }
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+    warnings,
+  };
+}
+
+/**
+ * 環境変数の包括的検証
+ */
+export interface EnvValidationConfig {
+  atlassianUrl?: string;
+  atlassianEmail?: string;
+  atlassianApiToken?: string;
+  githubOrg?: string;
+  githubToken?: string;
+  repositoryUrl?: string;
+}
+
+export function validateEnvironmentConfig(config: EnvValidationConfig): ValidationResult {
+  const allErrors: string[] = [];
+  const allWarnings: string[] = [];
+
+  if (config.atlassianUrl !== undefined) {
+    const result = validateAtlassianUrl(config.atlassianUrl);
+    allErrors.push(...result.errors.map((e) => `ATLASSIAN_URL: ${e}`));
+    allWarnings.push(...result.warnings.map((w) => `ATLASSIAN_URL: ${w}`));
+  }
+
+  if (config.atlassianEmail !== undefined) {
+    const result = validateEmail(config.atlassianEmail);
+    allErrors.push(...result.errors.map((e) => `ATLASSIAN_EMAIL: ${e}`));
+    allWarnings.push(...result.warnings.map((w) => `ATLASSIAN_EMAIL: ${w}`));
+  }
+
+  if (config.atlassianApiToken !== undefined) {
+    const result = validateAtlassianToken(config.atlassianApiToken);
+    allErrors.push(...result.errors.map((e) => `ATLASSIAN_API_TOKEN: ${e}`));
+    allWarnings.push(...result.warnings.map((w) => `ATLASSIAN_API_TOKEN: ${w}`));
+  }
+
+  if (config.githubOrg !== undefined) {
+    if (!config.githubOrg || config.githubOrg.trim() === '') {
+      allErrors.push('GITHUB_ORG: GitHub organization is empty');
+    } else if (config.githubOrg.includes('your-org')) {
+      allErrors.push('GITHUB_ORG: GitHub organization is a placeholder value');
+    }
+  }
+
+  if (config.githubToken !== undefined) {
+    const result = validateGitHubToken(config.githubToken);
+    allErrors.push(...result.errors.map((e) => `GITHUB_TOKEN: ${e}`));
+    allWarnings.push(...result.warnings.map((w) => `GITHUB_TOKEN: ${w}`));
+  }
+
+  if (config.repositoryUrl !== undefined) {
+    const result = validateGitHubRepositoryUrl(config.repositoryUrl);
+    allErrors.push(...result.errors.map((e) => `repository: ${e}`));
+    allWarnings.push(...result.warnings.map((w) => `repository: ${w}`));
+  }
+
+  return {
+    isValid: allErrors.length === 0,
+    errors: allErrors,
+    warnings: allWarnings,
+  };
+}
+
+/**
+ * ファイルパーミッションの検証（Unix系のみ）
+ */
+export function validateFilePermissions(filePath: string, expectedMode: number = 0o600): ValidationResult {
+  const errors: string[] = [];
+  const warnings: string[] = [];
+
+  try {
+    const stats = statSync(filePath);
+    const actualMode = stats.mode & 0o777;
+
+    if (actualMode !== expectedMode) {
+      const actualOctal = actualMode.toString(8);
+      const expectedOctal = expectedMode.toString(8);
+      warnings.push(
+        `File permissions are ${actualOctal} but should be ${expectedOctal} for security. Run: chmod ${expectedOctal} ${filePath}`,
+      );
+    }
+  } catch (error) {
+    errors.push(`Failed to check file permissions: ${error instanceof Error ? error.message : error}`);
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+    warnings,
+  };
+}

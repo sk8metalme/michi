@@ -76,7 +76,7 @@ cat > .env <<EOF
 # GitHub設定（必須）
 GITHUB_TOKEN=your-github-token
 GITHUB_ORG=your-org
-GITHUB_REPO=your-org/your-repo
+# Note: リポジトリ情報は .kiro/project.json の repository フィールドで管理されます
 
 # JIRA設定（オプション）
 ATLASSIAN_URL=https://your-domain.atlassian.net

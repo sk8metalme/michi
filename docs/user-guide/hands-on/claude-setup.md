@@ -173,8 +173,9 @@ vim .env
 # GitHub設定（必須）
 GITHUB_TOKEN=ghp_your_token_here
 GITHUB_ORG=your-org
-GITHUB_REPO=your-org/your-repo
 ```
+
+> **Note (v0.5.0以降)**: `GITHUB_REPO` 環境変数は廃止されました。リポジトリ情報は `.kiro/project.json` の `repository` フィールドから自動的に取得されます。
 
 **完全な設定（Confluence/JIRA連携も使用）**:
 
@@ -187,7 +188,6 @@ ATLASSIAN_API_TOKEN=your-token-here
 # GitHub設定
 GITHUB_ORG=your-org
 GITHUB_TOKEN=ghp_xxx
-GITHUB_REPO=your-org/your-repo
 
 # Confluence共有スペース
 CONFLUENCE_PRD_SPACE=PRD

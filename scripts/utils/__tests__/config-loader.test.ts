@@ -10,6 +10,7 @@ import {
   loadConfig,
   getConfig,
   getConfigPath,
+  getGlobalEnvPath,
   clearConfigCache
 } from '../config-loader.js';
 
@@ -251,6 +252,151 @@ describe('config-loader', () => {
       expect(consoleWarnSpy).not.toHaveBeenCalled();
 
       consoleWarnSpy.mockRestore();
+    });
+  });
+
+  describe('5層階層対応', () => {
+    describe('getGlobalEnvPath', () => {
+      it('~/.michi/.envのパスを返す', () => {
+        const envPath = getGlobalEnvPath();
+        expect(envPath).toBe(join(process.env.HOME as string, '.michi', '.env'));
+      });
+    });
+
+    describe('グローバル.envからの設定読み込み', () => {
+      it('グローバル.envからAtlassian設定を読み込む', () => {
+        clearConfigCache();
+
+        // ~/.michi/.env を作成
+        const globalEnvPath = join(testProjectRoot, '.michi', '.env');
+        writeFileSync(globalEnvPath, 'ATLASSIAN_URL=https://test.atlassian.net\n');
+
+        const config = loadConfig(testProjectRoot);
+
+        // グローバル.envの値が読み込まれることを確認
+        expect(config).toHaveProperty('atlassian');
+        // 注: 実装後に具体的なアサーションを追加
+      });
+
+      it('グローバル.envが存在しない場合でもエラーにならない', () => {
+        clearConfigCache();
+
+        // ~/.michi/.env を削除
+        const globalEnvPath = join(testProjectRoot, '.michi', '.env');
+        if (existsSync(globalEnvPath)) {
+          unlinkSync(globalEnvPath);
+        }
+
+        expect(() => {
+          loadConfig(testProjectRoot);
+        }).not.toThrow();
+      });
+    });
+
+    describe('project.jsonからの設定読み込み', () => {
+      it('project.jsonからプロジェクトメタデータを読み込む', () => {
+        clearConfigCache();
+
+        // .kiro/project.json を作成
+        const projectJsonPath = join(testProjectRoot, '.kiro', 'project.json');
+        mkdirSync(join(testProjectRoot, '.kiro'), { recursive: true });
+        writeFileSync(projectJsonPath, JSON.stringify({
+          projectId: 'test-project',
+          projectName: 'Test Project',
+          jiraProjectKey: 'TP'
+        }));
+
+        const config = loadConfig(testProjectRoot);
+
+        // project.jsonの値が読み込まれることを確認
+        expect(config).toHaveProperty('project');
+        // 注: 実装後に具体的なアサーションを追加
+      });
+
+      it('project.jsonが存在しない場合でもエラーにならない', () => {
+        clearConfigCache();
+
+        // .kiro/project.json を削除
+        const projectJsonPath = join(testProjectRoot, '.kiro', 'project.json');
+        if (existsSync(projectJsonPath)) {
+          unlinkSync(projectJsonPath);
+        }
+
+        expect(() => {
+          loadConfig(testProjectRoot);
+        }).not.toThrow();
+      });
+    });
+
+    describe('優先順位の検証', () => {
+      it('プロジェクト.envがグローバル.envより優先される', () => {
+        clearConfigCache();
+
+        // グローバル.env
+        const globalEnvPath = join(testProjectRoot, '.michi', '.env');
+        writeFileSync(globalEnvPath, 'CONFLUENCE_PRD_SPACE=GLOBAL\n');
+
+        // プロジェクト.env
+        const projectEnvPath = join(testProjectRoot, '.env');
+        writeFileSync(projectEnvPath, 'CONFLUENCE_PRD_SPACE=PROJECT\n');
+
+        const config = loadConfig(testProjectRoot);
+
+        // プロジェクト.envの値が優先されることを確認
+        expect(config.confluence?.spaces?.requirements).toBe('PROJECT');
+      });
+    });
+
+    describe('キャッシュ無効化', () => {
+      it('グローバル.envを変更するとキャッシュが無効化される', async () => {
+        clearConfigCache();
+
+        // 最初の設定
+        const globalEnvPath = join(testProjectRoot, '.michi', '.env');
+        writeFileSync(globalEnvPath, 'CONFLUENCE_PRD_SPACE=INITIAL\n');
+
+        const config1 = getConfig(testProjectRoot);
+
+        // ファイルシステムのmtime精度を考慮して少し待つ
+        await new Promise(resolve => setTimeout(resolve, 10));
+
+        // 設定を更新
+        writeFileSync(globalEnvPath, 'CONFLUENCE_PRD_SPACE=UPDATED\n');
+
+        const config2 = getConfig(testProjectRoot);
+
+        // 異なる値が返されることを確認（キャッシュが無効化された）
+        expect(config1.confluence?.spaces?.requirements).toBe('INITIAL');
+        expect(config2.confluence?.spaces?.requirements).toBe('UPDATED');
+      });
+
+      it('project.jsonを変更するとキャッシュが無効化される', async () => {
+        clearConfigCache();
+
+        // 最初の設定
+        const projectJsonPath = join(testProjectRoot, '.kiro', 'project.json');
+        mkdirSync(join(testProjectRoot, '.kiro'), { recursive: true });
+        writeFileSync(projectJsonPath, JSON.stringify({
+          projectId: 'initial-id',
+          projectName: 'Initial Name'
+        }));
+
+        const config1 = getConfig(testProjectRoot);
+
+        // ファイルシステムのmtime精度を考慮して少し待つ
+        await new Promise(resolve => setTimeout(resolve, 10));
+
+        // 設定を更新
+        writeFileSync(projectJsonPath, JSON.stringify({
+          projectId: 'updated-id',
+          projectName: 'Updated Name'
+        }));
+
+        const config2 = getConfig(testProjectRoot);
+
+        // 異なるオブジェクトが返されることを確認（キャッシュが無効化された）
+        expect(config1).not.toBe(config2);
+      });
     });
   });
 });

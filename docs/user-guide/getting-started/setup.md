@@ -230,8 +230,7 @@ ATLASSIAN_API_TOKEN=<ATLASSIANトークン>
 # GitHub設定
 GITHUB_ORG=your-org
 GITHUB_TOKEN=<GitHubトークン>
-# 開発したいリポジトリ
-GITHUB_REPO=your-org/user-auth
+# Note: リポジトリ情報は .kiro/project.json の repository フィールドで管理されます
 
 # Confluence設定
 CONFLUENCE_PRD_SPACE=PRD
@@ -285,15 +284,9 @@ SLACK_WEBHOOK_URL=<SlackWebhook URL>
 - **確認方法**: 3-3セクション「GitHub Token」を参照
 - **使用機能**: すべてのGitHub連携機能で認証に使用（API呼び出し時の認証トークン）
 
-**`GITHUB_REPO`**
-- **確認方法**: GitHubリポジトリのURLから取得
-- **確認手順**:
-  1. リポジトリのページにアクセス（例: `https://github.com/org/repo`）
-  2. URLの `/org/repo` 部分がリポジトリ名
-- **形式**: `組織名/リポジトリ名`
-- **例**: `sk8metalme/michi`
-- **使用機能**:
-  - PR自動作成（`michi github:create-pr`）: 指定されたリポジトリにPull Requestを作成（ワークフロー自動化で使用）
+> **Note**: リポジトリ情報（以前の `GITHUB_REPO` 環境変数）は `.kiro/project.json` の `repository` フィールドで管理されるようになりました。
+> 形式: `https://github.com/org/repo.git` または `git@github.com:org/repo.git`
+> 例: `.kiro/project.json` に `"repository": "https://github.com/sk8metalme/michi.git"` と設定
 
 ##### Confluence設定
 

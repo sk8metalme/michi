@@ -185,7 +185,6 @@ URL_WITH_PARAMS=https://example.com?param1=value1&param2=value2
         ['ATLASSIAN_API_TOKEN', 'token123'],
         ['GITHUB_ORG', 'myorg'],
         ['GITHUB_TOKEN', 'ghp_xxx'],
-        ['GITHUB_REPO', 'myorg/myrepo'],
         ['CONFLUENCE_PRD_SPACE', 'PRD'],
         ['CONFLUENCE_QA_SPACE', 'QA'],
         ['CONFLUENCE_RELEASE_SPACE', 'RELEASE'],
@@ -217,7 +216,6 @@ ATLASSIAN_API_TOKEN=test_token_123
 # GitHub設定
 GITHUB_ORG=testorg
 GITHUB_TOKEN=ghp_test123
-GITHUB_REPO=testorg/testrepo
 
 # Confluence共有スペース
 CONFLUENCE_PRD_SPACE=PRD

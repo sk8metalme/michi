@@ -182,7 +182,10 @@ vim .env
 # 最低限、以下を設定:
 # GITHUB_TOKEN=your-token
 # GITHUB_ORG=your-org
-# GITHUB_REPO=your-org/your-repo
+```
+
+> **Note (v0.5.0以降)**: `GITHUB_REPO` 環境変数は廃止されました。リポジトリ情報は `.kiro/project.json` の `repository` フィールドから自動的に取得されます。
+
 ```
 
 詳細: [Cursor IDEセットアップガイド](./cursor-setup.md)

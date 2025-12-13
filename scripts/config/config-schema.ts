@@ -147,6 +147,31 @@ export const ValidationConfigSchema = z.object({
 });
 
 /**
+ * Atlassian設定スキーマ
+ */
+export const AtlassianConfigSchema = z.object({
+  url: z.string().optional(),
+  email: z.string().optional(),
+  apiToken: z.string().optional(),
+});
+
+/**
+ * プロジェクトメタデータスキーマ
+ */
+export const ProjectMetaSchema = z.object({
+  projectId: z.string().min(1),
+  projectName: z.string().min(1),
+  language: z.enum(['ja', 'en']).optional(),
+  jiraProjectKey: z.string().optional(),
+  confluenceLabels: z.array(z.string()).optional(),
+  status: z.string().optional(),
+  team: z.array(z.string()).optional(),
+  stakeholders: z.array(z.string()).optional(),
+  repository: z.string().optional(),
+  description: z.string().optional(),
+});
+
+/**
  * 全体設定スキーマ
  */
 export const AppConfigSchema = z.object({
@@ -154,6 +179,8 @@ export const AppConfigSchema = z.object({
   jira: JiraConfigSchema.optional(),
   workflow: WorkflowConfigSchema.optional(),
   validation: ValidationConfigSchema.optional(),
+  atlassian: AtlassianConfigSchema.optional(),
+  project: ProjectMetaSchema.optional(),
 });
 
 /**
@@ -177,4 +204,17 @@ export type JiraStatusMapping = z.infer<typeof JiraStatusMappingSchema>;
 export type JiraConfig = z.infer<typeof JiraConfigSchema>;
 export type WorkflowConfig = z.infer<typeof WorkflowConfigSchema>;
 export type ValidationConfig = z.infer<typeof ValidationConfigSchema>;
+export type AtlassianConfig = z.infer<typeof AtlassianConfigSchema>;
+export type ProjectMeta = z.infer<typeof ProjectMetaSchema>;
 export type AppConfig = z.infer<typeof AppConfigSchema>;
+
+/**
+ * 設定の読み込み元
+ */
+export type ConfigSource =
+  | 'default'        // default-config.json
+  | 'global-env'     // ~/.michi/.env
+  | 'global-config'  // ~/.michi/config.json
+  | 'project-meta'   // .kiro/project.json
+  | 'project-config' // .michi/config.json
+  | 'project-env';   // .env

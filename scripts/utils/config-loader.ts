@@ -7,7 +7,7 @@ import { readFileSync, existsSync, statSync } from 'fs';
 import { resolve, relative, isAbsolute } from 'path';
 import { fileURLToPath } from 'url';
 import { homedir } from 'os';
-import { config } from 'dotenv';
+import { config, parse as dotenvParse } from 'dotenv';
 import { AppConfigSchema, type AppConfig } from '../config/config-schema.js';
 
 // 環境変数読み込み
@@ -25,6 +25,14 @@ const GLOBAL_CONFIG_FILE = 'config.json';
 export function getGlobalConfigPath(): string {
   const home = homedir();
   return resolve(home, GLOBAL_CONFIG_DIR, GLOBAL_CONFIG_FILE);
+}
+
+/**
+ * グローバル.envファイルのパスを取得
+ */
+export function getGlobalEnvPath(): string {
+  const home = process.env.HOME || homedir();
+  return resolve(home, GLOBAL_CONFIG_DIR, '.env');
 }
 
 /**
@@ -245,72 +253,171 @@ function loadGlobalConfig(): Partial<AppConfig> | null {
 }
 
 /**
+ * グローバル.envを読み込み
+ * ~/.michi/.env から組織共通の環境変数を読み込む
+ */
+function loadGlobalEnv(): Record<string, string> {
+  const globalEnvPath = getGlobalEnvPath();
+
+  if (!existsSync(globalEnvPath)) {
+    return {};
+  }
+
+  try {
+    const content = readFileSync(globalEnvPath, 'utf-8');
+    return dotenvParse(content);
+  } catch (error) {
+    console.warn(`⚠️  Failed to load global env from ${globalEnvPath}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    return {};
+  }
+}
+
+/**
+ * プロジェクト.envを読み込み
+ * .env からプロジェクト固有の環境変数を読み込む
+ */
+function loadProjectEnv(projectRoot: string): Record<string, string> {
+  const projectEnvPath = resolve(projectRoot, '.env');
+
+  if (!existsSync(projectEnvPath)) {
+    return {};
+  }
+
+  try {
+    const content = readFileSync(projectEnvPath, 'utf-8');
+    return dotenvParse(content);
+  } catch (error) {
+    console.warn(`⚠️  Failed to load project env from ${projectEnvPath}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    return {};
+  }
+}
+
+/**
+ * プロジェクトメタデータを読み込み
+ * .kiro/project.json からプロジェクト情報を読み込む
+ */
+function loadProjectMetadata(projectRoot: string): Partial<AppConfig> | null {
+  const projectJsonPath = resolve(projectRoot, '.kiro/project.json');
+
+  if (!existsSync(projectJsonPath)) {
+    return null;
+  }
+
+  try {
+    const content = readFileSync(projectJsonPath, 'utf-8');
+    const meta = JSON.parse(content);
+
+    // project フィールドとして返す
+    return { project: meta } as Partial<AppConfig>;
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      console.warn(`⚠️  Invalid JSON in ${projectJsonPath}: ${error.message}`);
+    } else {
+      console.warn(`⚠️  Failed to load project metadata from ${projectJsonPath}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+    return null;
+  }
+}
+
+/**
+ * 環境変数から設定へのマッピング
+ */
+const ENV_TO_CONFIG_MAPPING: Record<string, string> = {
+  'ATLASSIAN_URL': 'atlassian.url',
+  'ATLASSIAN_EMAIL': 'atlassian.email',
+  'ATLASSIAN_API_TOKEN': 'atlassian.apiToken',
+  'GITHUB_ORG': 'github.org',
+  'GITHUB_TOKEN': 'github.token',
+  'CONFLUENCE_PRD_SPACE': 'confluence.spaces.requirements',
+  'CONFLUENCE_QA_SPACE': 'confluence.spaces.qa',
+  'CONFLUENCE_RELEASE_SPACE': 'confluence.spaces.release',
+  'JIRA_ISSUE_TYPE_STORY': 'jira.issueTypes.story',
+  'JIRA_ISSUE_TYPE_SUBTASK': 'jira.issueTypes.subtask',
+  'JIRA_PROJECT_KEYS': 'jira.projectKeys',
+};
+
+/**
+ * ドットパスでオブジェクトの値を設定
+ * 例: setValueByPath(obj, 'a.b.c', value) => obj.a.b.c = value
+ */
+function setValueByPath(obj: Record<string, unknown>, path: string, value: string): void {
+  const keys = path.split('.');
+  let current: Record<string, unknown> = obj;
+
+  for (let i = 0; i < keys.length - 1; i++) {
+    const key = keys[i];
+    if (!current[key] || typeof current[key] !== 'object') {
+      current[key] = {};
+    }
+    current = current[key] as Record<string, unknown>;
+  }
+
+  current[keys[keys.length - 1]] = value;
+}
+
+/**
+ * 環境変数を設定オブジェクトに適用
+ */
+function applyEnvVarsToConfig(
+  config: AppConfig,
+  envVars: Record<string, string>
+): AppConfig {
+  const result = { ...config } as Record<string, unknown>;
+
+  for (const [envKey, configPath] of Object.entries(ENV_TO_CONFIG_MAPPING)) {
+    if (envVars[envKey]) {
+      setValueByPath(result, configPath, envVars[envKey]);
+    }
+  }
+
+  return result as AppConfig;
+}
+
+/**
  * 設定を読み込んでマージ
  *
- * マージ順序:
+ * マージ順序（優先度: 低 → 高）:
  * 1. デフォルト設定
- * 2. グローバル設定（上書き）
- * 3. プロジェクト固有設定（上書き）
- * 4. 環境変数（最終上書き、既存の動作を維持）
+ * 2. グローバル.env（~/.michi/.env）
+ * 3. グローバル設定（~/.michi/config.json）
+ * 4. プロジェクトメタデータ（.kiro/project.json）
+ * 5. プロジェクト設定（.michi/config.json）
+ * 6. プロジェクト.env（.env）- 最高優先度
  */
 export function loadConfig(projectRoot: string = process.cwd()): AppConfig {
-  // デフォルト設定を読み込み
-  const defaultConfig = loadDefaultConfig();
+  // 1. デフォルト設定を読み込み（最低優先度）
+  let mergedConfig: AppConfig = loadDefaultConfig();
 
-  // グローバル設定を読み込み
+  // 2. グローバル.envを読み込み
+  const globalEnvVars = loadGlobalEnv();
+  if (Object.keys(globalEnvVars).length > 0) {
+    mergedConfig = applyEnvVarsToConfig(mergedConfig, globalEnvVars);
+  }
+
+  // 3. グローバル設定を読み込み
   const globalConfig = loadGlobalConfig();
-
-  // プロジェクト固有設定を読み込み
-  const projectConfig = loadProjectConfig(projectRoot);
-
-  // マージ（デフォルト → グローバル → プロジェクト）
-  let mergedConfig: AppConfig = defaultConfig;
-
   if (globalConfig) {
     mergedConfig = deepMerge(mergedConfig, globalConfig);
   }
 
+  // 4. プロジェクトメタデータを読み込み
+  const projectMeta = loadProjectMetadata(projectRoot);
+  if (projectMeta) {
+    mergedConfig = deepMerge(mergedConfig, projectMeta);
+  }
+
+  // 5. プロジェクト固有設定を読み込み
+  const projectConfig = loadProjectConfig(projectRoot);
   if (projectConfig) {
     mergedConfig = deepMerge(mergedConfig, projectConfig);
   }
-  
-  // 環境変数で最終上書き（条件付き）
-  // 注意: config.jsonにspaces設定がある場合は環境変数を無視（config.jsonを優先）
-  if (process.env.CONFLUENCE_PRD_SPACE) {
-    if (!mergedConfig.confluence) {
-      mergedConfig.confluence = {
-        pageCreationGranularity: 'single',
-        pageTitleFormat: '[{projectName}] {featureName} {docTypeLabel}',
-        autoLabels: ['{projectLabel}', '{docType}', '{featureName}', 'github-sync']
-      };
-    }
-    // spacesオブジェクトを確実に作成
-    if (!mergedConfig.confluence.spaces) {
-      mergedConfig.confluence.spaces = {};
-    }
-    // 各フィールドを個別にチェックし、未定義のフィールドのみ環境変数で設定
-    // 既に定義されている値は変更しない
-    if (!mergedConfig.confluence.spaces.requirements) {
-      mergedConfig.confluence.spaces.requirements = process.env.CONFLUENCE_PRD_SPACE;
-    }
-    if (!mergedConfig.confluence.spaces.design) {
-      mergedConfig.confluence.spaces.design = process.env.CONFLUENCE_PRD_SPACE;
-    }
-    if (!mergedConfig.confluence.spaces.tasks) {
-      mergedConfig.confluence.spaces.tasks = process.env.CONFLUENCE_PRD_SPACE;
-    }
+
+  // 6. プロジェクト.envを読み込み（最高優先度）
+  const projectEnvVars = loadProjectEnv(projectRoot);
+  if (Object.keys(projectEnvVars).length > 0) {
+    mergedConfig = applyEnvVarsToConfig(mergedConfig, projectEnvVars);
   }
-  
-  // JIRA issue type IDを環境変数から取得（インスタンス固有の値のため）
-  if (mergedConfig.jira && mergedConfig.jira.issueTypes) {
-    if (process.env.JIRA_ISSUE_TYPE_STORY) {
-      mergedConfig.jira.issueTypes.story = process.env.JIRA_ISSUE_TYPE_STORY;
-    }
-    if (process.env.JIRA_ISSUE_TYPE_SUBTASK) {
-      mergedConfig.jira.issueTypes.subtask = process.env.JIRA_ISSUE_TYPE_SUBTASK;
-    }
-  }
-  
+
   // スキーマで最終バリデーション
   return AppConfigSchema.parse(mergedConfig);
 }
@@ -324,10 +431,16 @@ let cachedProjectRoot: string | null = null;
 let cachedConfigMtime: number | null = null;
 let cachedDefaultConfigMtime: number | null = null;
 let cachedGlobalConfigMtime: number | null = null;
+let cachedGlobalEnvMtime: number | null = null;
+let cachedProjectMetaMtime: number | null = null;
+let cachedProjectEnvMtime: number | null = null;
 
 export function getConfig(projectRoot: string = process.cwd()): AppConfig {
   const projectConfigPath = resolveConfigPath(projectRoot);
   const globalConfigPath = getGlobalConfigPath();
+  const globalEnvPath = getGlobalEnvPath();
+  const projectMetaPath = resolve(projectRoot, '.kiro/project.json');
+  const projectEnvPath = resolve(projectRoot, '.env');
   const currentFileUrl = import.meta.url;
   const currentFilePath = fileURLToPath(currentFileUrl);
   const currentDir = resolve(currentFilePath, '..');
@@ -397,13 +510,76 @@ export function getConfig(projectRoot: string = process.cwd()): AppConfig {
     cachedConfigMtime = null;
   }
 
+  // グローバル.envファイルの更新時刻をチェック
+  let globalEnvChanged = false;
+  try {
+    if (existsSync(globalEnvPath)) {
+      const globalEnvStats = statSync(globalEnvPath);
+      if (cachedGlobalEnvMtime !== globalEnvStats.mtimeMs) {
+        globalEnvChanged = true;
+        cachedGlobalEnvMtime = globalEnvStats.mtimeMs;
+      }
+    } else {
+      if (cachedGlobalEnvMtime !== null) {
+        globalEnvChanged = true;
+        cachedGlobalEnvMtime = null;
+      }
+    }
+  } catch {
+    globalEnvChanged = true;
+    cachedGlobalEnvMtime = null;
+  }
+
+  // プロジェクトメタデータファイルの更新時刻をチェック
+  let projectMetaChanged = false;
+  try {
+    if (existsSync(projectMetaPath)) {
+      const projectMetaStats = statSync(projectMetaPath);
+      if (cachedProjectMetaMtime !== projectMetaStats.mtimeMs) {
+        projectMetaChanged = true;
+        cachedProjectMetaMtime = projectMetaStats.mtimeMs;
+      }
+    } else {
+      if (cachedProjectMetaMtime !== null) {
+        projectMetaChanged = true;
+        cachedProjectMetaMtime = null;
+      }
+    }
+  } catch {
+    projectMetaChanged = true;
+    cachedProjectMetaMtime = null;
+  }
+
+  // プロジェクト.envファイルの更新時刻をチェック
+  let projectEnvChanged = false;
+  try {
+    if (existsSync(projectEnvPath)) {
+      const projectEnvStats = statSync(projectEnvPath);
+      if (cachedProjectEnvMtime !== projectEnvStats.mtimeMs) {
+        projectEnvChanged = true;
+        cachedProjectEnvMtime = projectEnvStats.mtimeMs;
+      }
+    } else {
+      if (cachedProjectEnvMtime !== null) {
+        projectEnvChanged = true;
+        cachedProjectEnvMtime = null;
+      }
+    }
+  } catch {
+    projectEnvChanged = true;
+    cachedProjectEnvMtime = null;
+  }
+
   // キャッシュが有効で、設定ファイルが変更されていない場合はキャッシュを返す
   if (
     cachedConfig &&
     cachedProjectRoot === projectRoot &&
     !defaultConfigChanged &&
     !globalConfigChanged &&
-    !projectConfigChanged
+    !globalEnvChanged &&
+    !projectConfigChanged &&
+    !projectMetaChanged &&
+    !projectEnvChanged
   ) {
     return cachedConfig;
   }
@@ -424,6 +600,9 @@ export function clearConfigCache(): void {
   cachedConfigMtime = null;
   cachedDefaultConfigMtime = null;
   cachedGlobalConfigMtime = null;
+  cachedGlobalEnvMtime = null;
+  cachedProjectMetaMtime = null;
+  cachedProjectEnvMtime = null;
 }
 
 /**

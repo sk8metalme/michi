@@ -258,12 +258,20 @@ ${jiraLink}
 *この PR は spec-impl ワークフローで自動作成されました*`;
 
     const { Octokit } = await import('@octokit/rest');
+    const { getRepositoryInfo } = await import('./utils/project-meta.js');
     const token = process.env.GITHUB_TOKEN;
-    const repo = process.env.GITHUB_REPO;
 
-    if (!token || !repo) {
+    if (!token) {
+      throw new Error('Missing GitHub credentials. Required: GITHUB_TOKEN');
+    }
+
+    // .kiro/project.json から repository 情報を取得
+    let repo: string;
+    try {
+      repo = getRepositoryInfo();
+    } catch (error) {
       throw new Error(
-        'Missing GitHub credentials. Required: GITHUB_TOKEN, GITHUB_REPO',
+        `Failed to get repository info from .kiro/project.json: ${error instanceof Error ? error.message : error}`,
       );
     }
 
@@ -393,12 +401,20 @@ export async function onSpecImplEnd(
 
   // PR 作成
   const { Octokit } = await import('@octokit/rest');
+  const { getRepositoryInfo } = await import('./utils/project-meta.js');
   const token = process.env.GITHUB_TOKEN;
-  const repo = process.env.GITHUB_REPO;
 
-  if (!token || !repo) {
+  if (!token) {
+    throw new Error('Missing GitHub credentials. Required: GITHUB_TOKEN');
+  }
+
+  // .kiro/project.json から repository 情報を取得
+  let repo: string;
+  try {
+    repo = getRepositoryInfo();
+  } catch (error) {
     throw new Error(
-      'Missing GitHub credentials. Required: GITHUB_TOKEN, GITHUB_REPO',
+      `Failed to get repository info from .kiro/project.json: ${error instanceof Error ? error.message : error}`,
     );
   }
 
