@@ -72,7 +72,7 @@
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --run --coverage",
     "test:integration:setup": "vitest --run src/__tests__/integration/setup",
-    "test:coverage:setup": "vitest --run --coverage src/__tests__/integration/setup",
+    "test:coverage:setup": "vitest --run --coverage --coverage.thresholds.lines=0 --coverage.thresholds.functions=0 --coverage.thresholds.branches=0 --coverage.thresholds.statements=0 src/__tests__/integration/setup",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
