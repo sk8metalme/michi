@@ -5,6 +5,46 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2025-12-14
+
+### Added
+- **設定移行コマンド**: `michi migrate` コマンドを追加（.env から 3層設定アーキテクチャへの移行）
+  - `--dry-run`: 変更内容のプレビュー
+  - `--force`: 確認プロンプトのスキップ
+  - `--rollback`: バックアップからの復元
+  - 自動バックアップ作成
+  - 移行後の設定検証
+- **設定検証コマンド**: `michi config:validate` コマンドを追加
+  - セキュリティ検証（APIトークン、URL、パーミッション）
+  - 設定ファイルの整合性チェック
+  - エラーと警告の詳細レポート
+- **セキュリティバリデーター**: 環境変数とAPIトークンの検証機能を追加
+  - Atlassian URL/Email/API Token の検証
+  - GitHub Organization/Token の検証
+  - リポジトリURLの検証
+  - ファイルパーミッションのチェック（.env は 600 または 644 を推奨）
+
+### Changed
+- **BREAKING: GITHUB_REPO環境変数の廃止**: `.kiro/project.json` の `repository` フィールドに統合
+  - 環境変数からメタデータへの移行により、3層設定アーキテクチャを実現
+  - 影響箇所: `scripts/utils/env-config.ts`, `scripts/utils/project-meta.ts`
+  - 移行ガイド: `michi migrate` コマンドで自動移行可能
+
+### Improved
+- **テストカバレッジの大幅向上**: 28% → 50% （75%向上）
+  - project-meta.ts のテストを追加（95% カバレッジ達成）
+  - vitest.config.ts に現実的な70%閾値を設定
+  - 統合テスト中心のファイルを除外リストで管理
+- **ドキュメント整備**: v0.5.0 移行に関する全ドキュメントを更新（8ファイル）
+  - セットアップガイドの GITHUB_REPO 参照を削除
+  - ハンズオンチュートリアルを v0.5.0 仕様に更新
+  - テンプレートファイルに廃止予定警告を追加
+
+### Fixed
+- **Lint エラー修正**: ESLint 準拠のコード品質向上
+  - require() スタイルのインポートを ES6 import に変更
+  - 未使用変数とインポートの削除（7箇所）
+
 ## [0.4.0] - 2025-12-11
 
 ### Added
