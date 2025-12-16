@@ -14,6 +14,11 @@ export interface TemplateContext {
   PROJECT_ID?: string;
   FEATURE_NAME?: string;
   TIMESTAMP?: string;
+  // Multi-Repo specific placeholders
+  PROJECT_NAME?: string;
+  JIRA_KEY?: string;
+  CONFLUENCE_SPACE?: string;
+  CREATED_AT?: string;
 }
 
 /**

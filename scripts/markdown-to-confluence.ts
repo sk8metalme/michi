@@ -14,14 +14,37 @@ const md = new MarkdownIt({
  * Markdown を Confluence Storage Format (HTML) に変換
  */
 export function convertMarkdownToConfluence(markdown: string): string {
-  // MarkdownIt でHTMLに変換
-  let html = md.render(markdown);
-  
-  // Confluence固有の変換
+  // 1. Mermaidブロックをプレースホルダーに置き換え
+  const mermaidBlocks: string[] = [];
+  const withPlaceholders = markdown.replace(
+    /```mermaid\n([\s\S]*?)```/g,
+    (match, diagram) => {
+      const placeholder = `<!--MERMAID_BLOCK_${mermaidBlocks.length}-->`;
+      mermaidBlocks.push(diagram.trim());
+      return placeholder;
+    }
+  );
+
+  // 2. MarkdownIt でHTMLに変換
+  let html = md.render(withPlaceholders);
+
+  // 3. Confluence固有の変換
   html = convertCodeBlocks(html);
   html = convertTables(html);
   html = convertInfoBoxes(html);
-  
+
+  // 4. プレースホルダーをConfluenceマクロに戻す
+  html = html.replace(
+    /<!--MERMAID_BLOCK_(\d+)-->/g,
+    (match, index) => {
+      const diagram = mermaidBlocks[parseInt(index)];
+      const escapedDiagram = escapeCDATA(diagram);
+      return `<ac:structured-macro ac:name="mermaid">
+  <ac:plain-text-body><![CDATA[${escapedDiagram}]]></ac:plain-text-body>
+</ac:structured-macro>`;
+    }
+  );
+
   return html;
 }
 
@@ -96,10 +119,18 @@ function decodeHtmlEntities(text: string): string {
     '&#39;': '\'',
     '&nbsp;': ' '
   };
-  
+
   return text.replace(/&[a-z]+;|&#\d+;/g, (entity) => {
     return entities[entity] || entity;
   });
+}
+
+/**
+ * CDATA内の ]]> をエスケープ
+ */
+function escapeCDATA(text: string): string {
+  // ]]> を ]]]]><![CDATA[> に置換してエスケープ
+  return text.replace(/]]>/g, ']]]]><![CDATA[>');
 }
 
 /**

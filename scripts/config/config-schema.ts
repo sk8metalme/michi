@@ -172,6 +172,67 @@ export const ProjectMetaSchema = z.object({
 });
 
 /**
+ * Multi-Repo リポジトリスキーマ
+ */
+export const RepositorySchema = z.object({
+  name: z.string().min(1),
+  url: z
+    .string()
+    .url()
+    .regex(/^https:\/\/github\.com\/[^/]+\/[^/]+$/, {
+      message: 'GitHub URL must be in format: https://github.com/{owner}/{repo}',
+    }),
+  branch: z.string().default('main'),
+});
+
+/**
+ * Multi-Repo プロジェクトスキーマ
+ */
+export const MultiRepoProjectSchema = z.object({
+  name: z
+    .string()
+    .min(1, { message: 'Project name must be at least 1 character' })
+    .max(100, { message: 'Project name must be at most 100 characters' })
+    .refine(
+      (name) => {
+        // パストラバーサル対策: '/', '\' 禁止
+        if (name.includes('/') || name.includes('\\')) {
+          return false;
+        }
+        // 相対パス対策: '.', '..' 禁止
+        if (name === '.' || name === '..') {
+          return false;
+        }
+        // 制御文字対策: \x00-\x1F, \x7F 禁止
+        // eslint-disable-next-line no-control-regex
+        const controlCharRegex = /[\x00-\x1F\x7F]/;
+        if (controlCharRegex.test(name)) {
+          return false;
+        }
+        return true;
+      },
+      {
+        message:
+          'Project name must not contain path traversal characters (/, \\), relative path components (., ..), or control characters',
+      },
+    ),
+  jiraKey: z
+    .string()
+    .min(1)
+    .regex(/^[A-Z]{2,10}$/, {
+      message: 'JIRA key must be 2-10 uppercase letters',
+    }),
+  confluenceSpace: z.string().min(1, {
+    message: 'Confluence space must be a non-empty string',
+  }),
+  createdAt: z.string().datetime({
+    offset: true,
+    message: 'createdAt must be in ISO 8601 format',
+  }),
+  repositories: z.array(RepositorySchema).default([]),
+});
+
+/**
  * 全体設定スキーマ
  */
 export const AppConfigSchema = z.object({
@@ -181,6 +242,7 @@ export const AppConfigSchema = z.object({
   validation: ValidationConfigSchema.optional(),
   atlassian: AtlassianConfigSchema.optional(),
   project: ProjectMetaSchema.optional(),
+  multiRepoProjects: z.array(MultiRepoProjectSchema).default([]),
 });
 
 /**
@@ -206,6 +268,8 @@ export type WorkflowConfig = z.infer<typeof WorkflowConfigSchema>;
 export type ValidationConfig = z.infer<typeof ValidationConfigSchema>;
 export type AtlassianConfig = z.infer<typeof AtlassianConfigSchema>;
 export type ProjectMeta = z.infer<typeof ProjectMetaSchema>;
+export type Repository = z.infer<typeof RepositorySchema>;
+export type MultiRepoProject = z.infer<typeof MultiRepoProjectSchema>;
 export type AppConfig = z.infer<typeof AppConfigSchema>;
 
 /**

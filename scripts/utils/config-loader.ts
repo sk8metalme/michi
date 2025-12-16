@@ -3,12 +3,19 @@
  * デフォルト設定 + プロジェクト固有設定をマージ
  */
 
-import { readFileSync, existsSync, statSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync, statSync, renameSync, unlinkSync } from 'fs';
 import { resolve, relative, isAbsolute } from 'path';
 import { fileURLToPath } from 'url';
 import { homedir } from 'os';
 import { config, parse as dotenvParse } from 'dotenv';
-import { AppConfigSchema, type AppConfig } from '../config/config-schema.js';
+import {
+  AppConfigSchema,
+  MultiRepoProjectSchema,
+  RepositorySchema,
+  type AppConfig,
+  type MultiRepoProject,
+  type Repository,
+} from '../config/config-schema.js';
 
 // 環境変数読み込み
 config();
@@ -610,5 +617,186 @@ export function clearConfigCache(): void {
  */
 export function getConfigPath(projectRoot: string = process.cwd()): string {
   return resolveConfigPath(projectRoot);
+}
+
+/**
+ * Multi-Repo管理関数
+ */
+
+/**
+ * 設定ファイルをアトミックに保存
+ * 一時ファイルに書き込んでからrenameすることでアトミック性を保証
+ */
+function saveConfig(
+  config: Partial<AppConfig>,
+  projectRoot: string = process.cwd(),
+): void {
+  const configPath = resolveConfigPath(projectRoot);
+  const tempPath = `${configPath}.tmp`;
+
+  try {
+    // 一時ファイルに書き込み
+    writeFileSync(tempPath, JSON.stringify(config, null, 2), 'utf-8');
+
+    // アトミックにリネーム
+    renameSync(tempPath, configPath);
+
+    // キャッシュをクリア
+    clearConfigCache();
+  } catch (error) {
+    // エラー時は一時ファイルを削除
+    if (existsSync(tempPath)) {
+      try {
+        unlinkSync(tempPath);
+      } catch {
+        // 削除失敗は無視
+      }
+    }
+    throw error;
+  }
+}
+
+/**
+ * プロジェクト名でMulti-Repoプロジェクトを検索
+ */
+export function findProject(
+  projectName: string,
+  projectRoot: string = process.cwd(),
+): MultiRepoProject | null {
+  const configPath = resolveConfigPath(projectRoot);
+
+  if (!existsSync(configPath)) {
+    return null;
+  }
+
+  try {
+    const config = loadProjectConfig(projectRoot);
+    if (!config?.multiRepoProjects) {
+      return null;
+    }
+
+    const project = config.multiRepoProjects.find(
+      (p) => p.name === projectName,
+    );
+    return project || null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Multi-Repoプロジェクトを追加
+ */
+export function addMultiRepoProject(
+  project: MultiRepoProject,
+  projectRoot: string = process.cwd(),
+): { success: boolean; project?: MultiRepoProject; error?: string } {
+  try {
+    // Zodスキーマでバリデーション
+    const validatedProject = MultiRepoProjectSchema.parse(project);
+
+    // 既存の設定を読み込み
+    const existingConfig = loadProjectConfig(projectRoot) || {};
+    const multiRepoProjects = existingConfig.multiRepoProjects || [];
+
+    // 重複チェック
+    const existingProject = multiRepoProjects.find(
+      (p) => p.name === validatedProject.name,
+    );
+    if (existingProject) {
+      return {
+        success: false,
+        error: `Project "${validatedProject.name}" already exists`,
+      };
+    }
+
+    // プロジェクトを追加
+    const updatedConfig = {
+      ...existingConfig,
+      multiRepoProjects: [...multiRepoProjects, validatedProject],
+    };
+
+    // 設定を保存
+    saveConfig(updatedConfig, projectRoot);
+
+    return {
+      success: true,
+      project: validatedProject,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+/**
+ * Multi-Repoプロジェクトにリポジトリを追加
+ */
+export function addRepositoryToProject(
+  projectName: string,
+  repository: Repository,
+  projectRoot: string = process.cwd(),
+): { success: boolean; repository?: Repository; error?: string } {
+  try {
+    // Zodスキーマでバリデーション
+    const validatedRepo = RepositorySchema.parse(repository);
+
+    // 既存の設定を読み込み
+    const existingConfig = loadProjectConfig(projectRoot) || {};
+    const multiRepoProjects = existingConfig.multiRepoProjects || [];
+
+    // プロジェクトを検索
+    const projectIndex = multiRepoProjects.findIndex(
+      (p) => p.name === projectName,
+    );
+    if (projectIndex === -1) {
+      return {
+        success: false,
+        error: `Project "${projectName}" not found`,
+      };
+    }
+
+    const project = multiRepoProjects[projectIndex];
+
+    // 重複チェック
+    const existingRepo = project.repositories.find(
+      (r) => r.name === validatedRepo.name,
+    );
+    if (existingRepo) {
+      return {
+        success: false,
+        error: `Repository "${validatedRepo.name}" already exists in project "${projectName}"`,
+      };
+    }
+
+    // リポジトリを追加
+    const updatedProject = {
+      ...project,
+      repositories: [...project.repositories, validatedRepo],
+    };
+
+    // プロジェクト配列を更新
+    const updatedProjects = [...multiRepoProjects];
+    updatedProjects[projectIndex] = updatedProject;
+
+    // 設定を保存
+    const updatedConfig = {
+      ...existingConfig,
+      multiRepoProjects: updatedProjects,
+    };
+    saveConfig(updatedConfig, projectRoot);
+
+    return {
+      success: true,
+      repository: validatedRepo,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
 }
 

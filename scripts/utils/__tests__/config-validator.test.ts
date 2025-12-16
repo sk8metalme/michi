@@ -12,7 +12,7 @@ import {
   validateForJiraSync,
   validateForJiraSyncAsync,
 } from '../config-validator.js';
-import { clearConfigCache } from '../config-loader.js';
+import { clearConfigCache, getConfig } from '../config-loader.js';
 import * as jiraFetcher from '../jira-issue-type-fetcher.js';
 
 describe('config-validator', () => {
@@ -147,6 +147,22 @@ describe('config-validator', () => {
   });
 
   describe('validateForConfluenceSync', () => {
+    let savedConfluenceSpace: string | undefined;
+
+    beforeEach(() => {
+      // 環境変数を保存
+      savedConfluenceSpace = process.env.CONFLUENCE_PRD_SPACE;
+    });
+
+    afterEach(() => {
+      // 環境変数を復元
+      if (savedConfluenceSpace !== undefined) {
+        process.env.CONFLUENCE_PRD_SPACE = savedConfluenceSpace;
+      } else {
+        delete process.env.CONFLUENCE_PRD_SPACE;
+      }
+    });
+
     it('spaces設定がない場合は警告を返す', () => {
       // 環境変数をクリア
       delete process.env.CONFLUENCE_PRD_SPACE;
@@ -236,6 +252,7 @@ describe('config-validator', () => {
     });
 
     it('環境変数CONFLUENCE_PRD_SPACEがある場合は情報メッセージ', () => {
+      // 環境変数を明示的に設定
       process.env.CONFLUENCE_PRD_SPACE = 'Michi';
       const configPath = join(testProjectRoot, '.michi/config.json');
       writeFileSync(
@@ -259,23 +276,48 @@ describe('config-validator', () => {
   });
 
   describe('validateForJiraSync', () => {
+    let savedStoryEnv: string | undefined;
+    let savedSubtaskEnv: string | undefined;
+
     beforeEach(() => {
-      // 環境変数をクリア
+      // 環境変数を保存して削除
+      savedStoryEnv = process.env.JIRA_ISSUE_TYPE_STORY;
+      savedSubtaskEnv = process.env.JIRA_ISSUE_TYPE_SUBTASK;
       delete process.env.JIRA_ISSUE_TYPE_STORY;
       delete process.env.JIRA_ISSUE_TYPE_SUBTASK;
     });
 
-    it('issueTypes.story設定がない場合はエラー', () => {
+    afterEach(() => {
+      // 環境変数を復元
+      if (savedStoryEnv !== undefined) {
+        process.env.JIRA_ISSUE_TYPE_STORY = savedStoryEnv;
+      } else {
+        delete process.env.JIRA_ISSUE_TYPE_STORY;
+      }
+      if (savedSubtaskEnv !== undefined) {
+        process.env.JIRA_ISSUE_TYPE_SUBTASK = savedSubtaskEnv;
+      } else {
+        delete process.env.JIRA_ISSUE_TYPE_SUBTASK;
+      }
+    });
+
+    it('issueTypes.story設定がない場合はエラー（デフォルト設定なし）', () => {
       const configPath = join(testProjectRoot, '.michi/config.json');
+      // issueTypes.storyを明示的にnullに設定してデフォルト値を無効化
       writeFileSync(
         configPath,
         JSON.stringify({
-          jira: {},
+          jira: {
+            issueTypes: {
+              story: null,
+            },
+          },
         }),
       );
 
       const result = validateForJiraSync(testProjectRoot);
 
+      // story=nullの場合、環境変数もないのでエラーになる
       expect(result.valid).toBe(false);
       expect(result.errors.length).toBeGreaterThan(0);
       expect(result.errors[0]).toContain('issueTypes.story');
@@ -301,6 +343,7 @@ describe('config-validator', () => {
     });
 
     it('環境変数JIRA_ISSUE_TYPE_STORYがある場合は情報メッセージ', () => {
+      // 環境変数を明示的に設定
       process.env.JIRA_ISSUE_TYPE_STORY = '10036';
       const configPath = join(testProjectRoot, '.michi/config.json');
       writeFileSync(
@@ -322,7 +365,7 @@ describe('config-validator', () => {
       }
     });
 
-    it('issueTypes.subtask設定がない場合は警告', () => {
+    it('issueTypes.subtask設定がない場合は警告（デフォルト設定なし）', () => {
       const configPath = join(testProjectRoot, '.michi/config.json');
       writeFileSync(
         configPath,
@@ -330,6 +373,7 @@ describe('config-validator', () => {
           jira: {
             issueTypes: {
               story: '10036',
+              subtask: null, // 明示的にnullに設定してデフォルト値を無効化
             },
           },
         }),
@@ -337,6 +381,7 @@ describe('config-validator', () => {
 
       const result = validateForJiraSync(testProjectRoot);
 
+      // subtask=nullの場合、環境変数もないので警告になる
       expect(result.valid).toBe(true);
       expect(result.warnings.length).toBeGreaterThan(0);
       expect(result.warnings[0]).toContain('subtask');
@@ -365,13 +410,57 @@ describe('config-validator', () => {
   });
 
   describe('validateForJiraSyncAsync', () => {
+    let savedEnv: {
+      JIRA_ISSUE_TYPE_STORY?: string;
+      JIRA_ISSUE_TYPE_SUBTASK?: string;
+      ATLASSIAN_URL?: string;
+      ATLASSIAN_EMAIL?: string;
+      ATLASSIAN_API_TOKEN?: string;
+    };
+
     beforeEach(() => {
-      // 環境変数をクリア
+      // 環境変数を保存して削除
+      savedEnv = {
+        JIRA_ISSUE_TYPE_STORY: process.env.JIRA_ISSUE_TYPE_STORY,
+        JIRA_ISSUE_TYPE_SUBTASK: process.env.JIRA_ISSUE_TYPE_SUBTASK,
+        ATLASSIAN_URL: process.env.ATLASSIAN_URL,
+        ATLASSIAN_EMAIL: process.env.ATLASSIAN_EMAIL,
+        ATLASSIAN_API_TOKEN: process.env.ATLASSIAN_API_TOKEN,
+      };
       delete process.env.JIRA_ISSUE_TYPE_STORY;
       delete process.env.JIRA_ISSUE_TYPE_SUBTASK;
       delete process.env.ATLASSIAN_URL;
       delete process.env.ATLASSIAN_EMAIL;
       delete process.env.ATLASSIAN_API_TOKEN;
+    });
+
+    afterEach(() => {
+      // 環境変数を復元
+      if (savedEnv.JIRA_ISSUE_TYPE_STORY !== undefined) {
+        process.env.JIRA_ISSUE_TYPE_STORY = savedEnv.JIRA_ISSUE_TYPE_STORY;
+      } else {
+        delete process.env.JIRA_ISSUE_TYPE_STORY;
+      }
+      if (savedEnv.JIRA_ISSUE_TYPE_SUBTASK !== undefined) {
+        process.env.JIRA_ISSUE_TYPE_SUBTASK = savedEnv.JIRA_ISSUE_TYPE_SUBTASK;
+      } else {
+        delete process.env.JIRA_ISSUE_TYPE_SUBTASK;
+      }
+      if (savedEnv.ATLASSIAN_URL !== undefined) {
+        process.env.ATLASSIAN_URL = savedEnv.ATLASSIAN_URL;
+      } else {
+        delete process.env.ATLASSIAN_URL;
+      }
+      if (savedEnv.ATLASSIAN_EMAIL !== undefined) {
+        process.env.ATLASSIAN_EMAIL = savedEnv.ATLASSIAN_EMAIL;
+      } else {
+        delete process.env.ATLASSIAN_EMAIL;
+      }
+      if (savedEnv.ATLASSIAN_API_TOKEN !== undefined) {
+        process.env.ATLASSIAN_API_TOKEN = savedEnv.ATLASSIAN_API_TOKEN;
+      } else {
+        delete process.env.ATLASSIAN_API_TOKEN;
+      }
     });
 
     it('認証情報が未設定の場合は同期版と同じ結果を返す', async () => {
@@ -406,6 +495,7 @@ describe('config-validator', () => {
     });
 
     it('認証情報が設定されていて、Issue Type IDが存在する場合は成功', async () => {
+      // 環境変数を明示的に設定
       process.env.ATLASSIAN_URL = 'https://test.atlassian.net';
       process.env.ATLASSIAN_EMAIL = 'test@example.com';
       process.env.ATLASSIAN_API_TOKEN = 'test-token';
@@ -451,16 +541,23 @@ describe('config-validator', () => {
     });
 
     it('認証情報が設定されていて、Issue Type IDが存在しない場合はエラー', async () => {
+      // 環境変数を明示的に設定（既存の環境変数を上書き）
       process.env.ATLASSIAN_URL = 'https://test.atlassian.net';
       process.env.ATLASSIAN_EMAIL = 'test@example.com';
       process.env.ATLASSIAN_API_TOKEN = 'test-token';
       process.env.JIRA_ISSUE_TYPE_STORY = '99999'; // 存在しないID
 
       const configPath = join(testProjectRoot, '.michi/config.json');
+      // issueTypes.storyを環境変数から取得するように空にする
+      // （デフォルト値を使わないように明示的にnullに設定）
       writeFileSync(
         configPath,
         JSON.stringify({
-          jira: {},
+          jira: {
+            issueTypes: {
+              story: null, // 環境変数から取得
+            },
+          },
         }),
       );
 
@@ -501,6 +598,7 @@ describe('config-validator', () => {
     });
 
     it('JIRA API取得に失敗した場合は警告を追加するがエラーにはしない', async () => {
+      // 環境変数を明示的に設定
       process.env.ATLASSIAN_URL = 'https://test.atlassian.net';
       process.env.ATLASSIAN_EMAIL = 'test@example.com';
       process.env.ATLASSIAN_API_TOKEN = 'test-token';
