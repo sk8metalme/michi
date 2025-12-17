@@ -10,8 +10,6 @@ import {
   GitHubActionsClient,
   parseGitHubWorkflowRun,
   type IRepositoryCIStatus,
-  type Result,
-  type GitHubAPIError,
 } from '../../scripts/github-actions-client.js';
 
 /**

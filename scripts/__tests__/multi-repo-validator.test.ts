@@ -8,7 +8,6 @@ import {
   validateProjectName,
   validateJiraKey,
   validateRepositoryUrl,
-  type ValidationResult,
 } from '../utils/multi-repo-validator.js';
 
 describe('validateProjectName', () => {

@@ -6,7 +6,6 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { multiRepoCIStatus } from '../multi-repo-ci-status.js';
 import * as configLoader from '../../../scripts/utils/config-loader.js';
 import * as fs from 'fs';
-import * as path from 'path';
 
 // GitHubActionsClientのモックをhoistで定義
 const { mockGitHubClient } = vi.hoisted(() => {

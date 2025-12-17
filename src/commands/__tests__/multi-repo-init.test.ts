@@ -5,10 +5,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { multiRepoInit } from '../multi-repo-init.js';
 import * as configLoader from '../../../scripts/utils/config-loader.js';
-import * as validator from '../../../scripts/utils/multi-repo-validator.js';
 import * as multiRepoRenderer from '../../../scripts/template/multi-repo-renderer.js';
 import * as fs from 'fs';
-import * as path from 'path';
 
 vi.mock('fs');
 vi.mock('../../../scripts/utils/config-loader.js');

@@ -27,14 +27,6 @@ type Result<T, E> =
   | { success: true; data: T }
   | { success: false; error: E };
 
-interface GitHubActionsClient {
-  getLatestWorkflowRun(
-    owner: string,
-    repo: string,
-    branch: string
-  ): Promise<Result<IGitHubWorkflowRun, GitHubAPIError>>;
-}
-
 // モック用
 vi.mock('@octokit/rest', () => ({
   Octokit: vi.fn(),

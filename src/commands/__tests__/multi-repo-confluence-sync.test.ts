@@ -6,7 +6,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { multiRepoConfluenceSync } from '../multi-repo-confluence-sync.js';
 import * as fs from 'fs';
 import * as configLoader from '../../../scripts/utils/config-loader.js';
-import { ConfluenceClient } from '../../../scripts/confluence-sync.js';
 
 vi.mock('fs');
 vi.mock('../../../scripts/utils/config-loader.js');

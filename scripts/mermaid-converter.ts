@@ -22,7 +22,7 @@ export class MermaidConverter {
     const matches = markdown.matchAll(mermaidBlockRegex);
     let hasMatches = false;
 
-    for (const match of matches) {
+    for (const _match of matches) {
       hasMatches = true;
       break;
     }

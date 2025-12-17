@@ -5,7 +5,7 @@
  */
 
 import { readFileSync } from 'fs';
-import { join } from 'path';
+import { join, resolve, relative, isAbsolute } from 'path';
 import { renderTemplate, type TemplateContext } from './renderer.js';
 
 export interface MultiRepoTemplateContext {
@@ -39,21 +39,41 @@ export const createMultiRepoTemplateContext = (
 /**
  * Load Multi-Repo template file
  *
+ * Security: Path traversal prevention with three-layer validation:
+ * 1. Validate template name (no path separators)
+ * 2. Resolve absolute paths
+ * 3. Verify path containment
+ *
  * @param templateName - Template name (e.g., "overview/requirements", "steering/multi-repo")
  * @param projectRoot - Project root directory
  * @returns Template content
- * @throws {Error} If template file not found
+ * @throws {Error} If template file not found or path traversal detected
  */
 export const loadMultiRepoTemplate = (
   templateName: string,
   projectRoot: string = process.cwd()
 ): string => {
-  const templatePath = join(
-    projectRoot,
-    'templates',
-    'multi-repo',
-    `${templateName}.md`
-  );
+  // Security Layer 1: Validate template name
+  // Reject path traversal characters (../, ..\, absolute paths)
+  if (templateName.includes('..') || templateName.includes('\\')) {
+    throw new Error(
+      `Invalid template name: ${templateName}\n` +
+      'Template name must not contain path traversal characters (\\, ..)'
+    );
+  }
+
+  // Security Layer 2: Resolve absolute paths
+  const templateDir = resolve(projectRoot, 'templates', 'multi-repo');
+  const templatePath = resolve(templateDir, `${templateName}.md`);
+
+  // Security Layer 3: Verify path containment
+  const relativePath = relative(templateDir, templatePath);
+  if (relativePath.startsWith('..') || isAbsolute(relativePath)) {
+    throw new Error(
+      `Invalid template path: ${templateName}\n` +
+      `Template path is outside template directory: ${templateDir}`
+    );
+  }
 
   try {
     return readFileSync(templatePath, 'utf-8');

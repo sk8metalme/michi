@@ -12,7 +12,7 @@ import {
   validateForJiraSync,
   validateForJiraSyncAsync,
 } from '../config-validator.js';
-import { clearConfigCache, getConfig } from '../config-loader.js';
+import { clearConfigCache } from '../config-loader.js';
 import * as jiraFetcher from '../jira-issue-type-fetcher.js';
 
 describe('config-validator', () => {

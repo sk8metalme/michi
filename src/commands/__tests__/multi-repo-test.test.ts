@@ -6,7 +6,6 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { multiRepoTest } from '../multi-repo-test.js';
 import * as configLoader from '../../../scripts/utils/config-loader.js';
 import * as fs from 'fs';
-import * as path from 'path';
 
 // HealthCheckServiceとTestScriptRunnerのモックをhoistで定義
 const { mockHealthCheckService, mockTestScriptRunner } = vi.hoisted(() => {

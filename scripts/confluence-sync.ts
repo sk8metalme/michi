@@ -18,6 +18,20 @@ import { updateSpecJsonAfterConfluenceSync, loadSpecJson } from './utils/spec-up
 config();
 
 /**
+ * セキュリティ: CQLクエリ文字列のエスケープ
+ * CQLインジェクション対策: バックスラッシュと引用符を適切にエスケープ
+ *
+ * @param str - エスケープする文字列
+ * @returns エスケープされた文字列
+ */
+function escapeCQL(str: string): string {
+  return str
+    .replace(/\\/g, '\\\\')  // バックスラッシュを先にエスケープ（重要: 最初に実行）
+    .replace(/"/g, '\\"')    // ダブルクォート
+    .replace(/'/g, "\\'");   // シングルクォート
+}
+
+/**
  * Confluence APIページレスポンス
  */
 export interface ConfluencePage {
@@ -133,8 +147,8 @@ class ConfluenceClient {
       // 親ページIDが指定されている場合、CQLクエリを使用して親ページの子ページのみを検索
       if (parentId) {
         // CQLクエリ: スペース、タイトル、親ページIDで検索
-        // タイトル内の特殊文字をエスケープ
-        const escapedTitle = title.replace(/"/g, '\\"');
+        // セキュリティ: CQLインジェクション対策 - タイトルを適切にエスケープ
+        const escapedTitle = escapeCQL(title);
         // ancestorの代わりにparentを使用（Confluence CQLの正しい構文）
         const cql = `space = ${spaceKey} AND title = "${escapedTitle}" AND parent = ${parentId}`;
         console.log(`  CQL Query: ${cql}`);
