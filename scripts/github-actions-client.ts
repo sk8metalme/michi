@@ -43,6 +43,16 @@ export type GitHubAPIError =
   | { type: 'SERVER_ERROR'; message: string; statusCode: number };
 
 /**
+ * Octokit APIから返されるエラーオブジェクトの型
+ */
+interface OctokitError extends Error {
+  status?: number;
+  response?: {
+    headers?: Record<string, string>;
+  };
+}
+
+/**
  * Result型
  */
 export type Result<T, E> =
@@ -111,22 +121,23 @@ async function exponentialBackoff<T>(
   fn: () => Promise<T>,
   maxRetries: number = 3
 ): Promise<T> {
-  let lastError: any;
+  let lastError: OctokitError;
 
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
       return await fn();
-    } catch (error: any) {
-      lastError = error;
+    } catch (error) {
+      const octokitError = error as OctokitError;
+      lastError = octokitError;
 
       // レート制限エラーでない場合は即座にスロー
-      if (error.status !== 403 || !error.response?.headers) {
-        throw error;
+      if (octokitError.status !== 403 || !octokitError.response?.headers) {
+        throw octokitError;
       }
 
       // 最後の試行の場合はスロー
       if (attempt === maxRetries - 1) {
-        throw error;
+        throw octokitError;
       }
 
       // Exponential Backoff: 1秒、2秒、4秒
@@ -196,19 +207,20 @@ export class GitHubActionsClient {
         success: true,
         data: run,
       };
-    } catch (error: any) {
+    } catch (error) {
       // エラーハンドリング
-      if (error.status === 404) {
+      const octokitError = error as OctokitError;
+      if (octokitError.status === 404) {
         return {
           success: false,
           error: {
             type: 'NOT_FOUND',
-            message: error.message || 'リポジトリが見つかりません',
+            message: octokitError.message || 'リポジトリが見つかりません',
           },
         };
-      } else if (error.status === 403) {
+      } else if (octokitError.status === 403) {
         // レート制限
-        const resetTime = error.response?.headers?.['x-ratelimit-reset'];
+        const resetTime = octokitError.response?.headers?.['x-ratelimit-reset'];
         const retryAfter = resetTime
           ? parseInt(resetTime, 10) - Math.floor(Date.now() / 1000)
           : 3600;
@@ -220,12 +232,12 @@ export class GitHubActionsClient {
             retryAfter: Math.max(retryAfter, 0),
           },
         };
-      } else if (error.status === 401) {
+      } else if (octokitError.status === 401) {
         return {
           success: false,
           error: {
             type: 'UNAUTHORIZED',
-            message: error.message || '認証エラー',
+            message: octokitError.message || '認証エラー',
           },
         };
       } else {
@@ -233,8 +245,8 @@ export class GitHubActionsClient {
           success: false,
           error: {
             type: 'SERVER_ERROR',
-            message: error.message || 'サーバーエラー',
-            statusCode: error.status || 500,
+            message: octokitError.message || 'サーバーエラー',
+            statusCode: octokitError.status || 500,
           },
         };
       }

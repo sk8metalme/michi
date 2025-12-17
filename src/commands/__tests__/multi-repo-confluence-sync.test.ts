@@ -10,8 +10,15 @@ import * as configLoader from '../../../scripts/utils/config-loader.js';
 vi.mock('fs');
 vi.mock('../../../scripts/utils/config-loader.js');
 
-// ConfluenceClientのモックインスタンス
-const mockClientInstance = {
+// ConfluenceClientのモックインスタンス型
+type MockConfluenceClient = {
+  searchPage: ReturnType<typeof vi.fn>;
+  createPage: ReturnType<typeof vi.fn>;
+  createPageUnderParent: ReturnType<typeof vi.fn>;
+  updatePage: ReturnType<typeof vi.fn>;
+};
+
+const mockClientInstance: MockConfluenceClient = {
   searchPage: vi.fn(),
   createPage: vi.fn(),
   createPageUnderParent: vi.fn(),
@@ -21,7 +28,7 @@ const mockClientInstance = {
 vi.mock('../../../scripts/confluence-sync.js', () => ({
   ConfluenceClient: class {
     constructor() {
-      return mockClientInstance as any;
+      return mockClientInstance;
     }
   },
   getConfluenceConfig: vi.fn(() => ({
@@ -67,7 +74,7 @@ describe('multiRepoConfluenceSync', () => {
     it('プロジェクトが存在しない場合はエラー', async () => {
       vi.spyOn(configLoader, 'getConfig').mockReturnValue({
         multiRepoProjects: []
-      } as any);
+      } as ReturnType<typeof configLoader.getConfig>);
 
       await expect(
         multiRepoConfluenceSync('non-existent-project')
@@ -81,7 +88,7 @@ describe('multiRepoConfluenceSync', () => {
 
       vi.spyOn(configLoader, 'getConfig').mockReturnValue({
         multiRepoProjects: [{ name: 'test-project', jiraKey: 'TEST', confluenceSpace: 'TEST' }]
-      } as any);
+      } as ReturnType<typeof configLoader.getConfig>);
 
       await expect(
         multiRepoConfluenceSync('test-project')
@@ -91,10 +98,10 @@ describe('multiRepoConfluenceSync', () => {
     it('無効なドキュメントタイプの場合はエラー', async () => {
       vi.spyOn(configLoader, 'getConfig').mockReturnValue({
         multiRepoProjects: [{ name: 'test-project', jiraKey: 'TEST', confluenceSpace: 'TEST' }]
-      } as any);
+      } as ReturnType<typeof configLoader.getConfig>);
 
       await expect(
-        multiRepoConfluenceSync('test-project', { docType: 'invalid-doc' as any })
+        multiRepoConfluenceSync('test-project', { docType: 'invalid-doc' as unknown as import('../multi-repo-confluence-sync.js').DocumentType })
       ).rejects.toThrow('Invalid document type: invalid-doc');
     });
   });
@@ -108,7 +115,7 @@ describe('multiRepoConfluenceSync', () => {
           confluenceSpace: 'TEST',
           repositories: []
         }]
-      } as any);
+      } as ReturnType<typeof configLoader.getConfig>);
 
       vi.spyOn(fs, 'existsSync').mockReturnValue(true);
       vi.spyOn(fs, 'readFileSync').mockReturnValue('# Requirements\n\nTest content');
@@ -128,7 +135,7 @@ describe('multiRepoConfluenceSync', () => {
           confluenceSpace: 'TEST',
           repositories: []
         }]
-      } as any);
+      } as ReturnType<typeof configLoader.getConfig>);
 
       vi.spyOn(fs, 'existsSync').mockReturnValue(false);
 
@@ -149,7 +156,7 @@ describe('multiRepoConfluenceSync', () => {
           confluenceSpace: 'TEST',
           repositories: []
         }]
-      } as any);
+      } as ReturnType<typeof configLoader.getConfig>);
 
       vi.spyOn(fs, 'existsSync').mockReturnValue(true);
       vi.spyOn(fs, 'readFileSync').mockReturnValue('# Test\n\nContent');
@@ -169,7 +176,7 @@ describe('multiRepoConfluenceSync', () => {
           confluenceSpace: 'TEST',
           repositories: []
         }]
-      } as any);
+      } as ReturnType<typeof configLoader.getConfig>);
 
       // requirements.md のみ存在
       vi.spyOn(fs, 'existsSync').mockImplementation((path) => {
@@ -198,7 +205,7 @@ describe('multiRepoConfluenceSync', () => {
           confluenceSpace: 'TEST',
           repositories: []
         }]
-      } as any);
+      } as ReturnType<typeof configLoader.getConfig>);
 
       vi.spyOn(fs, 'existsSync').mockReturnValue(true);
       vi.spyOn(fs, 'readFileSync').mockReturnValue(`
@@ -227,7 +234,7 @@ graph TD
           confluenceSpace: 'TEST',
           repositories: []
         }]
-      } as any);
+      } as ReturnType<typeof configLoader.getConfig>);
 
       vi.spyOn(fs, 'existsSync').mockReturnValue(true);
       vi.spyOn(fs, 'readFileSync').mockReturnValue('# Test\n\nContent');
@@ -251,7 +258,7 @@ graph TD
           confluenceSpace: 'TEST',
           repositories: []
         }]
-      } as any);
+      } as ReturnType<typeof configLoader.getConfig>);
 
       // requirements.md と architecture.md のみ存在
       vi.spyOn(fs, 'existsSync').mockImplementation((path) => {
@@ -297,7 +304,7 @@ graph TD
           confluenceSpace: 'TEST',
           repositories: []
         }]
-      } as any);
+      } as ReturnType<typeof configLoader.getConfig>);
 
       vi.spyOn(fs, 'existsSync').mockReturnValue(true);
       vi.spyOn(fs, 'readFileSync').mockReturnValue('# Requirements\n\nContent');

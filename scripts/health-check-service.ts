@@ -25,6 +25,15 @@ export interface HealthCheckResult {
 }
 
 /**
+ * execSync実行時のエラー型
+ */
+interface ExecError extends Error {
+  status?: number;
+  stdout?: Buffer | string;
+  stderr?: Buffer | string;
+}
+
+/**
  * ヘルスチェックサービス
  */
 export class HealthCheckService {
@@ -99,13 +108,14 @@ export class HealthCheckService {
         success: true,
         servicesStatus,
       };
-    } catch (error: any) {
+    } catch (error) {
       // スクリプト実行エラー
-      console.error('❌ ヘルスチェックスクリプトの実行に失敗しました:', error.message);
+      const execError = error as ExecError;
+      console.error('❌ ヘルスチェックスクリプトの実行に失敗しました:', execError.message);
 
-      if (error.status !== undefined && error.status !== 0) {
+      if (execError.status !== undefined && execError.status !== 0) {
         // 終了コードが非0の場合は失敗
-        const output = error.stdout || error.stderr || '';
+        const output = execError.stdout || execError.stderr || '';
         const outputStr = Buffer.isBuffer(output) ? output.toString('utf-8') : String(output);
         const servicesStatus = this.parseHealthCheckOutput(outputStr);
 

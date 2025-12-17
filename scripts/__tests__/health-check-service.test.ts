@@ -10,6 +10,12 @@ import * as child_process from 'child_process';
 vi.mock('fs');
 vi.mock('child_process');
 
+// カスタムエラー型の定義
+interface ExecError extends Error {
+  status?: number;
+  code?: string;
+}
+
 describe('HealthCheckService', () => {
   let service: HealthCheckService;
 
@@ -40,7 +46,7 @@ describe('HealthCheckService', () => {
 
     it('終了コード0の場合は成功', async () => {
       vi.spyOn(child_process, 'execSync').mockReturnValue(
-        'database: healthy\nredis: healthy\n' as any
+        'database: healthy\nredis: healthy\n'
       );
 
       const result = await service.runHealthCheck('my-project');
@@ -51,8 +57,8 @@ describe('HealthCheckService', () => {
     });
 
     it('終了コード非0の場合は失敗', async () => {
-      const error = new Error('Command failed');
-      (error as any).status = 1;
+      const error: ExecError = new Error('Command failed');
+      error.status = 1;
       vi.spyOn(child_process, 'execSync').mockImplementation(() => {
         throw error;
       });
@@ -64,7 +70,7 @@ describe('HealthCheckService', () => {
 
     it('スクリプト出力を解析してサービスステータスを返す', async () => {
       vi.spyOn(child_process, 'execSync').mockReturnValue(
-        'database: healthy\nredis: unhealthy - Connection timeout\napi: healthy\n' as any
+        'database: healthy\nredis: unhealthy - Connection timeout\napi: healthy\n'
       );
 
       const result = await service.runHealthCheck('my-project');
@@ -78,8 +84,8 @@ describe('HealthCheckService', () => {
     });
 
     it('スクリプト実行タイムアウトの場合はエラー', async () => {
-      const error = new Error('Timeout');
-      (error as any).code = 'ETIMEDOUT';
+      const error: ExecError = new Error('Timeout');
+      error.code = 'ETIMEDOUT';
       vi.spyOn(child_process, 'execSync').mockImplementation(() => {
         throw error;
       });
@@ -109,7 +115,7 @@ describe('HealthCheckService', () => {
 
     it('スクリプト出力が不正な形式の場合はエラー', async () => {
       vi.spyOn(child_process, 'execSync').mockReturnValue(
-        'invalid output format\n' as any
+        'invalid output format\n'
       );
 
       const result = await service.runHealthCheck('my-project');

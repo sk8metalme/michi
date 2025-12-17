@@ -80,7 +80,7 @@ describe('multiRepoTest', () => {
       });
 
       await expect(
-        multiRepoTest('my-project', 'invalid-type' as any)
+        multiRepoTest('my-project', 'invalid-type' as unknown as import('../multi-repo-test.js').TestType)
       ).rejects.toThrow('無効なテストタイプです');
     });
   });

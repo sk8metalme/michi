@@ -60,7 +60,7 @@ describe('Multi-Repo E2E: Phase 2 (GitHub API)', () => {
       if (configContent.multiRepoProjects) {
         const beforeCount = configContent.multiRepoProjects.length;
         configContent.multiRepoProjects = configContent.multiRepoProjects.filter(
-          (p: any) => p.name !== projectName
+          (p: { name: string }) => p.name !== projectName
         );
         if (configContent.multiRepoProjects.length < beforeCount) {
           writeFileSync(configPath, JSON.stringify(configContent, null, 2), 'utf-8');
@@ -93,7 +93,7 @@ describe('Multi-Repo E2E: Phase 2 (GitHub API)', () => {
       const configContent = JSON.parse(readFileSync(configPath, 'utf-8'));
       if (configContent.multiRepoProjects) {
         configContent.multiRepoProjects = configContent.multiRepoProjects.filter(
-          (p: any) => p.name !== projectName
+          (p: { name: string }) => p.name !== projectName
         );
         writeFileSync(configPath, JSON.stringify(configContent, null, 2), 'utf-8');
         console.log(`🧹 クリーンアップ完了: ${configPath}から${projectName}を削除\n`);
@@ -123,7 +123,7 @@ describe('Multi-Repo E2E: Phase 2 (GitHub API)', () => {
       expect(existsSync(configPath)).toBe(true);
       const configContent = JSON.parse(readFileSync(configPath, 'utf-8'));
       expect(configContent.multiRepoProjects).toBeDefined();
-      const project = configContent.multiRepoProjects.find((p: any) => p.name === projectName);
+      const project = configContent.multiRepoProjects.find((p: { name: string }) => p.name === projectName);
       expect(project).toBeDefined();
       expect(project.name).toBe(projectName);
       expect(project.jiraKey).toBe(jiraKey);
@@ -147,7 +147,7 @@ describe('Multi-Repo E2E: Phase 2 (GitHub API)', () => {
       // 検証: config.json更新内容
       const configContent = JSON.parse(readFileSync(configPath, 'utf-8'));
       const project = configContent.multiRepoProjects.find(
-        (p: any) => p.name === projectName
+        (p: { name: string }) => p.name === projectName
       );
 
       expect(project).toBeDefined();

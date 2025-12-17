@@ -66,7 +66,7 @@ describe('Multi-Repo E2E: Phase 3 (Confluence API)', () => {
       if (configContent.multiRepoProjects) {
         const beforeCount = configContent.multiRepoProjects.length;
         configContent.multiRepoProjects = configContent.multiRepoProjects.filter(
-          (p: any) => p.name !== projectName
+          (p: { name: string }) => p.name !== projectName
         );
         if (configContent.multiRepoProjects.length < beforeCount) {
           writeFileSync(configPath, JSON.stringify(configContent, null, 2), 'utf-8');
@@ -125,7 +125,7 @@ describe('Multi-Repo E2E: Phase 3 (Confluence API)', () => {
       const configContent = JSON.parse(readFileSync(configPath, 'utf-8'));
       if (configContent.multiRepoProjects) {
         configContent.multiRepoProjects = configContent.multiRepoProjects.filter(
-          (p: any) => p.name !== projectName
+          (p: { name: string }) => p.name !== projectName
         );
         writeFileSync(configPath, JSON.stringify(configContent, null, 2), 'utf-8');
         console.log(`🧹 クリーンアップ完了: ${configPath}から${projectName}を削除\n`);
