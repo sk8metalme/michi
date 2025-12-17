@@ -121,7 +121,7 @@ async function exponentialBackoff<T>(
   fn: () => Promise<T>,
   maxRetries: number = 3
 ): Promise<T> {
-  let lastError: OctokitError;
+  let lastError: OctokitError | undefined;
 
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
@@ -146,7 +146,7 @@ async function exponentialBackoff<T>(
     }
   }
 
-  throw lastError;
+  throw lastError ?? new Error('Unexpected error in exponentialBackoff');
 }
 
 /**

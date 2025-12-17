@@ -113,6 +113,7 @@ describe('multiRepoConfluenceSync', () => {
           name: 'test-project',
           jiraKey: 'TEST',
           confluenceSpace: 'TEST',
+          createdAt: new Date().toISOString(),
           repositories: []
         }]
       } as ReturnType<typeof configLoader.getConfig>);
@@ -133,6 +134,7 @@ describe('multiRepoConfluenceSync', () => {
           name: 'test-project',
           jiraKey: 'TEST',
           confluenceSpace: 'TEST',
+          createdAt: new Date().toISOString(),
           repositories: []
         }]
       } as ReturnType<typeof configLoader.getConfig>);
@@ -154,6 +156,7 @@ describe('multiRepoConfluenceSync', () => {
           name: 'test-project',
           jiraKey: 'TEST',
           confluenceSpace: 'TEST',
+          createdAt: new Date().toISOString(),
           repositories: []
         }]
       } as ReturnType<typeof configLoader.getConfig>);
@@ -174,6 +177,7 @@ describe('multiRepoConfluenceSync', () => {
           name: 'test-project',
           jiraKey: 'TEST',
           confluenceSpace: 'TEST',
+          createdAt: new Date().toISOString(),
           repositories: []
         }]
       } as ReturnType<typeof configLoader.getConfig>);
@@ -203,6 +207,7 @@ describe('multiRepoConfluenceSync', () => {
           name: 'test-project',
           jiraKey: 'TEST',
           confluenceSpace: 'TEST',
+          createdAt: new Date().toISOString(),
           repositories: []
         }]
       } as ReturnType<typeof configLoader.getConfig>);
@@ -232,6 +237,7 @@ graph TD
           name: 'test-project',
           jiraKey: 'TEST',
           confluenceSpace: 'TEST',
+          createdAt: new Date().toISOString(),
           repositories: []
         }]
       } as ReturnType<typeof configLoader.getConfig>);
@@ -256,6 +262,7 @@ graph TD
           name: 'test-project',
           jiraKey: 'TEST',
           confluenceSpace: 'TEST',
+          createdAt: new Date().toISOString(),
           repositories: []
         }]
       } as ReturnType<typeof configLoader.getConfig>);
@@ -302,6 +309,7 @@ graph TD
           name: 'test-project',
           jiraKey: 'TEST',
           confluenceSpace: 'TEST',
+          createdAt: new Date().toISOString(),
           repositories: []
         }]
       } as ReturnType<typeof configLoader.getConfig>);

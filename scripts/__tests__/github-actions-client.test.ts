@@ -17,13 +17,6 @@ interface IGitHubWorkflowRun {
   html_url: string;
 }
 
-// モック用の型定義
-interface MockedOctokitInstance {
-  actions: {
-    listWorkflowRunsForRepo: ReturnType<typeof vi.fn>;
-  };
-}
-
 // モック用
 vi.mock('@octokit/rest', () => ({
   Octokit: vi.fn(),
@@ -92,13 +85,13 @@ describe('GitHubActionsClient', () => {
           },
         });
 
-      vi.mocked(Octokit).mockImplementation(
-        function (this: MockedOctokitInstance) {
-          this.actions = {
+      vi.mocked(Octokit).mockImplementation(function () {
+        return {
+          actions: {
             listWorkflowRunsForRepo: mockListWorkflowRunsForRepo,
-          };
-        } as unknown as InstanceType<typeof Octokit>
-      );
+          },
+        } as unknown as InstanceType<typeof Octokit>;
+      });
 
       const { GitHubActionsClient } = await import(
         '../github-actions-client.js'
@@ -120,13 +113,13 @@ describe('GitHubActionsClient', () => {
         message: 'Not Found',
       });
 
-      vi.mocked(Octokit).mockImplementation(
-        function (this: MockedOctokitInstance) {
-          this.actions = {
+      vi.mocked(Octokit).mockImplementation(function () {
+        return {
+          actions: {
             listWorkflowRunsForRepo: mockListWorkflowRunsForRepo,
-          };
-        } as unknown as InstanceType<typeof Octokit>
-      );
+          },
+        } as unknown as InstanceType<typeof Octokit>;
+      });
 
       const { GitHubActionsClient } = await import(
         '../github-actions-client.js'
@@ -154,13 +147,13 @@ describe('GitHubActionsClient', () => {
         },
       });
 
-      vi.mocked(Octokit).mockImplementation(
-        function (this: MockedOctokitInstance) {
-          this.actions = {
+      vi.mocked(Octokit).mockImplementation(function () {
+        return {
+          actions: {
             listWorkflowRunsForRepo: mockListWorkflowRunsForRepo,
-          };
-        } as unknown as InstanceType<typeof Octokit>
-      );
+          },
+        } as unknown as InstanceType<typeof Octokit>;
+      });
 
       const { GitHubActionsClient } = await import(
         '../github-actions-client.js'
@@ -184,13 +177,13 @@ describe('GitHubActionsClient', () => {
         message: 'Unauthorized',
       });
 
-      vi.mocked(Octokit).mockImplementation(
-        function (this: MockedOctokitInstance) {
-          this.actions = {
+      vi.mocked(Octokit).mockImplementation(function () {
+        return {
+          actions: {
             listWorkflowRunsForRepo: mockListWorkflowRunsForRepo,
-          };
-        } as unknown as InstanceType<typeof Octokit>
-      );
+          },
+        } as unknown as InstanceType<typeof Octokit>;
+      });
 
       const { GitHubActionsClient } = await import(
         '../github-actions-client.js'
@@ -211,13 +204,13 @@ describe('GitHubActionsClient', () => {
         message: 'Internal Server Error',
       });
 
-      vi.mocked(Octokit).mockImplementation(
-        function (this: MockedOctokitInstance) {
-          this.actions = {
+      vi.mocked(Octokit).mockImplementation(function () {
+        return {
+          actions: {
             listWorkflowRunsForRepo: mockListWorkflowRunsForRepo,
-          };
-        } as unknown as InstanceType<typeof Octokit>
-      );
+          },
+        } as unknown as InstanceType<typeof Octokit>;
+      });
 
       const { GitHubActionsClient } = await import(
         '../github-actions-client.js'
@@ -255,13 +248,13 @@ describe('GitHubActionsClient', () => {
           },
         });
 
-      vi.mocked(Octokit).mockImplementation(
-        function (this: MockedOctokitInstance) {
-          this.actions = {
+      vi.mocked(Octokit).mockImplementation(function () {
+        return {
+          actions: {
             listWorkflowRunsForRepo: mockListWorkflowRunsForRepo,
-          };
-        } as unknown as InstanceType<typeof Octokit>
-      );
+          },
+        } as unknown as InstanceType<typeof Octokit>;
+      });
 
       const { GitHubActionsClient } = await import(
         '../github-actions-client.js'
@@ -327,13 +320,13 @@ describe('GitHubActionsClient', () => {
         });
       });
 
-      vi.mocked(Octokit).mockImplementation(
-        function (this: MockedOctokitInstance) {
-          this.actions = {
+      vi.mocked(Octokit).mockImplementation(function () {
+        return {
+          actions: {
             listWorkflowRunsForRepo: mockListWorkflowRunsForRepo,
-          };
-        } as unknown as InstanceType<typeof Octokit>
-      );
+          },
+        } as unknown as InstanceType<typeof Octokit>;
+      });
 
       const { GitHubActionsClient } = await import(
         '../github-actions-client.js'
@@ -367,13 +360,13 @@ describe('GitHubActionsClient', () => {
         },
       });
 
-      vi.mocked(Octokit).mockImplementation(
-        function (this: MockedOctokitInstance) {
-          this.actions = {
+      vi.mocked(Octokit).mockImplementation(function () {
+        return {
+          actions: {
             listWorkflowRunsForRepo: mockListWorkflowRunsForRepo,
-          };
-        } as unknown as InstanceType<typeof Octokit>
-      );
+          },
+        } as unknown as InstanceType<typeof Octokit>;
+      });
 
       const { GitHubActionsClient } = await import(
         '../github-actions-client.js'
@@ -413,13 +406,13 @@ describe('GitHubActionsClient', () => {
           },
         });
 
-      vi.mocked(Octokit).mockImplementation(
-        function (this: MockedOctokitInstance) {
-          this.actions = {
+      vi.mocked(Octokit).mockImplementation(function () {
+        return {
+          actions: {
             listWorkflowRunsForRepo: mockListWorkflowRunsForRepo,
-          };
-        } as unknown as InstanceType<typeof Octokit>
-      );
+          },
+        } as unknown as InstanceType<typeof Octokit>;
+      });
 
       const { GitHubActionsClient } = await import(
         '../github-actions-client.js'
