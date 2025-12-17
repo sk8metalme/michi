@@ -800,6 +800,54 @@ export function createCLI(): Command {
       },
     );
 
+  // multi-repo:confluence-sync コマンド
+  program
+    .command('multi-repo:confluence-sync')
+    .description('Sync Multi-Repo project documents to Confluence')
+    .argument('<project-name>', 'Project name')
+    .option(
+      '--doc-type <type>',
+      'Document type to sync (requirements, architecture, sequence, strategy, ci-status, release-notes)',
+    )
+    .action(
+      async (
+        projectName: string,
+        options: { docType?: string },
+      ) => {
+        try {
+          const { multiRepoConfluenceSync } = await import(
+            './commands/multi-repo-confluence-sync.js'
+          );
+          const result = await multiRepoConfluenceSync(projectName, {
+            docType: options.docType as any,
+          });
+
+          console.log('');
+          console.log('✅ Confluence同期が完了しました');
+          console.log('');
+          console.log(`   プロジェクト名: ${result.projectName}`);
+          console.log(`   成功: ${result.totalSuccess}件`);
+          console.log(`   失敗: ${result.totalFailed}件`);
+          console.log('');
+
+          result.syncedDocs.forEach((doc) => {
+            if (doc.success) {
+              console.log(`✅ ${doc.docType}: ${doc.pageUrl}`);
+            } else {
+              console.log(`❌ ${doc.docType}: ${doc.error}`);
+            }
+          });
+          console.log('');
+        } catch (error) {
+          console.error(
+            '❌ Confluence同期に失敗しました:',
+            error instanceof Error ? error.message : error,
+          );
+          process.exit(1);
+        }
+      },
+    );
+
   // multi-repo:test コマンド
   program
     .command('multi-repo:test')

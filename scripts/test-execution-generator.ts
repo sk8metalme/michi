@@ -7,6 +7,73 @@ import { readFileSync, writeFileSync, existsSync, mkdirSync, chmodSync } from 'f
 import { join } from 'path';
 
 /**
+ * セキュリティ: URLバリデーション
+ * HTTP/HTTPS URLのみ許可、特殊文字やコマンドインジェクションを防ぐ
+ */
+function validateUrl(url: string): void {
+  // 基本的なURL形式チェック
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+      throw new Error(`Invalid protocol: ${parsed.protocol}. Only http: and https: are allowed.`);
+    }
+  } catch (_error) {
+    throw new Error(`Invalid URL format: ${url}`);
+  }
+
+  // コマンドインジェクション対策: 危険な文字を検出
+  const dangerousChars = /[;`$()&|<>]/;
+  if (dangerousChars.test(url)) {
+    throw new Error(`URL contains dangerous characters: ${url}`);
+  }
+}
+
+/**
+ * セキュリティ: Bash用文字列エスケープ
+ * シェルスクリプト内で安全に使用できる形式にエスケープ
+ */
+function escapeBash(str: string): string {
+  // シングルクォートで囲み、シングルクォート自体をエスケープ
+  return `'${str.replace(/'/g, '\'\\\'\'')}'`;
+}
+
+/**
+ * セキュリティ: Python用文字列エスケープ
+ * Pythonコード内で安全に使用できる形式にエスケープ
+ */
+function escapePython(str: string): string {
+  return str
+    .replace(/\\/g, '\\\\')  // バックスラッシュ
+    .replace(/"/g, '\\"')    // ダブルクォート
+    .replace(/\n/g, '\\n')   // 改行
+    .replace(/\r/g, '\\r')   // キャリッジリターン
+    .replace(/\t/g, '\\t');  // タブ
+}
+
+/**
+ * セキュリティ: Python識別子バリデーション
+ * Pythonのクラス名として有効な形式かチェック
+ */
+function validatePythonIdentifier(name: string): void {
+  // Python識別子のルール: 英字またはアンダースコアで始まり、英数字とアンダースコアのみ
+  const pythonIdentifierPattern = /^[A-Za-z_][A-Za-z0-9_]*$/;
+  if (!pythonIdentifierPattern.test(name)) {
+    throw new Error(`Invalid Python identifier: ${name}. Must start with letter or underscore, and contain only letters, numbers, and underscores.`);
+  }
+
+  // Pythonの予約語チェック
+  const pythonKeywords = [
+    'False', 'None', 'True', 'and', 'as', 'assert', 'async', 'await',
+    'break', 'class', 'continue', 'def', 'del', 'elif', 'else', 'except',
+    'finally', 'for', 'from', 'global', 'if', 'import', 'in', 'is', 'lambda',
+    'nonlocal', 'not', 'or', 'pass', 'raise', 'return', 'try', 'while', 'with', 'yield'
+  ];
+  if (pythonKeywords.includes(name)) {
+    throw new Error(`Invalid Python identifier: ${name} is a reserved keyword.`);
+  }
+}
+
+/**
  * テスト実行ファイルの生成オプション
  */
 export interface TestExecutionOptions {
@@ -151,28 +218,47 @@ function generateLocustFile(
   endpoint: { endpoint: string; method: string; baseUrl: string },
   perfReqs: { targetRps: string; targetResponseTime: string }
 ): string {
+  // セキュリティ: URLバリデーション
+  validateUrl(endpoint.baseUrl);
+
+  // セキュリティ: Pythonエスケープ
+  const escapedFeature = escapePython(feature);
+  const escapedEndpoint = escapePython(endpoint.endpoint);
+  const escapedMethod = escapePython(endpoint.method);
+  const escapedBaseUrl = escapePython(endpoint.baseUrl);
+  const escapedTargetRps = escapePython(perfReqs.targetRps);
+  const escapedTargetResponseTime = escapePython(perfReqs.targetResponseTime);
+
+  // セキュリティ: Pythonクラス名の生成と検証
+  let className = feature.replace(/[^a-zA-Z0-9]/g, '_');
+  // クラス名は大文字で始まる必要がある（Python慣例）
+  if (!/^[A-Z]/.test(className)) {
+    className = 'Test' + className.charAt(0).toUpperCase() + className.slice(1);
+  }
+  // Python識別子として有効かチェック
+  validatePythonIdentifier(className);
+
   const methodLower = endpoint.method.toLowerCase();
   const hasBody = ['post', 'put', 'patch'].includes(methodLower);
-  const className = feature.replace(/[^a-zA-Z0-9]/g, '');
 
   let taskCode = '';
   if (hasBody) {
     taskCode = `        self.client.${methodLower}(
-            "${endpoint.endpoint}",
+            "${escapedEndpoint}",
             json={},
             headers={"Content-Type": "application/json"}
         )`;
   } else {
-    taskCode = `        self.client.${methodLower}("${endpoint.endpoint}")`;
+    taskCode = `        self.client.${methodLower}("${escapedEndpoint}")`;
   }
 
   return `"""
-${feature} 負荷テスト
-自動生成: michi phase:run ${feature} phase-b
+${escapedFeature} 負荷テスト
+自動生成: michi phase:run ${escapedFeature} phase-b
 
 目標:
-- RPS: ${perfReqs.targetRps}
-- 応答時間: ${perfReqs.targetResponseTime}ms以内
+- RPS: ${escapedTargetRps}
+- 応答時間: ${escapedTargetResponseTime}ms以内
 """
 
 from locust import HttpUser, task, between
@@ -182,11 +268,11 @@ class ${className}User(HttpUser):
     """テスト対象ユーザーシミュレーション"""
 
     wait_time = between(1, 3)
-    host = "${endpoint.baseUrl}"
+    host = "${escapedBaseUrl}"
 
     @task
     def test_endpoint(self):
-        """${endpoint.endpoint}への${endpoint.method}リクエスト"""
+        """${escapedEndpoint}への${escapedMethod}リクエスト"""
 ${taskCode}
 
 
@@ -369,14 +455,21 @@ function generateZapScript(
   feature: string,
   endpoint: { baseUrl: string }
 ): string {
+  // セキュリティ: URLバリデーション（コマンドインジェクション対策）
+  validateUrl(endpoint.baseUrl);
+
+  // セキュリティ: Bashエスケープ（追加の防御層）
+  const escapedUrl = escapeBash(endpoint.baseUrl);
+  const escapedFeature = escapeBash(feature);
+
   return `#!/bin/bash
 # OWASP ZAPセキュリティスキャン実行スクリプト
-# 自動生成: michi phase:run ${feature} phase-b
+# 自動生成: michi phase:run ${escapedFeature} phase-b
 
 set -e
 
 # 変数定義
-TARGET_URL="${endpoint.baseUrl}"
+TARGET_URL=${escapedUrl}
 CONFIG_FILE="zap-config.yaml"
 REPORT_DIR="./reports"
 
