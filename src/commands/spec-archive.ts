@@ -15,6 +15,7 @@ export interface ArchiveCommandOptions {
  * @param featureName 機能名
  * @param options オプション
  * @param projectRoot プロジェクトルート（デフォルト: process.cwd()）
+ * @throws Error アーカイブに失敗した場合
  */
 export async function specArchiveCommand(
   featureName: string,
@@ -27,21 +28,24 @@ export async function specArchiveCommand(
   const check = canArchiveSpec(featureName, projectRoot);
 
   if (!check.canArchive) {
-    console.error(`❌ Cannot archive ${featureName}: ${check.reason}`);
-    process.exit(1);
+    throw new Error(`Cannot archive ${featureName}: ${check.reason}`);
   }
 
-  // アーカイブ実行
-  const result = archiveSpec(featureName, options, projectRoot);
+  // アーカイブ実行（エラーハンドリング付き）
+  try {
+    const result = archiveSpec(featureName, options, projectRoot);
 
-  if (result.success) {
-    console.log(`✅ Successfully archived ${featureName}`);
-    console.log(`📁 Archive path: ${result.archivePath}`);
-    if (options?.reason) {
-      console.log(`📝 Reason: ${options.reason}`);
+    if (result.success) {
+      console.log(`✅ Successfully archived ${featureName}`);
+      console.log(`📁 Archive path: ${result.archivePath}`);
+      if (options?.reason) {
+        console.log(`📝 Reason: ${options.reason}`);
+      }
+    } else {
+      throw new Error(`Failed to archive ${featureName}: ${result.error}`);
     }
-  } else {
-    console.error(`❌ Failed to archive ${featureName}: ${result.error}`);
-    process.exit(1);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    throw new Error(`Unexpected error during archiving: ${errorMessage}`);
   }
 }

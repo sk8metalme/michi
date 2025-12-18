@@ -5,6 +5,7 @@
 
 import { existsSync, renameSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'fs';
 import { resolve } from 'path';
+import { validateFeatureName as validateFeatureNameStrict } from './feature-name-validator.js';
 
 export interface ArchiveResult {
   success: boolean;
@@ -23,7 +24,9 @@ export interface SpecInfo {
 }
 
 /**
- * featureName のバリデーション（パストラバーサル攻撃を防止）
+ * featureName のバリデーション
+ * - kebab-case形式の検証（既存のバリデータを使用）
+ * - パストラバーサル攻撃を防止（追加のセキュリティチェック）
  * @throws Error 不正な文字が含まれる場合
  */
 function validateFeatureName(featureName: string): void {
@@ -32,7 +35,7 @@ function validateFeatureName(featureName: string): void {
     throw new Error('Feature name cannot be empty');
   }
 
-  // パストラバーサル攻撃を防ぐ
+  // パストラバーサル攻撃を防ぐ（セキュリティチェック）
   if (featureName.includes('..') ||
       featureName.includes('/') ||
       featureName.includes('\\') ||
@@ -40,9 +43,10 @@ function validateFeatureName(featureName: string): void {
     throw new Error(`Invalid feature name: path traversal detected in "${featureName}"`);
   }
 
-  // 安全な文字のみ許可（英数字、ハイフン、アンダースコア）
-  if (!/^[a-zA-Z0-9_-]+$/.test(featureName)) {
-    throw new Error(`Invalid feature name: "${featureName}" must contain only alphanumeric characters, hyphens, and underscores`);
+  // kebab-case形式の厳密な検証（既存のバリデータを使用）
+  const result = validateFeatureNameStrict(featureName);
+  if (!result.valid) {
+    throw new Error(result.errors.join('\n'));
   }
 }
 

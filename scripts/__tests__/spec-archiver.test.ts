@@ -71,7 +71,7 @@ describe('spec-archiver', () => {
       const result = canArchiveSpec('feature@123');
 
       expect(result.canArchive).toBe(false);
-      expect(result.reason).toContain('must contain only alphanumeric');
+      expect(result.reason).toContain('feature名が無効な形式です');
     });
 
     it('空文字の場合', () => {
@@ -103,18 +103,11 @@ describe('spec-archiver', () => {
       expect(mockExistsSync).toHaveBeenCalled();
     });
 
-    it('正常な feature name: アンダースコア', () => {
-      mockExistsSync.mockReturnValue(true);
-      mockReadFileSync.mockReturnValue(
-        JSON.stringify({
-          phase: 'implementation-complete',
-        }),
-      );
-      mockReaddirSync.mockReturnValue(['release-notes-v1.md'] as unknown as Dirent[]);
-
+    it('kebab-caseのみ許可: アンダースコアは不可', () => {
       const result = canArchiveSpec('user_auth');
 
-      expect(result.canArchive).toBe(true);
+      expect(result.canArchive).toBe(false);
+      expect(result.reason).toContain('アンダースコア(_)が含まれています');
     });
   });
 
