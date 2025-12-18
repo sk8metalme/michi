@@ -4,26 +4,28 @@ on:
   push:
     branches: [main, master, develop]
     paths:
-      - 'scripts/commands/multi-repo/**'
+      - 'src/commands/multi-repo-*.ts'
+      - 'src/commands/__tests__/multi-repo-*.test.ts'
       - 'scripts/config/**'
       - 'scripts/github-actions-client.ts'
       - 'scripts/confluence-sync.ts'
       - 'scripts/mermaid-converter.ts'
       - 'scripts/utils/multi-repo-validator.ts'
-      - 'src/__tests__/multi-repo/**'
+      - 'scripts/template/multi-repo-renderer.ts'
       - 'docs/user-guide/guides/multi-repo-*.md'
       - 'docs/user-guide/reference/multi-repo-*.md'
       - '.github/workflows/multi-repo-ci.yml'
   pull_request:
     branches: [main, master, develop]
     paths:
-      - 'scripts/commands/multi-repo/**'
+      - 'src/commands/multi-repo-*.ts'
+      - 'src/commands/__tests__/multi-repo-*.test.ts'
       - 'scripts/config/**'
       - 'scripts/github-actions-client.ts'
       - 'scripts/confluence-sync.ts'
       - 'scripts/mermaid-converter.ts'
       - 'scripts/utils/multi-repo-validator.ts'
-      - 'src/__tests__/multi-repo/**'
+      - 'scripts/template/multi-repo-renderer.ts'
       - 'docs/user-guide/guides/multi-repo-*.md'
       - 'docs/user-guide/reference/multi-repo-*.md'
       - '.github/workflows/multi-repo-ci.yml'
@@ -49,7 +51,7 @@ jobs:
         run: npm ci
 
       - name: Run multi-repo tests with coverage
-        run: npm run test:coverage -- src/__tests__/multi-repo
+        run: npm run test:coverage -- src/commands/__tests__/multi-repo-*.test.ts
         env:
           # Environment variables for tests
           CI: true
@@ -115,12 +117,12 @@ jobs:
 
       - name: Verify multi-repo commands exist
         run: |
-          test -f dist/scripts/commands/multi-repo/init.js || exit 1
-          test -f dist/scripts/commands/multi-repo/add-repo.js || exit 1
-          test -f dist/scripts/commands/multi-repo/list.js || exit 1
-          test -f dist/scripts/commands/multi-repo/ci-status.js || exit 1
-          test -f dist/scripts/commands/multi-repo/test.js || exit 1
-          test -f dist/scripts/commands/multi-repo/confluence-sync.js || exit 1
+          test -f dist/src/commands/multi-repo-init.js || exit 1
+          test -f dist/src/commands/multi-repo-add-repo.js || exit 1
+          test -f dist/src/commands/multi-repo-list.js || exit 1
+          test -f dist/src/commands/multi-repo-ci-status.js || exit 1
+          test -f dist/src/commands/multi-repo-test.js || exit 1
+          test -f dist/src/commands/multi-repo-confluence-sync.js || exit 1
           echo "✅ All multi-repo commands built successfully"
 
       - name: Upload build artifacts
@@ -170,12 +172,13 @@ jobs:
       - name: Run ESLint on multi-repo files
         run: |
           npm run lint -- \
-            scripts/commands/multi-repo/**/*.ts \
+            src/commands/multi-repo-*.ts \
+            src/commands/__tests__/multi-repo-*.test.ts \
             scripts/github-actions-client.ts \
             scripts/confluence-sync.ts \
             scripts/mermaid-converter.ts \
             scripts/utils/multi-repo-validator.ts \
-            src/__tests__/multi-repo/**/*.ts
+            scripts/template/multi-repo-renderer.ts
 
       - name: Notify Slack on failure
         if: failure() && github.event_name == 'push'
