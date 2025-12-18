@@ -5,7 +5,7 @@
  */
 
 import { readFileSync } from 'fs';
-import { join, resolve, relative, isAbsolute } from 'path';
+import { resolve, relative, isAbsolute } from 'path';
 import { renderTemplate, type TemplateContext } from './renderer.js';
 
 export interface MultiRepoTemplateContext {

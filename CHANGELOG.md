@@ -5,6 +5,37 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **PRサイズ監視機能**: `/michi:spec-impl` コマンドにPRサイズチェック機能を追加（Phase 4.4）
+  - 500行を超えるPRに対して警告と分割提案
+  - ロックファイル（package-lock.json, yarn.lock等）などの自動生成ファイルを除外
+  - PRサイズ監視サブエージェント（`templates/claude/agents/pr-size-monitor/AGENT.md`）を追加
+- **仕様書アーカイブ機能**: 完了した仕様書を `.kiro/specs/archive/` に移動する機能を追加
+  - `spec:archive <feature> [--reason]`: 完了した仕様書をアーカイブ
+  - `spec:list [--all]`: 仕様書一覧表示（--all でアーカイブ済みも表示）
+  - アーカイブ条件: Phase が `implementation-complete` かつ `release-notes-*.md` ファイルが存在
+  - パストラバーサル攻撃対策: feature名の厳格なバリデーション（英数字、ハイフン、アンダースコアのみ許可）
+
+### Removed
+
+- マルチプロジェクト切り替え機能を削除（`.kiro/project.json` による単一プロジェクト管理は維持）
+  - `/michi:project-switch` コマンドを削除
+  - `project:list` コマンドを削除
+  - `project:dashboard` コマンドを削除
+  - `create-project` スクリプトを削除
+  - `list-projects` スクリプトを削除
+  - **Note**: プロジェクトメタデータ処理（`project-meta.ts`, `project-finder.ts`）は Confluence/JIRA 連携で使用されるため保持
+
+### Security
+
+- **パストラバーサル脆弱性の修正**: `spec-archiver.ts` の feature名バリデーション強化
+  - `../../../etc/passwd` などの不正なパスを検出・拒否
+  - 空文字チェック、パス区切り文字チェック、英数字制限を実装
+  - 29個の包括的なテストケースを追加（セキュリティテスト、機能テスト）
+
 ## [1.0.0] - Unreleased
 
 ### Added - Multi-Repo機能（Phase 1-3）

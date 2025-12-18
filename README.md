@@ -295,7 +295,8 @@ npx @sk8metal/michi-cli workflow:run --feature <feature>
 npx @sk8metal/michi-cli confluence:sync user-auth requirements  # Confluenceに同期
 npx @sk8metal/michi-cli jira:sync user-auth                     # JIRAタスク作成
 npx @sk8metal/michi-cli preflight                               # プリフライトチェック
-npx @sk8metal/michi-cli project:list                            # プロジェクト一覧
+npx @sk8metal/michi-cli spec:list                               # 仕様書一覧
+npx @sk8metal/michi-cli spec:archive user-auth                  # 完了した仕様書をアーカイブ
 npx @sk8metal/michi-cli workflow:run --feature user-auth       # ワークフロー実行
 ```
 

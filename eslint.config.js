@@ -33,6 +33,8 @@ export default tseslint.config(
       '*.d.ts',
       'coverage/',
       'vitest.config.ts',
+      '**/*.test.ts',
+      '**/__tests__/**',
     ],
   }
 );

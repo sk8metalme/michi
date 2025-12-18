@@ -71,6 +71,10 @@ export interface SpecJson {
       completed?: boolean;
     };
   };
+  archived?: {
+    at: string;
+    reason?: string;
+  };
   lastUpdated?: string;
 }
 

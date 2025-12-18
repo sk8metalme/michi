@@ -12,8 +12,6 @@ import { syncToConfluence } from '../scripts/confluence-sync.js';
 import { runPhase } from '../scripts/phase-runner.js';
 import { validatePhase } from '../scripts/validate-phase.js';
 import { runPreFlightCheck } from '../scripts/pre-flight-check.js';
-import { listProjects } from '../scripts/list-projects.js';
-import { createResourceDashboard } from '../scripts/resource-dashboard.js';
 import { WorkflowOrchestrator } from '../scripts/workflow-orchestrator.js';
 import { validateAndReport } from '../scripts/utils/config-validator.js';
 import { setupExisting } from './commands/setup-existing.js';
@@ -21,6 +19,8 @@ import { initProject } from './commands/init.js';
 import { migrate } from './commands/migrate.js';
 import { convertTasksFile } from '../scripts/utils/tasks-converter.js';
 import { isAIDLCFormat } from '../scripts/utils/aidlc-parser.js';
+import { specArchiveCommand } from './commands/spec-archive.js';
+import { specListCommand } from './commands/spec-list.js';
 import { config } from 'dotenv';
 import { readFileSync, existsSync } from 'fs';
 import { dirname, join } from 'path';
@@ -255,32 +255,35 @@ export function createCLI(): Command {
       }
     });
 
-  // project:list コマンド
+  // spec:archive コマンド
   program
-    .command('project:list')
-    .description('List all projects')
-    .action(async () => {
+    .command('spec:archive')
+    .description('Archive a completed specification')
+    .argument('<feature>', 'Feature name')
+    .option('--reason <reason>', 'Archive reason')
+    .action(async (feature: string, options: { reason?: string }) => {
       try {
-        await listProjects();
+        await specArchiveCommand(feature, options);
       } catch (error) {
         console.error(
-          '❌ Failed to list projects:',
+          '❌ Failed to archive specification:',
           error instanceof Error ? error.message : error,
         );
         process.exit(1);
       }
     });
 
-  // project:dashboard コマンド
+  // spec:list コマンド
   program
-    .command('project:dashboard')
-    .description('Create resource dashboard')
-    .action(async () => {
+    .command('spec:list')
+    .description('List specifications')
+    .option('--all', 'Include archived specifications')
+    .action(async (options: { all?: boolean }) => {
       try {
-        await createResourceDashboard();
+        await specListCommand(options);
       } catch (error) {
         console.error(
-          '❌ Failed to create dashboard:',
+          '❌ Failed to list specifications:',
           error instanceof Error ? error.message : error,
         );
         process.exit(1);
