@@ -48,7 +48,10 @@ export type GitHubAPIError =
 interface OctokitError extends Error {
   status?: number;
   response?: {
+    url?: string;
+    status?: number;
     headers?: Record<string, string>;
+    data?: unknown;
   };
 }
 

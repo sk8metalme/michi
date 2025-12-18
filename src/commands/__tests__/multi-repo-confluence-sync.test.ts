@@ -25,19 +25,24 @@ const mockClientInstance: MockConfluenceClient = {
   updatePage: vi.fn(),
 };
 
-vi.mock('../../../scripts/confluence-sync.js', () => ({
-  ConfluenceClient: class {
-    constructor() {
-      return mockClientInstance;
-    }
-  },
-  getConfluenceConfig: vi.fn(() => ({
-    url: 'https://test.atlassian.net',
-    email: 'test@example.com',
-    apiToken: 'test-token',
-    space: 'TEST',
-  })),
-}));
+vi.mock('../../../scripts/confluence-sync.js', () => {
+  class MockedConfluenceClient {
+    searchPage = mockClientInstance.searchPage;
+    createPage = mockClientInstance.createPage;
+    createPageUnderParent = mockClientInstance.createPageUnderParent;
+    updatePage = mockClientInstance.updatePage;
+  }
+
+  return {
+    ConfluenceClient: MockedConfluenceClient,
+    getConfluenceConfig: vi.fn(() => ({
+      url: 'https://test.atlassian.net',
+      email: 'test@example.com',
+      apiToken: 'test-token',
+      space: 'TEST',
+    })),
+  };
+});
 
 describe('multiRepoConfluenceSync', () => {
   beforeEach(() => {
