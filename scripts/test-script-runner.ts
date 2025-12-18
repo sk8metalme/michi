@@ -23,6 +23,14 @@ export interface TestExecutionResult {
 }
 
 /**
+ * execSync実行時のエラー型
+ */
+interface ExecError extends Error {
+  status?: number;
+  stderr?: Buffer | string;
+}
+
+/**
  * テストスクリプトランナー
  */
 export class TestScriptRunner {
@@ -78,8 +86,9 @@ export class TestScriptRunner {
         stdio: 'inherit', // リアルタイム出力
         encoding: 'utf-8',
       });
-    } catch (execError: any) {
+    } catch (err) {
       // スクリプト実行エラー
+      const execError = err as ExecError;
       exitCode = execError.status !== undefined ? execError.status : 1;
       error = execError.message;
 

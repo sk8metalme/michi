@@ -819,7 +819,14 @@ export function createCLI(): Command {
             './commands/multi-repo-confluence-sync.js'
           );
           const result = await multiRepoConfluenceSync(projectName, {
-            docType: options.docType as any,
+            docType: options.docType as
+              | 'requirements'
+              | 'architecture'
+              | 'sequence'
+              | 'strategy'
+              | 'ci-status'
+              | 'release-notes'
+              | undefined,
           });
 
           console.log('');
@@ -921,7 +928,14 @@ export function createCLI(): Command {
             './commands/multi-repo-confluence-sync.js'
           );
           const result = await multiRepoConfluenceSync(projectName, {
-            docType: options.docType as any,
+            docType: options.docType as
+              | 'requirements'
+              | 'architecture'
+              | 'sequence'
+              | 'strategy'
+              | 'ci-status'
+              | 'release-notes'
+              | undefined,
           });
 
           console.log('');

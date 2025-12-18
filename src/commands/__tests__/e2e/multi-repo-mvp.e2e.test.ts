@@ -42,7 +42,7 @@ describe('Multi-Repo E2E: Phase 1 (MVP)', () => {
       if (configContent.multiRepoProjects) {
         const beforeCount = configContent.multiRepoProjects.length;
         configContent.multiRepoProjects = configContent.multiRepoProjects.filter(
-          (p: any) => p.name !== 'e2e-test-project'
+          (p: { name: string }) => p.name !== 'e2e-test-project'
         );
         if (configContent.multiRepoProjects.length < beforeCount) {
           writeFileSync(configPath, JSON.stringify(configContent, null, 2), 'utf-8');
@@ -71,7 +71,7 @@ describe('Multi-Repo E2E: Phase 1 (MVP)', () => {
       const configContent = JSON.parse(readFileSync(configPath, 'utf-8'));
       if (configContent.multiRepoProjects) {
         configContent.multiRepoProjects = configContent.multiRepoProjects.filter(
-          (p: any) => p.name !== 'e2e-test-project'
+          (p: { name: string }) => p.name !== 'e2e-test-project'
         );
         writeFileSync(configPath, JSON.stringify(configContent, null, 2), 'utf-8');
         console.log(`🧹 クリーンアップ完了: ${configPath}からe2e-test-projectを削除\n`);
@@ -148,7 +148,7 @@ describe('Multi-Repo E2E: Phase 1 (MVP)', () => {
         // 検証: config.json更新内容
         const configContent = JSON.parse(readFileSync(configPath, 'utf-8'));
         const project = configContent.multiRepoProjects.find(
-          (p: any) => p.name === projectName
+          (p: { name: string }) => p.name === projectName
         );
 
         expect(project).toBeDefined();

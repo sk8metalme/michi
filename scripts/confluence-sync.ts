@@ -28,7 +28,7 @@ function escapeCQL(str: string): string {
   return str
     .replace(/\\/g, '\\\\')  // バックスラッシュを先にエスケープ（重要: 最初に実行）
     .replace(/"/g, '\\"')    // ダブルクォート
-    .replace(/'/g, "\\'");   // シングルクォート
+    .replace(/'/g, '\\\'');  // シングルクォート
 }
 
 /**

@@ -8,6 +8,13 @@ import * as child_process from 'child_process';
 
 vi.mock('child_process');
 
+// カスタムエラー型の定義
+interface ExecError extends Error {
+  status?: number;
+  code?: string;
+  stderr?: Buffer;
+}
+
 describe('TestScriptRunner', () => {
   let runner: TestScriptRunner;
 
@@ -76,9 +83,9 @@ describe('TestScriptRunner', () => {
 
   describe('テスト失敗ケース', () => {
     it('テストスクリプト実行が失敗（終了コード非0）', async () => {
-      const error = new Error('Command failed');
-      (error as any).status = 1;
-      (error as any).stderr = Buffer.from('Test failed: assertion error');
+      const error: ExecError = new Error('Command failed');
+      error.status = 1;
+      error.stderr = Buffer.from('Test failed: assertion error');
 
       vi.spyOn(child_process, 'execSync').mockImplementation(() => {
         throw error;
@@ -92,8 +99,8 @@ describe('TestScriptRunner', () => {
     });
 
     it('終了コード2のテスト失敗', async () => {
-      const error = new Error('Command failed');
-      (error as any).status = 2;
+      const error: ExecError = new Error('Command failed');
+      error.status = 2;
 
       vi.spyOn(child_process, 'execSync').mockImplementation(() => {
         throw error;
@@ -108,8 +115,8 @@ describe('TestScriptRunner', () => {
 
   describe('エラーハンドリング', () => {
     it('スクリプト実行タイムアウトの場合はエラー', async () => {
-      const error = new Error('Timeout');
-      (error as any).code = 'ETIMEDOUT';
+      const error: ExecError = new Error('Timeout');
+      error.code = 'ETIMEDOUT';
 
       vi.spyOn(child_process, 'execSync').mockImplementation(() => {
         throw error;
@@ -122,8 +129,8 @@ describe('TestScriptRunner', () => {
     });
 
     it('パーミッションエラーの場合はエラー', async () => {
-      const error = new Error('Permission denied');
-      (error as any).code = 'EACCES';
+      const error: ExecError = new Error('Permission denied');
+      error.code = 'EACCES';
 
       vi.spyOn(child_process, 'execSync').mockImplementation(() => {
         throw error;
@@ -136,8 +143,8 @@ describe('TestScriptRunner', () => {
     });
 
     it('スクリプト未存在エラーの場合はエラー', async () => {
-      const error = new Error('Script not found');
-      (error as any).code = 'ENOENT';
+      const error: ExecError = new Error('Script not found');
+      error.code = 'ENOENT';
 
       vi.spyOn(child_process, 'execSync').mockImplementation(() => {
         throw error;
@@ -193,8 +200,8 @@ describe('TestScriptRunner', () => {
 
     it('失敗時に失敗メッセージを表示', async () => {
       const consoleSpy = vi.spyOn(console, 'log');
-      const error = new Error('Command failed');
-      (error as any).status = 1;
+      const error: ExecError = new Error('Command failed');
+      error.status = 1;
 
       vi.spyOn(child_process, 'execSync').mockImplementation(() => {
         throw error;
