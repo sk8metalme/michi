@@ -3,8 +3,8 @@
  * デフォルト設定 + プロジェクト固有設定をマージ
  */
 
-import { readFileSync, writeFileSync, existsSync, statSync, renameSync, unlinkSync } from 'fs';
-import { resolve, relative, isAbsolute } from 'path';
+import { readFileSync, writeFileSync, existsSync, statSync, renameSync, unlinkSync, mkdirSync } from 'fs';
+import { resolve, relative, isAbsolute, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { homedir } from 'os';
 import { config, parse as dotenvParse } from 'dotenv';
@@ -635,6 +635,12 @@ function saveConfig(
   const tempPath = `${configPath}.tmp`;
 
   try {
+    // .michiディレクトリが存在しない場合は作成
+    const configDir = dirname(configPath);
+    if (!existsSync(configDir)) {
+      mkdirSync(configDir, { recursive: true });
+    }
+
     // 一時ファイルに書き込み
     writeFileSync(tempPath, JSON.stringify(config, null, 2), 'utf-8');
 

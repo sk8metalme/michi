@@ -1,4 +1,4 @@
----
+/---
 name: /michi:spec-impl
 description: Execute spec tasks using TDD methodology with quality automation (Michi version)
 allowed-tools: Task, Bash, Read, Write, Edit, MultiEdit, Grep, Glob, LS, WebFetch, WebSearch
@@ -25,6 +25,8 @@ argument-hint: <feature-name> [task-numbers] [--mutation] [--skip-license] [--sk
 2. **自動修正ループ（Phase 2）**: type-check、lint、test を自動修正（最大5回）
 3. **事後品質レビュー（Phase 3）**: コードレビュー、デザインレビュー（Frontend時）
 4. **最終品質ゲート（Phase 4）**: カバレッジ95%、Mutation Testing（オプション）
+5. **タスク完了マーク（Phase 4.5）**: tasks.mdのチェックボックス更新
+6. **タスク完了後の処理（Phase 5）**: スペックのarchive移動を確認・実行
 
 ### コマンドシグネチャ
 
@@ -55,7 +57,7 @@ Phase 1: 事前品質監査（Michi拡張）
     └─ Frontend検出判定（並行）
     ↓
 Phase 2: TDD実装サイクル（kiro:spec-impl継承 + 自動修正ループ拡張）
-    RED → GREEN → REFACTOR → VERIFY（最大5回） → MARK
+    RED → GREEN → REFACTOR → VERIFY（最大5回）
     ↓
 Phase 3: 事後品質レビュー（Michi拡張）
     ├─ コードレビュー（常に）
@@ -63,6 +65,15 @@ Phase 3: 事後品質レビュー（Michi拡張）
     ↓
 Phase 4: 最終検証（Michi拡張）
     type-check + lint + test + coverage 95% + Mutation Testing（オプション）
+    ↓
+Phase 4.4: PRサイズチェック（Michi拡張）
+    500行超過時 → ユーザー確認 → PR作成
+    ↓
+Phase 4.5: タスク完了マーク（Michi拡張）
+    tasks.md のチェックボックス更新
+    ↓
+Phase 5: タスク完了後の処理（Michi拡張）
+    Archive確認 → ユーザー選択 → Archive実行 or スキップ
 ```
 
 ---
@@ -70,14 +81,13 @@ Phase 4: 最終検証（Michi拡張）
 ## Phase 1: 事前品質監査（Michi拡張）
 
 ### 目的
-実装前にライセンス・バージョンリスクを早期検出し、Critical問題を事前に解決。
+実装前にライセンス・バージョンリスクを早期検出し、Critical問題を解決する。
 
 ### 実行手順
 
 #### Step 1.1: オプション解析
 
 ```bash
-# コマンドライン引数を解析
 SKIP_LICENSE=false
 SKIP_VERSION=false
 SKIP_DESIGN=false
@@ -111,12 +121,12 @@ DESIGN_REVIEW_CRITICAL=0
 
 #### Step 1.2: サブエージェント並行起動
 
-**重要**: 以下の3つのタスクは独立しているため、**並行実行**してください。単一メッセージで複数のTaskツール呼び出しを行います。
+**重要**: 以下の3つのタスクは独立しているため、並行実行する。単一メッセージで複数のTaskツール呼び出しを行う。
 
 ```markdown
 ## サブエージェント並行起動（Phase 1）
 
-Phase 1では以下の3つのサブエージェントを**並行起動**します：
+Phase 1では以下の3つのサブエージェントを並行起動する：
 
 ### 1. oss-license-checker
 ```yaml
@@ -166,9 +176,6 @@ Task tool:
 
 ### 3. Frontend検出
 ```bash
-# 並行実行タスク:
-# ローカル検出ロジック（Task toolは使用せず、直接実行）
-
 # Frontend変更を検出
 FRONTEND_DETECTED=false
 
@@ -205,13 +212,6 @@ fi
 echo "Frontend detected: $FRONTEND_DETECTED"
 ```
 
-**並行実行の実装例**:
-```plaintext
-単一メッセージで以下を実行:
-- Task tool（oss-license-checker）
-- Task tool（stable-version-auditor）
-- Bash tool（Frontend検出）
-```
 
 #### Step 1.3: 結果集約とゲート判定
 
@@ -260,7 +260,32 @@ fi
 ## Phase 2: TDD実装サイクル（自動修正ループ拡張）
 
 ### 目的
-kiro:spec-implの基本TDDサイクルに、**自動修正ループ**を追加。
+kiro:spec-implの基本TDDサイクルに自動修正ループを追加する。
+
+### Step 2.1: RED - 失敗するテストを書く
+
+```markdown
+- 次の小さな機能のテストを書く
+- テストは失敗する（まだコードが存在しない）
+- 説明的なテスト名を使用する
+```
+
+### Step 2.2: GREEN - 最小限のコードを書く
+
+```markdown
+- テストを通過させる最もシンプルな実装を行う
+- このテストを通過させることだけに集中する
+- 過度な設計を避ける
+```
+
+### Step 2.3: REFACTOR - クリーンアップ
+
+```markdown
+- コード構造と可読性を改善する
+- 重複を削除する
+- 適切な設計パターンを適用する
+- リファクタリング後もすべてのテストが通過することを確認する
+```
 
 ### Step 2.4: VERIFY - 品質チェック（自動修正ループ）
 
@@ -308,24 +333,18 @@ while [ $ITERATION -lt $MAX_ITERATIONS ]; do
     # 自動修正を試行
     echo "⚙️  自動修正を試行します..."
 
-    # Lint修正
     if [ "$LINT_FAILED" = true ]; then
         echo "🔧 Lint自動修正を実行"
         npm run lint:fix
     fi
 
-    # 型エラー修正（簡易的な自動修正）
     if [ "$TYPE_CHECK_FAILED" = true ]; then
         echo "🔧 型エラーを分析中..."
-        # 型エラーログを分析して修正案を提示
-        # （実際の修正はAIによる判断が必要）
     fi
 
-    # テスト失敗修正（実装バグの可能性）
     if [ "$TEST_FAILED" = true ]; then
         echo "🔧 テスト失敗を分析中..."
-        # テストログを分析して修正案を提示
-        # ⚠️ 注意: テストは仕様。仕様変更の場合のみテストを修正
+        echo "⚠️  注意: テストは仕様。仕様変更の場合のみテストを修正"
     fi
 
     ITERATION=$((ITERATION + 1))
@@ -360,7 +379,7 @@ fi
 ## Phase 3: 事後品質レビュー（Michi拡張）
 
 ### 目的
-実装完了後、コードレビューとデザインレビュー（Frontend時）を実行。
+実装完了後、コードレビューとデザインレビュー（Frontend時）を実行する。
 
 ### Step 3.1: コードレビュー（常に実行）
 
@@ -458,12 +477,6 @@ while [ $REVIEW_ITERATION -lt $MAX_REVIEW_ITERATIONS ]; do
     # 自動修正を試行
     echo "⚙️  レビュー指摘事項を自動修正中..."
 
-    # コードレビュー指摘の修正
-    # （実際の修正はAIによる判断が必要）
-
-    # デザインレビュー指摘の修正
-    # （CSS、HTML、ARIA属性の修正）
-
     REVIEW_ITERATION=$((REVIEW_ITERATION + 1))
 done
 
@@ -491,7 +504,7 @@ fi
 ## Phase 4: 最終検証（Michi拡張）
 
 ### 目的
-全品質基準の最終確認。カバレッジ95%以上、Mutation Testing（オプション）。
+全品質基準を最終確認する。カバレッジ95%以上、Mutation Testing（オプション）を実施。
 
 ### Step 4.1: 品質チェック最終実行
 
@@ -545,7 +558,6 @@ case "$LANGUAGE" in
             exit 1
         fi
 
-        # JaCoCo coverage report parsing (堅牢な実装)
         if [ -f "build/reports/jacoco/test/jacocoTestReport.xml" ]; then
             COVERAGE=$(grep -oP '<counter type="LINE"\s+missed="\K[0-9]+|covered="\K[0-9]+' build/reports/jacoco/test/jacocoTestReport.xml | \
                 awk 'NR==1{m=$1} NR==2{c=$1} END {if(m+c>0) printf "%.1f", c*100/(m+c); else print 100}')
@@ -574,7 +586,6 @@ case "$LANGUAGE" in
             exit 1
         fi
 
-        # Clover XML coverage parsing (堅牢な実装)
         if [ -f "coverage/clover.xml" ]; then
             TOTAL_STATEMENTS=$(grep -oP '<metrics.*?statements="\K[0-9]+' coverage/clover.xml | awk '{sum+=$1} END {print sum}')
             COVERED_STATEMENTS=$(grep -oP '<metrics.*?coveredstatements="\K[0-9]+' coverage/clover.xml | awk '{sum+=$1} END {print sum}')
@@ -610,7 +621,6 @@ fi
 if [ "$MUTATION" = true ]; then
     echo "=== Mutation Testing ==="
 
-    # Step 4.1 で検出済みの $LANGUAGE 変数を再利用
     case "$LANGUAGE" in
         nodejs)
             echo "🔍 Node.js/TypeScript → Stryker"
@@ -685,6 +695,168 @@ echo "======================================"
 
 ---
 
+## Phase 4.4: PRサイズチェック（Michi拡張）
+
+### 目的
+レビュアビリティを確保するため、PRサイズを監視し、500行を超えた場合にPR分割を提案する。
+
+### Step 4.4.1: PRサイズ評価
+
+**重要**: このステップは品質チェック完了後、タスク完了マーク前に実行する。
+
+```markdown
+Task tool:
+  subagent_type: pr-size-monitor
+  prompt: |
+    現在の変更量を確認し、PRサイズを評価してください。
+
+    **機能名**: $1
+
+    **閾値**: 500行（追加+削除、除外ファイル除く）
+
+    **除外ファイル**:
+    - ロックファイル: package-lock.json, yarn.lock, pnpm-lock.yaml,
+      composer.lock, Gemfile.lock, poetry.lock, Cargo.lock, go.sum
+    - 自動生成: dist/*, build/*, coverage/*, .next/*, *.min.js, *.min.css
+
+    **実行手順**:
+    1. git diff --stat でベースブランチとの差分を取得
+    2. 除外ファイルを除いた行数を計算
+    3. 500行超過時:
+       - 現在の変更量を報告
+       - AskUserQuestionでPR作成を確認
+       - 同意があれば自動でPR作成（commit, push, gh pr create）
+       - 新しいブランチで残りの作業を継続
+    4. 500行未満: ✅ OK、Phase 4.5へ進行
+```
+
+**サブエージェント呼び出しの流れ**:
+
+```plaintext
+Phase 4.4 実行
+    ↓
+pr-size-monitor 起動
+    ↓
+変更量計測（500行超過？）
+    ├─ NO（500行未満）: ✅ OK → Phase 4.5へ
+    └─ YES（500行以上）:
+        ↓
+        AskUserQuestion（ユーザー確認）
+        ├─ A) PR作成する → commit → push → gh pr create → 新ブランチ提案
+        ├─ B) 作業続行 → 警告表示 → Phase 4.5へ
+        └─ C) 分割戦略提案 → 分割案表示 → 再度ユーザー確認
+```
+
+---
+
+## Phase 4.5: タスク完了マーク（Michi拡張）
+
+### 目的
+各タスク実装完了後、tasks.mdのチェックボックスを更新してタスクの進捗を記録する。
+
+### Step 4.5.1: MARK COMPLETE - tasks.md更新
+
+```bash
+# 品質チェックが成功したら、tasks.mdを更新
+echo "=== タスク完了をマーク ==="
+
+# tasks.mdのチェックボックスを更新
+# - [ ] タスク名 → - [x] タスク名
+TASK_FILE=".kiro/specs/$1/tasks.md"
+
+if [ -f "$TASK_FILE" ]; then
+    # 現在のタスク番号に対応する行を更新
+    # 例: "- [ ] 1.1 タスク説明" → "- [x] 1.1 タスク説明"
+    sed -i '' "s/- \[ \] $TASK_NUMBER/- [x] $TASK_NUMBER/" "$TASK_FILE"
+    echo "✅ tasks.md を更新しました: タスク $TASK_NUMBER を完了"
+else
+    echo "⚠️ tasks.mdが見つかりません: $TASK_FILE"
+fi
+```
+
+**重要**: タスクが完了したら、必ずtasks.mdのチェックボックスを更新する。
+- 未完了: `- [ ]`
+- 完了済: `- [x]`
+
+---
+
+## Phase 5: タスク完了後の処理（Michi拡張）
+
+### 目的
+すべてのタスクが完了した場合、スペックをarchiveに移動する。
+
+### Step 5.1: Archive確認とプロンプト
+
+```bash
+echo ""
+echo "======================================"
+echo " タスク完了確認"
+echo "======================================"
+echo ""
+echo "すべてのタスクが完了しました。"
+echo ""
+echo "次のアクション:"
+echo "A) スペックをarchiveに移動する（推奨）"
+echo "B) 追加のタスクを実行する"
+echo "C) 何もしない"
+echo ""
+
+# ユーザー確認
+# 注: AskUserQuestionツールが利用可能な場合は、そちらを優先使用すること
+read -p "どの対応を希望しますか? (A/B/C): " ARCHIVE_ACTION
+
+if [ "$ARCHIVE_ACTION" = "A" ]; then
+    echo "🗃️  スペックをarchiveに移動します..."
+    npx @sk8metal/michi-cli spec:archive $1
+
+    if [ $? -eq 0 ]; then
+        echo "✅ スペックをarchiveに移動しました"
+        echo ""
+        echo "Archive先: .kiro/specs/.archive/$1/"
+        echo "- spec.json"
+        echo "- requirements.md"
+        echo "- design.md"
+        echo "- tasks.md"
+        echo "- validation-reports/"
+    else
+        echo "❌ スペックのarchive移動に失敗しました"
+        echo "手動で実行する場合: npx @sk8metal/michi-cli spec:archive $1"
+    fi
+elif [ "$ARCHIVE_ACTION" = "B" ]; then
+    echo "✅ 追加のタスクを実行できます"
+    echo ""
+    echo "次のコマンドを実行してください:"
+    echo "/michi:spec-impl $1 [task-numbers]"
+else
+    echo "✅ スペックはそのままにしておきます"
+    echo ""
+    echo "後でarchiveする場合: npx @sk8metal/michi-cli spec:archive $1"
+fi
+```
+
+### Step 5.2: Archive後の推奨アクション（参考情報）
+
+```markdown
+スペックをarchiveに移動した後の推奨アクション:
+
+1. **ドキュメント更新**
+   - CHANGELOG.md に変更内容を記録
+   - README.md を必要に応じて更新
+
+2. **PR作成**
+   - 実装ブランチをmainにマージするPRを作成
+   - Phase Aテスト（unit, lint, build）を実行
+
+3. **リリース準備** (Phase B)
+   - 統合テスト、E2Eテスト、パフォーマンステスト、セキュリティテストを実行
+   - `/michi:confluence-sync` でリリース手順書を作成
+
+4. **次の機能開発**
+   - `/kiro:spec-init "description"` で新しいスペックを作成
+```
+
+---
+
 ## 安全性ルール
 
 ### 必須確認ケース
@@ -693,6 +865,7 @@ echo "======================================"
 2. **Phase 2で自動修正失敗時**: 最大5回試行後、ユーザー確認
 3. **Phase 3でレビュー失敗時**: 最大5回修正後、ユーザー確認
 4. **Phase 4でカバレッジ不足時**: 即時停止、ユーザー確認
+5. **Phase 5でArchive実行時**: 必ずユーザー確認、明示的な承認
 
 ### 禁止事項
 

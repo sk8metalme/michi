@@ -19,16 +19,10 @@ export class MermaidConverter {
     const mermaidBlockRegex = /```mermaid\n([\s\S]*?)```/g;
 
     // Mermaidブロックを検出
-    const matches = markdown.matchAll(mermaidBlockRegex);
-    let hasMatches = false;
-
-    for (const _match of matches) {
-      hasMatches = true;
-      break;
-    }
+    const matches = Array.from(markdown.matchAll(mermaidBlockRegex));
 
     // Mermaidブロックがない場合は変更なし
-    if (!hasMatches) {
+    if (matches.length === 0) {
       return markdown;
     }
 

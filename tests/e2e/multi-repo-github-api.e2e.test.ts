@@ -230,12 +230,14 @@ describe('Task 13.2: Phase 2 E2Eテスト（実際のGitHub API）', () => {
         const ciStatusContent = readFileSync(ciStatusFile, 'utf-8');
 
         // 差分情報セクションの存在確認（新規成功/新規失敗/復旧/新規失敗のいずれか）
-        const _hasDiffSection =
+        const hasDiffSection =
         ciStatusContent.includes('## 差分情報') ||
         ciStatusContent.includes('新規成功') ||
         ciStatusContent.includes('新規失敗') ||
         ciStatusContent.includes('復旧') ||
         ciStatusContent.includes('変更なし');
+
+        expect(hasDiffSection).toBe(true);
 
         // 差分がある場合（CI状態が変わった場合）は差分情報が表示される
         // 差分がない場合（CI状態が同じ場合）は差分情報が表示されない

@@ -134,7 +134,6 @@ gh pr create --head <project-id>/feature/<feature> --base main
 | `/michi:spec-design <feature>`           | 設計生成（Phase 0.3-0.4 ガイダンス付き）⭐推奨 |
 | `/michi:validate-design <feature>`       | 設計レビュー（テスト計画完了確認付き）         |
 | `/michi:confluence-sync <feature> [type]` | Confluence同期                                 |
-| `/michi:project-switch <project_id>`      | プロジェクト切り替え                           |
 
 ## Michi CLIコマンド一覧
 
@@ -149,8 +148,8 @@ gh pr create --head <project-id>/feature/<feature> --base main
 | `michi phase:run <feature> <phase>`         | フェーズ実行（requirements/design/tasks）         |
 | `michi validate:phase <feature> <phase>`    | フェーズ完了バリデーション                        |
 | `michi preflight [phase]`                   | プリフライトチェック                              |
-| `michi project:list`                        | プロジェクト一覧                                  |
-| `michi project:dashboard`                   | リソースダッシュボード生成                        |
+| `michi spec:list [--all]`                   | 仕様書一覧（--allでアーカイブも表示）             |
+| `michi spec:archive <feature> [--reason]`   | 完了した仕様書をアーカイブ                        |
 | `michi workflow:run --feature <name>`       | 統合ワークフロー実行                              |
 | `michi config:validate`                     | 設定ファイルのバリデーション                      |
 | `michi tasks:convert <feature>`             | AI-DLC形式のtasks.mdをMichiワークフロー形式に変換 |
@@ -167,50 +166,37 @@ gh pr create --head <project-id>/feature/<feature> --base main
 
 ## npmスクリプト一覧（michiリポジトリ内）
 
-| コマンド                 | 説明                  |
-| ------------------------ | --------------------- |
-| `npm run setup:env`      | .env テンプレート作成 |
-| `npm run create-project` | 新規プロジェクト作成  |
-| `npm run multi-estimate` | 見積もり集計          |
-| `npm run michi`          | ローカルCLIツール実行 |
+| コマンド            | 説明                  |
+| ------------------- | --------------------- |
+| `npm run setup:env` | .env テンプレート作成 |
+| `npm run michi`     | ローカルCLIツール実行 |
 
-## プロジェクト切り替え
+## 仕様書管理
 
-### 方法1: Cursorコマンド
-
-```
-/michi:project-switch <project-id>
-```
-
-### 方法2: ターミナル
+### 仕様書一覧の確認
 
 ```bash
-cd ~/work/projects/<project-name>
-cat .kiro/project.json
+# アクティブな仕様書のみ
+npx @sk8metal/michi-cli spec:list
+
+# アーカイブ済みも含む
+npx @sk8metal/michi-cli spec:list --all
 ```
 
-## プロジェクト横断操作
-
-### すべてのプロジェクトを確認
+### 完了した仕様書のアーカイブ
 
 ```bash
-cd /path/to/michi
-# 全プロジェクトの一覧を表示
-npx @sk8metal/michi-cli project:list
+# 基本的な使い方
+npx @sk8metal/michi-cli spec:archive <feature>
+
+# 理由を付けてアーカイブ
+npx @sk8metal/michi-cli spec:archive <feature> --reason "v1.0.0としてリリース済み"
 ```
 
-### リソースダッシュボード
-
-```bash
-# Confluenceにプロジェクト横断ダッシュボードを作成
-npx @sk8metal/michi-cli project:dashboard
-```
-
-### 見積もり集計
-
-```bash
-npm run multi-estimate
-```
+**アーカイブ条件**:
+- Phase が `implementation-complete`
+- `release-notes-*.md` ファイルが存在する
+- まだアーカイブされていない
 
 ## Git/Jujutsuコマンド
 
@@ -308,5 +294,4 @@ npm install
 - [セットアップガイド](./setup.md)
 - [新規リポジトリセットアップ](../getting-started/new-repository-setup.md)
 - [ワークフローガイド](./workflow.md)
-- [マルチプロジェクト管理](./multi-project.md)
 - [テスト・検証](./testing.md)

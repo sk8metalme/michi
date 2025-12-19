@@ -26,6 +26,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Build
+        run: npm run build
+
       - name: Run tests with coverage
         run: npm run test:coverage
 
@@ -36,9 +39,6 @@ jobs:
           flags: unittests
           name: codecov-umbrella
           fail_ci_if_error: false
-
-      - name: Build
-        run: npm run build
 
   lint:
     name: Lint
