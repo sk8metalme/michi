@@ -622,8 +622,4 @@ Security tests are executed manually before creating a release tag:
 4. All critical and high-severity vulnerabilities must be fixed before release
 5. Medium/low vulnerabilities should be documented and scheduled for future fix
 
-Security tests are **NOT** executed automatically in CI/CD during PR phase (Phase A), except for:
-- Static code analysis (SonarQube)
-- Dependency vulnerability scanning (Snyk)
-
-These automated scans can run in Phase A, but comprehensive security testing is done in Phase B.
+**Note**: All security tests, including static code analysis and dependency vulnerability scanning, are executed manually in Phase B. CI/CD during PR phase (Phase A) only runs unit tests, linting, and build checks.

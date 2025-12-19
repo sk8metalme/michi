@@ -8,7 +8,7 @@
 
 ### GitHub Actions設定例
 
-**.github/workflows/test.yml**
+**設定ファイル例**: `.github/workflows/test.yml`
 
 ```yaml
 name: Test
@@ -63,7 +63,7 @@ jobs:
 
 ### Screwdriver設定例
 
-**screwdriver.yaml**
+**設定ファイル例**: `screwdriver.yaml`
 
 ```yaml
 shared:
