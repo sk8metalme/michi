@@ -49,7 +49,7 @@ jobs:
         run: npm run build
 
       - name: Upload coverage
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v5.5.1
         if: matrix.node-version == '20.x'
         with:
           files: ./coverage/coverage-final.json

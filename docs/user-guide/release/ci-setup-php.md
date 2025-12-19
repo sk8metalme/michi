@@ -55,7 +55,7 @@ jobs:
         run: composer test
 
       - name: Upload coverage
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v5.5.1
         if: matrix.php-version == '8.3'
         with:
           files: ./coverage.xml
