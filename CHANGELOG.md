@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0] - 2025-12-19
+
 ### Added
 
 - **PRサイズ監視機能**: `/michi:spec-impl` コマンドにPRサイズチェック機能を追加（Phase 4.4）
@@ -36,7 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - 空文字チェック、パス区切り文字チェック、英数字制限を実装
   - 29個の包括的なテストケースを追加（セキュリティテスト、機能テスト）
 
-## [1.0.0] - Unreleased
+## [0.6.0] 
 
 ### Added - Multi-Repo機能（Phase 1-3）
 
@@ -421,4 +423,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - マルチプロジェクト対応
 - フェーズバリデーション機能
 - 自動化スクリプト（Markdown↔Confluence同期、JIRA連携、PR自動化）
-
