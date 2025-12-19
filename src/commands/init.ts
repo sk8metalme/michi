@@ -558,10 +558,10 @@ JIRA_ISSUE_TYPE_SUBTASK=10037
     console.log('   ℹ️  .env already exists (skipped)');
   }
 
-  // Step 4: テンプレート/ルールのコピー（--michi-path 指定時のみ）
-  if (config.michiPath) {
-    console.log('\n📋 Step 4: Copying templates and rules...');
+  // Step 4: テンプレート/ルールのコピー
+  console.log('\n📋 Step 4: Copying templates and rules...');
 
+  try {
     const templatesDir = resolveTemplatesDir(config.michiPath);
     const envConfig = getEnvironmentConfig(config.environment);
     const templateContext = createTemplateContext(
@@ -575,16 +575,46 @@ JIRA_ISSUE_TYPE_SUBTASK=10037
     const templateSourceDir = join(templatesDir, envConfig.templateSource);
 
     if (existsSync(templateSourceDir)) {
-      // rulesディレクトリ
-      const templateDirName =
-        config.environment === 'claude-agent' ? 'agents' : 'rules';
-      const rulesTemplateDir = join(templateSourceDir, templateDirName);
-      const rulesDestDir = join(currentDir, envConfig.rulesDir);
+      // rulesディレクトリ（claude-agent環境では agents と rules の両方をコピー）
+      if (config.environment === 'claude-agent') {
+        // 1. agents ディレクトリをコピー
+        const agentsTemplateDir = join(templateSourceDir, 'agents');
+        const agentsDestDir = join(currentDir, '.claude/agents');
+        if (existsSync(agentsTemplateDir)) {
+          mkdirSync(agentsDestDir, { recursive: true });
+          copyAndRenderTemplates(
+            agentsTemplateDir,
+            agentsDestDir,
+            templateContext,
+          );
+          console.log('   ✅ Agents copied to .claude/agents');
+        }
 
-      if (existsSync(rulesTemplateDir)) {
-        mkdirSync(rulesDestDir, { recursive: true });
-        copyAndRenderTemplates(rulesTemplateDir, rulesDestDir, templateContext);
-        console.log(`   ✅ Rules copied to ${envConfig.rulesDir}`);
+        // 2. rules ディレクトリをコピー
+        const rulesTemplateDir = join(templateSourceDir, 'rules');
+        const rulesDestDir = join(currentDir, '.claude/rules');
+        if (existsSync(rulesTemplateDir)) {
+          mkdirSync(rulesDestDir, { recursive: true });
+          copyAndRenderTemplates(
+            rulesTemplateDir,
+            rulesDestDir,
+            templateContext,
+          );
+          console.log('   ✅ Rules copied to .claude/rules');
+        }
+      } else {
+        // その他の環境では従来通り rules のみコピー
+        const rulesTemplateDir = join(templateSourceDir, 'rules');
+        const rulesDestDir = join(currentDir, envConfig.rulesDir);
+        if (existsSync(rulesTemplateDir)) {
+          mkdirSync(rulesDestDir, { recursive: true });
+          copyAndRenderTemplates(
+            rulesTemplateDir,
+            rulesDestDir,
+            templateContext,
+          );
+          console.log(`   ✅ Rules copied to ${envConfig.rulesDir}`);
+        }
       }
 
       // commandsディレクトリ
@@ -626,10 +656,15 @@ JIRA_ISSUE_TYPE_SUBTASK=10037
         );
         console.log('   ✅ Spec templates copied');
       }
+    } else {
+      console.log(`   ⚠️  Template source not found: ${templateSourceDir}`);
     }
-  } else {
-    console.log('\n⚠️  Step 4: Skipped (--michi-path not specified)');
-    console.log('   テンプレートをコピーするには --michi-path オプションを指定してください');
+  } catch (error) {
+    console.error(
+      '   ⚠️  Template copying failed:',
+      error instanceof Error ? error.message : error,
+    );
+    console.log('   Continuing with project initialization...');
   }
 
   // Step 5: ワークフロー設定

@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.1] - 2025-12-19
+
+### Fixed
+
+- **`michi init --claude-agent` でagentsディレクトリが配置されない問題を修正**
+  - `init.ts` のStep 4が `--michi-path` オプション指定時のみ実行されていた問題を解決
+  - テンプレートディレクトリを自動検出し、常にテンプレートをコピーするように変更
+  - claude-agent環境で agents と rules の両方をコピーするロジックを追加（setup-existing.ts と同様）
+  - エラー処理を追加し、テンプレートコピー失敗時も処理を継続
+
 ## [0.8.0] - 2025-12-19
 
 ### Added
