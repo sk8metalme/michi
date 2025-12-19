@@ -506,16 +506,48 @@ export async function setupExisting(options: SetupOptions): Promise<void> {
     console.log(`   ⚠️  Template source not found: ${templateSourceDir}`);
   } else {
     // rulesディレクトリ（環境別にテンプレートディレクトリ名が異なる）
-    // cursor/claude: 'rules', claude-agent: 'agents'
-    const templateDirName =
-      config.environment === 'claude-agent' ? 'agents' : 'rules';
-    const rulesTemplateDir = join(templateSourceDir, templateDirName);
-    const rulesDestDir = join(currentDir, envConfig.rulesDir);
+    // claude-agent: 'agents' と 'rules' の両方をコピー
+    // cursor/claude: 'rules' のみコピー
+    if (config.environment === 'claude-agent') {
+      // Claude Agent環境では agents と rules の両方をコピー
+      // 1. agents ディレクトリをコピー
+      const agentsTemplateDir = join(templateSourceDir, 'agents');
+      const agentsDestDir = join(currentDir, '.claude/agents');
+      if (existsSync(agentsTemplateDir)) {
+        mkdirSync(agentsDestDir, { recursive: true });
+        copyAndRenderTemplates(
+          agentsTemplateDir,
+          agentsDestDir,
+          templateContext,
+        );
+        console.log('   ✅ Agents copied to .claude/agents');
+      }
 
-    if (existsSync(rulesTemplateDir)) {
-      mkdirSync(rulesDestDir, { recursive: true });
-      copyAndRenderTemplates(rulesTemplateDir, rulesDestDir, templateContext);
-      console.log(`   ✅ Rules copied to ${envConfig.rulesDir}`);
+      // 2. rules ディレクトリをコピー
+      const rulesTemplateDir = join(templateSourceDir, 'rules');
+      const rulesDestDir = join(currentDir, '.claude/rules');
+      if (existsSync(rulesTemplateDir)) {
+        mkdirSync(rulesDestDir, { recursive: true });
+        copyAndRenderTemplates(
+          rulesTemplateDir,
+          rulesDestDir,
+          templateContext,
+        );
+        console.log('   ✅ Rules copied to .claude/rules');
+      }
+    } else {
+      // その他の環境では従来通り rules のみコピー
+      const rulesTemplateDir = join(templateSourceDir, 'rules');
+      const rulesDestDir = join(currentDir, envConfig.rulesDir);
+      if (existsSync(rulesTemplateDir)) {
+        mkdirSync(rulesDestDir, { recursive: true });
+        copyAndRenderTemplates(
+          rulesTemplateDir,
+          rulesDestDir,
+          templateContext,
+        );
+        console.log(`   ✅ Rules copied to ${envConfig.rulesDir}`);
+      }
     }
 
     // commandsディレクトリ

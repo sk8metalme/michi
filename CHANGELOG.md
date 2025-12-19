@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.0] - 2025-12-19
+
+### Added
+
+- **ドキュメントレビューサブエージェント**: Agent Skills仕様準拠の汎用Markdownレビューエージェントを追加
+  - `templates/claude-agent/agents/doc-reviewer.md`: すべての.mdファイルをレビュー対象
+  - Agent Skills仕様（https://agentskills.io/specification）に準拠
+    - `tools` → `allowed-tools`に変更
+    - `metadata`（author, version）追加
+    - `license`（MIT）追加
+  - ドキュメント種別ごとの専用チェック（README、requirements、design、tasks、API仕様、CHANGELOG）
+  - Michi固有チェック（@参照整合性、プレースホルダー検出、Phase 0.3-0.4準拠）
+  - 詳細なレビュー結果出力（文量、禁止パターン、必須セクション、総合評価）
+
 ## [0.7.0] - 2025-12-19
 
 ### Added
