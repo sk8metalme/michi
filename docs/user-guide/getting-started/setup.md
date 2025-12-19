@@ -28,48 +28,30 @@ michi --help
 
 > **開発者向け**: Michiの開発に貢献したい場合や、最新の開発版を使用したい場合は [開発環境セットアップガイド](../contributing/development.md) を参照してください。
 
-## Step 2: cc-sddのインストール
 
-**重要**: 作業するプロジェクトのルートディレクトリで実行してください。
+## Step 2: cc-sddとMichiのセットアップ
 
-cc-sddは、Michiの仕様駆動開発ワークフローのコアフレームワークです。
+Michiは、cc-sddをコアフレームワークとして使用します。セットアップは2段階で行います:
+
+1. **cc-sdd**: AI駆動開発ワークフローの基盤
+2. **Michi**: Confluence/JIRA連携などの拡張機能
+
+詳細な手順については、以下のセクションを参照してください:
+
+### クイックスタート（3ステップ）
 
 ```bash
-# 作業プロジェクトのルートディレクトリに移動
-cd /path/to/your-project
+# Step 1: cc-sddで標準ファイル生成
+npx cc-sdd@latest --cursor --lang ja
 
-# Cursor IDE を使用する場合
-npx cc-sdd@latest --lang ja --cursor
+# Step 2: Michi固有ファイルを追加
+npx @sk8metal/michi-cli setup-existing --cursor --lang ja
 
-# Claude Code を使用する場合
-npx cc-sdd@latest --lang ja --claude
-
-# Gemini CLI を使用する場合
-npx cc-sdd@latest --lang ja --gemini
-
-# Codex CLI を使用する場合
-npx cc-sdd@next --lang ja --codex
-
-# GitHub Copilot を使用する場合
-npx cc-sdd@next --lang ja --copilot
-
-# Windsurf IDE を使用する場合
-npx cc-sdd@next --lang ja --windsurf
+# Step 3: 環境設定
+npm run setup:interactive
 ```
 
-**実行内容:**
-- `.kiro/settings/` にテンプレート作成
-- `.cursor/commands/kiro/` または `.claude/commands/kiro/` にコマンド作成
-- `CLAUDE.md` にプロジェクト設定追加
-
-**cc-sdd準拠アーキテクチャ（Issue #35）:**
-- Michiは**単一の英語テンプレート + プレースホルダー**でcc-sdd準拠を実現
-- `templates/` ディレクトリからCursor/Claude両環境に対応
-- プレースホルダー（`{{LANG_CODE}}`, `{{DEV_GUIDELINES}}` 等）をAIが実行時に解釈
-
-
-詳細: [cc-sdd公式ドキュメント](https://github.com/gotalab/cc-sdd/blob/main/tools/cc-sdd/README_ja.md)
-
+👉 **詳細な手順**: [推奨ワークフロー（cc-ssd + Michi）](#step-25-推奨ワークフローcc-ssd--michi) を参照してください。
 
 ## Step 2.5: 推奨ワークフロー（cc-sdd + Michi）
 

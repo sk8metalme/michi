@@ -85,7 +85,9 @@ Example:
 | UF-002 | Product Purchase | User browses, adds to cart, and completes checkout | High | 8 |
 | UF-003 | Password Reset | User resets forgotten password | Medium | 4 |
 
-### 3.3 Browser/Device Matrix
+### 3.3 Browser/Device Matrix (Optional)
+
+**Note**: This matrix is optional. Include it if you need to test across multiple browsers and devices.
 
 Test each user flow on the following combinations:
 
@@ -506,7 +508,9 @@ describe('User Registration Flow', () => {
 });
 ```
 
-## Appendix C: Screenshot and Video Configuration
+## Appendix C: Screenshot and Video Configuration (Optional)
+
+**Note**: This section is optional. Include it if you need to configure screenshot and video capture for your E2E tests.
 
 ### Playwright Configuration
 
@@ -533,7 +537,9 @@ module.exports = {
 };
 ```
 
-## Appendix D: Execution Timing
+## Appendix D: Execution Timing (Optional)
+
+**Note**: This section is optional. Include it if you need to specify when E2E tests should be executed.
 
 ## Phase B (Before Release) - Manual Execution
 

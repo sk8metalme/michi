@@ -1,6 +1,6 @@
 # Backup Files
 # Exclude backup files created by ai-agent-setup scripts
-*.backup.*
+*.backup.*  # AI設定スクリプト生成バックアップ（ダブルエクステンション）
 *.bak
 *~
 .#*
@@ -81,3 +81,4 @@ pnpm-lock.yaml
 
 # AI Context
 AGENTS.mdecho
+*.backup  # 一般的なバックアップファイル（ドキュメント編集時などに生成）
