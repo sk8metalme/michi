@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.2] - 2025-12-19
+
+### Removed
+
+- **未使用の依存関係を削除**
+  - `googleapis` パッケージを削除（ソースコード内で使用されていないことを確認）
+  - パッケージサイズを削減（712行の依存関係を削除）
+
 ## [0.8.1] - 2025-12-19
 
 ### Fixed
