@@ -603,47 +603,12 @@ sonar-scanner \
 
 ---
 
+
 ## Appendix B: Common Attack Payloads
 
-### SQL Injection Payloads
+攻撃ペイロードの詳細なリストは、以下のリファレンスドキュメントを参照してください:
 
-```sql
-' OR '1'='1' --
-' OR '1'='1' /*
-admin' --
-admin' #
-' UNION SELECT NULL, username, password FROM users --
-1'; DROP TABLE users; --
-```
-
-### XSS Payloads
-
-```html
-<script>alert('XSS')</script>
-<img src=x onerror=alert('XSS')>
-<svg onload=alert('XSS')>
-<iframe src="javascript:alert('XSS')">
-<body onload=alert('XSS')>
-```
-
-### Path Traversal Payloads
-
-```text
-../../etc/passwd
-....//....//etc/passwd
-..%2F..%2Fetc%2Fpasswd
-..%252F..%252Fetc%252Fpasswd
-```
-
-### LDAP Injection Payloads
-
-```text
-*)(uid=*))(|(uid=*
-admin)(&(password=*))
-*)(objectClass=*)
-```
-
----
+👉 **[一般的な攻撃ペイロード](../../reference/security-test-payloads.md)**
 
 ## Appendix C: Execution Timing
 

@@ -81,3 +81,4 @@ pnpm-lock.yaml
 
 # AI Context
 AGENTS.mdecho
+*.backup
