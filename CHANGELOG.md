@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.3] - 2025-12-20
+
+### Added
+
+- **env-loader.tsのテストカバレッジ向上**
+  - 0%から100%に改善（5つの新しいテストケースを追加）
+  - グローバル環境変数読み込みのテスト
+  - ローカル環境変数読み込みのテスト
+  - グローバル/ローカルの上書き動作のテスト
+  - ファイル不在時のエラーハンドリングテスト
+
+- **環境変数の上書き機能を改善**
+  - ローカル`.env`がグローバル`~/.michi/.env`を確実に上書きするよう`override: true`を追加
+  - プロジェクト固有の環境変数が優先されるように修正
+
+### Fixed
+
+- **config-loaderの環境変数読み込みリグレッションを修正**
+  - config-loaderをインポートするだけのスクリプト（`config-validator.ts`、`validate-phase.ts`、`config-global.ts`）で環境変数が読み込まれない問題を解決
+  - `loadEnv()`をconfig-loaderのモジュール初期化時に復活させることで修正
+  - 影響: `npm run config:validate`などのコマンドが正常に動作するように
+
+- **ESLint警告を修正**
+  - multi-repo-renderer.tsの未使用パラメータ警告を解消
+
 ## [0.8.2] - 2025-12-19
 
 ### Removed
