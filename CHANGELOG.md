@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.4] - 2025-12-20
+
+### Fixed
+
+- **multi-repoコマンドにprojectRootパラメータを追加**
+  - マルチリポジトリ環境で正しいプロジェクトルートを参照できるように改善
+  - `findProject()`と`getConfig()`に`projectRoot`パラメータを渡すように修正
+  - 影響コマンド: `multi-repo-ci-status`, `multi-repo-confluence-sync`, `multi-repo-init`, `multi-repo-test`
+
 ## [0.8.3] - 2025-12-20
 
 ### Added
