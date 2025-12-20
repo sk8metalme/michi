@@ -3,9 +3,9 @@
  */
 
 import { Octokit } from '@octokit/rest';
-import { config } from 'dotenv';
+import { loadEnv } from './utils/env-loader.js';
 
-config();
+loadEnv();
 
 interface PROptions {
   branch: string;

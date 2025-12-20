@@ -13,6 +13,13 @@ import {
   type MultiRepoTemplateContext,
 } from '../multi-repo-renderer.js';
 import * as fs from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname, resolve } from 'path';
+
+// Calculate MICHI_PACKAGE_ROOT for tests
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const MICHI_PACKAGE_ROOT = resolve(__dirname, '..', '..', '..');
 
 vi.mock('fs');
 
@@ -63,10 +70,11 @@ describe('loadMultiRepoTemplate', () => {
     const mockContent = '# {{PROJECT_NAME}} - Requirements';
     vi.spyOn(fs, 'readFileSync').mockReturnValue(mockContent);
 
-    const content = loadMultiRepoTemplate('overview/requirements', '/test/root');
+    const content = loadMultiRepoTemplate('overview/requirements');
 
+    const expectedPath = resolve(MICHI_PACKAGE_ROOT, 'templates', 'multi-repo', 'overview', 'requirements.md');
     expect(fs.readFileSync).toHaveBeenCalledWith(
-      '/test/root/templates/multi-repo/overview/requirements.md',
+      expectedPath,
       'utf-8'
     );
     expect(content).toBe(mockContent);
@@ -77,7 +85,7 @@ describe('loadMultiRepoTemplate', () => {
       throw new Error('ENOENT: no such file or directory');
     });
 
-    expect(() => loadMultiRepoTemplate('invalid/template', '/test/root')).toThrow(
+    expect(() => loadMultiRepoTemplate('invalid/template')).toThrow(
       'Multi-Repo template not found: invalid/template.md'
     );
   });
@@ -151,8 +159,7 @@ describe('loadAndRenderMultiRepoTemplate', () => {
 
     const rendered = loadAndRenderMultiRepoTemplate(
       'overview/requirements',
-      context,
-      '/test/root'
+      context
     );
 
     expect(rendered).toBe('# test-project Requirements\n\n**JIRA**: TEST');
@@ -184,8 +191,7 @@ describe('renderMultiRepoTemplates', () => {
 
     const rendered = renderMultiRepoTemplates(
       ['overview/requirements', 'overview/architecture'],
-      context,
-      '/test/root'
+      context
     );
 
     expect(rendered['overview/requirements']).toBe('# test-project Requirements');
@@ -200,7 +206,7 @@ describe('renderMultiRepoTemplates', () => {
       CREATED_AT: '2025-12-14T10:00:00Z',
     };
 
-    const rendered = renderMultiRepoTemplates([], context, '/test/root');
+    const rendered = renderMultiRepoTemplates([], context);
 
     expect(rendered).toEqual({});
   });
@@ -248,8 +254,7 @@ describe('統合テスト', () => {
 
     const rendered = loadAndRenderMultiRepoTemplate(
       'overview/requirements',
-      context,
-      '/test/root'
+      context
     );
 
     expect(rendered).toContain('# my-awesome-project - 要件定義書');

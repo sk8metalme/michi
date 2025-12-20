@@ -7,7 +7,7 @@
  * - 終了時: PR作成、Epic + 最初の Story を「レビュー待ち」に移動、PRリンクをコメント
  */
 
-import { config } from 'dotenv';
+import { loadEnv } from './utils/env-loader.js';
 import { JIRAClient } from './jira-sync.js';
 import { getConfig } from './utils/config-loader.js';
 import {
@@ -16,7 +16,7 @@ import {
   JiraInfo,
 } from './utils/spec-loader.js';
 
-config();
+loadEnv();
 
 /**
  * spec-impl 統合ワークフローのオプション

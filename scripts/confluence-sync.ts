@@ -6,7 +6,7 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import axios from 'axios';
-import { config } from 'dotenv';
+import { loadEnv } from './utils/env-loader.js';
 import { loadProjectMeta } from './utils/project-meta.js';
 import { validateFeatureNameOrThrow } from './utils/feature-name-validator.js';
 import { getConfig, getConfigPath } from './utils/config-loader.js';
@@ -15,7 +15,7 @@ import { validateForConfluenceSync } from './utils/config-validator.js';
 import { updateSpecJsonAfterConfluenceSync, loadSpecJson } from './utils/spec-updater.js';
 
 // 環境変数読み込み
-config();
+loadEnv();
 
 /**
  * セキュリティ: CQLクエリ文字列のエスケープ

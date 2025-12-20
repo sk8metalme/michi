@@ -3,7 +3,7 @@
  * AI開発フロー全体を統合実行
  */
 
-import { config } from 'dotenv';
+import { loadEnv } from './utils/env-loader.js';
 import { loadProjectMeta } from './utils/project-meta.js';
 import { syncToConfluence, getConfluenceConfig } from './confluence-sync.js';
 import { syncTasksToJIRA } from './jira-sync.js';
@@ -12,7 +12,7 @@ import { executeTests, generateTestReport } from './utils/test-runner.js';
 import { createReleaseNotes } from './utils/release-notes-generator.js';
 import { pollForApproval, waitForManualApproval } from './utils/confluence-approval.js';
 
-config();
+loadEnv();
 
 export interface WorkflowConfig {
   feature: string;
