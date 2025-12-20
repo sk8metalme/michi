@@ -253,7 +253,7 @@ export async function multiRepoCIStatus(
   }
 
   // 2. プロジェクト存在確認
-  const project = await findProject(projectName);
+  const project = await findProject(projectName, projectRoot);
   if (!project) {
     throw new Error(`プロジェクト「${projectName}」が見つかりません`);
   }

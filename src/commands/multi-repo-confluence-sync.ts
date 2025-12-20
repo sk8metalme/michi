@@ -89,7 +89,7 @@ export async function multiRepoConfluenceSync(
   const { docType, projectRoot = process.cwd() } = options;
 
   // 1. プロジェクト存在確認
-  const config = getConfig();
+  const config = getConfig(projectRoot);
   const project = config.multiRepoProjects?.find(p => p.name === projectName);
 
   if (!project) {

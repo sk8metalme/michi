@@ -68,7 +68,7 @@ export async function multiRepoInit(
   }
 
   // 4. 既存プロジェクト重複チェック
-  const existingProject = await findProject(projectName);
+  const existingProject = await findProject(projectName, projectRoot);
   if (existingProject) {
     throw new Error(`プロジェクト「${projectName}」は既に存在します`);
   }
