@@ -3,10 +3,10 @@
  * testとreleaseステージのみを実行
  */
 
-import { config } from 'dotenv';
+import { loadEnv } from './utils/env-loader.js';
 import { WorkflowOrchestrator, WorkflowConfig } from './workflow-orchestrator.js';
 
-config();
+loadEnv();
 
 async function main() {
   const args = process.argv.slice(2);

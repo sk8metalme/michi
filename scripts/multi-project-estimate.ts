@@ -3,14 +3,14 @@
  */
 
 import { Octokit } from '@octokit/rest';
-import { config } from 'dotenv';
+import { loadEnv } from './utils/env-loader.js';
 import ExcelJS from 'exceljs';
 import { resolve, join, dirname } from 'path';
 import { writeFileSync, mkdirSync, unlinkSync, readFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { mkdir } from 'fs/promises';
 
-config();
+loadEnv();
 
 // EstimateData型定義（estimate-generator.tsから統合）
 export interface EstimateData {

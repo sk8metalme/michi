@@ -4,11 +4,11 @@
  */
 
 import { Octokit } from '@octokit/rest';
-import { config } from 'dotenv';
+import { loadEnv } from './utils/env-loader.js';
 import { ConfluenceClient, getConfluenceConfig } from './confluence-sync.js';
 import { getConfig } from './utils/config-loader.js';
 
-config();
+loadEnv();
 
 interface ProjectResource {
   projectName: string;

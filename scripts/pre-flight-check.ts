@@ -6,9 +6,9 @@
 import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
 import axios from 'axios';
-import { config } from 'dotenv';
+import { loadEnv } from './utils/env-loader.js';
 
-config();
+loadEnv();
 
 interface PreFlightResult {
   valid: boolean;

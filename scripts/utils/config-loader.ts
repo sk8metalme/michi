@@ -7,7 +7,8 @@ import { readFileSync, writeFileSync, existsSync, statSync, renameSync, unlinkSy
 import { resolve, relative, isAbsolute, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { homedir } from 'os';
-import { config, parse as dotenvParse } from 'dotenv';
+import { parse as dotenvParse } from 'dotenv';
+import { loadEnv } from './env-loader.js';
 import {
   AppConfigSchema,
   MultiRepoProjectSchema,
@@ -18,7 +19,7 @@ import {
 } from '../config/config-schema.js';
 
 // 環境変数読み込み
-config();
+loadEnv();
 
 /**
  * グローバル設定ファイルのパス定数

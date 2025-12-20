@@ -5,8 +5,14 @@
  */
 
 import { readFileSync } from 'fs';
-import { resolve, relative, isAbsolute } from 'path';
+import { resolve, relative, isAbsolute, dirname } from 'path';
+import { fileURLToPath } from 'url';
 import { renderTemplate, type TemplateContext } from './renderer.js';
+
+// Resolve Michi package root directory
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const MICHI_PACKAGE_ROOT = resolve(__dirname, '..', '..');
 
 export interface MultiRepoTemplateContext {
   PROJECT_NAME: string;
@@ -51,7 +57,7 @@ export const createMultiRepoTemplateContext = (
  */
 export const loadMultiRepoTemplate = (
   templateName: string,
-  projectRoot: string = process.cwd()
+  _projectRoot: string = process.cwd()
 ): string => {
   // Security Layer 1: Validate template name
   // Reject path traversal characters (../, ..\, absolute paths)
@@ -63,7 +69,7 @@ export const loadMultiRepoTemplate = (
   }
 
   // Security Layer 2: Resolve absolute paths
-  const templateDir = resolve(projectRoot, 'templates', 'multi-repo');
+  const templateDir = resolve(MICHI_PACKAGE_ROOT, 'templates', 'multi-repo');
   const templatePath = resolve(templateDir, `${templateName}.md`);
 
   // Security Layer 3: Verify path containment

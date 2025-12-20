@@ -21,9 +21,9 @@ import { convertTasksFile } from '../scripts/utils/tasks-converter.js';
 import { isAIDLCFormat } from '../scripts/utils/aidlc-parser.js';
 import { specArchiveCommand } from './commands/spec-archive.js';
 import { specListCommand } from './commands/spec-list.js';
-import { config } from 'dotenv';
 import { readFileSync, existsSync } from 'fs';
 import { dirname, join } from 'path';
+import { loadEnv } from '../scripts/utils/env-loader.js';
 
 // package.jsonからバージョンを読み込む
 // Michi自身のpackage.jsonのみを読み込み、利用者のpackage.jsonは読まない
@@ -64,8 +64,8 @@ function getMichiVersion(): string {
 
 const michiVersion = getMichiVersion();
 
-// 環境変数読み込み
-config();
+// 環境変数読み込み（グローバル → ローカルの順で読み込み）
+loadEnv();
 
 /**
  * 環境変数から承認ゲートのロールリストを取得
