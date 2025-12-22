@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Multi-Repo AI支援コマンド**: AI駆動によるMulti-Repoプロジェクトの初期化・要件定義・設計書生成
+  - `/michi_multi_repo:spec-init`: プロジェクト説明から自動初期化、spec.jsonでメタデータ管理
+    - プロジェクト名の自動生成（feature-name形式）
+    - ディレクトリ構造の自動作成（`docs/michi/{project-name}/`）
+    - テンプレートファイルの自動展開
+    - `.michi/config.json`への自動登録
+  - `/michi_multi_repo:spec-requirements`: EARS形式の要件定義書自動生成
+    - 登録リポジトリ情報の自動反映
+    - サービス構成図（Mermaid）の作成
+    - インターフェース要件の定義
+    - サービス間依存関係の明記
+  - `/michi_multi_repo:spec-design`: C4モデルに基づいた設計書自動生成
+    - システム全体図の自動生成
+    - サービス横断アーキテクチャの設計
+    - デプロイメントアーキテクチャの可視化
+    - セキュリティ・データモデルの設計
+  - テンプレート拡張: Multi-Repo固有テンプレート
+    - `templates/multi-repo/spec.json`: メタデータ管理（phase、approvals状態）
+    - `templates/multi-repo/overview/{requirements,architecture,sequence}.md`
+    - `templates/multi-repo/steering/multi-repo.md`
+    - `templates/multi-repo/tests/strategy.md`
+    - `templates/multi-repo/docs/{ci-status,release-notes}.md`
+  - コマンド配布機構: `templates/claude/commands/michi_multi_repo/`でGit管理
+
 ## [0.8.4] - 2025-12-20
 
 ### Fixed

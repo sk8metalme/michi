@@ -452,6 +452,47 @@ APPROVAL_GATES_RELEASE=SM,部長
 
 ## 他のリポジトリでプロジェクトを進める
 
+### Multi-Repoプロジェクトの管理（NEW）
+
+**新機能**: 複数のGitHubリポジトリを単一プロジェクトとして統合管理するMulti-Repo機能が追加されました。
+
+**使用ケース**:
+- マイクロサービスアーキテクチャで複数のサービスリポジトリを管理
+- フロントエンド・バックエンド・インフラを別リポジトリで管理
+- 複数リポジトリのCI/CD状態を一元管理
+- 複数リポジトリの統合ドキュメントをConfluenceで管理
+
+**AI支援による初期化・設計（推奨）**:
+
+```bash
+# 1. AIでプロジェクト初期化（プロジェクト説明から自動生成）
+/michi_multi_repo:spec-init "マイクロサービスアーキテクチャでECサイトを構築" --jira MSV --confluence-space MSV
+
+# 2. リポジトリ登録（CLIコマンド）
+michi multi-repo:add-repo my-microservices --name frontend --url https://github.com/org/frontend --branch main
+michi multi-repo:add-repo my-microservices --name backend --url https://github.com/org/backend --branch main
+
+# 3. AIで要件定義書生成
+/michi_multi_repo:spec-requirements my-microservices
+
+# 4. AIで設計書生成（アーキテクチャ図含む）
+/michi_multi_repo:spec-design my-microservices
+
+# 5. Confluence同期
+michi multi-repo:confluence-sync my-microservices
+```
+
+**従来のCLIコマンドでの初期化**:
+
+```bash
+# CLIコマンドのみで初期化
+michi multi-repo:init my-microservices --jira MSV --confluence-space MSV
+michi multi-repo:add-repo my-microservices --name frontend --url https://github.com/org/frontend --branch main
+michi multi-repo:list  # プロジェクト確認
+```
+
+詳細は [Multi-Repo管理ガイド](./docs/user-guide/guides/multi-repo-guide.md) を参照してください。
+
 ### 推奨ワークフロー（cc-sdd準拠）
 
 既存リポジトリにMichiを導入する標準的な手順です：
