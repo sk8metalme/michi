@@ -906,6 +906,119 @@ michi config:validate
 
 **A**: 現在、削除用のコマンドはありません。`.michi/config.json` を直接編集して該当プロジェクトを削除してください。将来のバージョンで削除コマンドを追加予定です。
 
+## AI支援要件定義・設計
+
+Multi-Repoプロジェクトでは、AI支援による要件定義・設計書の自動生成が可能です。
+
+### 前提条件
+
+- プロジェクトが初期化されていること（`/michi_multi_repo:spec-init` または `michi multi-repo:init`）
+- 1つ以上のリポジトリが登録されていること（`michi multi-repo:add-repo`）
+
+### 6. AIプロジェクト初期化（NEW）
+
+Multi-Repoプロジェクトを AI支援で初期化します。`michi multi-repo:init` の代替コマンドです。
+
+```bash
+/michi_multi_repo:spec-init "<プロジェクト説明>" --jira <JIRA_KEY> --confluence-space <SPACE>
+```
+
+**例**:
+```bash
+/michi_multi_repo:spec-init "マイクロサービスアーキテクチャでECサイトを構築" --jira MSV --confluence-space MSV
+```
+
+**機能**:
+- プロジェクト説明からプロジェクト名を自動生成
+- ディレクトリ構造を作成（`docs/michi/{project}/`）
+- メタデータファイル（`spec.json`）を作成
+- `.michi/config.json` の `multiRepoProjects` に登録
+- 初期テンプレートファイルを生成
+
+**出力**:
+- `docs/michi/{project}/spec.json` - メタデータ（phase: initialized）
+- `docs/michi/{project}/overview/requirements.md` - 要件定義書（初期化済み）
+- `docs/michi/{project}/overview/architecture.md` - 設計書（テンプレート）
+- `.michi/config.json` - multiRepoProjects に追加
+
+**`michi multi-repo:init` との違い**:
+- プロジェクト説明を入力して自動的にプロジェクト名を生成
+- spec.json でメタデータ管理（phase、承認状態等）
+- AIコマンドで一貫したワークフローを実現
+
+### 7. AI要件定義書の生成
+
+プロジェクトの要件定義書をAI支援で自動生成します。
+
+```bash
+/michi_multi_repo:spec-requirements <project-name>
+```
+
+**例**:
+```bash
+/michi_multi_repo:spec-requirements my-microservices
+```
+
+**生成される内容**:
+- プロジェクト概要
+- サービス構成（登録リポジトリ一覧、依存関係図）
+- インターフェース要件（API契約、イベント契約）
+- 機能要件（EARS形式）
+- 非機能要件（パフォーマンス、セキュリティ等）
+
+**出力先**: `docs/michi/{project}/overview/requirements.md`
+
+### 8. AI設計書の生成
+
+プロジェクトの技術設計書をAI支援で自動生成します。
+
+```bash
+/michi_multi_repo:spec-design <project-name> [-y]
+```
+
+**例**:
+```bash
+/michi_multi_repo:spec-design my-microservices
+```
+
+**生成される内容**:
+- システム全体図（C4モデル）
+- サービス横断アーキテクチャ
+- サービス間通信設計
+- 共有コンポーネント
+- デプロイメントアーキテクチャ
+- データフロー図
+
+**出力先**: `docs/michi/{project}/overview/architecture.md`
+
+**オプション**:
+- `-y`: 既存ファイルの上書きを自動承認
+
+### ワークフロー例（AIコマンド使用）
+
+```bash
+# 1. AI初期化（NEW - michi multi-repo:init の代替）
+/michi_multi_repo:spec-init "マイクロサービスアーキテクチャでECサイトを構築" --jira MSV --confluence-space MSV
+
+# 2. リポジトリ登録
+michi multi-repo:add-repo my-microservices --name frontend --url https://github.com/myorg/frontend --branch main
+michi multi-repo:add-repo my-microservices --name backend --url https://github.com/myorg/backend --branch main
+michi multi-repo:add-repo my-microservices --name database --url https://github.com/myorg/db-schema --branch main
+
+# 3. AI要件定義書生成（NEW）
+/michi_multi_repo:spec-requirements my-microservices
+
+# 4. AI設計書生成（NEW）
+/michi_multi_repo:spec-design my-microservices
+
+# 5. Confluence同期
+michi multi-repo:confluence-sync my-microservices --doc-type requirements
+michi multi-repo:confluence-sync my-microservices --doc-type architecture
+
+# 6. CI結果確認
+michi multi-repo:ci-status my-microservices
+```
+
 ## 関連ドキュメント
 
 - [ワークフローガイド](./workflow.md): Michiの全体的な開発ワークフロー
