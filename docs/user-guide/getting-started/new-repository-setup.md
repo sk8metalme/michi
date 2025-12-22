@@ -259,9 +259,10 @@ cp $MICHI_PATH/.cursor/rules/multi-project.mdc .cursor/rules/
 cp $MICHI_PATH/.cursor/rules/github-ssot.mdc .cursor/rules/
 cp $MICHI_PATH/.cursor/rules/atlassian-mcp.mdc .cursor/rules/
 
-# カスタムコマンドをコピー
-cp $MICHI_PATH/.cursor/commands/kiro/confluence-sync.md .cursor/commands/kiro/
-cp $MICHI_PATH/.cursor/commands/kiro/project-switch.md .cursor/commands/kiro/
+# カスタムコマンドをコピー（v0.8.7以降の構造）
+mkdir -p .cursor/commands/michi
+cp $MICHI_PATH/.cursor/commands/michi/confluence-sync.md .cursor/commands/michi/
+cp $MICHI_PATH/.cursor/commands/michi/project-switch.md .cursor/commands/michi/
 
 # Steeringテンプレートをコピー
 mkdir -p .kiro/steering

@@ -21,17 +21,17 @@ export type Environment =
 export const ENV_CONFIG: Record<Environment, EnvironmentConfig> = {
   claude: {
     rulesDir: '.claude/rules',
-    commandsDir: '.claude/commands/kiro',
+    commandsDir: '.claude/commands',
     templateSource: 'claude',
   },
   'claude-agent': {
     rulesDir: '.claude/agents',
-    commandsDir: '.claude/commands/kiro',
+    commandsDir: '.claude/commands',
     templateSource: 'claude-agent',
   },
   cursor: {
     rulesDir: '.cursor/rules',
-    commandsDir: '.cursor/commands/kiro',
+    commandsDir: '.cursor/commands',
     templateSource: 'cursor',
   },
   gemini: {

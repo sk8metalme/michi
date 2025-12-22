@@ -26,7 +26,7 @@ Multi-Repoプロジェクト **$1** の技術設計書を生成します。
    - プロジェクト名、JIRAキー、Confluenceスペース
    - 登録リポジトリ一覧
 2. `docs/michi/$1/overview/requirements.md` から要件読み込み
-   - 要件定義書が存在しない場合は、先に `/michi_multi_repo:spec-requirements $1` の実行を促す
+   - 要件定義書が存在しない場合は、先に `/michi-multi-repo:spec-requirements $1` の実行を促す
 3. `.kiro/settings/rules/design-principles.md` から設計原則取得（存在する場合）
 4. `.kiro/settings/templates/specs/design.md` から構造参照（存在する場合）
 
@@ -246,7 +246,7 @@ sequenceDiagram
   エラー: 要件定義書が見つかりません: `docs/michi/{project}/overview/requirements.md`
 
   先に要件定義書を生成してください：
-  /michi_multi_repo:spec-requirements {project}
+  /michi-multi-repo:spec-requirements {project}
   ```
 
 - **プロジェクト未登録**:
@@ -290,7 +290,7 @@ sequenceDiagram
 4. **CI/CD設定**: `michi multi-repo:ci-status {project}` でCI結果を監視
 
 **修正が必要な場合**:
-- フィードバックを提供し、`/michi_multi_repo:spec-design $1` を再実行
+- フィードバックを提供し、`/michi-multi-repo:spec-design $1` を再実行
 - `-y` フラグで自動上書き可能
 
 think hard

@@ -83,7 +83,7 @@ npx tsx ~/Work/git/michi/src/cli.ts setup-existing --claude --lang ja
 実行後、Michiのコマンドが追加されることを確認：
 
 ```bash
-ls -la /tmp/michi-manual-test-claude-code/.claude/commands/kiro/michi
+ls -la /tmp/michi-manual-test-claude-code/.claude/commands/michi
 # Michiのコマンドが追加されている:
 #   michi-confluence-sync.md
 #   michi-project-switch.md
@@ -407,13 +407,15 @@ npx tsx ~/Work/git/michi/src/cli.ts phase:run java-calculator-webapp phase-b
 ├── .claude/
 │   ├── CLAUDE.md
 │   └── commands/
-│       ├── kiro-spec-init.md (cc-sdd)
-│       ├── kiro-spec-requirements.md (cc-sdd)
-│       ├── kiro-spec-design.md (cc-sdd)
-│       ├── kiro-spec-tasks.md (cc-sdd)
-│       ├── ... (cc-sdd提供の他のコマンド)
-│       ├── michi-confluence-sync.md (Michi)
-│       └── michi-project-switch.md (Michi)
+│       ├── kiro/ (cc-sdd)
+│       │   ├── kiro-spec-init.md
+│       │   ├── kiro-spec-requirements.md
+│       │   ├── kiro-spec-design.md
+│       │   ├── kiro-spec-tasks.md
+│       │   └── ... (cc-sdd提供の他のコマンド)
+│       └── michi/ (Michi)
+│           ├── michi-confluence-sync.md
+│           └── michi-project-switch.md
 └── .kiro/
     └── specs/
         └── java-calculator-webapp/

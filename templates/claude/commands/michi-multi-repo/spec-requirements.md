@@ -137,7 +137,7 @@ graph TB
 1. **生成された要件定義書のパス**: `docs/michi/{project}/overview/requirements.md`
 2. **含まれるリポジトリ/サービスの一覧**: サービス名と役割の要約
 3. **次のステップ**:
-   - `/michi_multi_repo:spec-design $1` で設計書を生成
+   - `/michi-multi-repo:spec-design $1` で設計書を生成
    - `michi multi-repo:confluence-sync $1 --doc-type requirements` でConfluenceに同期
 
 **出力形式**:
@@ -154,7 +154,7 @@ graph TB
 
 ### 次のステップ
 1. 要件定義書を確認: `docs/michi/{project}/overview/requirements.md`
-2. 設計書を生成: `/michi_multi_repo:spec-design {project}`
+2. 設計書を生成: `/michi-multi-repo:spec-design {project}`
 3. Confluenceに同期: `michi multi-repo:confluence-sync {project} --doc-type requirements`
 ```
 

@@ -467,17 +467,17 @@ APPROVAL_GATES_RELEASE=SM,部長
 
 ```bash
 # 1. AIでプロジェクト初期化（プロジェクト説明から自動生成）
-/michi_multi_repo:spec-init "マイクロサービスアーキテクチャでECサイトを構築" --jira MSV --confluence-space MSV
+/michi-multi-repo:spec-init "マイクロサービスアーキテクチャでECサイトを構築" --jira MSV --confluence-space MSV
 
 # 2. リポジトリ登録（CLIコマンド）
 michi multi-repo:add-repo my-microservices --name frontend --url https://github.com/org/frontend --branch main
 michi multi-repo:add-repo my-microservices --name backend --url https://github.com/org/backend --branch main
 
 # 3. AIで要件定義書生成
-/michi_multi_repo:spec-requirements my-microservices
+/michi-multi-repo:spec-requirements my-microservices
 
 # 4. AIで設計書生成（アーキテクチャ図含む）
-/michi_multi_repo:spec-design my-microservices
+/michi-multi-repo:spec-design my-microservices
 
 # 5. Confluence同期
 michi multi-repo:confluence-sync my-microservices

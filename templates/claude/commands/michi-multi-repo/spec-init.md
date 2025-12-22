@@ -24,7 +24,7 @@ argument-hint: "<project-description>" --jira <JIRA_KEY> --confluence-space <SPA
 
 引数の形式:
 ```
-/michi_multi_repo:spec-init "<プロジェクト説明>" --jira <JIRA_KEY> --confluence-space <SPACE>
+/michi-multi-repo:spec-init "<プロジェクト説明>" --jira <JIRA_KEY> --confluence-space <SPACE>
 ```
 
 パラメータ:
@@ -171,12 +171,12 @@ docs/michi/{project-name}/
 
 2. **AI要件定義書を生成**:
    \`\`\`bash
-   /michi_multi_repo:spec-requirements {project}
+   /michi-multi-repo:spec-requirements {project}
    \`\`\`
 
 3. **AI設計書を生成**:
    \`\`\`bash
-   /michi_multi_repo:spec-design {project}
+   /michi-multi-repo:spec-design {project}
    \`\`\`
 
 4. **Confluenceに同期**:
@@ -194,10 +194,10 @@ docs/michi/{project-name}/
   エラー: 必須パラメータが不足しています。
 
   使用方法:
-  /michi_multi_repo:spec-init "<プロジェクト説明>" --jira <JIRA_KEY> --confluence-space <SPACE>
+  /michi-multi-repo:spec-init "<プロジェクト説明>" --jira <JIRA_KEY> --confluence-space <SPACE>
 
   例:
-  /michi_multi_repo:spec-init "マイクロサービスでECサイト構築" --jira MSV --confluence-space MSV
+  /michi-multi-repo:spec-init "マイクロサービスでECサイト構築" --jira MSV --confluence-space MSV
   ```
 
 - **JIRAキーが不正**:
@@ -217,7 +217,7 @@ docs/michi/{project-name}/
 
   Michiプロジェクトのルートディレクトリで実行してください。
   または、次のコマンドで初期設定を行ってください:
-  michi config:init
+  michi init
   ```
 
 ### Fallback Strategy

@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Multi-Repo AIコマンド名変更**: `michi_multi_repo:*` → `michi-multi-repo:*`
+  - `/michi-multi-repo:spec-init`: プロジェクト初期化コマンド（旧: `/michi_multi_repo:spec-init`）
+  - `/michi-multi-repo:spec-requirements`: 要件定義書生成コマンド（旧: `/michi_multi_repo:spec-requirements`）
+  - `/michi-multi-repo:spec-design`: 設計書生成コマンド（旧: `/michi_multi_repo:spec-design`）
+  - **理由**: Claude Codeのスキル検出でアンダースコアが正しく処理されない問題に対応
+- **`michi init` コマンドの配布先修正**
+  - `commandsDir` を `.claude/commands/kiro` から `.claude/commands` に変更
+  - これにより `kiro/`, `michi/`, `michi-multi-repo/` が正しい階層にコピーされるようになった
+  - **影響**: 既存の二重ネスト（`.claude/commands/kiro/kiro/`）問題を解決
+
+### Fixed
+
+- **Multi-Repo AIコマンドがユーザープロジェクトにコピーされない問題を修正**
+  - `environments.ts` の設定により、`templates/claude/commands/` が `/kiro` サブディレクトリにコピーされていた
+  - 修正により、各コマンドディレクトリ（`kiro/`, `michi/`, `michi-multi-repo/`）が `.claude/commands/` 直下に正しく配置されるようになった
+- **存在しない `michi config:init` コマンドの参照を修正**
+  - spec-init.md のエラーメッセージで参照されていた `michi config:init` を `michi init` に修正
+  - **注意**: `michi config:init` コマンドは実装されておらず、正しくは `michi init` を使用
+
+### Added
+
+- **マイグレーションガイド**: v0.8.6 → v0.8.7 の移行手順を文書化（docs/user-guide/guides/migration-guide.md）
+
 ## [0.8.6] - 2025-12-22
 
 ### Fixed
