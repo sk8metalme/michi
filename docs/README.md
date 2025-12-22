@@ -25,6 +25,7 @@ Michiを使った開発の実践的なガイドです。
 |------------|------|
 | [ワークフローガイド](./guides/workflow.md) ⭐ | AI開発フローの詳細 |
 | [フェーズ自動化ガイド](./guides/phase-automation.md) ⭐ | Confluence/JIRA自動作成 |
+| [Multi-Repo管理ガイド](./guides/multi-repo-guide.md) | マイクロサービス等複数リポジトリの統合管理、AI支援初期化・要件定義・設計 |
 | [マルチプロジェクト管理](./guides/multi-project.md) | 複数プロジェクトの同時管理 |
 | [カスタマイズガイド](./guides/customization.md) | Confluence/JIRA階層構造のカスタマイズ |
 
