@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.5] - 2025-12-22
+
 ### Added
 
 - **Multi-Repo AI支援コマンド**: AI駆動によるMulti-Repoプロジェクトの初期化・要件定義・設計書生成
