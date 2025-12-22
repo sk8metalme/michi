@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.6] - 2025-12-22
+
+### Fixed
+
+- **Multi-Repo templates not copied to dist during build** (#118)
+  - Fixed `michi multi-repo:init` failing with "Multi-Repo template not found" error
+  - Added `copyDirectory()` function to `scripts/copy-static-assets.js` to recursively copy template directories
+  - `templates/multi-repo/` is now correctly copied to `dist/templates/multi-repo/` during build
+  - All Multi-Repo templates (requirements.md, architecture.md, sequence.md, etc.) are now properly included in npm package
+
 ## [0.8.5] - 2025-12-22
 
 ### Added
