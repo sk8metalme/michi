@@ -214,7 +214,7 @@ export function validateLocalPath(
       };
     }
     exists = true;
-  } catch (error) {
+  } catch (_error) {
     errors.push(`localPath '${localPath}' does not exist`);
     return {
       isValid: false,
