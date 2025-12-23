@@ -183,6 +183,26 @@ export const RepositorySchema = z.object({
       message: 'GitHub URL must be in format: https://github.com/{owner}/{repo}',
     }),
   branch: z.string().default('main'),
+  localPath: z
+    .string()
+    .optional()
+    .refine(
+      (path) => {
+        // localPath が指定されていない場合は検証スキップ
+        if (path === undefined) return true;
+        // 空文字列はエラー
+        if (path === '') return false;
+        // 絶対パスであることを検証（セキュリティ考慮）
+        // Unix系: '/' で始まる、Windows系: 'C:\' 等で始まる
+        const isUnixAbsolutePath = path.startsWith('/');
+        const isWindowsAbsolutePath = /^[A-Za-z]:\\/.test(path);
+        return isUnixAbsolutePath || isWindowsAbsolutePath;
+      },
+      {
+        message:
+          'localPath must be an absolute path (Unix: /path/to/repo, Windows: C:\\path\\to\\repo)',
+      },
+    ),
 });
 
 /**
