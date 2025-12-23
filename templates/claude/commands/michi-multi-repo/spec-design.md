@@ -94,6 +94,49 @@ Multi-Repoプロジェクト **$1** の技術設計書を生成します。
 - 出力先: `docs/michi/$1/overview/architecture.md`
 - 既存ファイルがある場合は、上書き確認（`-y` フラグで自動承認）
 
+### Step 4.5: 品質検証（PROACTIVE）
+
+**architecture.md生成後、以下の検証を自動実行**:
+
+#### 4.5.1 Mermaid図の構文検証
+
+`mermaid-validator` エージェントを使用してMermaid図を検証:
+
+```
+IMPORTANT: architecture.mdにMermaid図が含まれる場合、mermaid-validatorエージェントを自動実行してください。
+- 検出: Mermaid図を含むかどうかを確認
+- 検証: 構文エラーを検出
+- 修正: 自動修正可能なエラーを修正
+- 報告: 修正内容をユーザーに通知
+```
+
+**実行タイミング**: architecture.md保存直後
+
+**エージェント呼び出し**:
+```
+Task(subagent_type='mermaid-validator', prompt='docs/michi/$1/overview/architecture.md のMermaid図を検証し、構文エラーを自動修正してください')
+```
+
+#### 4.5.2 技術スタックバージョン監査
+
+`stable-version-auditor` エージェントを使用して技術スタックを監査:
+
+```
+IMPORTANT: architecture.mdに技術スタック（Node.js、Java、Python、PHP等）が記載されている場合、
+stable-version-auditorエージェントを自動実行してください。
+- 検出: バージョン指定を抽出
+- 監査: EOLリスクを評価
+- 推奨: 最新LTS/安定版を提案
+- 報告: アップグレード推奨をユーザーに通知
+```
+
+**実行タイミング**: architecture.md保存直後
+
+**エージェント呼び出し**:
+```
+Task(subagent_type='stable-version-auditor', prompt='docs/michi/$1/overview/architecture.md に記載された技術スタックのバージョンを監査し、EOLリスクを評価してください')
+```
+
 ### Step 5: メタデータ更新（spec.json）
 - `docs/michi/$1/spec.json` を読み込み
 - phase を `"design-generated"` に更新
@@ -208,7 +251,10 @@ sequenceDiagram
 
 1. **生成された設計書のパス**: `docs/michi/{project}/overview/architecture.md`
 2. **分析したリポジトリの一覧**: サービス名と技術スタックの要約
-3. **次のステップ**:
+3. **品質検証結果**:
+   - Mermaid図の検証結果
+   - 技術スタックバージョン監査結果
+4. **次のステップ**:
    - 設計書の確認
    - Confluence同期
    - 各リポジトリでの個別実装
@@ -230,10 +276,27 @@ sequenceDiagram
 - **データベース**: PostgreSQL（サービスごとにDB分離）
 - **デプロイ**: Kubernetes（Pod自動スケーリング）
 
+### 品質検証結果
+
+#### Mermaid図検証
+✅ 検証完了 - 構文エラーなし
+または
+⚠️ 2件の構文エラーを自動修正しました:
+- L15: C4モデルのタイトル記法エラー → 修正済み
+- L45: シーケンス図の矢印記法エラー → 修正済み
+
+#### 技術スタックバージョン監査
+✅ すべて最新LTS/安定版を使用
+または
+⚠️ バージョン更新を推奨:
+- Node.js 16.x → 20.x (LTS) - EOL: 2023-09-11（EOL済み）
+- Python 3.9 → 3.11 - EOL 6ヶ月以内
+
 ### 次のステップ
 1. 設計書を確認: `docs/michi/{project}/overview/architecture.md`
-2. Confluenceに同期: `michi multi-repo:confluence-sync {project} --doc-type architecture`
-3. 各リポジトリで実装を開始:
+2. 技術スタック更新（必要に応じて）
+3. Confluenceに同期: `michi multi-repo:confluence-sync {project} --doc-type architecture`
+4. 各リポジトリで実装を開始:
    - `/kiro:spec-init` で個別仕様を作成
    - または直接実装を開始
 ```

@@ -37,6 +37,50 @@ describe('RepositorySchema', () => {
         expect(result.data.branch).toBe('main');
       }
     });
+
+    it('localPathが未指定の場合も受け入れる（オプショナル）', () => {
+      const repoWithoutLocalPath = {
+        name: 'my-repo',
+        url: 'https://github.com/owner/repo',
+        branch: 'main',
+      };
+
+      const result = RepositorySchema.safeParse(repoWithoutLocalPath);
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.localPath).toBeUndefined();
+      }
+    });
+
+    it('Unix絶対パス（/path/to/repo）を受け入れる', () => {
+      const repoWithUnixPath = {
+        name: 'my-repo',
+        url: 'https://github.com/owner/repo',
+        branch: 'main',
+        localPath: '/Users/user/repos/my-repo',
+      };
+
+      const result = RepositorySchema.safeParse(repoWithUnixPath);
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.localPath).toBe('/Users/user/repos/my-repo');
+      }
+    });
+
+    it('Windows絶対パス（C:\\path\\to\\repo）を受け入れる', () => {
+      const repoWithWindowsPath = {
+        name: 'my-repo',
+        url: 'https://github.com/owner/repo',
+        branch: 'main',
+        localPath: 'C:\\Users\\user\\repos\\my-repo',
+      };
+
+      const result = RepositorySchema.safeParse(repoWithWindowsPath);
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.localPath).toBe('C:\\Users\\user\\repos\\my-repo');
+      }
+    });
   });
 
   describe('異常ケース', () => {
@@ -67,6 +111,68 @@ describe('RepositorySchema', () => {
         name: 'my-repo',
         url: 'http://github.com/owner/repo', // httpは非対応
         branch: 'main',
+      };
+
+      const result = RepositorySchema.safeParse(invalidRepo);
+      expect(result.success).toBe(false);
+    });
+  });
+
+  describe('localPathバリデーション', () => {
+    it('相対パス（./repo）を含む場合はエラー', () => {
+      const invalidRepo = {
+        name: 'my-repo',
+        url: 'https://github.com/owner/repo',
+        branch: 'main',
+        localPath: './repos/my-repo',
+      };
+
+      const result = RepositorySchema.safeParse(invalidRepo);
+      expect(result.success).toBe(false);
+    });
+
+    it('相対パス（../repo）を含む場合はエラー', () => {
+      const invalidRepo = {
+        name: 'my-repo',
+        url: 'https://github.com/owner/repo',
+        branch: 'main',
+        localPath: '../repos/my-repo',
+      };
+
+      const result = RepositorySchema.safeParse(invalidRepo);
+      expect(result.success).toBe(false);
+    });
+
+    it('Windowsの相対パス（.\\repo）を含む場合はエラー', () => {
+      const invalidRepo = {
+        name: 'my-repo',
+        url: 'https://github.com/owner/repo',
+        branch: 'main',
+        localPath: '.\\repos\\my-repo',
+      };
+
+      const result = RepositorySchema.safeParse(invalidRepo);
+      expect(result.success).toBe(false);
+    });
+
+    it('空文字列の場合はエラー', () => {
+      const invalidRepo = {
+        name: 'my-repo',
+        url: 'https://github.com/owner/repo',
+        branch: 'main',
+        localPath: '',
+      };
+
+      const result = RepositorySchema.safeParse(invalidRepo);
+      expect(result.success).toBe(false);
+    });
+
+    it('相対パス（repo/subdir）を含む場合はエラー', () => {
+      const invalidRepo = {
+        name: 'my-repo',
+        url: 'https://github.com/owner/repo',
+        branch: 'main',
+        localPath: 'repos/my-repo',
       };
 
       const result = RepositorySchema.safeParse(invalidRepo);

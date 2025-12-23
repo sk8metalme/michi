@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.0] - 2025-12-23
+
+### Added
+
+- **Multi-Repo Repository localPath管理**: リポジトリのローカルクローンパスを`.michi/config.json`で管理
+  - **フィールド**: `Repository.localPath` (optional, 絶対パスのみ許可)
+  - **バリデーション**: Unix (`/path/to/repo`) と Windows (`C:\path\to\repo`) の絶対パス形式をサポート
+  - **セキュリティ**: 相対パス（`./`, `../`）と空文字列を禁止
+  - **後方互換性**: オプショナルフィールドのため既存データに影響なし
+  - **テスト**: 8件の新規テストケース追加（正常3件、異常5件）
+  - **用途**: multi-repo環境で各リポジトリへのドキュメント配置や詳細調査に活用
+
+- **Mermaid Validatorスキル/エージェント**: architecture.md生成時のMermaid図構文エラーを自動検証・修正
+  - **スキル**: `templates/claude/skills/mermaid-validator/SKILL.md`
+  - **エージェント**: `templates/claude/agents/mermaid-validator/AGENT.md`
+  - **統合**: `/michi-multi-repo:spec-design` コマンドに自動実行を追加（Step 4.5.1）
+  - **機能**: C4モデル、シーケンス図、グラフ、ER図の構文検証と自動修正
+  - **検出エラー**: タイトル記法、矢印記法、インデント、リレーションシップ記法
+  - **効果**: architecture.md生成時のMermaidパースエラーを防止
+
+- **Stable Version Auditor統合強化**: 技術スタックバージョン監査を設計フェーズに統合
+  - **統合**: `/michi-multi-repo:spec-design` コマンドに自動実行を追加（Step 4.5.2）
+  - **機能**: architecture.mdに記載された技術スタック（Node.js、Java、Python、PHP等）のバージョンを自動監査
+  - **監査内容**: EOLリスク評価、最新LTS/安定版の推奨、アップグレードパス提示
+  - **効果**: 設計時点で技術スタックの最新化を促進、技術的負債を削減
+
 ### Changed
 
 - **Multi-Repo AIコマンド名変更**: `michi_multi_repo:*` → `michi-multi-repo:*`
