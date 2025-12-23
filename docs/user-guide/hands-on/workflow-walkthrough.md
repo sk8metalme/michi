@@ -817,11 +817,180 @@ michi jira:comment DEMO-103 "PRを作成しました: https://github.com/..."
 - [ ] Confluenceページが作成された（設計書）
 - [ ] `spec.json` に `confluence.designPageId` が記録された
 
-### Phase 0.3-0.4: テスト計画（このガイドではスキップ）
+### Phase 0.3-0.4: テスト計画
 
-- このハンズオンでは省略していますが、実際のプロジェクトでは：
-- [ ] テストタイプを選択（Phase 0.3）
-- [ ] テスト仕様書を作成（Phase 0.4）
+#### Phase 0.3: テストタイプの選択
+
+health-check-endpointの場合、以下のテストタイプを選択します：
+
+**判断基準**:
+
+| テストタイプ | 必要性 | 判断理由 |
+|-------------|--------|----------|
+| **単体テスト** | ✅ 必須 | HealthControllerとHealthServiceのロジックを検証 |
+| **統合テスト** | ✅ 推奨 | API全体の動作とレスポンス形式を検証 |
+| E2Eテスト | ❌ 不要 | 単一エンドポイントのみで複雑なフローなし |
+| パフォーマンステスト | ⚠️ 任意 | ヘルスチェックは高頻度で呼ばれるため検討可能 |
+| セキュリティテスト | ❌ 不要 | 認証不要の公開エンドポイント |
+
+**結論**: health-check-endpointでは**単体テスト**と**統合テスト**を実施します。
+
+#### Phase 0.4: テスト仕様書の作成
+
+テストタイプごとに仕様書を作成します。
+
+##### 単体テスト仕様書
+
+**作成場所**: `tests/specs/unit-test-spec.md`
+
+**期待される内容（例）**:
+
+```markdown
+# health-check-endpoint 単体テスト仕様
+
+## テスト対象
+
+- HealthController
+- HealthService
+
+## HealthControllerTest
+
+### TC-U-001: 正常系 - ステータス取得
+
+**目的**: HealthControllerが正常にヘルスチェック情報を返す
+
+**前提条件**:
+- HealthServiceがモック化されている
+- HealthService.getStatus()が`{status: "ok", timestamp: "2025-01-15T10:00:00Z"}`を返す
+
+**実行手順**:
+1. GET /health エンドポイントを呼び出す
+
+**期待結果**:
+- HTTPステータス: 200
+- レスポンスボディ: `{"status": "ok", "timestamp": "2025-01-15T10:00:00Z"}`
+
+### TC-U-002: 異常系 - サービスエラー
+
+**目的**: サービス層でエラーが発生した場合の処理
+
+**前提条件**:
+- HealthService.getStatus()が例外をスローする
+
+**実行手順**:
+1. GET /health エンドポイントを呼び出す
+
+**期待結果**:
+- HTTPステータス: 503
+- レスポンスボディ: `{"status": "error", "message": "..."}`
+
+## HealthServiceTest
+
+### TC-U-101: システムステータス正常
+
+**目的**: HealthServiceがシステムの正常状態を正しく判定
+
+**前提条件**:
+- すべての依存サービスが正常
+
+**実行手順**:
+1. HealthService.getStatus()を呼び出す
+
+**期待結果**:
+- status: "ok"
+- timestamp: 現在時刻のISO 8601形式
+```
+
+##### 統合テスト仕様書
+
+**作成場所**: `tests/specs/integration-test-spec.md`
+
+**期待される内容（例）**:
+
+```markdown
+# health-check-endpoint 統合テスト仕様
+
+## テスト対象
+
+- Health API全体（Controller → Service → Repository）
+
+## TC-I-001: 正常系 - エンドツーエンド
+
+**目的**: Health APIが期待通りに動作する
+
+**前提条件**:
+- テストサーバーが起動している
+- データベース接続が有効
+
+**実行手順**:
+1. GET http://localhost:8080/health をHTTPクライアントで呼び出す
+
+**期待結果**:
+- HTTPステータス: 200
+- Content-Type: application/json
+- レスポンスボディ:
+  ```json
+  {
+    "status": "ok",
+    "timestamp": "<ISO 8601形式>",
+    "version": "1.0.0"
+  }
+  ```
+
+## TC-I-002: 異常系 - データベース切断
+
+**目的**: DB接続エラー時の503レスポンス
+
+**前提条件**:
+- テストサーバーが起動している
+- データベースが停止している
+
+**実行手順**:
+1. GET http://localhost:8080/health を呼び出す
+
+**期待結果**:
+- HTTPステータス: 503
+- Content-Type: application/json
+- レスポンスボディ:
+  ```json
+  {
+    "status": "error",
+    "message": "Database connection failed"
+  }
+  ```
+```
+
+#### ディレクトリ構造の準備
+
+テスト仕様書を配置するディレクトリを作成します：
+
+```bash
+mkdir -p tests/specs
+```
+
+**確認**:
+
+```bash
+ls -la tests/specs/
+```
+
+**期待されるファイル**:
+
+```
+tests/specs/
+├── unit-test-spec.md
+└── integration-test-spec.md
+```
+
+#### 検証チェックリスト
+
+テスト計画が完了したら、以下を確認してください：
+
+- [ ] Phase 0.3: 必要なテストタイプを選択した（単体テスト + 統合テスト）
+- [ ] Phase 0.4: 単体テスト仕様書を作成した（`tests/specs/unit-test-spec.md`）
+- [ ] Phase 0.4: 統合テスト仕様書を作成した（`tests/specs/integration-test-spec.md`）
+- [ ] テストケースにID（TC-U-XXX、TC-I-XXX）を付与した
+- [ ] 各テストケースに目的・前提条件・実行手順・期待結果を記載した
 
 ### Phase 0.5-0.6: タスク分割とJIRA同期
 

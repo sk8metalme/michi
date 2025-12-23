@@ -2,8 +2,13 @@
  * multi-repo-validator.ts
  * Multi-Repo機能のバリデーションユーティリティ
  *
- * プロジェクト名、JIRAキー、リポジトリURLのバリデーションとセキュリティチェックを行います。
+ * プロジェクト名、JIRAキー、リポジトリURL、localPathのバリデーションとセキュリティチェックを行います。
  */
+
+import * as fs from 'fs';
+import * as path from 'path';
+import { execSync } from 'child_process';
+import type { Repository } from '../config/config-schema.js';
 
 /**
  * バリデーション結果
@@ -12,6 +17,17 @@ export interface ValidationResult {
   isValid: boolean;
   errors: string[];
   warnings: string[];
+}
+
+/**
+ * LocalPathバリデーション結果（詳細情報付き）
+ */
+export interface LocalPathValidationResult extends ValidationResult {
+  exists: boolean;
+  isGitRepository: boolean;
+  currentBranch: string | null;
+  branchMatches: boolean;
+  hasUncommittedChanges: boolean;
 }
 
 /**
@@ -137,5 +153,148 @@ export function validateRepositoryUrl(url: string): ValidationResult {
     isValid: errors.length === 0,
     errors,
     warnings,
+  };
+}
+
+/**
+ * LocalPathのバリデーション
+ * ディレクトリ存在、Gitリポジトリ、ブランチ、未コミット変更をチェック
+ *
+ * @param repository - リポジトリ設定
+ * @returns バリデーション結果（詳細情報付き）
+ */
+export function validateLocalPath(
+  repository: Repository,
+): LocalPathValidationResult {
+  const errors: string[] = [];
+  const warnings: string[] = [];
+
+  // 初期値
+  let exists = false;
+  let isGitRepository = false;
+  let currentBranch: string | null = null;
+  let branchMatches = false;
+  let hasUncommittedChanges = false;
+
+  // 1. localPath設定確認
+  if (!repository.localPath) {
+    warnings.push(
+      `Repository '${repository.name}' does not have localPath configured`,
+    );
+    return {
+      isValid: false,
+      errors,
+      warnings,
+      exists,
+      isGitRepository,
+      currentBranch,
+      branchMatches,
+      hasUncommittedChanges,
+    };
+  }
+
+  const localPath = repository.localPath;
+
+  // 2. ディレクトリ存在確認
+  try {
+    const stats = fs.statSync(localPath);
+    if (!stats.isDirectory()) {
+      errors.push(
+        `localPath '${localPath}' exists but is not a directory`,
+      );
+      return {
+        isValid: false,
+        errors,
+        warnings,
+        exists: true,
+        isGitRepository,
+        currentBranch,
+        branchMatches,
+        hasUncommittedChanges,
+      };
+    }
+    exists = true;
+  } catch (_error) {
+    errors.push(`localPath '${localPath}' does not exist`);
+    return {
+      isValid: false,
+      errors,
+      warnings,
+      exists,
+      isGitRepository,
+      currentBranch,
+      branchMatches,
+      hasUncommittedChanges,
+    };
+  }
+
+  // 3. Gitリポジトリ確認
+  const gitDir = path.join(localPath, '.git');
+  if (!fs.existsSync(gitDir)) {
+    errors.push(
+      `localPath '${localPath}' is not a Git repository (no .git directory)`,
+    );
+    return {
+      isValid: false,
+      errors,
+      warnings,
+      exists,
+      isGitRepository,
+      currentBranch,
+      branchMatches,
+      hasUncommittedChanges,
+    };
+  }
+  isGitRepository = true;
+
+  // 4. ブランチ確認
+  try {
+    currentBranch = execSync('git branch --show-current', {
+      cwd: localPath,
+      encoding: 'utf-8',
+    }).trim();
+
+    if (currentBranch !== repository.branch) {
+      warnings.push(
+        `Current branch '${currentBranch}' does not match configured branch '${repository.branch}'`,
+      );
+      branchMatches = false;
+    } else {
+      branchMatches = true;
+    }
+  } catch (error) {
+    warnings.push(
+      `Failed to get current branch: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
+
+  // 5. 未コミット変更確認
+  try {
+    const statusOutput = execSync('git status --porcelain', {
+      cwd: localPath,
+      encoding: 'utf-8',
+    }).trim();
+
+    if (statusOutput.length > 0) {
+      warnings.push(
+        `Repository '${repository.name}' has uncommitted changes`,
+      );
+      hasUncommittedChanges = true;
+    }
+  } catch (error) {
+    warnings.push(
+      `Failed to check uncommitted changes: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+    warnings,
+    exists,
+    isGitRepository,
+    currentBranch,
+    branchMatches,
+    hasUncommittedChanges,
   };
 }
