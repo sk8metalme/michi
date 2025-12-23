@@ -3,12 +3,17 @@
  * Task 11.1: バリデーション関数の単体テスト
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import * as fs from 'fs';
+import * as path from 'path';
+import { execSync } from 'child_process';
 import {
   validateProjectName,
   validateJiraKey,
   validateRepositoryUrl,
+  validateLocalPath,
 } from '../utils/multi-repo-validator.js';
+import type { Repository } from '../config/config-schema.js';
 
 describe('validateProjectName', () => {
   describe('正常ケース', () => {
@@ -519,6 +524,229 @@ describe('validateRepositoryUrl', () => {
       // このテストは実装の動作を反映して調整します
       expect(result.isValid).toBe(true); // URLエンコードされるため有効
       expect(result.errors).toHaveLength(0);
+    });
+  });
+});
+
+describe('validateLocalPath', () => {
+  let tempDir: string;
+
+  beforeEach(() => {
+    // テスト用の一時ディレクトリを作成
+    tempDir = fs.mkdtempSync(path.join(process.cwd(), 'test-temp-'));
+  });
+
+  afterEach(() => {
+    // テスト用の一時ディレクトリを削除
+    if (fs.existsSync(tempDir)) {
+      fs.rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  describe('localPath未設定ケース', () => {
+    it('localPathが未設定の場合、警告を返す', () => {
+      const repository: Repository = {
+        name: 'test-repo',
+        url: 'https://github.com/owner/repo',
+        branch: 'main',
+        // localPath: undefined (省略)
+      };
+
+      const result = validateLocalPath(repository);
+
+      expect(result.isValid).toBe(false);
+      expect(result.errors).toHaveLength(0);
+      expect(result.warnings).toHaveLength(1);
+      expect(result.warnings[0]).toContain(
+        "Repository 'test-repo' does not have localPath configured",
+      );
+      expect(result.exists).toBe(false);
+      expect(result.isGitRepository).toBe(false);
+      expect(result.currentBranch).toBeNull();
+      expect(result.branchMatches).toBe(false);
+      expect(result.hasUncommittedChanges).toBe(false);
+    });
+  });
+
+  describe('ディレクトリ存在確認', () => {
+    it('localPathが存在しない場合、エラーを返す', () => {
+      const nonExistentPath = path.join(tempDir, 'non-existent');
+      const repository: Repository = {
+        name: 'test-repo',
+        url: 'https://github.com/owner/repo',
+        branch: 'main',
+        localPath: nonExistentPath,
+      };
+
+      const result = validateLocalPath(repository);
+
+      expect(result.isValid).toBe(false);
+      expect(result.errors).toHaveLength(1);
+      expect(result.errors[0]).toContain('does not exist');
+      expect(result.exists).toBe(false);
+    });
+
+    it('localPathがファイルの場合、エラーを返す', () => {
+      const filePath = path.join(tempDir, 'test-file.txt');
+      fs.writeFileSync(filePath, 'test content');
+
+      const repository: Repository = {
+        name: 'test-repo',
+        url: 'https://github.com/owner/repo',
+        branch: 'main',
+        localPath: filePath,
+      };
+
+      const result = validateLocalPath(repository);
+
+      expect(result.isValid).toBe(false);
+      expect(result.errors).toHaveLength(1);
+      expect(result.errors[0]).toContain('is not a directory');
+      expect(result.exists).toBe(true);
+      expect(result.isGitRepository).toBe(false);
+    });
+  });
+
+  describe('Gitリポジトリ確認', () => {
+    it('Gitリポジトリではないディレクトリの場合、エラーを返す', () => {
+      const nonGitDir = path.join(tempDir, 'non-git-repo');
+      fs.mkdirSync(nonGitDir);
+
+      const repository: Repository = {
+        name: 'test-repo',
+        url: 'https://github.com/owner/repo',
+        branch: 'main',
+        localPath: nonGitDir,
+      };
+
+      const result = validateLocalPath(repository);
+
+      expect(result.isValid).toBe(false);
+      expect(result.errors).toHaveLength(1);
+      expect(result.errors[0]).toContain('is not a Git repository');
+      expect(result.exists).toBe(true);
+      expect(result.isGitRepository).toBe(false);
+    });
+
+    it('Gitリポジトリの場合、基本的なチェックを通過する', () => {
+      const gitDir = path.join(tempDir, 'git-repo');
+      fs.mkdirSync(gitDir);
+
+      // Gitリポジトリを初期化
+      execSync('git init', { cwd: gitDir });
+      execSync('git config user.email "test@example.com"', { cwd: gitDir });
+      execSync('git config user.name "Test User"', { cwd: gitDir });
+
+      // 初回コミットを作成（ブランチが作成されるため）
+      fs.writeFileSync(path.join(gitDir, 'README.md'), '# Test');
+      execSync('git add .', { cwd: gitDir });
+      execSync('git commit -m "Initial commit"', { cwd: gitDir });
+
+      // mainブランチに切り替え（git initでデフォルトブランチ名が異なる可能性があるため）
+      try {
+        execSync('git branch -M main', { cwd: gitDir });
+      } catch {
+        // すでにmainの場合は無視
+      }
+
+      const repository: Repository = {
+        name: 'test-repo',
+        url: 'https://github.com/owner/repo',
+        branch: 'main',
+        localPath: gitDir,
+      };
+
+      const result = validateLocalPath(repository);
+
+      expect(result.isValid).toBe(true);
+      expect(result.errors).toHaveLength(0);
+      expect(result.exists).toBe(true);
+      expect(result.isGitRepository).toBe(true);
+      expect(result.currentBranch).toBe('main');
+      expect(result.branchMatches).toBe(true);
+      expect(result.hasUncommittedChanges).toBe(false);
+    });
+
+    it('ブランチが一致しない場合、警告を返す', () => {
+      const gitDir = path.join(tempDir, 'git-repo-branch-mismatch');
+      fs.mkdirSync(gitDir);
+
+      // Gitリポジトリを初期化
+      execSync('git init', { cwd: gitDir });
+      execSync('git config user.email "test@example.com"', { cwd: gitDir });
+      execSync('git config user.name "Test User"', { cwd: gitDir });
+
+      // 初回コミットを作成
+      fs.writeFileSync(path.join(gitDir, 'README.md'), '# Test');
+      execSync('git add .', { cwd: gitDir });
+      execSync('git commit -m "Initial commit"', { cwd: gitDir });
+
+      // developブランチに切り替え
+      execSync('git checkout -b develop', { cwd: gitDir });
+
+      const repository: Repository = {
+        name: 'test-repo',
+        url: 'https://github.com/owner/repo',
+        branch: 'main', // 実際はdevelopブランチにいる
+        localPath: gitDir,
+      };
+
+      const result = validateLocalPath(repository);
+
+      expect(result.isValid).toBe(true); // 警告のみでエラーではない
+      expect(result.errors).toHaveLength(0);
+      expect(result.warnings.length).toBeGreaterThan(0);
+      expect(result.warnings.some((w) => w.includes('does not match'))).toBe(
+        true,
+      );
+      expect(result.exists).toBe(true);
+      expect(result.isGitRepository).toBe(true);
+      expect(result.currentBranch).toBe('develop');
+      expect(result.branchMatches).toBe(false);
+    });
+
+    it('未コミット変更がある場合、警告を返す', () => {
+      const gitDir = path.join(tempDir, 'git-repo-uncommitted');
+      fs.mkdirSync(gitDir);
+
+      // Gitリポジトリを初期化
+      execSync('git init', { cwd: gitDir });
+      execSync('git config user.email "test@example.com"', { cwd: gitDir });
+      execSync('git config user.name "Test User"', { cwd: gitDir });
+
+      // 初回コミットを作成
+      fs.writeFileSync(path.join(gitDir, 'README.md'), '# Test');
+      execSync('git add .', { cwd: gitDir });
+      execSync('git commit -m "Initial commit"', { cwd: gitDir });
+
+      // mainブランチに切り替え
+      try {
+        execSync('git branch -M main', { cwd: gitDir });
+      } catch {
+        // すでにmainの場合は無視
+      }
+
+      // 未コミットの変更を追加
+      fs.writeFileSync(path.join(gitDir, 'new-file.txt'), 'uncommitted');
+
+      const repository: Repository = {
+        name: 'test-repo',
+        url: 'https://github.com/owner/repo',
+        branch: 'main',
+        localPath: gitDir,
+      };
+
+      const result = validateLocalPath(repository);
+
+      expect(result.isValid).toBe(true); // 警告のみでエラーではない
+      expect(result.errors).toHaveLength(0);
+      expect(result.warnings.length).toBeGreaterThan(0);
+      expect(
+        result.warnings.some((w) => w.includes('uncommitted changes')),
+      ).toBe(true);
+      expect(result.exists).toBe(true);
+      expect(result.isGitRepository).toBe(true);
+      expect(result.hasUncommittedChanges).toBe(true);
     });
   });
 });

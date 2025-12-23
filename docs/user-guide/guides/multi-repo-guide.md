@@ -22,6 +22,7 @@ Multi-Repo機能は、1つのプロジェクトで複数のGitHubリポジトリ
 3. **テスト実行**: プロジェクト単位でテストスクリプトを実行
 4. **Confluence同期**: プロジェクトドキュメントをConfluenceに自動同期
 5. **一覧表示**: プロジェクトとリポジトリの情報を一覧表示
+6. **サブエージェント連携**: 各リポジトリで仕様展開・レビュー・実装を並行実行（NEW）
 
 ## セットアップ
 
@@ -171,6 +172,9 @@ ls -la .claude/commands/
 | `/michi-multi-repo:spec-init` | プロジェクト初期化（プロジェクト説明から自動生成） |
 | `/michi-multi-repo:spec-requirements` | 要件定義書の自動生成 |
 | `/michi-multi-repo:spec-design` | 設計書の自動生成 |
+| `/michi-multi-repo:propagate-specs` | 各リポジトリへ仕様を展開（並行実行）（NEW） |
+| `/michi-multi-repo:spec-review` | クロスリポジトリレビュー（NEW） |
+| `/michi-multi-repo:impl-all` | 全リポジトリで実装を並行実行（NEW） |
 
 **使用例**:
 ```bash
@@ -977,6 +981,104 @@ mv .michi/config.json .michi/config.json.broken
 michi config:validate
 ```
 
+### 問題7: localPath未設定エラー（NEW）
+
+**エラーメッセージ**:
+```
+⚠️ 警告: リポジトリ 'frontend' の localPath が未設定です。スキップします。
+```
+
+**原因**:
+サブエージェント連携コマンド（`propagate-specs`, `spec-review`, `impl-all`）を使用しようとしたが、リポジトリに `localPath` が設定されていない。
+
+**解決方法**:
+
+1. リポジトリに `localPath` を設定する:
+
+```bash
+michi multi-repo:add-repo <project-name> \
+  --name <repo-name> \
+  --url <github-url> \
+  --branch <branch> \
+  --localPath <absolute-path>
+```
+
+**例**:
+```bash
+michi multi-repo:add-repo my-microservices \
+  --name frontend \
+  --url https://github.com/myorg/frontend \
+  --branch main \
+  --localPath /Users/user/projects/frontend
+```
+
+2. リポジトリがローカルにクローンされていることを確認:
+
+```bash
+ls -la /Users/user/projects/frontend
+# .git ディレクトリが存在することを確認
+```
+
+3. コマンドを再実行
+
+### 問題8: 品質ゲート不合格エラー（NEW）
+
+**エラーメッセージ**:
+```
+❌ エラー: 品質ゲート不合格
+
+BLOCK問題が未解決です。実装を開始できません。
+
+次のアクション:
+1. BLOCK問題を修正
+2. `/michi-multi-repo:spec-review my-project` を再実行
+3. 合格後に再度このコマンドを実行
+```
+
+**原因**:
+`/michi-multi-repo:spec-review` でBLOCK問題が検出され、品質ゲートが不合格になっている。
+
+**解決方法**:
+
+1. レビューレポートを確認:
+
+```bash
+# 最新のレビューレポートを確認
+ls -lt docs/michi/<project>/reviews/
+cat docs/michi/<project>/reviews/cross-repo-review-*.md
+```
+
+2. BLOCK問題を特定:
+
+```markdown
+#### 🔴 BLOCK (修正必須)
+
+##### Issue 1: [API-001] エンドポイント不整合
+- **発生箇所**: Frontend → Backend
+- **詳細**: `POST /api/v1/users` が Backend 設計書に未定義
+- **影響**: ユーザー作成フローが動作不可
+- **推奨アクション**: Backend の design.md にエンドポイント定義を追加
+```
+
+3. 該当リポジトリの設計書を修正:
+
+```bash
+cd /path/to/backend
+# design.md を編集してエンドポイント定義を追加
+```
+
+4. レビューを再実行:
+
+```bash
+/michi-multi-repo:spec-review my-project
+```
+
+5. 合格後、実装コマンドを再実行:
+
+```bash
+/michi-multi-repo:impl-all my-project
+```
+
 ## FAQ
 
 ### Q1: Multi-Repo機能はどのようなプロジェクトに適していますか？
@@ -1137,6 +1239,347 @@ michi multi-repo:confluence-sync my-microservices --doc-type architecture
 
 # 6. CI結果確認
 michi multi-repo:ci-status my-microservices
+```
+
+## サブエージェント連携による並行開発（NEW）
+
+Multi-Repoプロジェクトでは、サブエージェント連携により各リポジトリで仕様展開・レビュー・実装を並行実行できます。
+
+### 概要
+
+サブエージェント連携は、親プロジェクトの設計書を基に、各リポジトリで自動的に仕様コマンドを実行する機能です。
+
+**主な特徴**:
+- **並行実行**: 最大3リポジトリを同時に処理（効率化）
+- **整合性チェック**: API契約、データモデル、イベントスキーマの自動検証
+- **品質ゲート**: BLOCK/WARN/PASSによる品質判定
+- **チェックポイント**: 失敗時の再開をサポート
+
+**対象ユーザー**:
+- マイクロサービスアーキテクチャで開発しているチーム
+- 複数リポジトリの仕様を統一的に管理したいチーム
+- クロスリポジトリの整合性を保ちたいチーム
+
+### 前提条件
+
+サブエージェント連携を使用するには、各リポジトリに **localPath** を設定する必要があります。
+
+#### localPath設定方法
+
+リポジトリ登録時に `--localPath` オプションを追加します:
+
+```bash
+michi multi-repo:add-repo <project-name> \
+  --name <repo-name> \
+  --url <github-url> \
+  --branch <branch> \
+  --localPath <absolute-path>
+```
+
+**例**:
+```bash
+michi multi-repo:add-repo my-microservices \
+  --name frontend \
+  --url https://github.com/myorg/frontend \
+  --branch main \
+  --localPath /Users/user/projects/frontend
+
+michi multi-repo:add-repo my-microservices \
+  --name backend \
+  --url https://github.com/myorg/backend \
+  --branch main \
+  --localPath /Users/user/projects/backend
+```
+
+**重要事項**:
+- localPathは**絶対パス**で指定してください
+- 各リポジトリは事前にローカルにクローンしておく必要があります
+- 指定したブランチにチェックアウトされていることを確認してください
+
+### ワークフロー全体像
+
+```
+親プロジェクト
+├── 1. spec-init, spec-requirements, spec-design（親プロジェクトで実行）
+│
+├── 2. propagate-specs（各リポジトリへ仕様を展開）
+│   ├── Repository A: /kiro:spec-init, spec-requirements, spec-design
+│   ├── Repository B: /kiro:spec-init, spec-requirements, spec-design
+│   └── Repository C: /kiro:spec-init, spec-requirements, spec-design
+│
+├── 3. spec-review（クロスリポジトリレビュー）
+│   ├── API契約整合性チェック
+│   ├── データモデル整合性チェック
+│   ├── イベントスキーマ整合性チェック
+│   └── 品質ゲート判定（BLOCK/WARN/PASS）
+│
+└── 4. impl-all（全リポジトリで実装）
+    ├── Repository A: /michi:spec-impl（TDD実装）
+    ├── Repository B: /michi:spec-impl（TDD実装）
+    └── Repository C: /michi:spec-impl（TDD実装）
+```
+
+### 9. 仕様の並行展開
+
+各リポジトリに親プロジェクトの仕様を展開します。
+
+```bash
+/michi-multi-repo:propagate-specs <project-name> [--operation <operation>]
+```
+
+**オプション**:
+- `--operation`: 実行する操作（デフォルト: design）
+  - `init`: michi init + /kiro:spec-init
+  - `requirements`: /kiro:spec-requirements
+  - `design`: /kiro:spec-design
+  - `all`: init → requirements → design を順次実行
+
+**実行例**:
+```bash
+# 各リポジトリで設計書を生成
+/michi-multi-repo:propagate-specs my-microservices --operation design
+```
+
+**実行内容**:
+1. 各リポジトリのlocalPath検証
+2. repo-spec-executorサブエージェント起動（最大3並列）
+3. 各リポジトリで以下を実行:
+   - 作業ディレクトリ移動（cd localPath）
+   - michi init（未初期化の場合）
+   - 指定されたoperationコマンド実行
+4. 結果集約とレポート
+
+**出力例**:
+```
+🎉 全リポジトリで仕様展開が完了しました
+
+### 次のステップ
+
+1. クロスリポジトリレビューを実行:
+   `/michi-multi-repo:spec-review my-microservices`
+
+2. 合格後、各リポジトリでタスク生成:
+   各リポジトリで `/kiro:spec-tasks {feature}` を実行
+
+3. 実装を開始:
+   `/michi-multi-repo:impl-all my-microservices`
+```
+
+### 10. クロスリポジトリレビュー
+
+複数リポジトリ間の仕様整合性を検証します。
+
+```bash
+/michi-multi-repo:spec-review <project-name> [--focus <focus>]
+```
+
+**オプション**:
+- `--focus`: レビュー観点（デフォルト: all）
+  - `api`: API契約整合性のみ
+  - `data`: データモデル整合性のみ
+  - `event`: イベントスキーマ整合性のみ
+  - `deps`: 依存関係整合性のみ
+  - `test`: テスト仕様整合性のみ
+  - `all`: 全観点
+
+**実行例**:
+```bash
+# 全観点でレビュー
+/michi-multi-repo:spec-review my-microservices
+
+# API契約のみレビュー
+/michi-multi-repo:spec-review my-microservices --focus api
+```
+
+**レビュー観点**:
+
+1. **API契約整合性**
+   - エンドポイントパスの一致
+   - HTTPメソッドの一致
+   - リクエスト/レスポンススキーマの一致
+
+2. **データモデル整合性**
+   - エンティティ定義の一致
+   - フィールド名・型の一致
+   - 必須/オプショナル属性の一致
+
+3. **イベントスキーマ整合性**
+   - イベント名/トピック名の一致
+   - ペイロード構造の一致
+   - メタデータの一致
+
+4. **依存関係整合性**
+   - サービス間依存方向の妥当性
+   - バージョン要件の整合性
+
+5. **テスト仕様整合性**
+   - 統合テスト境界の明確さ
+   - E2Eシナリオの網羅性
+
+**品質ゲート判定**:
+
+- 🔴 **BLOCK（重大な不整合 - 即時修正必須）**:
+  - API契約の不一致（エンドポイント、スキーマ）
+  - 必須要件の欠落
+  - セキュリティ設計の不整合
+
+- 🟡 **WARN（軽微な不整合 - 修正推奨）**:
+  - 命名規則の不統一
+  - 推奨設計パターンからの逸脱
+  - ドキュメント不足
+
+- 🟢 **PASS（問題なし）**:
+  - 全チェック項目が基準を満たす
+
+**レビューレポート**:
+
+レビュー結果は以下に保存されます:
+```
+docs/michi/{project}/reviews/cross-repo-review-{timestamp}.md
+```
+
+**出力例**:
+```markdown
+## Multi-Repo Cross-Repository Review Report
+
+**プロジェクト**: my-microservices
+**レビュー日時**: 2025-12-23T14:00:00Z
+**対象リポジトリ**: 3件
+
+### サマリー
+
+| カテゴリ | ステータス | 問題件数 |
+|---------|----------|---------|
+| API契約整合性 | ✅ | 0件 |
+| データモデル整合性 | ⚠️ | 1件 |
+| イベントスキーマ整合性 | ✅ | 0件 |
+
+### 検出された問題
+
+#### 🟡 WARN (修正推奨)
+
+##### Issue 1: [DATA-001] フィールド名不一致
+- **発生箇所**: Frontend ↔ Backend
+- **詳細**: `userId` (Frontend) vs `user_id` (Backend)
+- **影響**: データマッピング時の不整合
+- **推奨アクション**: 命名規則を統一（camelCase推奨）
+
+### 品質ゲート判定
+
+**判定**: ⚠️ 条件付き合格
+
+**理由**: WARN問題が1件検出されましたが、修正は任意です。
+```
+
+### 11. 並行実装
+
+spec-review合格後、全リポジトリで実装を並行実行します。
+
+```bash
+/michi-multi-repo:impl-all <project-name> [--tasks <task-numbers>]
+```
+
+**オプション**:
+- `--tasks`: 実行するタスク番号（例: 1,2,3）、省略時は全タスク
+
+**実行例**:
+```bash
+# 全タスクを実装
+/michi-multi-repo:impl-all my-microservices
+
+# タスク1-3のみ実装
+/michi-multi-repo:impl-all my-microservices --tasks 1,2,3
+```
+
+**前提条件**:
+- spec-reviewが合格（BLOCK問題がないこと）
+- 各リポジトリでタスク生成済み（`/kiro:spec-tasks`）
+
+**実行内容**:
+1. 品質ゲート判定確認（最新レビューレポート）
+2. 各リポジトリで`/michi:spec-impl`を並行実行（最大3並列）
+3. TDDサイクル（RED-GREEN-REFACTOR）準拠
+4. テストカバレッジ95%以上を維持
+5. 結果集約とレポート
+
+**出力例**:
+```
+🎉 全リポジトリで実装が完了しました
+
+### 実装サマリー
+
+| 指標 | 結果 |
+|------|------|
+| 完了リポジトリ | 3/3 |
+| 全体カバレッジ | 96.3% |
+| Lint/Build | ✅ All Pass |
+
+### 次のステップ
+
+1. 各リポジトリでPR作成:
+   各リポジトリで `/pr` コマンドを実行
+
+2. CI結果を監視:
+   `michi multi-repo:ci-status my-microservices`
+
+3. PRマージ後、リリース準備:
+   - Confluenceリリース手順書作成
+   - JIRAリリースチケット起票
+```
+
+### サブエージェント連携ワークフロー例
+
+```bash
+# 1. 親プロジェクトの初期化と設計
+/michi-multi-repo:spec-init "マイクロサービスでECサイト構築" --jira EC --confluence-space EC
+/michi-multi-repo:spec-requirements ec-microservices
+/michi-multi-repo:spec-design ec-microservices
+
+# 2. リポジトリ登録（localPath付き）
+michi multi-repo:add-repo ec-microservices \
+  --name frontend \
+  --url https://github.com/myorg/frontend \
+  --branch main \
+  --localPath /Users/user/projects/frontend
+
+michi multi-repo:add-repo ec-microservices \
+  --name backend \
+  --url https://github.com/myorg/backend \
+  --branch main \
+  --localPath /Users/user/projects/backend
+
+michi multi-repo:add-repo ec-microservices \
+  --name payment-service \
+  --url https://github.com/myorg/payment-service \
+  --branch main \
+  --localPath /Users/user/projects/payment-service
+
+# 3. 各リポジトリに仕様を展開（NEW）
+/michi-multi-repo:propagate-specs ec-microservices --operation design
+
+# 4. クロスリポジトリレビュー（NEW）
+/michi-multi-repo:spec-review ec-microservices
+
+# 5. レビュー合格後、各リポジトリでタスク生成
+# （各リポジトリで個別に実行）
+cd /Users/user/projects/frontend
+/kiro:spec-tasks {feature}
+
+cd /Users/user/projects/backend
+/kiro:spec-tasks {feature}
+
+# 6. 全リポジトリで実装開始（NEW）
+/michi-multi-repo:impl-all ec-microservices
+
+# 7. 各リポジトリでPR作成
+cd /Users/user/projects/frontend
+/pr
+
+cd /Users/user/projects/backend
+/pr
+
+# 8. CI結果確認
+michi multi-repo:ci-status ec-microservices
 ```
 
 ## 関連ドキュメント
