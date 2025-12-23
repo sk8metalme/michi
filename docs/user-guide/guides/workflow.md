@@ -115,20 +115,10 @@ Cursorで実行：
 
 ```bash
 # 凡例
-/kiro:confluence-sync <feature> requirements
+/michi:confluence-sync <feature>
 
 # 具体例
-/kiro:confluence-sync user-auth requirements
-```
-
-または：
-
-```bash
-# 凡例
-michi confluence:sync <feature> requirements
-
-# 具体例
-michi confluence:sync user-auth requirements
+/michi:confluence-sync user-auth
 ```
 
 AIが自動的に：
@@ -185,10 +175,10 @@ jj git push
 
 ```bash
 # 凡例
-michi confluence:sync <feature> design
+/michi:confluence-sync <feature>
 
 # 具体例
-michi confluence:sync user-auth design
+/michi:confluence-sync user-auth
 ```
 
 見積もりExcelファイルが `estimates/<feature>-estimate.xlsx` に出力されます。
