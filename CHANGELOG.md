@@ -7,6 +7,51 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.0] - 2025-12-23
+
+### Added
+
+- **Multi-Repo Cross-Repository Reviewer Agent**: リポジトリ間の仕様整合性を自動レビュー
+  - **エージェント**: `templates/claude-agent/agents/cross-repo-reviewer.md`
+  - **機能**: API契約、データモデル、イベントスキーマの一貫性チェック
+  - **用途**: multi-repo環境でのspec-review時にPROACTIVELY使用
+
+- **Multi-Repo Spec Executor Agent**: 個別リポジトリで仕様コマンドを実行
+  - **エージェント**: `templates/claude-agent/agents/repo-spec-executor.md`
+  - **機能**: `/kiro:*`、`/michi:*` コマンドの個別リポジトリでの実行
+  - **用途**: multi-repo環境での仕様展開時にPROACTIVELY使用
+
+- **Multi-Repo Implementation Command**: 全リポジトリで並行実装を実行
+  - **コマンド**: `/michi-multi-repo:impl-all`
+  - **機能**: test-developer エージェントを使用したTDD実装の並行実行
+  - **用途**: multi-repo環境での一括実装自動化
+
+- **Multi-Repo Spec Propagation Command**: プロジェクトから各リポジトリへ仕様展開
+  - **コマンド**: `/michi-multi-repo:propagate-specs`
+  - **機能**: repo-spec-executor を使用した仕様の並行展開
+  - **用途**: multi-repo環境での仕様配布自動化
+
+- **Multi-Repo Spec Review Command**: クロスリポジトリ仕様整合性レビュー
+  - **コマンド**: `/michi-multi-repo:spec-review`
+  - **機能**: cross-repo-reviewer を使用した整合性レビュー
+  - **用途**: multi-repo環境でのspec-review自動化
+
+### Changed
+
+- **Multi-Repo Guide大幅更新**: 443行の詳細ガイドを追加
+  - `.michi/config.json` の Repository スキーマ詳細解説
+  - ワークフロー（プロジェクト初期化→仕様展開→実装→レビュー）の追加
+  - エージェント・コマンドの使い方を網羅
+
+- **Workflow Walkthrough更新**: multi-repo対応の実践的ガイドを追加（177行追加）
+  - multi-repo環境でのハンズオン手順を追加
+
+- **Multi-Repo Validator強化**: localPath品質検証機能を追加（161行追加）
+  - 絶対パス検証（Unix/Windows両対応）
+  - 重複パス検出
+  - パストラバーサル攻撃防止
+  - テストケース230行追加
+
 ## [0.9.0] - 2025-12-23
 
 ### Added
