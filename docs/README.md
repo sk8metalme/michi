@@ -1,96 +1,33 @@
-# Michiドキュメント
+# Michi (道)
 
-Michiは、AI駆動開発ワークフロー自動化プラットフォームです。このドキュメントでは、Michiの使い方と開発方法を説明します。
+**M**anaged **I**ntelligent **C**omprehensive **H**ub for **I**ntegration
 
-## ドキュメント構造
+AI駆動開発ワークフロー自動化プラットフォーム
 
-Michiのドキュメントは、目的別に以下のカテゴリに整理されています。
+[![npm version](https://badge.fury.io/js/@sk8metal%2Fmichi-cli.svg?icon=si%3Anpm)](https://badge.fury.io/js/@sk8metal%2Fmichi-cli)
+[![CI](https://github.com/sk8metalme/michi/actions/workflows/ci.yml/badge.svg)](https://github.com/sk8metalme/michi/actions/workflows/ci.yml)
+[![Test Setup](https://github.com/sk8metalme/michi/actions/workflows/test-setup.yml/badge.svg)](https://github.com/sk8metalme/michi/actions/workflows/test-setup.yml)
+[![Security](https://github.com/sk8metalme/michi/actions/workflows/security.yml/badge.svg)](https://github.com/sk8metalme/michi/actions/workflows/security.yml)
+[![codecov](https://codecov.io/gh/sk8metalme/michi/branch/main/graph/badge.svg)](https://codecov.io/gh/sk8metalme/michi)
 
-### 🚀 はじめに ([getting-started/](./getting-started/))
+## 概要
 
-初めてMichiを使う方向けのガイドです。
+Michiは、開発フロー全体（要件定義→設計→タスク分割→実装→テスト→リリース）をAIで自動化するプラットフォームです。
 
-| ドキュメント | 説明 |
-|------------|------|
-| [セットアップガイド](./getting-started/setup.md) | Michiのインストールと設定手順 |
-| [クイックスタート](./getting-started/quick-start.md) | 5分で始めるMichi |
-| [新規リポジトリ作成](./getting-started/new-repository-setup.md) | 新規リポジトリを作成してMichiを使い始める方法 |
-| **[ハンズオンガイド](./hands-on/README.md)** ⭐ | 実際に手を動かして学ぶ1時間のチュートリアル |
+**Powered by [cc-sdd](https://github.com/gotalab/cc-sdd)**
 
-### 📖 実践ガイド ([guides/](./guides/))
+### はじめに
 
-Michiを使った開発の実践的なガイドです。
+- [5分で始めるMichi](getting-started/quick-start.md) - クイックスタートガイド
+- [インストール](getting-started/installation.md) - インストール方法
+- [環境設定](getting-started/configuration.md) - 環境変数とMCP設定
 
-| ドキュメント | 説明 |
-|------------|------|
-| [ワークフローガイド](./guides/workflow.md) ⭐ | AI開発フローの詳細 |
-| [フェーズ自動化ガイド](./guides/phase-automation.md) ⭐ | Confluence/JIRA自動作成 |
-| [Multi-Repo管理ガイド](./guides/multi-repo-guide.md) | マイクロサービス等複数リポジトリの統合管理、AI支援初期化・要件定義・設計 |
-| [マルチプロジェクト管理](./guides/multi-project.md) | 複数プロジェクトの同時管理 |
-| [カスタマイズガイド](./guides/customization.md) | Confluence/JIRA階層構造のカスタマイズ |
+### リファレンス
 
-### 📚 リファレンス ([reference/](./reference/))
+- [CLIコマンドリファレンス](reference/cli.md) - 全CLIコマンドの詳細
 
-コマンドや設定値のリファレンス資料です。
+## 対象読者
 
-| ドキュメント | 説明 |
-|------------|------|
-| [クイックリファレンス](./reference/quick-reference.md) ⭐ | コマンド一覧・チートシート |
-| [設定値リファレンス](./reference/config.md) | `.michi/config.json`の全設定値 |
-| [タスクテンプレート](./reference/tasks-template.md) | タスク記述のテンプレート |
+このドキュメントは、Michiを利用してプロジェクト開発を行う**ユーザー向け**です。
 
-### 🛠️ コントリビューター向け ([contributing/](./contributing/))
-
-Michiプロジェクトに貢献したい開発者向けのガイドです。
-
-| ドキュメント | 説明 |
-|------------|------|
-| [開発環境セットアップ](./contributing/development.md) | 開発者向けセットアップ手順 |
-| [リリース手順](./contributing/release.md) | バージョンアップ・NPM公開 |
-| [CI/CD設定](./contributing/ci-cd.md) | CI/CD整備計画 |
-
-### 📝 一時ドキュメント ([tmp/](./tmp/))
-
-プロジェクト管理や計画のための一時的なドキュメントです（gitで管理されません）。
-
-## おすすめの読み方
-
-### Michiを初めて使う場合
-
-1. [セットアップガイド](./getting-started/setup.md) - Michiをインストール
-2. [クイックスタート](./getting-started/quick-start.md) - 5分で基本的な使い方を習得
-3. **[ハンズオンガイド](./hands-on/README.md)** ⭐ - 1時間で全ワークフローを体験
-4. [ワークフローガイド](./guides/workflow.md) - AI開発フローを理解
-
-### Michiを別のプロジェクトで使う場合
-
-1. [新規リポジトリ作成](./getting-started/new-repository-setup.md) - 新規リポジトリでの始め方
-2. [クイックリファレンス](./reference/quick-reference.md) - コマンド一覧を確認
-
-### Confluence/JIRAの設定をカスタマイズする場合
-
-1. [カスタマイズガイド](./guides/customization.md) - カスタマイズ方法
-2. [設定値リファレンス](./reference/config.md) - 全設定値の詳細
-
-### Michiの開発に貢献する場合
-
-1. [コントリビューションガイド](../CONTRIBUTING.md) - 貢献方法の概要
-2. [開発環境セットアップ](./contributing/development.md) - 開発環境の構築
-3. [リリース手順](./contributing/release.md) - リリースプロセス
-
-## アイコンの意味
-
-- ⭐: 重要度が高いドキュメント
-- 🚧: 作成中のドキュメント
-- 📦: 外部リンク
-
-## 質問・フィードバック
-
-ドキュメントに関する質問やフィードバックがある場合は、[issue](https://github.com/sk8metalme/michi/issues)を作成してください。
-
-## 参考リンク
-
-- [Michiリポジトリ](https://github.com/sk8metalme/michi)
-- [cc-sdd公式ドキュメント](https://github.com/gotalab/cc-sdd)
-- [Cursor IDE](https://cursor.sh/)
-- [Atlassian MCP Server](https://www.atlassian.com/ja/platform/remote-mcp-server)
+Michi自体の開発に貢献する場合は、[CONTRIBUTING.md](../CONTRIBUTING.md) を参照してください。
