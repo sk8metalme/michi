@@ -388,19 +388,43 @@ describe('hasMichiSetup', () => {
 });
 
 describe('getMichiSetupCommand', () => {
-  it('正しいセットアップコマンドを生成する', () => {
+  it('正しいセットアップコマンドを生成する（シングルクォートでラップ）', () => {
     const localPath = '/path/to/repo';
     const command = getMichiSetupCommand(localPath);
     expect(command).toBe(
-      'cd /path/to/repo && npx @sk8metal/michi-cli@latest init',
+      "cd '/path/to/repo' && npx @sk8metal/michi-cli@latest init",
     );
   });
 
-  it('スペースを含むパスでもコマンドを生成する', () => {
+  it('スペースを含むパスを正しくエスケープする', () => {
     const localPath = '/path/to/my repo';
     const command = getMichiSetupCommand(localPath);
     expect(command).toBe(
-      'cd /path/to/my repo && npx @sk8metal/michi-cli@latest init',
+      "cd '/path/to/my repo' && npx @sk8metal/michi-cli@latest init",
+    );
+  });
+
+  it('シングルクォートを含むパスを正しくエスケープする', () => {
+    const localPath = "/path/to/user's repo";
+    const command = getMichiSetupCommand(localPath);
+    expect(command).toBe(
+      "cd '/path/to/user'\\''s repo' && npx @sk8metal/michi-cli@latest init",
+    );
+  });
+
+  it('複数のシングルクォートを含むパスを正しくエスケープする', () => {
+    const localPath = "/path/to/'test'/repo's/dir";
+    const command = getMichiSetupCommand(localPath);
+    expect(command).toBe(
+      "cd '/path/to/'\\''test'\\''/repo'\\''s/dir' && npx @sk8metal/michi-cli@latest init",
+    );
+  });
+
+  it('スペースとシングルクォート両方を含むパスを正しくエスケープする', () => {
+    const localPath = "/path/to/user's test repo";
+    const command = getMichiSetupCommand(localPath);
+    expect(command).toBe(
+      "cd '/path/to/user'\\''s test repo' && npx @sk8metal/michi-cli@latest init",
     );
   });
 });

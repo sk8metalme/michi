@@ -172,12 +172,16 @@ export function hasMichiSetup(localPath: string): boolean {
 
 /**
  * Michi導入コマンドを生成
+ * パスに空白やシングルクォートが含まれる場合に対応
  *
  * @param localPath - 子リポジトリのlocalPath
  * @returns セットアップコマンド文字列
  */
 export function getMichiSetupCommand(localPath: string): string {
-  return `cd ${localPath} && npx @sk8metal/michi-cli@latest init`;
+  // シングルクォートをエスケープ: ' → '\''
+  // eslint-disable-next-line quotes
+  const escapedPath = localPath.replace(/'/g, "'\\''");
+  return `cd '${escapedPath}' && npx @sk8metal/michi-cli@latest init`;
 }
 
 /**
