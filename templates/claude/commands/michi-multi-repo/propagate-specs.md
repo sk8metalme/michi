@@ -182,7 +182,7 @@ C) キャンセル
    `/michi-multi-repo:spec-review $1`
 
 2. 合格後、各リポジトリでタスク生成:
-   各リポジトリで `/kiro:spec-tasks {feature}` を実行
+   各リポジトリで `/michi:spec-tasks {feature}` を実行
 
 3. 実装を開始:
    `/michi-multi-repo:impl-all $1`

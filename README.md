@@ -65,8 +65,8 @@ michi setup-existing --claude-agent
 # 3. 設計（テスト計画統合版）
 /michi:spec-design calculator-app
 
-# 4. タスク分割とJIRA同期
-/kiro:spec-tasks calculator-app
+# 4. タスク分割（JIRA同期確認付き）
+/michi:spec-tasks calculator-app
 
 # 5. TDD実装
 /michi:spec-impl calculator-app

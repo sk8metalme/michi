@@ -44,7 +44,7 @@ npx @sk8metal/michi-cli setup-existing --codex --lang ja
 | `/kiro:spec-init` | 新規仕様フォルダ初期化 |
 | `/kiro:spec-requirements` | 要件定義書作成（EARS形式） |
 | `/kiro:spec-design` | 設計ドキュメント作成 |
-| `/kiro:spec-tasks` | タスク分割（並列実行可能） |
+| `/michi:spec-tasks` | タスク分割（並列実行可能） |
 | `/kiro:spec-impl` | TDDベース実装 |
 | `/kiro:spec-status` | ワークフロー進捗確認 |
 | `/kiro:validate-gap` | 既存コードとのギャップ分析 |
@@ -82,7 +82,7 @@ npx @sk8metal/michi-cli setup-existing --codex --lang ja
 
 ### 4. 実装
 ```bash
-/kiro:spec-tasks FEATURE=user-authentication
+/michi:spec-tasks FEATURE=user-authentication
 /kiro:spec-impl FEATURE=user-authentication
 ```
 

@@ -39,6 +39,7 @@ AI駆動開発を支援するコマンドセットです。
 | `/michi:spec-design` | テスト計画統合設計書を作成 | `{feature}` | Phase 0.3-0.4ガイダンス付き |
 | `/michi:test-planning` | テスト計画を実行 | `{feature}` | テストタイプ選択+仕様書作成 |
 | `/michi:validate-design` | テスト計画レビュー | `{feature}` | テスト計画完了確認付き |
+| `/michi:spec-tasks` | タスク分割+JIRA同期確認 | `{feature}` | JIRA連携オプション付き |
 | `/michi:spec-impl` | TDD実装+品質自動化 | `{feature}` | ライセンス/バージョン監査+レビュー |
 | `/michi:confluence-sync` | Confluence同期 | `{feature} {type}` | type: requirements/design |
 
@@ -72,7 +73,7 @@ AI駆動開発を支援するコマンドセットです。
 
 ```
 /kiro:spec-init → /kiro:spec-requirements → /michi:spec-design
-→ /michi:test-planning → /kiro:spec-tasks → /michi:spec-impl
+→ /michi:test-planning → /michi:spec-tasks → /michi:spec-impl
 → /michi:confluence-sync
 ```
 

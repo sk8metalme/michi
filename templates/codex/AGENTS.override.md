@@ -242,7 +242,7 @@ v<major>.<minor>.<patch>
 
 4. **実装とテスト（cc-sdd + TDD）**
    ```bash
-   /kiro:spec-tasks FEATURE=user-auth
+   /michi:spec-tasks FEATURE=user-auth
    /kiro:spec-impl FEATURE=user-auth
    ```
 

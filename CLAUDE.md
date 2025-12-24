@@ -238,7 +238,7 @@ Michi 固有拡張:
 2. `/kiro:spec-requirements {feature}` - 要件定義
 3. `/michi:spec-design {feature}` - 設計（Phase 0.3-0.4ガイダンス付き）
 4. `/michi:test-planning {feature}` - テスト計画（Phase 0.3-0.4）
-5. `/kiro:spec-tasks {feature}` - タスク分割
+5. `/michi:spec-tasks {feature}` - タスク分割（JIRA同期確認付き）
 6. `/michi:spec-impl {feature}` - TDD実装 + 品質自動化
 
 詳細なワークフローは [ワークフローガイド](docs/user-guide/guides/workflow.md) を参照してください。

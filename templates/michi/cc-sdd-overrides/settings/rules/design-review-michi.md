@@ -44,7 +44,7 @@
 設計が承認された場合（GO Decision）:
 1. Phase 0.3: テストタイプの選択を実施
 2. Phase 0.4: テスト仕様書の作成を実施
-3. Phase 0.5: タスク分割（`/kiro:spec-tasks`）に進む
+3. Phase 0.5: タスク分割（`/michi:spec-tasks`）に進む
 
 詳細は [テスト計画フロー](docs/user-guide/testing/test-planning-flow.md) を参照してください。
 

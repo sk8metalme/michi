@@ -106,7 +106,7 @@ npx @sk8metal/michi-cli phase:run <feature> design
 
 ```bash
 # AIコマンドで tasks.md 作成後
-/kiro:spec-tasks <feature>
+/michi:spec-tasks <feature>
 
 # CLIツールで JIRA作成 + バリデーション
 npx @sk8metal/michi-cli phase:run <feature> tasks

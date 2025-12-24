@@ -66,10 +66,10 @@ Phase 0.3-0.4 完了後、以下のステップに進んでください:
 
 **推奨フロー**:
 1. `/michi:validate-design {feature}` で設計レビューを実施（任意）
-2. `/kiro:spec-tasks {feature}` でタスク生成
+2. `/michi:spec-tasks {feature}` でタスク生成
 
 **クイックフロー**:
-- `/kiro:spec-tasks {feature} -y` で自動承認してタスク生成
+- `/michi:spec-tasks {feature} -y` で自動承認してタスク生成
 
 **重要**: テスト計画（Phase 0.3-0.4）を完了してからタスク生成することで、実装タスクにテスト実装が適切に含まれます。
 

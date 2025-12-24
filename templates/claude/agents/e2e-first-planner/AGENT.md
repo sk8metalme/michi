@@ -3,7 +3,7 @@ name: e2e-first-planner
 description: |
   E2Eファースト開発計画を自動生成する実行エージェント。
   Walking Skeleton、MVP計画、縦割りタスク分割を提案。
-  タスク分割フェーズ（/kiro:spec-tasks実行時）に PROACTIVELY 使用してください。
+  タスク分割フェーズ（/michi:spec-tasks実行時）に PROACTIVELY 使用してください。
 allowed-tools: Bash, Read, Grep, Glob
 ---
 
