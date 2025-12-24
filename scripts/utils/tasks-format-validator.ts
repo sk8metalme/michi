@@ -35,7 +35,7 @@ export function validateTasksFormat(tasksPath: string): void {
     throw new Error(
       'tasks.md appears to be in AI-DLC format instead of Michi workflow format.\n' +
         'Detected "- [ ] 1." pattern without Phase structure.\n' +
-        'Please regenerate tasks.md using /kiro:spec-tasks command with correct template.',
+        'Please regenerate tasks.md using /michi:spec-tasks command with correct template.',
     );
   }
 
@@ -72,7 +72,7 @@ export function validateTasksFormat(tasksPath: string): void {
       'tasks.md does not match either workflow structure.\n\n' +
         `Missing required phases (new workflow):\n${missingNewPhases.map((p) => `  - ${p}`).join('\n')}\n\n` +
         `Missing phases (legacy workflow):\n${missingLegacyPhases.map((p) => `  - ${p}`).join('\n')}\n\n` +
-        'Please regenerate tasks.md using /kiro:spec-tasks command with the latest template.',
+        'Please regenerate tasks.md using /michi:spec-tasks command with the latest template.',
     );
   }
 
@@ -100,7 +100,7 @@ export function validateTasksFormat(tasksPath: string): void {
     throw new Error(
       'tasks.md does not contain valid Story headers.\n' +
         'Expected format: "### Story X.Y: Title"\n' +
-        'Please regenerate tasks.md using /kiro:spec-tasks command.',
+        'Please regenerate tasks.md using /michi:spec-tasks command.',
     );
   }
 

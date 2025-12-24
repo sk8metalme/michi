@@ -229,7 +229,7 @@ async function checkTasksPrerequisites(
   const tasksPath = join(process.cwd(), '.kiro', 'specs', feature, 'tasks.md');
   if (!existsSync(tasksPath)) {
     errors.push(
-      'tasks.mdが存在しません。先に/kiro:spec-tasks を実行してください',
+      'tasks.mdが存在しません。先に/michi:spec-tasks を実行してください',
     );
     return { valid: false, errors };
   }

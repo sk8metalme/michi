@@ -166,7 +166,7 @@ michi phase:run calculator-app design
 
 **実行コマンド**:
 ```bash
-/kiro:spec-tasks {feature}
+/michi:spec-tasks {feature}
 
 # または、CLIから実行（JIRA同期付き）
 michi phase:run {feature} tasks
@@ -174,7 +174,7 @@ michi phase:run {feature} tasks
 
 **実行例**:
 ```bash
-/kiro:spec-tasks calculator-app
+/michi:spec-tasks calculator-app
 
 # または、CLIから実行
 michi phase:run calculator-app tasks
@@ -335,7 +335,7 @@ michi phase:run calculator-app phase-b
 | 0.1 | 必須 | `/kiro:spec-requirements {feature}` | - |
 | 0.2 | 必須 | `/michi:spec-design {feature}` | Michi推奨 |
 | 0.3-0.4 | 任意 | `/michi:test-planning {feature}` | Michi拡張 |
-| 0.5 | 必須 | `/kiro:spec-tasks {feature}` | - |
+| 0.5 | 必須 | `/michi:spec-tasks {feature}` | Michi推奨 |
 | 2 | 必須 | `/michi:spec-impl {feature}` | Michi推奨 |
 
 ### CLI経由（Confluence/JIRA同期付き）

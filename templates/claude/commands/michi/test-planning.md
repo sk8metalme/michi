@@ -153,7 +153,7 @@ This command will:
 ### Or: Proceed to Task Generation
 
 ```bash
-/kiro:spec-tasks {feature-name} [-y]
+/michi:spec-tasks {feature-name} [-y]
 ```
 
 This will generate implementation tasks based on requirements, design, and test specifications.

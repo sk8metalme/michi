@@ -78,7 +78,7 @@ Cursorでは、以下のコマンドが利用できます：
 /kiro:spec-init "機能の説明"
 /kiro:spec-requirements {feature}
 /kiro:spec-design {feature}
-/kiro:spec-tasks {feature}
+/michi:spec-tasks {feature}
 /kiro:spec-impl {feature}
 
 # Michi拡張コマンド
@@ -118,7 +118,7 @@ Gemini CLIでは、以下のコマンドが利用できます：
 /kiro:spec-init "機能の説明"
 /kiro:spec-requirements {feature}
 /kiro:spec-design {feature}
-/kiro:spec-tasks {feature}
+/michi:spec-tasks {feature}
 /kiro:spec-impl {feature}
 
 # Gemini固有の操作
@@ -159,7 +159,7 @@ Codex CLIでは、以下のプロンプトが利用できます：
 /kiro:spec-init FEATURE=calculator-app
 /kiro:spec-requirements FEATURE=calculator-app
 /kiro:spec-design FEATURE=calculator-app
-/kiro:spec-tasks FEATURE=calculator-app
+/michi:spec-tasks FEATURE=calculator-app
 /kiro:spec-impl FEATURE=calculator-app
 
 # Michi拡張プロンプト
@@ -216,7 +216,7 @@ Clineでは、以下の機能が利用できます：
 /kiro:spec-init "機能の説明"
 /kiro:spec-requirements {feature}
 /kiro:spec-design {feature}
-/kiro:spec-tasks {feature}
+/michi:spec-tasks {feature}
 /kiro:spec-impl {feature}
 
 # Michi拡張

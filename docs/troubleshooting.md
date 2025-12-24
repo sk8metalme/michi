@@ -246,7 +246,7 @@
    /michi:spec-design calculator-app
 
    # Phase 0.5: タスク分割
-   /kiro:spec-tasks calculator-app
+   /michi:spec-tasks calculator-app
    ```
 
 3. ファイルの存在確認

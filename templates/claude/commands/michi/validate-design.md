@@ -42,15 +42,15 @@ Phase 0.3-0.4 が未完了の場合は、タスク生成前に完了すること
      - 統合テスト: `docs/user-guide/templates/test-specs/integration-test-spec-template.md`
    - 出力先: `.kiro/specs/$1/test-specs/`
 
-3. **完了後**: `/kiro:spec-tasks $1` でタスク生成に進む
+3. **完了後**: `/michi:spec-tasks $1` でタスク生成に進む
 
 ### Next Phase Guidance
 
 **テスト計画完了済みの場合**:
-- `/kiro:spec-tasks $1` でタスク生成
+- `/michi:spec-tasks $1` でタスク生成
 
 **テスト計画未完了の場合**:
-- Phase 0.3-0.4 を実施してから `/kiro:spec-tasks $1`
+- Phase 0.3-0.4 を実施してから `/michi:spec-tasks $1`
 - または `/michi:spec-design $1` を再実行して Next Phase ガイダンスを確認
 
 ---

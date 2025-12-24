@@ -108,6 +108,6 @@ michi init
 
 ### 次のステップ
 
-- `/kiro:spec-tasks user-authentication` でタスク生成
+- `/michi:spec-tasks user-authentication` でタスク生成
 - または `/michi:spec-impl user-authentication` で実装開始
 ```
