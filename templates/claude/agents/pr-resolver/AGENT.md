@@ -30,15 +30,27 @@ gh pr view <PR番号> --json number,title,state
 
 GitHub GraphQL APIでreviewThreadsを取得（`isResolved: false`）
 
-### 3. ユーザー確認
+### 3. CI/CDステータス確認
+
+CI／CDステータスを確認し、失敗しているjobがあれば、原因調査
+
+### 4. 未resolveスレッドについて対応するかどうか判断する
+
+tasks.mdを参考に、今後のタスクとして対応予定のものなのか、それとも、今すぐに対応すべき課題なのかを判断する
+
+### 5. CI/CDステータスが失敗だった時の対応
+
+失敗しているjobについてログを確認し、事実ベースで解決策を検討
+
+### 　6. ユーザー確認
 
 resolveするスレッドを提示し、確認を得る。
 
-### 4. resolve実行
+### 7. resolve実行
 
 `resolveReviewThread` mutationを実行。
 
-### 5. 結果報告
+### 8. 結果報告
 
 resolve済みスレッド数とステータスを報告。
 
