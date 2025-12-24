@@ -28,6 +28,8 @@ export interface LocalPathValidationResult extends ValidationResult {
   currentBranch: string | null;
   branchMatches: boolean;
   hasUncommittedChanges: boolean;
+  hasMichiSetup: boolean;
+  michiSetupCommand: string | null;
 }
 
 /**
@@ -157,6 +159,32 @@ export function validateRepositoryUrl(url: string): ValidationResult {
 }
 
 /**
+ * Michi導入状況をチェック
+ * .kiro/project.json の存在でMichi導入済みと判定
+ *
+ * @param localPath - 子リポジトリのlocalPath
+ * @returns Michi導入済みかどうか
+ */
+export function hasMichiSetup(localPath: string): boolean {
+  const projectJsonPath = path.join(localPath, '.kiro', 'project.json');
+  return fs.existsSync(projectJsonPath);
+}
+
+/**
+ * Michi導入コマンドを生成
+ * パスに空白やシングルクォートが含まれる場合に対応
+ *
+ * @param localPath - 子リポジトリのlocalPath
+ * @returns セットアップコマンド文字列
+ */
+export function getMichiSetupCommand(localPath: string): string {
+  // シングルクォートをエスケープ: ' → '\''
+  // eslint-disable-next-line quotes
+  const escapedPath = localPath.replace(/'/g, "'\\''");
+  return `cd '${escapedPath}' && npx @sk8metal/michi-cli@latest init`;
+}
+
+/**
  * LocalPathのバリデーション
  * ディレクトリ存在、Gitリポジトリ、ブランチ、未コミット変更をチェック
  *
@@ -175,6 +203,8 @@ export function validateLocalPath(
   let currentBranch: string | null = null;
   let branchMatches = false;
   let hasUncommittedChanges = false;
+  let hasMichiSetupResult = false;
+  let michiSetupCommand: string | null = null;
 
   // 1. localPath設定確認
   if (!repository.localPath) {
@@ -190,6 +220,8 @@ export function validateLocalPath(
       currentBranch,
       branchMatches,
       hasUncommittedChanges,
+      hasMichiSetup: hasMichiSetupResult,
+      michiSetupCommand,
     };
   }
 
@@ -211,6 +243,8 @@ export function validateLocalPath(
         currentBranch,
         branchMatches,
         hasUncommittedChanges,
+        hasMichiSetup: hasMichiSetupResult,
+        michiSetupCommand,
       };
     }
     exists = true;
@@ -225,6 +259,8 @@ export function validateLocalPath(
       currentBranch,
       branchMatches,
       hasUncommittedChanges,
+      hasMichiSetup: hasMichiSetupResult,
+      michiSetupCommand,
     };
   }
 
@@ -243,6 +279,8 @@ export function validateLocalPath(
       currentBranch,
       branchMatches,
       hasUncommittedChanges,
+      hasMichiSetup: hasMichiSetupResult,
+      michiSetupCommand,
     };
   }
   isGitRepository = true;
@@ -287,6 +325,16 @@ export function validateLocalPath(
     );
   }
 
+  // 6. Michi導入状況確認
+  hasMichiSetupResult = hasMichiSetup(localPath);
+
+  if (!hasMichiSetupResult) {
+    michiSetupCommand = getMichiSetupCommand(localPath);
+    warnings.push(
+      `Repository '${repository.name}' does not have Michi setup (.kiro/project.json not found)`,
+    );
+  }
+
   return {
     isValid: errors.length === 0,
     errors,
@@ -296,5 +344,7 @@ export function validateLocalPath(
     currentBranch,
     branchMatches,
     hasUncommittedChanges,
+    hasMichiSetup: hasMichiSetupResult,
+    michiSetupCommand,
   };
 }
