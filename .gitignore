@@ -5,6 +5,7 @@
 *~
 .#*
 #*#
+.michi-backup-*  # Michi バックアップディレクトリ
 
 # Dependencies
 node_modules/
@@ -20,6 +21,7 @@ node_modules/
 dist/
 build/
 *.tsbuildinfo
+*.tgz  # npm pack で生成されるビルド成果物
 
 # Logs
 logs/
