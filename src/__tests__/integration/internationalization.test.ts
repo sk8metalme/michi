@@ -45,7 +45,7 @@ describe('Internationalization (i18n) E2E', () => {
   describe('Japanese Language Support', () => {
     it('should setup project with Japanese language (default)', async () => {
       await setupExisting({
-        cursor: true,
+        claude: true,
         projectName: 'テストプロジェクト',
         jiraKey: 'TEST'
       });
@@ -58,15 +58,15 @@ describe('Internationalization (i18n) E2E', () => {
 
     it('should render templates with Japanese DEV_GUIDELINES', async () => {
       await setupExisting({
-        cursor: true,
+        claude: true,
         lang: 'ja',
         projectName: 'テストプロジェクト',
         jiraKey: 'TEST'
       });
 
       // Check if templates contain Japanese guidelines
-      const rulesDir = join(testProject.path, '.cursor/rules');
-      const ruleFiles = ['github-ssot.mdc', 'atlassian-mcp.mdc', 'multi-project.mdc'];
+      const rulesDir = join(testProject.path, '.claude/rules');
+      const ruleFiles = ['atlassian-integration.md', 'michi-core.md'];
 
       for (const ruleFile of ruleFiles) {
         const rulePath = join(rulesDir, ruleFile);
@@ -97,7 +97,7 @@ describe('Internationalization (i18n) E2E', () => {
   describe('English Language Support', () => {
     it('should setup project with English language', async () => {
       await setupExisting({
-        cursor: true,
+        claude: true,
         lang: 'en',
         projectName: 'Test Project',
         jiraKey: 'TEST'
@@ -111,15 +111,15 @@ describe('Internationalization (i18n) E2E', () => {
 
     it('should render templates with English DEV_GUIDELINES', async () => {
       await setupExisting({
-        cursor: true,
+        claude: true,
         lang: 'en',
         projectName: 'Test Project',
         jiraKey: 'TEST'
       });
 
       // Check if templates contain English guidelines
-      const rulesDir = join(testProject.path, '.cursor/rules');
-      const ruleFiles = ['github-ssot.mdc', 'atlassian-mcp.mdc', 'multi-project.mdc'];
+      const rulesDir = join(testProject.path, '.claude/rules');
+      const ruleFiles = ['atlassian-integration.md', 'michi-core.md'];
 
       for (const ruleFile of ruleFiles) {
         const rulePath = join(rulesDir, ruleFile);
@@ -160,7 +160,7 @@ description: {{DEV_GUIDELINES}} for testing
 ## Other content
 `;
 
-      const context = createTemplateContext('ja', '.kiro', '.cursor');
+      const context = createTemplateContext('ja', '.kiro', '.claude');
       const rendered = renderTemplate(template, context);
 
       // Should replace all placeholders
@@ -185,7 +185,7 @@ description: {{DEV_GUIDELINES}} for testing
 ## Other content
 `;
 
-      const context = createTemplateContext('en', '.kiro', '.cursor');
+      const context = createTemplateContext('en', '.kiro', '.claude');
       const rendered = renderTemplate(template, context);
 
       // Should replace all placeholders
@@ -205,13 +205,13 @@ Kiro Dir: {{KIRO_DIR}}
 Agent Dir: {{AGENT_DIR}}
 `;
 
-      const context = createTemplateContext('ja', '.kiro', '.cursor');
+      const context = createTemplateContext('ja', '.kiro', '.claude');
       const rendered = renderTemplate(template, context);
 
       expect(rendered).toContain('Language: ja');
       expect(rendered).toContain('Guidelines: - Think in English');
       expect(rendered).toContain('Kiro Dir: .kiro');
-      expect(rendered).toContain('Agent Dir: .cursor');
+      expect(rendered).toContain('Agent Dir: .claude');
     });
 
     it('should preserve unrecognized placeholders', () => {
@@ -219,7 +219,7 @@ Agent Dir: {{AGENT_DIR}}
 Unknown: {{UNKNOWN_PLACEHOLDER}}
 `;
 
-      const context = createTemplateContext('ja', '.kiro', '.cursor');
+      const context = createTemplateContext('ja', '.kiro', '.claude');
       const rendered = renderTemplate(template, context);
 
       // Known placeholder should be replaced
@@ -266,7 +266,7 @@ Unknown: {{UNKNOWN_PLACEHOLDER}}
 
       it(`should setup project with ${name} (${code})`, async () => {
         await setupExisting({
-          cursor: true,
+          claude: true,
           lang: code,
           projectName: 'Test Project',
           jiraKey: 'TEST'
@@ -280,26 +280,26 @@ Unknown: {{UNKNOWN_PLACEHOLDER}}
 
   describe('Template Context Creation', () => {
     it('should create context with all required fields', () => {
-      const context = createTemplateContext('ja', '.kiro', '.cursor');
+      const context = createTemplateContext('ja', '.kiro', '.claude');
       
       expect(context).toHaveProperty('LANG_CODE', 'ja');
       expect(context).toHaveProperty('DEV_GUIDELINES');
       expect(context).toHaveProperty('KIRO_DIR', '.kiro');
-      expect(context).toHaveProperty('AGENT_DIR', '.cursor');
+      expect(context).toHaveProperty('AGENT_DIR', '.claude');
       
       expect(context.DEV_GUIDELINES).toContain('Think in English');
       expect(context.DEV_GUIDELINES).toContain('日本語');
     });
 
     it('should create context for different environments', () => {
-      const cursorContext = createTemplateContext('ja', '.kiro', '.cursor');
-      const claudeContext = createTemplateContext('ja', '.kiro', '.claude');
-      
-      expect(cursorContext.AGENT_DIR).toBe('.cursor');
-      expect(claudeContext.AGENT_DIR).toBe('.claude');
-      
-      // DEV_GUIDELINES should be the same
-      expect(cursorContext.DEV_GUIDELINES).toBe(claudeContext.DEV_GUIDELINES);
+      const claudeContext1 = createTemplateContext('ja', '.kiro', '.claude');
+      const claudeContext2 = createTemplateContext('en', '.kiro', '.claude');
+
+      expect(claudeContext1.AGENT_DIR).toBe('.claude');
+      expect(claudeContext2.AGENT_DIR).toBe('.claude');
+
+      // DEV_GUIDELINES should be different for different languages
+      expect(claudeContext1.DEV_GUIDELINES).not.toBe(claudeContext2.DEV_GUIDELINES);
     });
   });
 
@@ -307,7 +307,7 @@ Unknown: {{UNKNOWN_PLACEHOLDER}}
     it('should handle unsupported language code', async () => {
       await expect(async () => {
         await setupExisting({
-          cursor: true,
+          claude: true,
           lang: 'invalid-lang',
           projectName: 'Test Project',
           jiraKey: 'TEST'
@@ -317,7 +317,7 @@ Unknown: {{UNKNOWN_PLACEHOLDER}}
 
     it('should handle empty template gracefully', () => {
       const template = '';
-      const context = createTemplateContext('ja', '.kiro', '.cursor');
+      const context = createTemplateContext('ja', '.kiro', '.claude');
       const rendered = renderTemplate(template, context);
       
       expect(rendered).toBe('');
@@ -325,7 +325,7 @@ Unknown: {{UNKNOWN_PLACEHOLDER}}
 
     it('should handle template without placeholders', () => {
       const template = 'This is a plain template without any placeholders.';
-      const context = createTemplateContext('ja', '.kiro', '.cursor');
+      const context = createTemplateContext('ja', '.kiro', '.claude');
       const rendered = renderTemplate(template, context);
       
       expect(rendered).toBe(template);
@@ -333,41 +333,43 @@ Unknown: {{UNKNOWN_PLACEHOLDER}}
   });
 
   describe('Real-world Scenarios', () => {
-    it('should correctly render GitHub SSoT template in Japanese', async () => {
+    it('should correctly render Michi Core template in Japanese', async () => {
       await setupExisting({
-        cursor: true,
+        claude: true,
         lang: 'ja',
         projectName: 'リアルプロジェクト',
         jiraKey: 'REAL'
       });
 
-      const githubSsotPath = join(testProject.path, '.cursor/rules/github-ssot.mdc');
-      assertFileExists(githubSsotPath);
+      const michiCorePath = join(testProject.path, '.claude/rules/michi-core.md');
+      assertFileExists(michiCorePath);
 
-      const content = readFileSync(githubSsotPath, 'utf-8');
-      
-      // Frontmatter should have rendered guidelines
-      expect(content).toMatch(/description:.*Think in English.*Japanese/);
-      
+      const content = readFileSync(michiCorePath, 'utf-8');
+
+      // Should have rendered guidelines
+      expect(content).toContain('Think in English');
+      expect(content).toContain('日本語');
+
       // Should not have placeholder
       expect(content).not.toContain('{{DEV_GUIDELINES}}');
     });
 
-    it('should correctly render GitHub SSoT template in English', async () => {
+    it('should correctly render Michi Core template in English', async () => {
       await setupExisting({
-        cursor: true,
+        claude: true,
         lang: 'en',
         projectName: 'Real Project',
         jiraKey: 'REAL'
       });
 
-      const githubSsotPath = join(testProject.path, '.cursor/rules/github-ssot.mdc');
-      assertFileExists(githubSsotPath);
+      const michiCorePath = join(testProject.path, '.claude/rules/michi-core.md');
+      assertFileExists(michiCorePath);
 
-      const content = readFileSync(githubSsotPath, 'utf-8');
-      
-      // Frontmatter should have rendered guidelines
-      expect(content).toMatch(/description:.*Think in English.*English/);
+      const content = readFileSync(michiCorePath, 'utf-8');
+
+      // Should have rendered guidelines
+      expect(content).toContain('Think in English');
+      expect(content).toContain('generate responses in English');
       
       // Should not have placeholder
       expect(content).not.toContain('{{DEV_GUIDELINES}}');
@@ -382,7 +384,7 @@ Unknown: {{UNKNOWN_PLACEHOLDER}}
       process.chdir(jaProject.path);
       
       await setupExisting({
-        cursor: true,
+        claude: true,
         lang: 'ja',
         projectName: '日本語プロジェクト',
         jiraKey: 'JAPROJ'
@@ -396,7 +398,7 @@ Unknown: {{UNKNOWN_PLACEHOLDER}}
       process.chdir(enProject.path);
       
       await setupExisting({
-        cursor: true,
+        claude: true,
         lang: 'en',
         projectName: 'English Project',
         jiraKey: 'ENPROJ'

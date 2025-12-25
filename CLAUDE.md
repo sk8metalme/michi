@@ -4,7 +4,7 @@
 
 ## プロジェクト概要
 
-Michiは、AI駆動開発を支援するプロジェクト管理・ドキュメント管理フレームワークです。Claude Code、Cursor、Claude Agent SDKと統合し、効率的な開発フローを実現します。
+Michiは、AI駆動開発を支援するプロジェクト管理・ドキュメント管理フレームワークです。Claude CodeおよびClaude Agent SDKと統合し、効率的な開発フローを実現します。
 
 ## Michiプロジェクト固有ルール
 ### ドキュメント構成
@@ -106,9 +106,6 @@ git push origin vX.Y.Z  # ← この時点で自動的にnpm publishとGitHub Re
 ### Claude Code
 - このCLAUDE.mdファイルを参照して開発
 - Jujutsu (jj) をバージョン管理に使用
-
-### Cursor
-- `.cursorrules` ファイルでプロジェクト固有ルールを定義
 
 ### Claude Agent SDK
 - カスタムサブエージェント: `templates/claude-agent/`

@@ -25,7 +25,6 @@
     "atlassian",
     "spec-driven-development",
     "cc-sdd",
-    "cursor",
     "github"
   ],
   "bin": {
@@ -46,7 +45,6 @@
     "build": "tsc && node scripts/copy-static-assets.js",
     "postbuild": "node scripts/set-permissions.js",
     "prepare": "husky",
-    "michi:setup:cursor": "tsx src/cli.ts setup-existing --cursor",
     "michi:setup:claude": "tsx src/cli.ts setup-existing --claude",
     "michi:setup:claude-agent": "tsx src/cli.ts setup-existing --claude-agent",
     "confluence:sync": "tsx scripts/confluence-sync.ts",

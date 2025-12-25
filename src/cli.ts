@@ -387,12 +387,8 @@ export function createCLI(): Command {
     .option('--michi-path <path>', 'Path to Michi repository (for template copying)')
     .option('--skip-config', 'Skip workflow configuration setup')
     .option('-y, --yes', 'Skip confirmation prompts')
-    .option('--cursor', 'Use Cursor IDE environment')
     .option('--claude', 'Use Claude Code environment')
     .option('--claude-agent', 'Use Claude Code Subagents environment')
-    .option('--gemini', 'Use Gemini CLI environment')
-    .option('--codex', 'Use Codex CLI environment')
-    .option('--cline', 'Use Cline environment')
     .option('--lang <code>', 'Language code (default: ja)', 'ja')
     .action(async (options) => {
       try {
@@ -410,12 +406,8 @@ export function createCLI(): Command {
   program
     .command('setup-existing')
     .description('[DEPRECATED] Use "michi init --existing" instead')
-    .option('--cursor', 'Use Cursor IDE environment')
     .option('--claude', 'Use Claude Code environment')
     .option('--claude-agent', 'Use Claude Code Subagents environment')
-    .option('--gemini', 'Use Gemini CLI environment')
-    .option('--codex', 'Use Codex CLI environment')
-    .option('--cline', 'Use Cline environment')
     .option('--lang <code>', 'Language code (default: ja)', 'ja')
     .option('--project-name <name>', 'Project name')
     .option('--jira-key <key>', 'JIRA project key')

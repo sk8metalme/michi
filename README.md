@@ -16,7 +16,7 @@ Michiは、開発フロー全体（要件定義→設計→タスク分割→実
 
 ### 主な機能
 
-- ✅ **AI駆動開発**: Claude Code、Cursor、Gemini CLI、Codex CLI、Cline統合
+- ✅ **AI駆動開発**: Claude Code統合
 - ✅ **テスト計画統合**: Phase 0.3-0.4でテストタイプ選択とテスト仕様書作成
 - ✅ **品質自動化**: OSSライセンスチェック、バージョン監査、自動レビュー
 - ✅ **Confluence/JIRA連携**: 自動同期、タスク管理、進捗追跡
@@ -45,9 +45,6 @@ npm install -g @sk8metal/michi-cli
 ```bash
 # Claude Code向け（推奨）
 michi init --claude-agent
-
-# Cursor向け
-michi init --cursor
 
 # 既存プロジェクトに追加
 michi setup-existing --claude-agent
@@ -90,7 +87,6 @@ michi setup-existing --claude-agent
 - [Atlassian連携](docs/guides/atlassian-integration.md) - JIRA/Confluence連携
 - [Multi-Repo管理](docs/guides/multi-repo.md) - マイクロサービス開発
 - [Claude Code](docs/guides/claude-code.md) - Claude Code統合
-- [他AIツール](docs/guides/ai-tools.md) - Cursor/Gemini/Codex/Cline統合
 
 ### リファレンス
 
@@ -134,11 +130,8 @@ Michiは以下のフェーズで構成されています:
 
 ### 対応AIツール
 
-- **Claude Code** - メインAIツール（推奨）
-- **Cursor** - エディタ統合AI
-- **Gemini CLI** - Google AI活用
-- **Codex CLI** - プロンプトベース開発
-- **Cline** - VS Code拡張AI
+- **Claude Code** - AI駆動開発ツール（推奨）
+- **Claude Code Subagents** - カスタムサブエージェント統合
 
 ### 外部連携
 

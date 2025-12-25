@@ -85,7 +85,7 @@ describe('init command', () => {
         projectName: 'テストプロジェクト',
         jiraKey: 'TEST',
         yes: true,
-        cursor: true,
+        claude: true,
         lang: 'ja',
         skipConfig: true,
       });
@@ -122,7 +122,7 @@ describe('init command', () => {
         projectName: 'Existing Application',
         jiraKey: 'EXIST',
         yes: true,
-        cursor: true,
+        claude: true,
         lang: 'ja',
         skipConfig: true,
       });
@@ -153,7 +153,7 @@ describe('init command', () => {
         projectName: 'Test Project',
         jiraKey: 'TEST',
         yes: true,
-        cursor: true,
+        claude: true,
         skipConfig: true,
       });
 
@@ -178,7 +178,7 @@ describe('init command', () => {
         projectName: 'My Application',
         jiraKey: 'MYAPP',
         yes: true,
-        cursor: true,
+        claude: true,
         skipConfig: true,
       });
 
@@ -199,7 +199,7 @@ describe('init command', () => {
         projectName: 'Java Application',
         jiraKey: 'JAVA',
         yes: true,
-        cursor: true,
+        claude: true,
         skipConfig: true,
       });
 
@@ -220,7 +220,7 @@ describe('init command', () => {
         projectName: 'Gradle Application',
         jiraKey: 'GRAD',
         yes: true,
-        cursor: true,
+        claude: true,
         skipConfig: true,
       });
 
@@ -241,7 +241,7 @@ describe('init command', () => {
         projectName: 'PHP Application',
         jiraKey: 'PHP',
         yes: true,
-        cursor: true,
+        claude: true,
         skipConfig: true,
       });
 
@@ -278,7 +278,7 @@ describe('init command', () => {
         projectName: 'Test Project',
         jiraKey: 'TEST',
         yes: true,
-        cursor: true,
+        claude: true,
         skipConfig: false,
       });
 
@@ -306,7 +306,7 @@ describe('init command', () => {
           projectName: 'Test',
           jiraKey: 'TEST',
           yes: true,
-          cursor: true,
+          claude: true,
           skipConfig: true,
         }),
       ).rejects.toThrow(/無効なプロジェクトID/);
@@ -319,7 +319,7 @@ describe('init command', () => {
           projectName: '', // 空のプロジェクト名
           jiraKey: 'TEST',
           yes: true,
-          cursor: true,
+          claude: true,
           skipConfig: true,
         }),
       ).rejects.toThrow(/プロジェクト名/);
@@ -332,7 +332,7 @@ describe('init command', () => {
           projectName: 'Test Project',
           jiraKey: 'TOOLONGKEY123', // 10文字超
           yes: true,
-          cursor: true,
+          claude: true,
           skipConfig: true,
         }),
       ).rejects.toThrow(/JIRAキー/);

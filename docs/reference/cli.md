@@ -76,12 +76,8 @@ michi init [options]
 | `--michi-path <path>` | Michiリポジトリパス（テンプレートコピー用） | - |
 | `--skip-config` | ワークフロー設定のスキップ | false |
 | `-y, --yes` | 確認プロンプトをスキップ | false |
-| `--cursor` | Cursor IDE環境を使用 | - |
 | `--claude` | Claude Code環境を使用 | - |
 | `--claude-agent` | Claude Code Subagents環境を使用（推奨） | - |
-| `--gemini` | Gemini CLI環境を使用 | - |
-| `--codex` | Codex CLI環境を使用 | - |
-| `--cline` | Cline環境を使用 | - |
 | `--lang <code>` | 言語コード | `ja` |
 
 #### 使用例
