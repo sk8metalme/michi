@@ -687,7 +687,7 @@ class JIRAClient {
  */
 function extractRepoName(repository: string): string {
   // owner/repo 形式を抽出
-  const match = repository.match(/github\.com[:/]([\w-]+\/[\w-]+)(\.git)?/);
+  const match = repository.match(/github\.com[:/]([\w.-]+\/[\w.-]+)(\.git)?/);
   if (!match) {
     // フォールバック: repository 全体を使用
     return 'repo';
