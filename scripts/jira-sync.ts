@@ -681,6 +681,34 @@ class JIRAClient {
 }
 
 /**
+ * リポジトリ名（repo部分のみ）を取得
+ * @param repository リポジトリURL（例: https://github.com/sk8metalme/michi.git）
+ * @returns リポジトリ名（例: michi）
+ */
+function extractRepoName(repository: string): string {
+  // owner/repo 形式を抽出
+  const match = repository.match(/github\.com[:/]([\w-]+\/[\w-]+)(\.git)?/);
+  if (!match) {
+    // フォールバック: repository 全体を使用
+    return 'repo';
+  }
+
+  const ownerRepo = match[1]; // 例: sk8metalme/michi
+  const parts = ownerRepo.split('/');
+  return parts[1] || parts[0]; // repo部分のみ返す
+}
+
+/**
+ * JIRAチケットのタイトルプレフィックスを生成
+ * @param repoName リポジトリ名
+ * @param featureName 機能名
+ * @returns プレフィックス文字列（例: [michi][user-auth]）
+ */
+function createTitlePrefix(repoName: string, featureName: string): string {
+  return `[${repoName}][${featureName}]`;
+}
+
+/**
  * Phase行からフェーズラベルを検出
  * @param line Markdown行
  * @returns フェーズラベル、または検出されない場合はnull
@@ -867,7 +895,9 @@ async function getOrCreateEpic(
 
   // Epic作成
   console.log('Creating Epic...');
-  const epicSummary = `[${featureName}] ${projectMeta.projectName}`;
+  const repoName = extractRepoName(projectMeta.repository);
+  const titlePrefix = createTitlePrefix(repoName, featureName);
+  const epicSummary = `${titlePrefix} ${projectMeta.projectName}`;
 
   // 同じタイトルのEpicがすでに存在するかJQLで検索
   const jql = `project = ${projectMeta.jiraProjectKey} AND issuetype = Epic AND summary ~ "${featureName}"`;
@@ -964,6 +994,10 @@ async function syncTasksToJIRA(featureName: string): Promise<void> {
   const config = getJIRAConfig();
   const client = new JIRAClient(config);
 
+  // リポジトリ名を取得（タイトルプレフィックス用）
+  const repoName = extractRepoName(projectMeta.repository);
+  const titlePrefix = createTitlePrefix(repoName, featureName);
+
   // StoryタイプのIDを取得
   const storyIssueTypeId = await getStoryIssueTypeId(
     appConfig,
@@ -1058,7 +1092,7 @@ async function syncTasksToJIRA(featureName: string): Promise<void> {
     if (!storyMatch) continue;
 
     const storyTitle = storyMatch[1];
-    const storySummary = `Story: ${storyTitle}`;
+    const storySummary = `${titlePrefix} Story: ${storyTitle}`;
 
     // 既に同じタイトルのStoryが存在するかチェック
     if (existingStorySummaries.has(storySummary)) {
