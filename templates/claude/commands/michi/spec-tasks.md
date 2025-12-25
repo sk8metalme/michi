@@ -99,6 +99,45 @@ C) 何もせずにこのまま終了する
 
 ---
 
+## Michi Extension: Task Diff Size Guidelines
+
+タスク分割時に、各サブタスクの git diff サイズを考慮してください。
+
+### 推奨サイズ
+- **目標**: 各サブタスクで 200-400 行の diff
+- **最大**: 500 行まで（超過時は分割を検討）
+- **警告**: 400行超過時は分割を推奨
+
+### 除外対象ファイル（行数カウント対象外）
+- **ロックファイル**: package-lock.json, yarn.lock, pnpm-lock.yaml, composer.lock, Gemfile.lock, poetry.lock, Pipfile.lock, Cargo.lock, go.sum
+- **自動生成ファイル**: *.min.js, *.min.css, *.map, dist/*, build/*, coverage/*, .next/*, *.d.ts, *.generated.ts, __snapshots__/*
+
+### 分割戦略
+
+タスクが大きすぎる場合の分割方法:
+
+1. **水平分割（レイヤー別）**
+   - model/repository → service/logic → controller/handler
+   - 例: 「User CRUD」→「User model作成」「User service作成」「User controller作成」
+
+2. **垂直分割（機能スライス別）**
+   - core機能 → validation → error handling → edge cases
+   - 例: 「認証機能」→「ログインcore」「バリデーション追加」「エラーハンドリング」
+
+3. **フェーズ分割（段階別）**
+   - 基本実装 → テスト追加 → 最適化
+   - 例: 「検索機能」→「基本検索」「フィルター追加」「パフォーマンス最適化」
+
+### タスク生成時の確認事項
+
+タスク分割完了後、以下を確認してください:
+
+- [ ] 各サブタスクの予想diff行数が500行以内か
+- [ ] 大きなサブタスクは適切に分割されているか
+- [ ] ロックファイルや自動生成ファイルを含むタスクはその旨が明記されているか
+
+---
+
 ## 実装上の注意点
 
 1. **基底コマンドの実行結果を維持**:
@@ -114,4 +153,4 @@ C) 何もせずにこのまま終了する
 
 ---
 
-**Michi 固有機能**: このコマンドは cc-sdd 標準の `/kiro:spec-tasks` を拡張し、Phase 0.6（JIRA同期）への誘導を Next Phase として案内します。これにより、タスク分割からJIRA連携へのスムーズな移行を実現します。
+**Michi 固有機能**: このコマンドは cc-sdd 標準の `/kiro:spec-tasks` を拡張し、Phase 0.6（JIRA同期）への誘導を Next Phase として案内します。また、タスク粒度ガイドライン（git diff 500行制限）を提供し、適切なタスク分割を支援します。
