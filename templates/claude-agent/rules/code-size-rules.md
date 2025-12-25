@@ -1,6 +1,7 @@
 # Code Size Rules
 
 ## Threshold
+
 | Metric | Value |
 |--------|-------|
 | Maximum Diff Lines | 500 lines |
@@ -20,9 +21,10 @@
 ## Exclusion Patterns (Generated Files)
 - *.min.js, *.min.css, *.map
 - dist/*, build/*, coverage/*, .next/*
-- *.d.ts, *.generated.ts, __snapshots__/*
+- *.d.ts, *.generated.ts, `__snapshots__/*`
 
 ## Status Indicators
+
 | Status | Condition |
 |--------|-----------|
 | ✅ OK | diff < 400 lines |
