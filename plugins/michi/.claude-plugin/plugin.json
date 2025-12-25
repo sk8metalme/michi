@@ -53,14 +53,9 @@
     { "name": "doc-review-rules", "file": "rules/doc-review-rules.md" }
   ],
   "dependencies": {
-    "recommended": [
-      "design-review@ai-agent-setup",
-      "oss-compliance@ai-agent-setup",
-      "version-audit@ai-agent-setup",
-      "e2e-planning@ai-agent-setup"
-    ],
-    "required": [
-      "cc-sdd (kiro:* commands)"
-    ]
+    "design-review": "*",
+    "oss-compliance": "*",
+    "version-audit": "*",
+    "e2e-planning": "*"
   }
 }

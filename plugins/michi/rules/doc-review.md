@@ -10,7 +10,7 @@ alwaysApply: false
 
 ## レビュー基準
 
-@.claude/rules/doc-review-rules.md
+@./doc-review-rules.md
 
 ## 実行タイミング
 
