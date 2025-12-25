@@ -699,9 +699,10 @@ JIRA_ISSUE_TYPE_SUBTASK=10037
   }
 
   // スキル/サブエージェントのインストール（デフォルト有効）
+  // Note: claude環境は非推奨のため、claude-agentのみ実行
   if (
     options.agentSkills !== false &&
-    (config.environment === 'claude' || config.environment === 'claude-agent')
+    config.environment === 'claude-agent'
   ) {
     console.log('\n🎯 Step 7.5: Installing skills and agents...');
 
@@ -713,7 +714,7 @@ JIRA_ISSUE_TYPE_SUBTASK=10037
       const claudeAgentsDir = join(homeDir, '.claude', 'agents');
 
       // スキルのコピー
-      const skillsTemplateDir = join(templatesDir, 'claude', 'skills');
+      const skillsTemplateDir = join(templatesDir, 'claude-agent', 'skills');
       if (existsSync(skillsTemplateDir)) {
         mkdirSync(claudeSkillsDir, { recursive: true });
         cpSync(skillsTemplateDir, claudeSkillsDir, { recursive: true });
@@ -723,7 +724,7 @@ JIRA_ISSUE_TYPE_SUBTASK=10037
       }
 
       // サブエージェントのコピー
-      const agentsTemplateDir = join(templatesDir, 'claude', 'agents');
+      const agentsTemplateDir = join(templatesDir, 'claude-agent', 'agents');
       if (existsSync(agentsTemplateDir)) {
         mkdirSync(claudeAgentsDir, { recursive: true });
         cpSync(agentsTemplateDir, claudeAgentsDir, { recursive: true });
@@ -768,9 +769,10 @@ JIRA_ISSUE_TYPE_SUBTASK=10037
   // 環境別のメッセージ
   switch (config.environment) {
   case 'claude':
-    console.log('  3. Claude Code で開く');
-    console.log('  4. .claude/rules/ のルールファイルを確認');
-    console.log('  5. Claude Code コマンドで開発開始');
+    console.log('  3. Michiプラグインをインストール:');
+    console.log('     /plugin marketplace add sk8metalme/michi');
+    console.log('     /plugin install michi@michi');
+    console.log('  4. Claude Code で開発開始');
     break;
 
   case 'claude-agent':
