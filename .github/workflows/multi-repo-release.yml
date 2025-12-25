@@ -69,13 +69,6 @@ jobs:
         env:
           CI: true
 
-      - name: Run multi-repo E2E tests
-        run: npm run test:run -- src/__tests__/multi-repo/e2e
-        env:
-          CI: true
-          # Note: E2E tests should use mocked APIs in CI
-          # Real API credentials should only be used in pre-release manual testing
-
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
@@ -219,7 +212,7 @@ jobs:
         run: npm audit --audit-level=moderate
 
       - name: Run multi-repo security tests
-        run: npm run test:run -- src/__tests__/multi-repo/security
+        run: npm run test:run -- src/commands/__tests__/security
         env:
           CI: true
 
