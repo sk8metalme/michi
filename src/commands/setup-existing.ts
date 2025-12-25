@@ -267,46 +267,6 @@ function copyAndRenderTemplates(
 }
 
 /**
- * cc-sdd-overridesディレクトリからオーバーライドを適用
- * @param sourceDir オーバーライドソースディレクトリ
- * @param destDir 上書き先ディレクトリ
- * @param context テンプレートコンテキスト
- */
-function applyOverrides(
-  sourceDir: string,
-  destDir: string,
-  context: ReturnType<typeof createTemplateContext>,
-): void {
-  if (!existsSync(sourceDir)) {
-    return;
-  }
-
-  const entries = readdirSync(sourceDir, { withFileTypes: true });
-
-  for (const entry of entries) {
-    const sourcePath = join(sourceDir, entry.name);
-    const destPath = join(destDir, entry.name);
-
-    if (entry.isDirectory()) {
-      mkdirSync(destPath, { recursive: true });
-      applyOverrides(sourcePath, destPath, context);
-    } else if (entry.isFile()) {
-      // テンプレートレンダリングを適用（.md, .jsonファイル）
-      if (entry.name.endsWith('.md') || entry.name.endsWith('.json')) {
-        const content = readFileSync(sourcePath, 'utf-8');
-        const rendered = renderTemplate(content, context);
-        writeFileSync(destPath, rendered, 'utf-8');
-        if (process.env.DEBUG) {
-          console.log(`   📄 Override applied: ${entry.name}`);
-        }
-      } else {
-        cpSync(sourcePath, destPath);
-      }
-    }
-  }
-}
-
-/**
  * setup-existing コマンドのメイン処理
  */
 export async function setupExisting(options: SetupOptions): Promise<void> {
@@ -438,6 +398,18 @@ export async function setupExisting(options: SetupOptions): Promise<void> {
       ? envConfig.rulesDir.substring(1, envConfig.rulesDir.indexOf('/', 1))
       : envConfig.rulesDir.split('/')[0],
   );
+
+  // Deprecation warning for --claude option
+  if (config.environment === 'claude') {
+    console.warn('');
+    console.warn('⚠️  DEPRECATION WARNING: Template distribution via `michi setup --claude` is deprecated.');
+    console.warn('   Please use Claude Code plugin instead:');
+    console.warn('   /plugin marketplace add sk8metalme/michi');
+    console.warn('   /plugin install michi@michi');
+    console.warn('');
+    console.warn('   Continuing with other setup tasks (project init, .env config)...');
+    console.warn('');
+  }
 
   const templateSourceDir = join(templatesDir, envConfig.templateSource);
 
@@ -571,64 +543,6 @@ export async function setupExisting(options: SetupOptions): Promise<void> {
     console.log('   ⚠️  Spec rules not found (skipped)');
   }
 
-  // cc-sdd-overridesによる上書き
-  const ccSddOverridesDir = join(
-    templatesDir,
-    'michi',
-    'cc-sdd-overrides',
-    'settings',
-  );
-  if (existsSync(ccSddOverridesDir)) {
-    console.log('\n📋 Step 5.1: Applying Michi cc-sdd overrides...');
-    try {
-      applyOverrides(
-        ccSddOverridesDir,
-        join(currentDir, '.kiro/settings'),
-        templateContext,
-      );
-      console.log('   ✅ cc-sdd overrides applied');
-    } catch (error) {
-      throw new Error(
-        `Failed to apply cc-sdd overrides: ${error instanceof Error ? error.message : error}`,
-      );
-    }
-  }
-
-  // kiro-spec-tasksテンプレートを上書き（cc-sddのAI-DLC形式をMichiワークフロー形式に置換）
-  console.log('\n📋 Step 5.2: Overriding kiro-spec-tasks command template...');
-  const kiroSpecTasksSource = join(
-    templatesDir,
-    envConfig.templateSource,
-    'commands',
-    'kiro',
-    'kiro-spec-tasks.md',
-  );
-  const kiroSpecTasksDest = join(currentDir, '.kiro', 'commands', 'kiro');
-
-  if (existsSync(kiroSpecTasksSource)) {
-    try {
-      mkdirSync(kiroSpecTasksDest, { recursive: true });
-      cpSync(
-        kiroSpecTasksSource,
-        join(kiroSpecTasksDest, 'kiro-spec-tasks.md'),
-      );
-      console.log(
-        '   ✅ kiro-spec-tasks.md overridden with Michi workflow format',
-      );
-      console.log(
-        '      (This ensures /kiro:spec-tasks generates Phase-based tasks.md)',
-      );
-    } catch (error) {
-      throw new Error(
-        `Failed to copy kiro-spec-tasks template: ${error instanceof Error ? error.message : error}`,
-      );
-    }
-  } else {
-    console.log(
-      `   ⚠️  kiro-spec-tasks template not found: ${kiroSpecTasksSource}`,
-    );
-    console.log('      (cc-sdd default template will be used)');
-  }
 
   // .env 対話的設定
   console.log('\n🔐 Step 6: Configuring environment variables...');
@@ -826,9 +740,6 @@ JIRA_ISSUE_TYPE_SUBTASK=10037
   console.log('\n🔍 Step 8: Validating setup...');
 
   const expectedFiles = [
-    '.kiro/settings/templates/specs/tasks.md',
-    '.kiro/settings/templates/specs/requirements.md',
-    '.kiro/settings/templates/specs/design.md',
     '.kiro/settings/rules/tasks-generation.md',
   ];
 

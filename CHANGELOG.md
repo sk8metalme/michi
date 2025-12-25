@@ -5,6 +5,82 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.14.0] - TBD
+
+### Added
+
+- **Claude Code プラグイン配布** (#134)
+  - **プラグイン構造**: `plugins/michi/` ディレクトリ作成
+  - **コマンド**: 14個（michi:* 8個、michi-multi-repo:* 6個）
+  - **エージェント**: 3個（mermaid-validator, pr-resolver, pr-size-monitor）
+  - **スキル**: 1個（mermaid-validator）
+  - **ルール**: 6個（atlassian-integration, michi-core, code-size-monitor, code-size-rules, doc-review, doc-review-rules）
+  - **インストール方法**: `/plugin marketplace add sk8metalme/michi` → `/plugin install michi@michi`
+  - **依存関係**: cc-sdd（必須）、ai-agent-setup（推奨）
+
+- **プラグインREADME**: `plugins/michi/README.md` 作成
+  - 利用可能なコマンド、エージェント、スキル、ルールの一覧
+  - Phase 構成と推奨ワークフローの説明
+  - CLI併用時のベストプラクティス
+
+### Changed
+
+- **README.md更新**: プラグインインストールセクション追加
+  - プラグインインストールを推奨方法として優先表示
+  - CLIツールは外部ツール連携用として併用を推奨
+  - `michi setup --claude` の廃止予定を明記
+
+- **setup-existing.ts更新**: テンプレート配布機能の段階的廃止
+  - `--claude` オプション実行時に廃止予定警告を表示
+  - プラグインインストール方法を案内
+  - cc-sdd-overridesロジックを削除（lines 574-607）
+  - kiro-spec-tasks.mdコピーロジックを削除（lines 609-643）
+  - expectedFiles検証からテンプレート参照を削除
+
+### Removed
+
+- **重複コンポーネント削除**: ai-agent-setupとの重複を解消
+  - コマンド: design-review, license-check, version-audit, e2e-plan（4個）
+  - エージェント: design-reviewer, e2e-first-planner, oss-license-checker, stable-version-auditor（4個）
+  - スキル: design-review, e2e-first-planning, oss-license, stable-version（4個）
+
+- **cc-sdd標準コマンド削除**: `templates/claude/commands/kiro/` ディレクトリ
+  - kiro:* コマンドはcc-sddから取得するため、Michiからは除外
+
+- **templates/michi/削除**: `templates/michi/cc-sdd-overrides/` ディレクトリ
+  - kiro-spec-tasks.mdにテンプレートが既に埋め込まれているため不要
+  - CLIスクリプトは生成済みtasks.mdのみ参照するため不要
+
+### Migration Guide
+
+**v0.13.0以前からの移行**:
+
+1. **プラグインインストール** (推奨):
+   ```
+   # cc-sddセットアップ（未実施の場合）
+   npx cc-sdd@latest --claude --lang ja
+
+   # Michiプラグインインストール
+   /plugin marketplace add sk8metalme/michi
+   /plugin install michi@michi
+
+   # 推奨プラグイン
+   /plugin marketplace add sk8metalme/ai-agent-setup
+   /plugin install design-review@ai-agent-setup
+   /plugin install oss-compliance@ai-agent-setup
+   /plugin install version-audit@ai-agent-setup
+   /plugin install e2e-planning@ai-agent-setup
+   ```
+
+2. **既存の `michi setup --claude` 使用者**:
+   - 既存のプロジェクトはそのまま動作します（後方互換性あり）
+   - 新規プロジェクトではプラグインインストールを使用してください
+   - v0.15.0以降で `michi setup --claude` は完全に削除予定
+
+3. **CLIツール併用**:
+   - JIRA/Confluence連携には引き続きCLIツールが必要です
+   - `npm install -g @sk8metal/michi-cli` でインストール
+
 ## [0.13.0] - 2025-12-25
 
 ### Added
