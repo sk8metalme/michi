@@ -17,23 +17,23 @@ describe('create-project.ts パス問題', () => {
     vi.clearAllMocks();
   });
 
-  it('.cursor, .kiro, scripts が actualProjectDir にコピーされる', () => {
+  it('.claude, .kiro, scripts が actualProjectDir にコピーされる', () => {
     const projectDir = '/test/repo';
     const actualProjectDir = '/test/repo/projects/test-project';
 
-    // .cursor/rules のコピー先パスを検証
-    const cursorRulesPath = join(actualProjectDir, '.cursor/rules', 'test.mdc');
-    expect(cursorRulesPath).toContain('projects/test-project/.cursor/rules');
-    expect(cursorRulesPath).not.toContain(join(projectDir, '.cursor'));
+    // .claude/rules のコピー先パスを検証
+    const claudeRulesPath = join(actualProjectDir, '.claude/rules', 'test.mdc');
+    expect(claudeRulesPath).toContain('projects/test-project/.claude/rules');
+    expect(claudeRulesPath).not.toContain(join(projectDir, '.claude'));
 
-    // .cursor/commands のコピー先パスを検証
-    const cursorCommandsPath = join(
+    // .claude/commands のコピー先パスを検証
+    const claudeCommandsPath = join(
       actualProjectDir,
-      '.cursor/commands/kiro',
+      '.claude/commands',
       'test.md',
     );
-    expect(cursorCommandsPath).toContain(
-      'projects/test-project/.cursor/commands',
+    expect(claudeCommandsPath).toContain(
+      'projects/test-project/.claude/commands',
     );
 
     // .kiro/steering のコピー先パスを検証
@@ -63,8 +63,8 @@ describe('create-project.ts パス問題', () => {
     const actualProjectDir = '/test/repo/projects/test-project';
 
     const directories = [
-      join(actualProjectDir, '.cursor/rules'),
-      join(actualProjectDir, '.cursor/commands/kiro'),
+      join(actualProjectDir, '.claude/rules'),
+      join(actualProjectDir, '.claude/commands'),
       join(actualProjectDir, '.kiro/steering'),
       join(actualProjectDir, '.kiro/settings/templates'),
       join(actualProjectDir, 'scripts/utils'),

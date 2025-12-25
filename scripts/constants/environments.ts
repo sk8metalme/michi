@@ -10,13 +10,7 @@ export interface EnvironmentConfig {
   templateSource: string;
 }
 
-export type Environment =
-  | 'claude'
-  | 'claude-agent'
-  | 'cursor'
-  | 'gemini'
-  | 'codex'
-  | 'cline';
+export type Environment = 'claude' | 'claude-agent';
 
 export const ENV_CONFIG: Record<Environment, EnvironmentConfig> = {
   claude: {
@@ -28,26 +22,6 @@ export const ENV_CONFIG: Record<Environment, EnvironmentConfig> = {
     rulesDir: '.claude/agents',
     commandsDir: '.claude/commands',
     templateSource: 'claude-agent',
-  },
-  cursor: {
-    rulesDir: '.cursor/rules',
-    commandsDir: '.cursor/commands',
-    templateSource: 'cursor',
-  },
-  gemini: {
-    rulesDir: '.gemini',
-    commandsDir: '.gemini/extensions',
-    templateSource: 'gemini',
-  },
-  codex: {
-    rulesDir: '.codex/docs',
-    commandsDir: '.codex/docs',
-    templateSource: 'codex',
-  },
-  cline: {
-    rulesDir: '.clinerules/rules',
-    commandsDir: '.clinerules/commands',
-    templateSource: 'cline',
   },
 };
 

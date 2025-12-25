@@ -21,9 +21,9 @@ vi.mock('../utils/project-finder.js', () => ({
 }));
 vi.mock('../constants/environments.js', () => ({
   getEnvironmentConfig: vi.fn(() => ({
-    rulesDir: '.cursor/rules',
-    commandsDir: '.cursor/commands/kiro',
-    templateSource: 'cursor'
+    rulesDir: '.claude/rules',
+    commandsDir: '.claude/commands',
+    templateSource: 'claude'
   })),
   isSupportedEnvironment: vi.fn(() => true)
 }));
@@ -35,7 +35,7 @@ vi.mock('../template/renderer.js', () => ({
     LANG_CODE: 'ja',
     DEV_GUIDELINES: '- Think in English, but generate responses in Japanese',
     KIRO_DIR: '.kiro',
-    AGENT_DIR: '.cursor'
+    AGENT_DIR: '.claude'
   })),
   renderTemplate: vi.fn((content: string) => content)
 }));
@@ -143,18 +143,18 @@ ATLASSIAN_API_TOKEN=existing_token
 
   it('ディレクトリがコピー前に作成される', () => {
     const projectDir = '/test/repo/projects/test-project';
-    
-    // .cursor/rules ディレクトリの作成
-    const rulesDir = join(projectDir, '.cursor/rules');
+
+    // .claude/rules ディレクトリの作成
+    const rulesDir = join(projectDir, '.claude/rules');
     mkdirSync(rulesDir, { recursive: true });
-    
-    // .cursor/commands/kiro ディレクトリの作成
-    const commandsDir = join(projectDir, '.cursor/commands/kiro');
+
+    // .claude/commands ディレクトリの作成
+    const commandsDir = join(projectDir, '.claude/commands');
     mkdirSync(commandsDir, { recursive: true });
-    
+
     // ディレクトリが正しく作成されることを確認
-    expect(rulesDir).toContain('.cursor/rules');
-    expect(commandsDir).toContain('.cursor/commands/kiro');
+    expect(rulesDir).toContain('.claude/rules');
+    expect(commandsDir).toContain('.claude/commands');
   });
 
   it('パッケージ名が @sk8metal/michi-cli に統一されている', () => {
@@ -177,8 +177,8 @@ ATLASSIAN_API_TOKEN=existing_token
   it('完了メッセージに scripts/ ディレクトリが含まれていない', () => {
     const projectDir = '/test/repo/projects/test-project';
     const repoRoot = '/test/repo';
-    const envConfigRulesDir = '.cursor/rules';
-    const envConfigCommandsDir = '.cursor/commands/kiro';
+    const envConfigRulesDir = '.claude/rules';
+    const envConfigCommandsDir = '.claude/commands';
     
     // 実際に作成されるファイルのリスト（環境別）
     const createdFiles = [
@@ -217,14 +217,14 @@ ATLASSIAN_API_TOKEN=existing_token
 
   it('環境別のディレクトリマッピングが正しい', () => {
     const envConfig = {
-      rulesDir: '.cursor/rules',
-      commandsDir: '.cursor/commands/kiro',
-      templateSource: 'cursor'
+      rulesDir: '.claude/rules',
+      commandsDir: '.claude/commands',
+      templateSource: 'claude'
     };
 
-    expect(envConfig.rulesDir).toBe('.cursor/rules');
-    expect(envConfig.commandsDir).toBe('.cursor/commands/kiro');
-    expect(envConfig.templateSource).toBe('cursor');
+    expect(envConfig.rulesDir).toBe('.claude/rules');
+    expect(envConfig.commandsDir).toBe('.claude/commands');
+    expect(envConfig.templateSource).toBe('claude');
   });
 
   it('テンプレートコンテキストが正しく作成される', () => {
@@ -232,7 +232,7 @@ ATLASSIAN_API_TOKEN=existing_token
       LANG_CODE: 'ja',
       DEV_GUIDELINES: '- Think in English, but generate responses in Japanese',
       KIRO_DIR: '.kiro',
-      AGENT_DIR: '.cursor'
+      AGENT_DIR: '.claude'
     };
 
     expect(context).toHaveProperty('LANG_CODE');

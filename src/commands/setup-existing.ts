@@ -3,8 +3,8 @@
  * 既存プロジェクトにMichiワークフローを追加するコマンド
  *
  * 使い方:
- * npx @sk8metal/michi-cli setup-existing --cursor --lang ja
- * npm run michi:setup:cursor
+ * npx @sk8metal/michi-cli setup-existing --claude --lang ja
+ * npm run michi:setup:claude
  */
 
 import {
@@ -39,12 +39,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 interface SetupOptions {
-  cursor?: boolean;
   claude?: boolean;
   claudeAgent?: boolean; // camelCase
-  gemini?: boolean;
-  codex?: boolean;
-  cline?: boolean;
   lang?: string;
   projectName?: string; // camelCase
   jiraKey?: string; // camelCase
@@ -136,41 +132,25 @@ async function prompt(question: string): Promise<string> {
 async function determineEnvironment(
   options: SetupOptions,
 ): Promise<Environment> {
-  if (options.cursor) return 'cursor';
   if (options.claude) return 'claude';
   if (options.claudeAgent) return 'claude-agent';
-  if (options.gemini) return 'gemini';
-  if (options.codex) return 'codex';
-  if (options.cline) return 'cline';
 
   console.log('');
   console.log('環境を選択してください:');
-  console.log('  1) Cursor IDE (推奨)');
-  console.log('  2) Claude Code');
-  console.log('  3) Claude Code Subagents');
-  console.log('  4) Gemini CLI');
-  console.log('  5) Codex CLI');
-  console.log('  6) Cline');
+  console.log('  1) Claude Code (推奨)');
+  console.log('  2) Claude Code Subagents');
   console.log('');
 
-  const choice = await prompt('選択 [1-6] (デフォルト: 1): ');
+  const choice = await prompt('選択 [1-2] (デフォルト: 1): ');
 
   switch (choice || '1') {
   case '1':
-    return 'cursor';
-  case '2':
     return 'claude';
-  case '3':
+  case '2':
     return 'claude-agent';
-  case '4':
-    return 'gemini';
-  case '5':
-    return 'codex';
-  case '6':
-    return 'cline';
   default:
-    console.log('無効な選択です。Cursor IDEを使用します。');
-    return 'cursor';
+    console.log('無効な選択です。Claude Codeを使用します。');
+    return 'claude';
   }
 }
 
@@ -447,47 +427,6 @@ export async function setupExisting(options: SetupOptions): Promise<void> {
     );
   }
 
-  // Codex環境の場合: cc-sddのインストールを促す
-  if (config.environment === 'codex') {
-    console.log('\n📦 Step 3: Setting up Codex CLI integration...');
-    console.log('');
-    console.log('⚠️  Codex CLIではcc-sddのインストールが必要です:');
-    console.log('');
-    console.log('   npx cc-sdd@latest --codex --lang ja');
-    console.log('');
-    console.log('このコマンドにより以下がインストールされます:');
-    console.log('  - 11個の /kiro:* コマンド (.codex/commands/)');
-    console.log('  - AGENTS.md (.codex/docs/)');
-    console.log('  - .kiro/ ディレクトリ構造');
-    console.log('');
-
-    const shouldInstall = await prompt(
-      '今すぐcc-sddをインストールしますか？ [Y/n]: ',
-    );
-
-    if (shouldInstall.toLowerCase() !== 'n') {
-      console.log('\n🚀 Installing cc-sdd...');
-      try {
-        execSync('npx cc-sdd@latest --codex --lang ja', {
-          stdio: 'inherit',
-          cwd: currentDir,
-        });
-        console.log('✅ cc-sdd installed successfully');
-      } catch (error) {
-        console.error('❌ cc-sdd installation failed');
-        console.error(
-          '   Please run manually: npx cc-sdd@latest --codex --lang ja',
-        );
-        throw error;
-      }
-    } else {
-      console.log('⚠️  cc-sddをスキップしました');
-      console.log(
-        '   後で手動で実行してください: npx cc-sdd@latest --codex --lang ja',
-      );
-    }
-  }
-
   // 環境別テンプレートのコピーとレンダリング
   console.log('\n📋 Step 3: Copying and rendering templates...');
 
@@ -581,71 +520,6 @@ export async function setupExisting(options: SetupOptions): Promise<void> {
     }
   } else {
     console.log('   ⚠️  Steering templates not found (skipped)');
-  }
-
-  // Codex環境の場合: Michi独自の拡張ファイルをコピー
-  if (config.environment === 'codex') {
-    console.log('\n🎯 Step 4.1: Installing Michi extensions for Codex...');
-
-    // 1. Confluence同期プロンプトをコピー
-    const confluenceSyncSource = join(
-      templatesDir,
-      'codex/prompts/confluence-sync.md',
-    );
-    const codexPromptsDir = join(currentDir, '.codex/prompts');
-
-    if (existsSync(confluenceSyncSource)) {
-      try {
-        mkdirSync(codexPromptsDir, { recursive: true });
-        cpSync(
-          confluenceSyncSource,
-          join(codexPromptsDir, 'confluence-sync.md'),
-        );
-        console.log('   ✅ Confluence sync command installed');
-        console.log(
-          '      Usage: /prompts:confluence-sync FEATURE=<機能名>',
-        );
-      } catch (error) {
-        console.warn('   ⚠️  Failed to copy confluence-sync.md');
-        if (error instanceof Error && error.message) {
-          console.warn(`   Reason: ${error.message}`);
-        }
-      }
-    } else {
-      console.log(
-        `   ⚠️  Confluence sync template not found: ${confluenceSyncSource}`,
-      );
-    }
-
-    // 2. AGENTS.override.mdをプロジェクトルートにコピー
-    const agentsOverrideSource = join(
-      templatesDir,
-      'codex/AGENTS.override.md',
-    );
-    const agentsOverrideDest = join(currentDir, 'AGENTS.override.md');
-
-    if (existsSync(agentsOverrideSource)) {
-      try {
-        cpSync(agentsOverrideSource, agentsOverrideDest);
-        console.log('   ✅ AGENTS.override.md installed');
-        console.log('      (Michi-specific rules added to Codex AGENTS.md)');
-      } catch (error) {
-        console.warn('   ⚠️  Failed to copy AGENTS.override.md');
-        if (error instanceof Error && error.message) {
-          console.warn(`   Reason: ${error.message}`);
-        }
-      }
-    } else {
-      console.log(
-        `   ⚠️  AGENTS.override.md template not found: ${agentsOverrideSource}`,
-      );
-    }
-
-    console.log('');
-    console.log('📝 Codex extensions summary:');
-    console.log('  ✓ cc-sdd provides: /kiro:* commands (11 total)');
-    console.log('  ✓ Michi adds: /prompts:confluence-sync command');
-    console.log('  ✓ Michi adds: AGENTS.override.md (project-specific rules)');
   }
 
   // Specテンプレートをコピー
@@ -982,16 +856,6 @@ JIRA_ISSUE_TYPE_SUBTASK=10037
 
   // 環境別のメッセージ
   switch (config.environment) {
-  case 'cursor':
-    console.log('  3. Cursor で開く: cursor .');
-    console.log('  4. Cursorを起動したら ~/.cursor/mcp.json の設定を確認');
-    console.log(
-      '     MCP設定の詳細: https://github.com/sk8metalme/michi/issues',
-    );
-    console.log('     （環境別MCP設定の対話的セットアップ機能は開発中）');
-    console.log('  5. /kiro:spec-init <機能説明> で開発開始');
-    break;
-
   case 'claude':
     console.log('  3. Claude Code で開く');
     console.log('  4. .claude/rules/ のルールファイルを確認');
@@ -1002,34 +866,6 @@ JIRA_ISSUE_TYPE_SUBTASK=10037
     console.log('  3. Claude Code で開く');
     console.log('  4. .claude/agents/ のサブエージェントを確認');
     console.log('  5. サブエージェントを活用して開発開始');
-    break;
-
-  case 'gemini':
-    console.log('  3. Gemini CLI で開く');
-    console.log('  4. .gemini/GEMINI.md のプロジェクトコンテキストを確認');
-    console.log('  5. Gemini CLI コマンドで開発開始');
-    console.log('     （階層的コンテキストロード機能を活用）');
-    break;
-
-  case 'codex':
-    console.log('  3. cc-sddとMichi拡張の統合を確認');
-    console.log('     - cc-sdd: /kiro:* コマンド（11個）');
-    console.log('     - Michi: /prompts:confluence-sync コマンド');
-    console.log('     - Michi: AGENTS.override.md（Michi固有ルール）');
-    console.log('  4. 開発開始:');
-    console.log('     /kiro:spec-init FEATURE=<機能名>');
-    console.log('     /kiro:spec-requirements FEATURE=<機能名>');
-    console.log('     /kiro:spec-design FEATURE=<機能名>');
-    console.log('     /prompts:confluence-sync FEATURE=<機能名>');
-    console.log('  5. 環境変数の設定（Confluence連携用）:');
-    console.log('     ATLASSIAN_URL, ATLASSIAN_EMAIL, ATLASSIAN_API_TOKEN');
-    break;
-
-  case 'cline':
-    console.log('  3. VSCode + Cline 拡張で開く');
-    console.log('  4. .clinerules/rules/ のルールファイルを確認');
-    console.log('  5. Clineのルールトグル機能（v3.13+）を活用');
-    console.log('     （各ルールファイルを個別に有効/無効化可能）');
     break;
 
   default:

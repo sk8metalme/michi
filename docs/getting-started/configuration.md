@@ -13,7 +13,6 @@ Michiは以下の設定ファイルを使用します：
 | `~/.michi/config.json` | グローバルワークフロー設定 | いいえ | 全プロジェクト |
 | `.kiro/project.json` | プロジェクトメタデータ | 自動生成 | プロジェクト |
 | `.michi/config.json` | プロジェクト固有ワークフロー設定 | いいえ | プロジェクト |
-| `mcp.json` | MCP設定（Cursor用） | いいえ | プロジェクト |
 
 **設定の優先順位**（高い順）:
 1. `.env`（プロジェクト環境変数）- 最高優先度
@@ -291,34 +290,6 @@ touch ~/.michi/config.json
 #### workflow
 
 - `enabledPhases`: 有効化するフェーズリスト
-
-## mcp.json 設定（Cursor用）
-
-CursorでAtlassian MCPサーバーを使用する場合に設定します。
-
-### 設定例
-
-```json
-{
-  "mcpServers": {
-    "atlassian": {
-      "command": "npx",
-      "args": ["-y", "@atlassian/mcp-server-atlassian"],
-      "env": {
-        "ATLASSIAN_URL": "https://your-domain.atlassian.net",
-        "ATLASSIAN_EMAIL": "your-email@company.com",
-        "ATLASSIAN_API_TOKEN": "your-token-here"
-      }
-    }
-  }
-}
-```
-
-### 配置場所
-
-- Windows: `%APPDATA%\Cursor\User\globalStorage\saoudrizwan.claude-dev\settings\mcp.json`
-- macOS: `~/Library/Application Support/Cursor/User/globalStorage/saoudrizwan.claude-dev/settings/mcp.json`
-- Linux: `~/.config/Cursor/User/globalStorage/saoudrizwan.claude-dev/settings/mcp.json`
 
 ## 設定検証
 

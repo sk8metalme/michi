@@ -327,7 +327,7 @@ michi phase:run calculator-app phase-b
 
 ## フェーズ実行方法まとめ
 
-### AIコマンド経由（Claude Code、Cursor）
+### AIコマンド経由（Claude Code）
 
 | Phase | 必須/任意 | コマンド | 備考 |
 |-------|----------|---------|------|

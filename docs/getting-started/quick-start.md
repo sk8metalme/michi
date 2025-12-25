@@ -6,7 +6,7 @@ Michiをインストールして、最初のプロジェクトを初期化する
 
 - Node.js 20以上
 - npm 10以上
-- AIツール（Claude Code、Cursor、Gemini CLI、Codex CLI、またはCline）
+- AIツール（Claude Code）
 
 ## インストール
 
@@ -46,7 +46,7 @@ michi init --claude-agent
 michi init --existing --claude-agent
 ```
 
-**注**: `--claude-agent` は環境オプションです（推奨）。他に `--claude`, `--cursor`, `--gemini`, `--codex`, `--cline` も選択可能です。
+**注**: `--claude-agent` は環境オプションです（推奨）。他に `--claude` も選択可能です。
 
 ## 環境設定
 

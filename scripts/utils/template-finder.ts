@@ -1,8 +1,8 @@
 /**
  * テンプレートファイル検索ユーティリティ
- * 
+ *
  * Issue #35: cc-sdd準拠のテンプレート検索
- * Cursor/Claude両環境のテンプレートを優先順位付きで検索
+ * Claude環境のテンプレートを検索
  */
 
 import { existsSync } from 'fs';
@@ -18,22 +18,16 @@ import { join } from 'path';
  * @example
  * ```typescript
  * const path = findTemplateFile('/path/to/michi', 'rules/github-ssot.mdc');
- * // returns: '/path/to/michi/templates/cursor/rules/github-ssot.mdc'
+ * // returns: '/path/to/michi/templates/claude/rules/github-ssot.mdc'
  * ```
  */
 export function findTemplateFile(michiPath: string, relativePath: string): string | null {
-  // 優先順位1: templates/cursor/
-  const cursorPath = join(michiPath, 'templates/cursor', relativePath);
-  if (existsSync(cursorPath)) {
-    return cursorPath;
-  }
-  
-  // 優先順位2: templates/claude/
+  // templates/claude/
   const claudePath = join(michiPath, 'templates/claude', relativePath);
   if (existsSync(claudePath)) {
     return claudePath;
   }
-  
+
   return null;
 }
 
