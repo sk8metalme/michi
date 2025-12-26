@@ -18,12 +18,5 @@
     "workflow",
     "confluence",
     "jira"
-  ],
-  "rules": "./rules",
-  "dependencies": {
-    "design-review": "*",
-    "oss-compliance": "*",
-    "version-audit": "*",
-    "e2e-planning": "*"
-  }
+  ]
 }
