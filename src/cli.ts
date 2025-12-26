@@ -14,7 +14,6 @@ import { validatePhase } from '../scripts/validate-phase.js';
 import { runPreFlightCheck } from '../scripts/pre-flight-check.js';
 import { WorkflowOrchestrator } from '../scripts/workflow-orchestrator.js';
 import { validateAndReport } from '../scripts/utils/config-validator.js';
-import { setupExisting } from './commands/setup-existing.js';
 import { initProject } from './commands/init.js';
 import { migrate } from './commands/migrate.js';
 import { convertTasksFile } from '../scripts/utils/tasks-converter.js';
@@ -396,32 +395,6 @@ export function createCLI(): Command {
       } catch (error) {
         console.error(
           '❌ Initialization failed:',
-          error instanceof Error ? error.message : error,
-        );
-        process.exit(1);
-      }
-    });
-
-  // setup-existing コマンド (非推奨)
-  program
-    .command('setup-existing')
-    .description('[DEPRECATED] Use "michi init --existing" instead')
-    .option('--claude', 'Use Claude Code environment')
-    .option('--claude-agent', 'Use Claude Code Subagents environment')
-    .option('--lang <code>', 'Language code (default: ja)', 'ja')
-    .option('--project-name <name>', 'Project name')
-    .option('--jira-key <key>', 'JIRA project key')
-    .option('--no-agent-skills', 'Skip installing agent skills and sub-agents to ~/.claude/')
-    .action(async (options) => {
-      console.warn('⚠️  このコマンドは非推奨です。代わりに "michi init --existing" を使用してください。');
-      console.warn('   This command is deprecated. Please use "michi init --existing" instead.');
-      console.log('');
-
-      try {
-        await setupExisting(options);
-      } catch (error) {
-        console.error(
-          '❌ Setup failed:',
           error instanceof Error ? error.message : error,
         );
         process.exit(1);
