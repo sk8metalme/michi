@@ -1,6 +1,6 @@
 {
   "name": "michi",
-  "version": "0.14.0",
+  "version": "0.14.1",
   "description": "Michi - AI-driven Spec-Driven Development workflow for Claude Code",
   "author": {
     "name": "sk8metal"
