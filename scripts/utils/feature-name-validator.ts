@@ -117,19 +117,3 @@ export function validateFeatureNameOrThrow(featureName: string): void {
   }
 }
 
-/**
- * feature名をバリデートし、警告を表示（続行可能）
- */
-export function validateFeatureNameWithWarning(featureName: string): boolean {
-  const result = validateFeatureName(featureName);
-  
-  if (!result.valid) {
-    console.error('\n⚠️  Feature name validation failed:');
-    result.errors.forEach(err => console.error(err));
-    console.error('\nヘルプ: README.md#機能名（feature）の命名規則 を参照してください\n');
-    return false;
-  }
-  
-  return true;
-}
-

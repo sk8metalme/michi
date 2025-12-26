@@ -5,8 +5,6 @@
  * 環境変数やAPIトークンなど機密情報のバリデーションとセキュリティチェックを行います。
  */
 
-import { statSync } from 'fs';
-
 /**
  * バリデーション結果
  */
@@ -256,31 +254,3 @@ export function validateEnvironmentConfig(config: EnvValidationConfig): Validati
   };
 }
 
-/**
- * ファイルパーミッションの検証（Unix系のみ）
- */
-export function validateFilePermissions(filePath: string, expectedMode: number = 0o600): ValidationResult {
-  const errors: string[] = [];
-  const warnings: string[] = [];
-
-  try {
-    const stats = statSync(filePath);
-    const actualMode = stats.mode & 0o777;
-
-    if (actualMode !== expectedMode) {
-      const actualOctal = actualMode.toString(8);
-      const expectedOctal = expectedMode.toString(8);
-      warnings.push(
-        `File permissions are ${actualOctal} but should be ${expectedOctal} for security. Run: chmod ${expectedOctal} ${filePath}`,
-      );
-    }
-  } catch (error) {
-    errors.push(`Failed to check file permissions: ${error instanceof Error ? error.message : error}`);
-  }
-
-  return {
-    isValid: errors.length === 0,
-    errors,
-    warnings,
-  };
-}
