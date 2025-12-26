@@ -91,10 +91,10 @@ async function runRequirementsPhase(feature: string): Promise<PhaseRunResult> {
     `  ${confluenceCreated ? '✅' : '❌'} Confluenceページ: ${confluenceCreated ? '作成済み' : '未作成'}`,
   );
   console.log(
-    `  ${validation.valid ? '✅' : '❌'} バリデーション: ${validation.valid ? '成功' : '失敗'}`,
+    `  ${validation.success ? '✅' : '❌'} バリデーション: ${validation.success ? '成功' : '失敗'}`,
   );
 
-  if (validation.valid && confluenceCreated) {
+  if (validation.success && confluenceCreated) {
     console.log('\n🎉 要件定義フェーズが完了しました！');
     console.log('📢 PMや部長にConfluenceでレビューを依頼してください');
     if (confluenceUrl) {
@@ -110,10 +110,10 @@ async function runRequirementsPhase(feature: string): Promise<PhaseRunResult> {
 
   return {
     phase: 'requirements',
-    success: validation.valid && confluenceCreated,
+    success: validation.success && confluenceCreated,
     confluenceCreated,
     jiraCreated: false,
-    validationPassed: validation.valid,
+    validationPassed: validation.success,
     errors,
   };
 }
@@ -178,10 +178,10 @@ async function runDesignPhase(feature: string): Promise<PhaseRunResult> {
     `  ${confluenceCreated ? '✅' : '❌'} Confluenceページ: ${confluenceCreated ? '作成済み' : '未作成'}`,
   );
   console.log(
-    `  ${validation.valid ? '✅' : '❌'} バリデーション: ${validation.valid ? '成功' : '失敗'}`,
+    `  ${validation.success ? '✅' : '❌'} バリデーション: ${validation.success ? '成功' : '失敗'}`,
   );
 
-  if (validation.valid && confluenceCreated) {
+  if (validation.success && confluenceCreated) {
     console.log('\n🎉 設計フェーズが完了しました！');
     console.log('📢 PMや部長にConfluenceでレビューを依頼してください');
     if (confluenceUrl) {
@@ -197,10 +197,10 @@ async function runDesignPhase(feature: string): Promise<PhaseRunResult> {
 
   return {
     phase: 'design',
-    success: validation.valid && confluenceCreated,
+    success: validation.success && confluenceCreated,
     confluenceCreated,
     jiraCreated: false,
-    validationPassed: validation.valid,
+    validationPassed: validation.success,
     errors,
   };
 }
@@ -355,7 +355,7 @@ async function validateTasksFormatAndSyncJIRA(
  */
 function displayTasksPhaseSummary(
   jiraCreated: boolean,
-  validation: { valid: boolean; errors: string[] }
+  validation: { success: boolean; errors: string[] }
 ): void {
   console.log('\n' + '='.repeat(60));
   console.log('📊 タスク分割フェーズ完了チェック:');
@@ -364,10 +364,10 @@ function displayTasksPhaseSummary(
     `  ${jiraCreated ? '✅' : '❌'} JIRA Epic/Story: ${jiraCreated ? '作成済み' : '未作成'}`,
   );
   console.log(
-    `  ${validation.valid ? '✅' : '❌'} バリデーション: ${validation.valid ? '成功' : '失敗'}`,
+    `  ${validation.success ? '✅' : '❌'} バリデーション: ${validation.success ? '成功' : '失敗'}`,
   );
 
-  if (validation.valid && jiraCreated) {
+  if (validation.success && jiraCreated) {
     console.log('\n🎉 タスク分割フェーズが完了しました！');
     console.log('📢 開発チームに実装開始を通知してください');
     console.log('🚀 次のステップ: /kiro:spec-impl <feature>');
@@ -427,10 +427,10 @@ async function runTasksPhase(feature: string): Promise<PhaseRunResult> {
 
   return {
     phase: 'tasks',
-    success: validation.valid && jiraCreated,
+    success: validation.success && jiraCreated,
     confluenceCreated: false,
     jiraCreated,
-    validationPassed: validation.valid,
+    validationPassed: validation.success,
     errors,
   };
 }

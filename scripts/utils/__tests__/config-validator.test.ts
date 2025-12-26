@@ -65,7 +65,7 @@ describe('config-validator', () => {
 
       const result = validateProjectConfig(testProjectRoot);
 
-      expect(result.valid).toBe(true);
+      expect(result.success).toBe(true);
       expect(result.errors).toHaveLength(0);
       expect(result.warnings).toHaveLength(0);
       expect(result.info.length).toBeGreaterThan(0);
@@ -94,7 +94,7 @@ describe('config-validator', () => {
 
       const result = validateProjectConfig(testProjectRoot);
 
-      expect(result.valid).toBe(true);
+      expect(result.success).toBe(true);
       expect(result.errors).toHaveLength(0);
     });
 
@@ -104,7 +104,7 @@ describe('config-validator', () => {
 
       const result = validateProjectConfig(testProjectRoot);
 
-      expect(result.valid).toBe(false);
+      expect(result.success).toBe(false);
       expect(result.errors.length).toBeGreaterThan(0);
       expect(result.errors[0]).toContain('Invalid JSON');
     });
@@ -122,7 +122,7 @@ describe('config-validator', () => {
 
       const result = validateProjectConfig(testProjectRoot);
 
-      expect(result.valid).toBe(false);
+      expect(result.success).toBe(false);
       expect(result.errors.length).toBeGreaterThan(0);
       expect(result.errors[0]).toContain('hierarchy');
     });
@@ -140,7 +140,7 @@ describe('config-validator', () => {
 
       const result = validateProjectConfig(testProjectRoot);
 
-      expect(result.valid).toBe(false);
+      expect(result.success).toBe(false);
       expect(result.errors.length).toBeGreaterThan(0);
       expect(result.errors[0]).toContain('selectedPhases');
     });
@@ -179,7 +179,7 @@ describe('config-validator', () => {
 
       const result = validateForConfluenceSync('requirements', testProjectRoot);
 
-      expect(result.valid).toBe(true);
+      expect(result.success).toBe(true);
       // デフォルト設定がある場合、警告が表示されない可能性がある
       // 実際の動作に合わせてテストを調整
       if (result.warnings.length > 0) {
@@ -202,7 +202,7 @@ describe('config-validator', () => {
 
       const result = validateForConfluenceSync('requirements', testProjectRoot);
 
-      expect(result.valid).toBe(true);
+      expect(result.success).toBe(true);
       expect(result.errors).toHaveLength(0);
     });
 
@@ -227,7 +227,7 @@ describe('config-validator', () => {
 
       // デフォルト設定にhierarchyがある場合、エラーにならない
       // このテストは、デフォルト設定の動作を確認するためのもの
-      expect(result.valid).toBe(true);
+      expect(result.success).toBe(true);
     });
 
     it('manualモードでstructure設定がない場合はエラー', () => {
@@ -246,7 +246,7 @@ describe('config-validator', () => {
 
       const result = validateForConfluenceSync('requirements', testProjectRoot);
 
-      expect(result.valid).toBe(false);
+      expect(result.success).toBe(false);
       expect(result.errors.length).toBeGreaterThan(0);
       expect(result.errors[0]).toContain('structure');
     });
@@ -266,7 +266,7 @@ describe('config-validator', () => {
 
       const result = validateForConfluenceSync('requirements', testProjectRoot);
 
-      expect(result.valid).toBe(true);
+      expect(result.success).toBe(true);
       // 環境変数がある場合、infoメッセージが表示される可能性がある
       // 実際の動作に合わせてテストを調整
       if (result.info.length > 0) {
@@ -318,7 +318,7 @@ describe('config-validator', () => {
       const result = validateForJiraSync(testProjectRoot);
 
       // story=nullの場合、環境変数もないのでエラーになる
-      expect(result.valid).toBe(false);
+      expect(result.success).toBe(false);
       expect(result.errors.length).toBeGreaterThan(0);
       expect(result.errors[0]).toContain('issueTypes.story');
     });
@@ -338,7 +338,7 @@ describe('config-validator', () => {
 
       const result = validateForJiraSync(testProjectRoot);
 
-      expect(result.valid).toBe(true);
+      expect(result.success).toBe(true);
       expect(result.errors).toHaveLength(0);
     });
 
@@ -357,7 +357,7 @@ describe('config-validator', () => {
 
       const result = validateForJiraSync(testProjectRoot);
 
-      expect(result.valid).toBe(true);
+      expect(result.success).toBe(true);
       // 環境変数がある場合、infoメッセージが表示される可能性がある
       // 実際の動作に合わせてテストを調整
       if (result.info.length > 0) {
@@ -382,7 +382,7 @@ describe('config-validator', () => {
       const result = validateForJiraSync(testProjectRoot);
 
       // subtask=nullの場合、環境変数もないので警告になる
-      expect(result.valid).toBe(true);
+      expect(result.success).toBe(true);
       expect(result.warnings.length).toBeGreaterThan(0);
       expect(result.warnings[0]).toContain('subtask');
     });
@@ -403,7 +403,7 @@ describe('config-validator', () => {
 
       const result = validateForJiraSync(testProjectRoot);
 
-      expect(result.valid).toBe(false);
+      expect(result.success).toBe(false);
       expect(result.errors.length).toBeGreaterThan(0);
       expect(result.errors[0]).toContain('selectedPhases');
     });
@@ -490,7 +490,7 @@ describe('config-validator', () => {
 
       const result = await validateForJiraSyncAsync(testProjectRoot);
 
-      expect(result.valid).toBe(true);
+      expect(result.success).toBe(true);
       expect(result.errors).toHaveLength(0);
     });
 
@@ -536,7 +536,7 @@ describe('config-validator', () => {
 
       const result = await validateForJiraSyncAsync(testProjectRoot);
 
-      expect(result.valid).toBe(true);
+      expect(result.success).toBe(true);
       expect(result.errors).toHaveLength(0);
     });
 
@@ -588,7 +588,7 @@ describe('config-validator', () => {
 
       const result = await validateForJiraSyncAsync(testProjectRoot);
 
-      expect(result.valid).toBe(false);
+      expect(result.success).toBe(false);
       expect(result.errors.length).toBeGreaterThan(0);
       expect(
         result.errors.some(
@@ -635,7 +635,7 @@ describe('config-validator', () => {
 
       const result = await validateForJiraSyncAsync(testProjectRoot);
 
-      expect(result.valid).toBe(true); // エラーにはしない
+      expect(result.success).toBe(true); // エラーにはしない
       expect(result.warnings.length).toBeGreaterThan(0);
       expect(
         result.warnings.some((w) => w.includes('取得できませんでした')),

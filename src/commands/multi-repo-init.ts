@@ -48,7 +48,7 @@ export async function multiRepoInit(
 ): Promise<InitResult> {
   // 1. プロジェクト名のバリデーション
   const projectNameValidation = validateProjectName(projectName);
-  if (!projectNameValidation.isValid) {
+  if (!projectNameValidation.success) {
     throw new Error(
       `プロジェクト名が無効です: ${projectNameValidation.errors.join(', ')}`
     );
@@ -56,7 +56,7 @@ export async function multiRepoInit(
 
   // 2. JIRAキーのバリデーション
   const jiraKeyValidation = validateJiraKey(jiraKey);
-  if (!jiraKeyValidation.isValid) {
+  if (!jiraKeyValidation.success) {
     throw new Error(
       `JIRAキーが無効です: ${jiraKeyValidation.errors.join(', ')}`
     );

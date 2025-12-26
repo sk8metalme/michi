@@ -5,8 +5,12 @@
  * 環境変数やAPIトークンなど機密情報のバリデーションとセキュリティチェックを行います。
  */
 
+import type { Result } from './types/validation.js';
+import { success, failure } from './types/validation.js';
+
 /**
  * バリデーション結果
+ * @deprecated Use Result<boolean, string> from ./types/validation.js
  */
 export interface ValidationResult {
   isValid: boolean;
@@ -17,13 +21,13 @@ export interface ValidationResult {
 /**
  * APIトークン形式の検証
  */
-export function validateAtlassianToken(token: string): ValidationResult {
+export function validateAtlassianToken(token: string): Result<boolean, string> {
   const errors: string[] = [];
   const warnings: string[] = [];
 
   if (!token || token.trim() === '') {
     errors.push('Atlassian API token is empty');
-    return { isValid: false, errors, warnings };
+    return failure(errors, warnings);
   }
 
   if (token.includes(' ')) {
@@ -38,17 +42,17 @@ export function validateAtlassianToken(token: string): ValidationResult {
     warnings.push('Atlassian API token seems too short (expected >20 characters)');
   }
 
-  return {
-    isValid: errors.length === 0,
-    errors,
-    warnings,
-  };
+  if (errors.length > 0) {
+    return failure(errors, warnings);
+  }
+
+  return success(true, warnings);
 }
 
 /**
  * GitHub Personal Access Token の検証
  */
-export function validateGitHubToken(token: string): ValidationResult {
+export function validateGitHubToken(token: string): Result<boolean, string> {
   const errors: string[] = [];
   const warnings: string[] = [];
 
@@ -64,17 +68,17 @@ export function validateGitHubToken(token: string): ValidationResult {
     warnings.push('GitHub token seems too short');
   }
 
-  return {
-    isValid: errors.length === 0,
-    errors,
-    warnings,
-  };
+  if (errors.length > 0) {
+    return failure(errors, warnings);
+  }
+
+  return success(true, warnings);
 }
 
 /**
  * メールアドレス形式の検証
  */
-export function validateEmail(email: string): ValidationResult {
+export function validateEmail(email: string): Result<boolean, string> {
   const errors: string[] = [];
   const warnings: string[] = [];
 
@@ -93,17 +97,17 @@ export function validateEmail(email: string): ValidationResult {
     }
   }
 
-  return {
-    isValid: errors.length === 0,
-    errors,
-    warnings,
-  };
+  if (errors.length > 0) {
+    return failure(errors, warnings);
+  }
+
+  return success(true, warnings);
 }
 
 /**
  * URL形式の検証
  */
-export function validateUrl(url: string, expectedDomain?: string): ValidationResult {
+export function validateUrl(url: string, expectedDomain?: string): Result<boolean, string> {
   const errors: string[] = [];
   const warnings: string[] = [];
 
@@ -133,25 +137,25 @@ export function validateUrl(url: string, expectedDomain?: string): ValidationRes
     }
   }
 
-  return {
-    isValid: errors.length === 0,
-    errors,
-    warnings,
-  };
+  if (errors.length > 0) {
+    return failure(errors, warnings);
+  }
+
+  return success(true, warnings);
 }
 
 /**
  * Atlassian URL の検証
  */
-export function validateAtlassianUrl(url: string): ValidationResult {
+export function validateAtlassianUrl(url: string): Result<boolean, string> {
   const result = validateUrl(url, 'atlassian.net');
 
-  if (result.isValid) {
+  if (result.success) {
     try {
       const parsedUrl = new URL(url);
       if (!parsedUrl.hostname.endsWith('.atlassian.net')) {
-        result.errors.push('Atlassian URL must end with .atlassian.net');
-        result.isValid = false;
+        const errors = [...result.errors, 'Atlassian URL must end with .atlassian.net'];
+        return failure(errors, result.warnings);
       }
     } catch {
       // Already handled in validateUrl
@@ -164,7 +168,7 @@ export function validateAtlassianUrl(url: string): ValidationResult {
 /**
  * GitHub リポジトリ URL の検証
  */
-export function validateGitHubRepositoryUrl(url: string): ValidationResult {
+export function validateGitHubRepositoryUrl(url: string): Result<boolean, string> {
   const errors: string[] = [];
   const warnings: string[] = [];
 
@@ -186,11 +190,11 @@ export function validateGitHubRepositoryUrl(url: string): ValidationResult {
     }
   }
 
-  return {
-    isValid: errors.length === 0,
-    errors,
-    warnings,
-  };
+  if (errors.length > 0) {
+    return failure(errors, warnings);
+  }
+
+  return success(true, warnings);
 }
 
 /**
@@ -205,7 +209,7 @@ export interface EnvValidationConfig {
   repositoryUrl?: string;
 }
 
-export function validateEnvironmentConfig(config: EnvValidationConfig): ValidationResult {
+export function validateEnvironmentConfig(config: EnvValidationConfig): Result<boolean, string> {
   const allErrors: string[] = [];
   const allWarnings: string[] = [];
 
@@ -247,10 +251,10 @@ export function validateEnvironmentConfig(config: EnvValidationConfig): Validati
     allWarnings.push(...result.warnings.map((w) => `repository: ${w}`));
   }
 
-  return {
-    isValid: allErrors.length === 0,
-    errors: allErrors,
-    warnings: allWarnings,
-  };
+  if (allErrors.length > 0) {
+    return failure(allErrors, allWarnings);
+  }
+
+  return success(true, allWarnings);
 }
 

@@ -35,7 +35,7 @@ describe('Multi-Repo Security Tests', () => {
       it(`プロジェクト名に${description}を含む場合はバリデーションエラー`, () => {
         const result = validateProjectName(name);
 
-        expect(result.isValid).toBe(false);
+        expect(result.success).toBe(false);
         expect(result.errors.length).toBeGreaterThan(0);
         expect(
           result.errors.some(
@@ -94,7 +94,7 @@ describe('Multi-Repo Security Tests', () => {
 
       validNames.forEach((name) => {
         const result = validateProjectName(name);
-        expect(result.isValid).toBe(true);
+        expect(result.success).toBe(true);
         expect(result.errors).toHaveLength(0);
       });
 
@@ -118,7 +118,7 @@ describe('Multi-Repo Security Tests', () => {
       it(`プロジェクト名に${description} (${char})を含む場合はバリデーションエラー`, () => {
         const result = validateProjectName(name);
 
-        expect(result.isValid).toBe(false);
+        expect(result.success).toBe(false);
         expect(result.errors.length).toBeGreaterThan(0);
         expect(result.errors[0]).toContain('control characters');
 
@@ -186,7 +186,7 @@ describe('Multi-Repo Security Tests', () => {
         // プロジェクト名に不正な文字が含まれる場合はバリデーションエラー
         if (script.includes('/')) {
           // スラッシュを含む場合のみバリデーションエラーになる
-          expect(result.isValid).toBe(false);
+          expect(result.success).toBe(false);
           console.log(`✅ ${description}: バリデーションで拒否されました`);
         } else {
           // セミコロン、パイプ、AND、バッククォート、ドル記号などは現在のバリデーションで許可されているが、
@@ -207,7 +207,7 @@ describe('Multi-Repo Security Tests', () => {
 
       maliciousUrls.forEach((url) => {
         const result = validateRepositoryUrl(url);
-        expect(result.isValid).toBe(false);
+        expect(result.success).toBe(false);
         expect(result.errors.length).toBeGreaterThan(0);
         console.log(`✅ 不正なURL拒否: ${url}`);
       });
@@ -222,7 +222,7 @@ describe('Multi-Repo Security Tests', () => {
 
       validUrls.forEach((url) => {
         const result = validateRepositoryUrl(url);
-        expect(result.isValid).toBe(true);
+        expect(result.success).toBe(true);
         expect(result.errors).toHaveLength(0);
       });
 
@@ -233,23 +233,23 @@ describe('Multi-Repo Security Tests', () => {
   describe('総合セキュリティテスト', () => {
     it('すべてのセキュリティ対策が機能している', () => {
       // パストラバーサル
-      expect(validateProjectName('../etc').isValid).toBe(false);
-      expect(validateProjectName('/root').isValid).toBe(false);
+      expect(validateProjectName('../etc').success).toBe(false);
+      expect(validateProjectName('/root').success).toBe(false);
 
       // 制御文字
-      expect(validateProjectName('test\x00null').isValid).toBe(false);
-      expect(validateProjectName('test\nnewline').isValid).toBe(false);
+      expect(validateProjectName('test\x00null').success).toBe(false);
+      expect(validateProjectName('test\nnewline').success).toBe(false);
 
       // JIRAキー検証
-      expect(validateJiraKey('ABC').isValid).toBe(true);
-      expect(validateJiraKey('abc').isValid).toBe(false); // 小文字不可
-      expect(validateJiraKey('AB1').isValid).toBe(false); // 数字不可
-      expect(validateJiraKey('A').isValid).toBe(false); // 1文字不可
+      expect(validateJiraKey('ABC').success).toBe(true);
+      expect(validateJiraKey('abc').success).toBe(false); // 小文字不可
+      expect(validateJiraKey('AB1').success).toBe(false); // 数字不可
+      expect(validateJiraKey('A').success).toBe(false); // 1文字不可
 
       // リポジトリURL検証
-      expect(validateRepositoryUrl('https://github.com/owner/repo').isValid).toBe(true);
-      expect(validateRepositoryUrl('http://github.com/owner/repo').isValid).toBe(false); // HTTPS必須
-      expect(validateRepositoryUrl('git@github.com:owner/repo.git').isValid).toBe(false); // SSH不可
+      expect(validateRepositoryUrl('https://github.com/owner/repo').success).toBe(true);
+      expect(validateRepositoryUrl('http://github.com/owner/repo').success).toBe(false); // HTTPS必須
+      expect(validateRepositoryUrl('git@github.com:owner/repo.git').success).toBe(false); // SSH不可
 
       console.log('✅ すべてのセキュリティ対策が正常に機能しています');
     });

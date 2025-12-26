@@ -45,7 +45,7 @@ function validateFeatureName(featureName: string): void {
 
   // kebab-case形式の厳密な検証（既存のバリデータを使用）
   const result = validateFeatureNameStrict(featureName);
-  if (!result.valid) {
+  if (!result.success) {
     throw new Error(result.errors.join('\n'));
   }
 }
