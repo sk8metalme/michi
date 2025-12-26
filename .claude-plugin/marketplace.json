@@ -6,10 +6,7 @@
   "plugins": [
     {
       "name": "michi",
-      "source": {
-        "type": "local",
-        "path": "plugins/michi"
-      },
+      "source": "./plugins/michi",
       "description": "Michi - AI-driven Spec-Driven Development workflow for Claude Code",
       "version": "0.14.1"
     }
