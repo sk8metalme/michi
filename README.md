@@ -34,21 +34,40 @@ JIRA ← タスク管理・進捗追跡
 
 ## クイックスタート
 
-### インストール
+### Claude Codeプラグイン（推奨）
+
+**前提条件**: cc-sdd（Spec-Driven Development Core）をセットアップ
+
+```bash
+npx cc-sdd@latest --claude --lang ja
+```
+
+**Michiプラグインのインストール** - Claude Code内で実行:
+
+```
+/plugin marketplace add sk8metalme/michi
+/plugin install michi@michi
+```
+
+**推奨プラグイン** - 併せてインストール:
+
+```
+/plugin marketplace add sk8metalme/ai-agent-setup
+/plugin install design-review@ai-agent-setup
+/plugin install oss-compliance@ai-agent-setup
+/plugin install version-audit@ai-agent-setup
+/plugin install e2e-planning@ai-agent-setup
+```
+
+### CLIツール（外部ツール連携用）
+
+JIRA/Confluence連携やリリース自動化には、CLIツールを併用します。
 
 ```bash
 npm install -g @sk8metal/michi-cli
 ```
 
-### 初期化
-
-```bash
-# Claude Code向け（推奨）
-michi init --claude-agent
-
-# 既存プロジェクトに追加
-michi setup-existing --claude-agent
-```
+**注意**: `michi setup --claude` コマンドは廃止予定です。上記のプラグインインストールを使用してください。
 
 ### 基本的な使い方
 

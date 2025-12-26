@@ -56,7 +56,8 @@ describe('Internationalization (i18n) E2E', () => {
       assertFileContains(projectJsonPath, '"language": "ja"');
     });
 
-    it('should render templates with Japanese DEV_GUIDELINES', async () => {
+    // DEPRECATED: Template distribution is deprecated in favor of plugin installation (v0.14.0)
+    it.skip('should render templates with Japanese DEV_GUIDELINES', async () => {
       await setupExisting({
         claude: true,
         lang: 'ja',
@@ -109,7 +110,8 @@ describe('Internationalization (i18n) E2E', () => {
       assertFileContains(projectJsonPath, '"language": "en"');
     });
 
-    it('should render templates with English DEV_GUIDELINES', async () => {
+    // DEPRECATED: Template distribution is deprecated in favor of plugin installation (v0.14.0)
+    it.skip('should render templates with English DEV_GUIDELINES', async () => {
       await setupExisting({
         claude: true,
         lang: 'en',
@@ -333,7 +335,8 @@ Unknown: {{UNKNOWN_PLACEHOLDER}}
   });
 
   describe('Real-world Scenarios', () => {
-    it('should correctly render Michi Core template in Japanese', async () => {
+    // DEPRECATED: Template distribution is deprecated in favor of plugin installation (v0.14.0)
+    it.skip('should correctly render Michi Core template in Japanese', async () => {
       await setupExisting({
         claude: true,
         lang: 'ja',
@@ -354,7 +357,8 @@ Unknown: {{UNKNOWN_PLACEHOLDER}}
       expect(content).not.toContain('{{DEV_GUIDELINES}}');
     });
 
-    it('should correctly render Michi Core template in English', async () => {
+    // DEPRECATED: Template distribution is deprecated in favor of plugin installation (v0.14.0)
+    it.skip('should correctly render Michi Core template in English', async () => {
       await setupExisting({
         claude: true,
         lang: 'en',

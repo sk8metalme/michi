@@ -1,0 +1,61 @@
+{
+  "name": "michi",
+  "version": "0.14.0",
+  "description": "Michi - AI-driven Spec-Driven Development workflow for Claude Code",
+  "author": "sk8metal",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sk8metalme/michi"
+  },
+  "homepage": "https://github.com/sk8metalme/michi",
+  "keywords": [
+    "claude-code",
+    "plugin",
+    "spec-driven-development",
+    "cc-sdd",
+    "michi",
+    "tdd",
+    "workflow",
+    "confluence",
+    "jira"
+  ],
+  "commands": [
+    { "name": "michi:spec-impl", "file": "commands/michi/spec-impl.md" },
+    { "name": "michi:spec-design", "file": "commands/michi/spec-design.md" },
+    { "name": "michi:spec-tasks", "file": "commands/michi/spec-tasks.md" },
+    { "name": "michi:validate-design", "file": "commands/michi/validate-design.md" },
+    { "name": "michi:confluence-sync", "file": "commands/michi/confluence-sync.md" },
+    { "name": "michi:test-planning", "file": "commands/michi/test-planning.md" },
+    { "name": "michi:pr-resolve", "file": "commands/michi/pr-resolve.md" },
+    { "name": "michi:project-switch", "file": "commands/michi/project-switch.md" },
+    { "name": "michi-multi-repo:spec-init", "file": "commands/michi-multi-repo/spec-init.md" },
+    { "name": "michi-multi-repo:spec-requirements", "file": "commands/michi-multi-repo/spec-requirements.md" },
+    { "name": "michi-multi-repo:spec-design", "file": "commands/michi-multi-repo/spec-design.md" },
+    { "name": "michi-multi-repo:spec-review", "file": "commands/michi-multi-repo/spec-review.md" },
+    { "name": "michi-multi-repo:propagate-specs", "file": "commands/michi-multi-repo/propagate-specs.md" },
+    { "name": "michi-multi-repo:impl-all", "file": "commands/michi-multi-repo/impl-all.md" }
+  ],
+  "agents": [
+    { "name": "mermaid-validator", "file": "agents/mermaid-validator/AGENT.md" },
+    { "name": "pr-resolver", "file": "agents/pr-resolver/AGENT.md" },
+    { "name": "pr-size-monitor", "file": "agents/pr-size-monitor/AGENT.md" }
+  ],
+  "skills": [
+    { "name": "mermaid-validator", "file": "skills/mermaid-validator/SKILL.md" }
+  ],
+  "rules": [
+    { "name": "atlassian-integration", "file": "rules/atlassian-integration.md" },
+    { "name": "michi-core", "file": "rules/michi-core.md" },
+    { "name": "code-size-monitor", "file": "rules/code-size-monitor.md" },
+    { "name": "code-size-rules", "file": "rules/code-size-rules.md" },
+    { "name": "doc-review", "file": "rules/doc-review.md" },
+    { "name": "doc-review-rules", "file": "rules/doc-review-rules.md" }
+  ],
+  "dependencies": {
+    "design-review": "*",
+    "oss-compliance": "*",
+    "version-audit": "*",
+    "e2e-planning": "*"
+  }
+}
