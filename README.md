@@ -46,7 +46,7 @@ npx cc-sdd@latest --claude --lang ja
 
 ```
 /plugin marketplace add sk8metalme/michi
-/plugin install michi@michi
+/plugin install michi@sk8metalme
 ```
 
 **推奨プラグイン** - 併せてインストール:

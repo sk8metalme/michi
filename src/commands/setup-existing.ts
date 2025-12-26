@@ -405,7 +405,7 @@ export async function setupExisting(options: SetupOptions): Promise<void> {
     console.warn('⚠️  DEPRECATION WARNING: Template distribution via `michi setup --claude` is deprecated.');
     console.warn('   Please use Claude Code plugin instead:');
     console.warn('   /plugin marketplace add sk8metalme/michi');
-    console.warn('   /plugin install michi@michi');
+    console.warn('   /plugin install michi@sk8metalme');
     console.warn('');
     console.warn('   Continuing with other setup tasks (project init, .env config)...');
     console.warn('');
@@ -771,7 +771,7 @@ JIRA_ISSUE_TYPE_SUBTASK=10037
   case 'claude':
     console.log('  3. Michiプラグインをインストール:');
     console.log('     /plugin marketplace add sk8metalme/michi');
-    console.log('     /plugin install michi@michi');
+    console.log('     /plugin install michi@sk8metalme');
     console.log('  4. Claude Code で開発開始');
     break;
 

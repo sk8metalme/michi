@@ -37,7 +37,7 @@ Claude Code内で以下を実行：
 
 ```
 /plugin marketplace add sk8metalme/michi
-/plugin install michi@michi
+/plugin install michi@sk8metalme
 ```
 
 ## 利用可能なコマンド

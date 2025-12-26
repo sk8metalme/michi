@@ -25,7 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **エージェント**: 3個（mermaid-validator, pr-resolver, pr-size-monitor）
   - **スキル**: 1個（mermaid-validator）
   - **ルール**: 6個（atlassian-integration, michi-core, code-size-monitor, code-size-rules, doc-review, doc-review-rules）
-  - **インストール方法**: `/plugin marketplace add sk8metalme/michi` → `/plugin install michi@michi`
+  - **インストール方法**: `/plugin marketplace add sk8metalme/michi` → `/plugin install michi@sk8metalme`
   - **依存関係**: cc-sdd（必須）、ai-agent-setup（推奨）
 
 - **プラグインREADME**: `plugins/michi/README.md` 作成
@@ -72,7 +72,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
    # Michiプラグインインストール
    /plugin marketplace add sk8metalme/michi
-   /plugin install michi@michi
+   /plugin install michi@sk8metalme
 
    # 推奨プラグイン
    /plugin marketplace add sk8metalme/ai-agent-setup
