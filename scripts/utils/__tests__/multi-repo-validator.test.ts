@@ -483,7 +483,7 @@ describe('validateLocalPath - Michi導入チェック', () => {
     // .git ディレクトリを作成しない（Gitリポジトリでない）
 
     const result = validateLocalPath(repository);
-    expect(result.success).toBe(false);
+    expect(result.isValid).toBe(false);
     expect(result.hasMichiSetup).toBe(false);
     expect(result.michiSetupCommand).toBeNull();
     expect(result.errors).toContain(
