@@ -19,7 +19,7 @@ type Phase =
 
 interface ValidationResult {
   phase: Phase;
-  valid: boolean;
+  success: boolean;
   errors: string[];
   warnings: string[];
 }
@@ -46,7 +46,7 @@ function validateRequirements(feature: string): ValidationResult {
   
   // 0. feature名のバリデーション
   const nameValidation = validateFeatureName(feature);
-  if (!nameValidation.valid) {
+  if (!nameValidation.success) {
     errors.push(...nameValidation.errors);
   }
   
@@ -63,7 +63,7 @@ function validateRequirements(feature: string): ValidationResult {
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : String(error);
     errors.push(`❌ spec.json読み込みエラー: ${message}`);
-    return { phase: 'requirements', valid: false, errors, warnings };
+    return { phase: 'requirements', success: false, errors, warnings };
   }
   
   // 3. Confluenceページ作成チェック（必須）
@@ -84,7 +84,7 @@ function validateRequirements(feature: string): ValidationResult {
   
   return {
     phase: 'requirements',
-    valid: errors.length === 0,
+    success: errors.length === 0,
     errors,
     warnings
   };
@@ -99,7 +99,7 @@ function validateDesign(feature: string): ValidationResult {
   
   // 0. feature名のバリデーション
   const nameValidation = validateFeatureName(feature);
-  if (!nameValidation.valid) {
+  if (!nameValidation.success) {
     errors.push(...nameValidation.errors);
   }
   
@@ -116,7 +116,7 @@ function validateDesign(feature: string): ValidationResult {
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : String(error);
     errors.push(`❌ spec.json読み込みエラー: ${message}`);
-    return { phase: 'design', valid: false, errors, warnings };
+    return { phase: 'design', success: false, errors, warnings };
   }
   
   // 3. 前提: 要件定義完了チェック
@@ -137,7 +137,7 @@ function validateDesign(feature: string): ValidationResult {
   
   return {
     phase: 'design',
-    valid: errors.length === 0,
+    success: errors.length === 0,
     errors,
     warnings
   };
@@ -152,7 +152,7 @@ function validateTasks(feature: string): ValidationResult {
   
   // 0. feature名のバリデーション
   const nameValidation = validateFeatureName(feature);
-  if (!nameValidation.valid) {
+  if (!nameValidation.success) {
     errors.push(...nameValidation.errors);
   }
   
@@ -198,7 +198,7 @@ function validateTasks(feature: string): ValidationResult {
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : String(error);
     errors.push(`❌ spec.json読み込みエラー: ${message}`);
-    return { phase: 'tasks', valid: false, errors, warnings };
+    return { phase: 'tasks', success: false, errors, warnings };
   }
   
   // 3. 前提: 設計完了チェック
@@ -236,7 +236,7 @@ function validateTasks(feature: string): ValidationResult {
   
   return {
     phase: 'tasks',
-    valid: errors.length === 0,
+    success: errors.length === 0,
     errors,
     warnings
   };
@@ -253,7 +253,7 @@ function validateEnvironmentSetup(feature: string): ValidationResult {
 
   // feature名のバリデーション
   const nameValidation = validateFeatureName(feature);
-  if (!nameValidation.valid) {
+  if (!nameValidation.success) {
     errors.push(...nameValidation.errors);
   }
 
@@ -261,7 +261,7 @@ function validateEnvironmentSetup(feature: string): ValidationResult {
 
   return {
     phase: 'environment-setup',
-    valid: errors.length === 0,
+    success: errors.length === 0,
     errors,
     warnings
   };
@@ -277,7 +277,7 @@ function validatePhaseA(feature: string): ValidationResult {
 
   // feature名のバリデーション
   const nameValidation = validateFeatureName(feature);
-  if (!nameValidation.valid) {
+  if (!nameValidation.success) {
     errors.push(...nameValidation.errors);
   }
 
@@ -285,7 +285,7 @@ function validatePhaseA(feature: string): ValidationResult {
 
   return {
     phase: 'phase-a',
-    valid: errors.length === 0,
+    success: errors.length === 0,
     errors,
     warnings
   };
@@ -301,7 +301,7 @@ function validatePhaseB(feature: string): ValidationResult {
 
   // feature名のバリデーション
   const nameValidation = validateFeatureName(feature);
-  if (!nameValidation.valid) {
+  if (!nameValidation.success) {
     errors.push(...nameValidation.errors);
   }
 
@@ -309,7 +309,7 @@ function validatePhaseB(feature: string): ValidationResult {
 
   return {
     phase: 'phase-b',
-    valid: errors.length === 0,
+    success: errors.length === 0,
     errors,
     warnings
   };
@@ -359,7 +359,7 @@ export function validatePhase(feature: string, phase: Phase): ValidationResult {
     result.warnings.forEach(warn => console.log(`  ${warn}`));
   }
   
-  if (result.valid) {
+  if (result.success) {
     console.log('\n✅ バリデーション成功: すべての必須項目が完了しています');
   } else {
     console.log('\n❌ バリデーション失敗: 上記のエラーを修正してください');
@@ -405,7 +405,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   
   try {
     const result = validatePhase(feature, phase as Phase);
-    process.exit(result.valid ? 0 : 1);
+    process.exit(result.success ? 0 : 1);
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : String(error);
     console.error(`\n❌ Validation error: ${message}`);

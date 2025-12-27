@@ -9,9 +9,12 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { execSync } from 'child_process';
 import type { Repository } from '../config/config-schema.js';
+import type { Result } from './types/validation.js';
+import { success, failure } from './types/validation.js';
 
 /**
  * バリデーション結果
+ * @deprecated Use Result<boolean, string> from ./types/validation.js
  */
 export interface ValidationResult {
   isValid: boolean;
@@ -36,7 +39,7 @@ export interface LocalPathValidationResult extends ValidationResult {
  * プロジェクト名のバリデーション
  * セキュリティ対策: パストラバーサル、相対パス、制御文字をチェック
  */
-export function validateProjectName(name: string): ValidationResult {
+export function validateProjectName(name: string): Result<boolean, string> {
   const errors: string[] = [];
   const warnings: string[] = [];
 
@@ -66,18 +69,18 @@ export function validateProjectName(name: string): ValidationResult {
     errors.push('Project name must not contain control characters');
   }
 
-  return {
-    isValid: errors.length === 0,
-    errors,
-    warnings,
-  };
+  if (errors.length > 0) {
+    return failure(errors, warnings);
+  }
+
+  return success(true, warnings);
 }
 
 /**
  * JIRAキーのバリデーション
  * 2-10文字の大文字英字のみ許可
  */
-export function validateJiraKey(key: string): ValidationResult {
+export function validateJiraKey(key: string): Result<boolean, string> {
   const errors: string[] = [];
   const warnings: string[] = [];
 
@@ -88,25 +91,25 @@ export function validateJiraKey(key: string): ValidationResult {
     errors.push('JIRA key must be 2-10 uppercase letters');
   }
 
-  return {
-    isValid: errors.length === 0,
-    errors,
-    warnings,
-  };
+  if (errors.length > 0) {
+    return failure(errors, warnings);
+  }
+
+  return success(true, warnings);
 }
 
 /**
  * リポジトリURLのバリデーション
  * GitHub HTTPS URL形式のみ許可
  */
-export function validateRepositoryUrl(url: string): ValidationResult {
+export function validateRepositoryUrl(url: string): Result<boolean, string> {
   const errors: string[] = [];
   const warnings: string[] = [];
 
   // 空文字列チェック
   if (!url || url.trim() === '') {
     errors.push('Repository URL is empty');
-    return { isValid: false, errors, warnings };
+    return failure(errors, warnings);
   }
 
   // SSH URL検出（git@github.com:形式）
@@ -114,7 +117,7 @@ export function validateRepositoryUrl(url: string): ValidationResult {
     errors.push(
       'Repository URL must be in GitHub format: https://github.com/{owner}/{repo}',
     );
-    return { isValid: false, errors, warnings };
+    return failure(errors, warnings);
   }
 
   // URL形式チェック
@@ -151,11 +154,11 @@ export function validateRepositoryUrl(url: string): ValidationResult {
     errors.push('Repository URL format is invalid');
   }
 
-  return {
-    isValid: errors.length === 0,
-    errors,
-    warnings,
-  };
+  if (errors.length > 0) {
+    return failure(errors, warnings);
+  }
+
+  return success(true, warnings);
 }
 
 /**

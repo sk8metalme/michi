@@ -76,10 +76,10 @@ export async function configValidate(): Promise<void> {
       console.log('');
     }
 
-    if (result.isValid && result.warnings.length === 0) {
+    if (result.success && result.warnings.length === 0) {
       console.log('✅ 検証成功: 設定に問題はありません');
       console.log('');
-    } else if (result.isValid) {
+    } else if (result.success) {
       console.log('✅ 検証成功: エラーはありませんが、警告があります');
       console.log('');
     } else {

@@ -61,7 +61,7 @@ describe('validatePhase', () => {
       const result = validatePhase('test-feature', 'requirements');
 
       // Assert
-      expect(result.valid).toBe(true);
+      expect(result.success).toBe(true);
       expect(result.errors).toHaveLength(0);
       expect(result.phase).toBe('requirements');
     });
@@ -82,7 +82,7 @@ describe('validatePhase', () => {
       const result = validatePhase('test-feature', 'requirements');
 
       // Assert
-      expect(result.valid).toBe(false);
+      expect(result.success).toBe(false);
       expect(result.errors).toContain(
         '❌ Confluenceページ（要件定義）が作成されていません',
       );
@@ -110,7 +110,7 @@ describe('validatePhase', () => {
       const result = validatePhase('test-feature', 'design');
 
       // Assert
-      expect(result.valid).toBe(false);
+      expect(result.success).toBe(false);
       expect(result.errors).toContain(
         '❌ 要件定義が完了していません（前提条件）',
       );
@@ -139,7 +139,7 @@ describe('validatePhase', () => {
       const result = validatePhase('test-feature', 'tasks');
 
       // Assert
-      expect(result.valid).toBe(false);
+      expect(result.success).toBe(false);
       expect(result.errors).toContain('❌ JIRA Epicが作成されていません');
     });
 
@@ -170,7 +170,7 @@ describe('validatePhase', () => {
       const result = validatePhase('test-feature', 'tasks');
 
       // Assert
-      expect(result.valid).toBe(true); // 警告だけなのでvalid
+      expect(result.success).toBe(true); // 警告だけなのでvalid
       expect(result.warnings).toContain(
         '⚠️  tasks.mdに曜日表記（月、火、水...）が含まれていません',
       );
@@ -290,7 +290,7 @@ describe('validatePhase', () => {
       const result = validatePhase('test-feature', 'requirements');
 
       // Assert: エラーをスローせず、errors配列にエラーを含めて返す
-      expect(result.valid).toBe(false);
+      expect(result.success).toBe(false);
       expect(result.errors).toContainEqual(
         expect.stringContaining('spec.json読み込みエラー'),
       );

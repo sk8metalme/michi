@@ -14,9 +14,14 @@ import {
   filterStoryTypes,
   filterSubtaskTypes,
 } from './jira-issue-type-fetcher.js';
+import type { Result } from './types/validation.js';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { success, failure } from './types/validation.js';
 
 /**
- * バリデーション結果
+ * バリデーション結果（情報メッセージ付き）
+ * info フィールドが必要な場合に使用
+ * @deprecated 新規コードでは Result<boolean, string> の使用を推奨。infoは warnings に統合してください
  */
 export interface ValidationResult {
   valid: boolean;
@@ -26,11 +31,45 @@ export interface ValidationResult {
 }
 
 /**
+ * Result型を拡張した情報メッセージ付きバリデーション結果
+ * config-validator固有の拡張型
+ */
+export interface ResultWithInfo extends Result<boolean, string> {
+  info: string[];
+}
+
+/**
+ * ResultWithInfo を作成するヘルパー関数（成功）
+ */
+function successWithInfo(value: boolean, warnings: string[] = [], info: string[] = []): ResultWithInfo {
+  return {
+    success: true,
+    value,
+    errors: [],
+    warnings,
+    info,
+  };
+}
+
+/**
+ * ResultWithInfo を作成するヘルパー関数（失敗）
+ */
+function failureWithInfo(errors: string[], warnings: string[] = [], info: string[] = []): ResultWithInfo {
+  return {
+    success: false,
+    value: undefined,
+    errors,
+    warnings,
+    info,
+  };
+}
+
+/**
  * プロジェクト設定ファイルをバリデーション
  */
 export function validateProjectConfig(
   projectRoot: string = process.cwd(),
-): ValidationResult {
+): ResultWithInfo {
   const errors: string[] = [];
   const warnings: string[] = [];
   const info: string[] = [];
@@ -40,12 +79,7 @@ export function validateProjectConfig(
   if (!existsSync(configPath)) {
     // 設定ファイルが存在しない場合は情報メッセージ（デフォルト設定を使用）
     info.push('Project config file not found. Using default configuration.');
-    return {
-      valid: true,
-      errors: [],
-      warnings: [],
-      info,
-    };
+    return successWithInfo(true, [], info);
   }
 
   try {
@@ -61,12 +95,7 @@ export function validateProjectConfig(
         errors.push(`${path}: ${error.message}`);
       });
 
-      return {
-        valid: false,
-        errors,
-        warnings: [],
-        info: [],
-      };
+      return failureWithInfo(errors, [], []);
     }
 
     // 追加のバリデーション
@@ -171,12 +200,11 @@ export function validateProjectConfig(
       }
     }
 
-    return {
-      valid: errors.length === 0,
-      errors,
-      warnings,
-      info: [],
-    };
+    if (errors.length > 0) {
+      return failureWithInfo(errors, warnings, []);
+    }
+
+    return successWithInfo(true, warnings, []);
   } catch (error) {
     if (error instanceof SyntaxError) {
       errors.push(`Invalid JSON: ${error.message}`);
@@ -186,12 +214,7 @@ export function validateProjectConfig(
       );
     }
 
-    return {
-      valid: false,
-      errors,
-      warnings: [],
-      info: [],
-    };
+    return failureWithInfo(errors, [], []);
   }
 }
 
@@ -225,11 +248,11 @@ export function validateAndReport(
     return false;
   }
 
-  if (result.valid) {
+  if (result.success) {
     console.log('✅ Configuration is valid');
   }
 
-  return result.valid;
+  return result.success;
 }
 
 /**
@@ -241,7 +264,7 @@ export function validateAndReport(
 export function validateForConfluenceSync(
   docType: 'requirements' | 'design' | 'tasks',
   projectRoot: string = process.cwd(),
-): ValidationResult {
+): ResultWithInfo {
   const errors: string[] = [];
   const warnings: string[] = [];
   const info: string[] = [];
@@ -319,12 +342,11 @@ export function validateForConfluenceSync(
     }
   }
 
-  return {
-    valid: errors.length === 0,
-    errors,
-    warnings,
-    info,
-  };
+  if (errors.length > 0) {
+    return failureWithInfo(errors, warnings, info);
+  }
+
+  return successWithInfo(true, warnings, info);
 }
 
 /**
@@ -334,7 +356,7 @@ export function validateForConfluenceSync(
  */
 export function validateForJiraSync(
   projectRoot: string = process.cwd(),
-): ValidationResult {
+): ResultWithInfo {
   const errors: string[] = [];
   const warnings: string[] = [];
   const info: string[] = [];
@@ -419,12 +441,11 @@ export function validateForJiraSync(
     }
   }
 
-  return {
-    valid: errors.length === 0,
-    errors,
-    warnings,
-    info,
-  };
+  if (errors.length > 0) {
+    return failureWithInfo(errors, warnings, info);
+  }
+
+  return successWithInfo(true, warnings, info);
 }
 
 /**
@@ -434,9 +455,13 @@ export function validateForJiraSync(
  */
 export async function validateForJiraSyncAsync(
   projectRoot: string = process.cwd(),
-): Promise<ValidationResult> {
+): Promise<ResultWithInfo> {
   // まず同期版のバリデーションを実行
   const result = validateForJiraSync(projectRoot);
+
+  // 追加のエラーと警告を収集
+  const additionalErrors: string[] = [];
+  const additionalWarnings: string[] = [];
 
   // JIRA認証情報とプロジェクトキーが設定されている場合、Issue Type IDの存在チェックを実行
   if (hasJiraCredentials()) {
@@ -467,7 +492,7 @@ export async function validateForJiraSyncAsync(
                     .join('\n')
                   : '  （Storyタイプが見つかりませんでした）';
 
-              result.errors.push(
+              additionalErrors.push(
                 `設定されたStory Issue Type ID (${storyId}) がプロジェクト '${projectKey}' に存在しません。\n` +
                   '\n利用可能なStoryタイプ:\n' +
                   suggestions +
@@ -478,7 +503,6 @@ export async function validateForJiraSyncAsync(
                   '  2. または、対話的設定を再実行:\n' +
                   '     npm run setup:interactive',
               );
-              result.valid = false;
             }
           }
 
@@ -493,7 +517,7 @@ export async function validateForJiraSyncAsync(
                     .join('\n')
                   : '  （Subtaskタイプが見つかりませんでした）';
 
-              result.warnings.push(
+              additionalWarnings.push(
                 `設定されたSubtask Issue Type ID (${subtaskId}) がプロジェクト '${projectKey}' に存在しません。\n` +
                   '\n利用可能なSubtaskタイプ:\n' +
                   suggestions +
@@ -509,7 +533,7 @@ export async function validateForJiraSyncAsync(
         } else {
           // Issue Types取得に失敗した場合（認証エラー、ネットワークエラーなど）
           // エラーにはしないが、警告として記録
-          result.warnings.push(
+          additionalWarnings.push(
             `JIRAプロジェクト '${projectKey}' のIssue Typesを取得できませんでした。` +
               '設定されたIssue Type IDの存在確認をスキップします。',
           );
@@ -518,11 +542,23 @@ export async function validateForJiraSyncAsync(
     } catch (error) {
       // プロジェクトメタデータの読み込みに失敗した場合など
       // エラーにはしないが、警告として記録
-      result.warnings.push(
+      additionalWarnings.push(
         `プロジェクトメタデータの読み込みに失敗しました: ${error instanceof Error ? error.message : error}` +
           '設定されたIssue Type IDの存在確認をスキップします。',
       );
     }
+  }
+
+  // 追加のエラーや警告があれば、新しいResultWithInfoを作成
+  if (additionalErrors.length > 0 || additionalWarnings.length > 0) {
+    const allErrors = [...result.errors, ...additionalErrors];
+    const allWarnings = [...result.warnings, ...additionalWarnings];
+
+    if (allErrors.length > 0) {
+      return failureWithInfo(allErrors, allWarnings, result.info);
+    }
+
+    return successWithInfo(true, allWarnings, result.info);
   }
 
   return result;
@@ -531,7 +567,7 @@ export async function validateForJiraSyncAsync(
 /**
  * グローバル設定ファイルをバリデーション
  */
-export function validateGlobalConfig(): ValidationResult {
+export function validateGlobalConfig(): ResultWithInfo {
   const errors: string[] = [];
   const warnings: string[] = [];
   const info: string[] = [];
@@ -540,12 +576,7 @@ export function validateGlobalConfig(): ValidationResult {
 
   if (!existsSync(globalConfigPath)) {
     info.push('Global config file not found. This is optional.');
-    return {
-      valid: true,
-      errors: [],
-      warnings: [],
-      info,
-    };
+    return successWithInfo(true, [], info);
   }
 
   try {
@@ -561,20 +592,14 @@ export function validateGlobalConfig(): ValidationResult {
         errors.push(`${path}: ${error.message}`);
       });
 
-      return {
-        valid: false,
-        errors,
-        warnings: [],
-        info: [],
-      };
+      return failureWithInfo(errors, [], []);
     }
 
-    return {
-      valid: errors.length === 0,
-      errors,
-      warnings,
-      info: [],
-    };
+    if (errors.length > 0) {
+      return failureWithInfo(errors, warnings, []);
+    }
+
+    return successWithInfo(true, warnings, []);
   } catch (error) {
     if (error instanceof SyntaxError) {
       errors.push(`Invalid JSON in global config: ${error.message}`);
@@ -584,12 +609,7 @@ export function validateGlobalConfig(): ValidationResult {
       );
     }
 
-    return {
-      valid: false,
-      errors,
-      warnings: [],
-      info: [],
-    };
+    return failureWithInfo(errors, [], []);
   }
 }
 

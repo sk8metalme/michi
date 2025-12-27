@@ -3,6 +3,13 @@
  * kebab-case形式を強制
  */
 
+import type { Result } from './types/validation.js';
+import { success, failure } from './types/validation.js';
+
+/**
+ * バリデーション結果
+ * @deprecated Use Result<boolean, string> from ./types/validation.js
+ */
 export interface ValidationResult {
   valid: boolean;
   errors: string[];
@@ -19,23 +26,26 @@ const KEBAB_CASE_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
 /**
  * feature名がkebab-case形式か検証
+ *
+ * @returns Result<boolean, string> - 成功時は true、失敗時は false
  */
-export function validateFeatureName(featureName: string): ValidationResult {
+export function validateFeatureName(featureName: string): Result<boolean, string> {
   const errors: string[] = [];
-  
+  const warnings: string[] = [];
+
   // 空文字チェック
   if (!featureName || featureName.trim().length === 0) {
     errors.push('❌ feature名が空です');
-    return { valid: false, errors };
+    return failure(errors);
   }
-  
+
   const trimmed = featureName.trim();
-  
+
   // kebab-case形式チェック
   if (!KEBAB_CASE_PATTERN.test(trimmed)) {
     errors.push(`❌ feature名が無効な形式です: "${trimmed}"`);
     errors.push('   必須形式: 英語、kebab-case（ハイフン区切り）、小文字のみ');
-    
+
     // 具体的な問題を特定
     if (/[A-Z]/.test(trimmed)) {
       errors.push('   → 大文字が含まれています（小文字に変換してください）');
@@ -59,29 +69,30 @@ export function validateFeatureName(featureName: string): ValidationResult {
       const invalidChars = trimmed.match(/[^a-z0-9-]/g);
       errors.push(`   → 使用できない文字が含まれています: ${[...new Set(invalidChars)].join(', ')}`);
     }
-    
+
     // 修正案を提示
     const suggestion = suggestFeatureName(trimmed);
     if (suggestion && suggestion !== trimmed) {
       errors.push(`   💡 修正案: "${suggestion}"`);
     }
   }
-  
+
   // 長さチェック（推奨）
   if (trimmed.length > 50) {
-    errors.push(`⚠️  feature名が長すぎます（${trimmed.length}文字）。50文字以内を推奨`);
+    warnings.push(`⚠️  feature名が長すぎます（${trimmed.length}文字）。50文字以内を推奨`);
   }
-  
+
   // 単語数チェック（推奨）
   const wordCount = trimmed.split('-').length;
   if (wordCount > 5) {
-    errors.push(`⚠️  単語数が多すぎます（${wordCount}単語）。2-4単語を推奨`);
+    warnings.push(`⚠️  単語数が多すぎます（${wordCount}単語）。2-4単語を推奨`);
   }
-  
-  return {
-    valid: errors.length === 0,
-    errors
-  };
+
+  if (errors.length > 0) {
+    return failure(errors, warnings);
+  }
+
+  return success(true, warnings);
 }
 
 /**
@@ -103,8 +114,8 @@ export function suggestFeatureName(input: string): string {
  */
 export function validateFeatureNameOrThrow(featureName: string): void {
   const result = validateFeatureName(featureName);
-  
-  if (!result.valid) {
+
+  if (!result.success) {
     const errorMessage = [
       `Invalid feature name: "${featureName}"`,
       '',
@@ -112,8 +123,7 @@ export function validateFeatureNameOrThrow(featureName: string): void {
       '',
       'ヘルプ: README.md#機能名（feature）の命名規則 を参照してください'
     ].join('\n');
-    
+
     throw new Error(errorMessage);
   }
 }
-

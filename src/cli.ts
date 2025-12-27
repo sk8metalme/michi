@@ -218,7 +218,7 @@ export function createCLI(): Command {
             | 'phase-a'
             | 'phase-b',
         );
-        process.exit(result.valid ? 0 : 1);
+        process.exit(result.success ? 0 : 1);
       } catch (error) {
         console.error(
           '❌ Validation failed:',

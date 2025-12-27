@@ -52,7 +52,7 @@ export async function multiRepoAddRepo(
 
   // 3. リポジトリURLのバリデーション
   const urlValidation = validateRepositoryUrl(url);
-  if (!urlValidation.isValid) {
+  if (!urlValidation.success) {
     throw new Error(
       'リポジトリURLが無効です: ' + urlValidation.errors.join(', ')
     );
