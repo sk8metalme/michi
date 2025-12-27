@@ -70,7 +70,7 @@ describe('multiRepoAddRepo', () => {
         repositories: [],
       });
       vi.spyOn(validator, 'validateRepositoryUrl').mockReturnValue({
-        isValid: true,
+        success: true,
         errors: [],
         warnings: [],
       });
@@ -105,7 +105,7 @@ describe('multiRepoAddRepo', () => {
         ],
       });
       vi.spyOn(validator, 'validateRepositoryUrl').mockReturnValue({
-        isValid: true,
+        success: true,
         errors: [],
         warnings: [],
       });
@@ -124,7 +124,7 @@ describe('multiRepoAddRepo', () => {
         repositories: [],
       });
       vi.spyOn(validator, 'validateRepositoryUrl').mockReturnValue({
-        isValid: true,
+        success: true,
         errors: [],
         warnings: [],
       });
@@ -153,7 +153,7 @@ describe('multiRepoAddRepo', () => {
         repositories: [],
       });
       vi.spyOn(validator, 'validateRepositoryUrl').mockReturnValue({
-        isValid: true,
+        success: true,
         errors: [],
         warnings: [],
       });
@@ -227,7 +227,7 @@ describe('multiRepoAddRepo', () => {
         repositories: [],
       });
       vi.spyOn(validator, 'validateRepositoryUrl').mockReturnValue({
-        isValid: true,
+        success: true,
         errors: [],
         warnings: [],
       });
@@ -252,7 +252,7 @@ describe('multiRepoAddRepo', () => {
         repositories: [],
       });
       vi.spyOn(validator, 'validateRepositoryUrl').mockReturnValue({
-        isValid: true,
+        success: true,
         errors: [],
         warnings: [],
       });
