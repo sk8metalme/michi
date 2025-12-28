@@ -3,7 +3,8 @@
  * Phase Bテスト（手動回帰、負荷、セキュリティ）を対話的に作成
  */
 
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
+import { writeFileSync, existsSync, mkdirSync } from 'fs';
+import { safeReadFileOrThrow } from './utils/safe-file-reader.js';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import * as readline from 'readline';
@@ -319,7 +320,7 @@ function processTemplate(templateFile: string, params: Record<string, string>): 
 - 必要に応じて内容を編集してください
 `;
   } else {
-    content = readFileSync(templatePath, 'utf-8');
+    content = safeReadFileOrThrow(templatePath, 'utf-8');
   }
 
   // パラメータを置換

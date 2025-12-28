@@ -3,7 +3,8 @@
  * docs/michi/{project-name}/ 配下のドキュメントをConfluenceに同期
  */
 
-import { existsSync, readFileSync } from 'fs';
+import { existsSync } from 'fs';
+import { safeReadFileOrThrow } from '../../scripts/utils/safe-file-reader.js';
 import { resolve } from 'path';
 import { getConfig } from '../../scripts/utils/config-loader.js';
 import { ConfluenceClient, getConfluenceConfig } from '../../scripts/confluence-sync.js';
@@ -135,7 +136,7 @@ export async function multiRepoConfluenceSync(
 
     try {
       // Markdownファイル読み込み
-      const markdown = readFileSync(docPath, 'utf-8');
+      const markdown = safeReadFileOrThrow(docPath, 'utf-8');
 
       // Confluence Storage Format に変換（Mermaid変換を含む）
       const confluenceContent = convertMarkdownToConfluence(markdown);

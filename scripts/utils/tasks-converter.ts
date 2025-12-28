@@ -15,12 +15,12 @@ import {
   isAIDLCFormat,
   getAIDLCStats,
 } from './aidlc-parser.js';
-import { readFileSync } from 'fs';
 import {
   getWeekdayNotation,
   getWeekdayRangeNotation,
   ensureBusinessDay,
 } from './business-days.js';
+import { safeReadFileOrThrow } from './safe-file-reader.js';
 
 /**
  * 変換オプション
@@ -551,7 +551,7 @@ export function convertTasksFile(
   options: ConversionOptions = {},
 ): ConversionResult {
   // ファイル読み込み
-  const content = readFileSync(inputPath, 'utf-8');
+  const content = safeReadFileOrThrow(inputPath);
 
   // AI-DLC形式かチェック
   if (!isAIDLCFormat(content)) {

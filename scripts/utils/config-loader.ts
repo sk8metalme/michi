@@ -9,7 +9,7 @@ import { fileURLToPath } from 'url';
 import { homedir } from 'os';
 import { parse as dotenvParse } from 'dotenv';
 import { loadEnv } from './env-loader.js';
-import { safeReadFile, safeReadJsonFile } from './safe-file-reader.js';
+import { safeReadFileOrThrow, safeReadJsonFile } from './safe-file-reader.js';
 import {
   AppConfigSchema,
   MultiRepoProjectSchema,
@@ -275,14 +275,13 @@ function loadGlobalEnv(): Record<string, string> {
     return {};
   }
 
-  const readResult = safeReadFile(globalEnvPath);
-
-  if (!readResult.success) {
-    console.warn(`⚠️  Failed to load global env from ${globalEnvPath}: ${readResult.errors[0].type}`);
+  try {
+    const content = safeReadFileOrThrow(globalEnvPath);
+    return dotenvParse(content);
+  } catch (error) {
+    console.warn(`⚠️  Failed to load global env from ${globalEnvPath}: ${error instanceof Error ? error.message : String(error)}`);
     return {};
   }
-
-  return dotenvParse(readResult.value as string);
 }
 
 /**
@@ -296,14 +295,13 @@ function loadProjectEnv(projectRoot: string): Record<string, string> {
     return {};
   }
 
-  const readResult = safeReadFile(projectEnvPath);
-
-  if (!readResult.success) {
-    console.warn(`⚠️  Failed to load project env from ${projectEnvPath}: ${readResult.errors[0].type}`);
+  try {
+    const content = safeReadFileOrThrow(projectEnvPath);
+    return dotenvParse(content);
+  } catch (error) {
+    console.warn(`⚠️  Failed to load project env from ${projectEnvPath}: ${error instanceof Error ? error.message : String(error)}`);
     return {};
   }
-
-  return dotenvParse(readResult.value as string);
 }
 
 /**

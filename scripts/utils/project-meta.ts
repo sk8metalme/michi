@@ -2,8 +2,9 @@
  * プロジェクトメタデータ読み込みユーティリティ
  */
 
-import { readFileSync, existsSync } from 'fs';
+import { existsSync } from 'fs';
 import { resolve } from 'path';
+import { safeReadFileOrThrow } from './safe-file-reader.js';
 
 export interface ProjectMetadata {
   projectId: string;
@@ -28,7 +29,7 @@ export function loadProjectMeta(projectRoot: string = process.cwd()): ProjectMet
   }
   
   try {
-    const content = readFileSync(projectJsonPath, 'utf-8');
+    const content = safeReadFileOrThrow(projectJsonPath);
     const meta = JSON.parse(content) as ProjectMetadata;
     
     // 必須フィールドのバリデーション

@@ -12,7 +12,7 @@ import { runPreFlightCheck } from './pre-flight-check.js';
 import { validateFeatureNameOrThrow } from './utils/feature-name-validator.js';
 import { getTestCommands } from './constants/test-commands.js';
 import { loadSpecJson } from './utils/spec-updater.js';
-import { safeReadFile, safeReadJsonFile } from './utils/safe-file-reader.js';
+import { safeReadFileOrThrow, safeReadJsonFile } from './utils/safe-file-reader.js';
 import inquirer from 'inquirer';
 
 type Phase =
@@ -251,12 +251,13 @@ async function detectAndConvertAIDLCFormat(
   console.log('\n🔍 tasks.mdフォーマット検証中...');
   const { isAIDLCFormat } = await import('./utils/aidlc-parser.js');
 
-  const readResult = safeReadFile(tasksPath);
-  if (!readResult.success) {
-    errors.push(`tasks.md読み込み失敗: ${readResult.errors[0].type}`);
+  let tasksContent: string;
+  try {
+    tasksContent = safeReadFileOrThrow(tasksPath);
+  } catch (error) {
+    errors.push(`tasks.md読み込み失敗: ${error instanceof Error ? error.message : String(error)}`);
     return { success: false, errors };
   }
-  const tasksContent = readResult.value as string;
 
   if (!isAIDLCFormat(tasksContent)) {
     return { success: true, errors: [] };

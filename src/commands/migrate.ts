@@ -11,7 +11,6 @@
 
 import {
   existsSync,
-  readFileSync,
   writeFileSync,
   mkdirSync,
   cpSync,
@@ -21,6 +20,7 @@ import { resolve, join, dirname } from 'path';
 import { parse as dotenvParse } from 'dotenv';
 import * as readline from 'readline';
 import { getGlobalEnvPath } from '../../scripts/utils/config-loader.js';
+import { safeReadFileOrThrow } from '../../scripts/utils/safe-file-reader.js';
 
 /**
  * 組織レベル環境変数（~/.michi/.env に移行）
@@ -87,7 +87,7 @@ function scanCurrentState(): MigrationState {
   }
 
   // .env ファイルを読み込み
-  const envContent = readFileSync(projectEnvPath, 'utf-8');
+  const envContent = safeReadFileOrThrow(projectEnvPath);
   const parsed = dotenvParse(envContent);
   const currentEnvVars = new Map(Object.entries(parsed));
 
@@ -281,7 +281,7 @@ function executeMigration(state: MigrationState, changes: MigrationChanges): voi
 
     let projectJson: Record<string, unknown> = {};
     if (existsSync(state.projectJsonPath)) {
-      const content = readFileSync(state.projectJsonPath, 'utf-8');
+      const content = safeReadFileOrThrow(state.projectJsonPath);
       projectJson = JSON.parse(content);
     }
 

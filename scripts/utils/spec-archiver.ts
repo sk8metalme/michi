@@ -3,9 +3,10 @@
  * 完了した仕様書を .kiro/specs/archive/ に移動する
  */
 
-import { existsSync, renameSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'fs';
+import { existsSync, renameSync, mkdirSync, readdirSync, writeFileSync } from 'fs';
 import { resolve } from 'path';
 import { validateFeatureName as validateFeatureNameStrict } from './feature-name-validator.js';
+import { safeReadFileOrThrow } from './safe-file-reader.js';
 
 export interface ArchiveResult {
   success: boolean;
@@ -79,7 +80,7 @@ export function canArchiveSpec(
   }
 
   try {
-    const specContent = JSON.parse(readFileSync(specJsonPath, 'utf-8'));
+    const specContent = JSON.parse(safeReadFileOrThrow(specJsonPath));
 
     // 既にアーカイブ済みかチェック
     if (specContent.archived) {
@@ -151,7 +152,7 @@ export function archiveSpec(
 
     // spec.json に archived 情報を追加
     const specJsonPath = resolve(targetDir, 'spec.json');
-    const spec = JSON.parse(readFileSync(specJsonPath, 'utf-8'));
+    const spec = JSON.parse(safeReadFileOrThrow(specJsonPath, 'utf-8'));
     spec.archived = {
       at: new Date().toISOString(),
       reason: options?.reason,
@@ -208,7 +209,7 @@ export function listSpecs(
           const specPath = resolve(archiveDir, archivedEntry.name, 'spec.json');
           if (existsSync(specPath)) {
             try {
-              const spec = JSON.parse(readFileSync(specPath, 'utf-8'));
+              const spec = JSON.parse(safeReadFileOrThrow(specPath, 'utf-8'));
               const files = readdirSync(resolve(archiveDir, archivedEntry.name));
 
               specs.push({
@@ -240,7 +241,7 @@ export function listSpecs(
     const specPath = resolve(specsDir, entry.name, 'spec.json');
     if (existsSync(specPath)) {
       try {
-        const spec = JSON.parse(readFileSync(specPath, 'utf-8'));
+        const spec = JSON.parse(safeReadFileOrThrow(specPath, 'utf-8'));
         const files = readdirSync(resolve(specsDir, entry.name));
 
         specs.push({

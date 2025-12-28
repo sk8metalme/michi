@@ -3,8 +3,9 @@
  * Phase Bで選択されたテストタイプに基づいて実行ファイルを生成
  */
 
-import { readFileSync, writeFileSync, existsSync, mkdirSync, chmodSync } from 'fs';
+import { writeFileSync, existsSync, mkdirSync, chmodSync } from 'fs';
 import { join } from 'path';
+import { safeReadFileOrThrow } from './utils/safe-file-reader.js';
 
 /**
  * セキュリティ: URLバリデーション
@@ -104,7 +105,7 @@ function extractEndpointsFromDesign(designPath: string): { endpoint: string; met
     return [{ endpoint: '/api/health', method: 'GET', baseUrl: 'http://localhost:8080' }];
   }
 
-  const content = readFileSync(designPath, 'utf-8');
+  const content = safeReadFileOrThrow(designPath, 'utf-8');
   const endpoints: { endpoint: string; method: string; baseUrl: string }[] = [];
 
   // APIエンドポイントのパターンを検索
@@ -147,7 +148,7 @@ function extractPerformanceRequirements(requirementsPath: string): {
     return defaults;
   }
 
-  const content = readFileSync(requirementsPath, 'utf-8');
+  const content = safeReadFileOrThrow(requirementsPath, 'utf-8');
 
   // レスポンスタイム要件を検索
   const responseTimeMatch = content.match(/(\d+)\s*(?:ms|ミリ秒)以内/);
@@ -771,7 +772,7 @@ export async function generateAllTestExecutions(
     throw new Error('test-type-selection.jsonが存在しません。先にtest-type-selectionフェーズを実行してください');
   }
 
-  const selection = JSON.parse(readFileSync(selectionPath, 'utf-8'));
+  const selection = JSON.parse(safeReadFileOrThrow(selectionPath, 'utf-8'));
   const testTypes: string[] = selection.selectedTypes || [];
 
   const results: GenerationResult[] = [];

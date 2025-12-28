@@ -3,6 +3,7 @@
  */
 
 import MarkdownIt from 'markdown-it';
+import { safeReadFileOrThrow } from './utils/safe-file-reader.js';
 
 const md = new MarkdownIt({
   html: true,
@@ -174,19 +175,18 @@ ${content}
 
 // CLI実行用
 if (import.meta.url === `file://${process.argv[1]}`) {
-  const { readFileSync } = await import('fs');
   const { resolve } = await import('path');
-  
+
   const args = process.argv.slice(2);
   if (args.length === 0) {
     console.error('Usage: tsx markdown-to-confluence.ts <markdown-file>');
     process.exit(1);
   }
-  
+
   const markdownFile = resolve(args[0]);
-  const markdown = readFileSync(markdownFile, 'utf-8');
+  const markdown = safeReadFileOrThrow(markdownFile);
   const confluenceHtml = convertMarkdownToConfluence(markdown);
-  
+
   console.log(confluenceHtml);
 }
 

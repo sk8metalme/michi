@@ -15,6 +15,18 @@ vi.mock('fs', () => ({
   writeFileSync: vi.fn(),
 }));
 
+// safe-file-reader のモック（実際のreadFileSyncモックを使用するため）
+vi.mock('../utils/safe-file-reader.js', async (importOriginal) => {
+  const mockFs = await import('fs');
+  return {
+    safeReadFileOrThrow: vi.fn((filePath: string, encoding: BufferEncoding = 'utf-8') => {
+      return (mockFs.readFileSync as ReturnType<typeof vi.fn>)(filePath, encoding);
+    }),
+    safeReadFile: vi.fn(),
+    safeReadJsonFile: vi.fn(),
+  };
+});
+
 import {
   canArchiveSpec,
   archiveSpec,

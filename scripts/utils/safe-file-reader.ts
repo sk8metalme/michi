@@ -104,3 +104,44 @@ export function safeReadJsonFile(
     }]);
   }
 }
+
+/**
+ * Safe file reader that throws on error (for compatibility with existing code)
+ *
+ * @param filePath - Path to the file to read
+ * @param encoding - File encoding (default: 'utf-8')
+ * @returns string - File content
+ * @throws Error if file cannot be read
+ *
+ * @example
+ * ```typescript
+ * try {
+ *   const content = safeReadFileOrThrow('/path/to/file.txt');
+ *   console.log(content);
+ * } catch (error) {
+ *   console.error('Failed to read file:', error);
+ * }
+ * ```
+ */
+export function safeReadFileOrThrow(
+  filePath: string,
+  encoding: BufferEncoding = 'utf-8'
+): string {
+  const result = safeReadFile(filePath, encoding);
+
+  if (!result.success) {
+    const error = result.errors[0];
+    switch (error.type) {
+    case 'FileNotFound':
+      throw new Error(`File not found: ${error.path}`);
+    case 'PermissionDenied':
+      throw new Error(`Permission denied: ${error.path}`);
+    case 'InvalidJSON':
+      throw new Error(`Invalid JSON in ${error.path}: ${error.cause}`);
+    case 'ReadError':
+      throw new Error(`Failed to read ${error.path}: ${error.cause}`);
+    }
+  }
+
+  return result.value as string;
+}

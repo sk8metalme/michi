@@ -3,7 +3,7 @@
  * ~/.michi/config.json を対話的に作成・更新
  */
 
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
+import { writeFileSync, existsSync, mkdirSync } from 'fs';
 import { dirname } from 'path';
 import { createInterface, confirm } from './utils/interactive-helpers.js';
 import {
@@ -16,6 +16,7 @@ import {
 } from './utils/config-sections.js';
 import { getGlobalConfigPath } from './utils/config-loader.js';
 import { AppConfigSchema } from './config/config-schema.js';
+import { safeReadFileOrThrow } from './utils/safe-file-reader.js';
 
 /**
  * プロジェクト設定全体
@@ -57,7 +58,7 @@ async function main(): Promise<void> {
       }
 
       try {
-        const content = readFileSync(globalConfigPath, 'utf-8');
+        const content = safeReadFileOrThrow(globalConfigPath, 'utf-8');
         existingConfig = JSON.parse(content) as ProjectConfig;
         console.log('既存の設定を読み込みました。\n');
       } catch {

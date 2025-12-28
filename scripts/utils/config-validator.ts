@@ -2,7 +2,7 @@
  * 設定ファイルのバリデーション
  */
 
-import { existsSync, readFileSync } from 'fs';
+import { existsSync } from 'fs';
 import { AppConfigSchema } from '../config/config-schema.js';
 import type { ZodIssue } from 'zod';
 import { getConfig, getConfigPath, getGlobalConfigPath } from './config-loader.js';
@@ -17,6 +17,7 @@ import {
 import type { Result } from './types/validation.js';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { success, failure } from './types/validation.js';
+import { safeReadFileOrThrow } from './safe-file-reader.js';
 
 /**
  * Result型を拡張した情報メッセージ付きバリデーション結果
@@ -71,7 +72,7 @@ export function validateProjectConfig(
   }
 
   try {
-    const content = readFileSync(configPath, 'utf-8');
+    const content = safeReadFileOrThrow(configPath);
     const parsed = JSON.parse(content);
 
     // スキーマでバリデーション
@@ -568,7 +569,7 @@ export function validateGlobalConfig(): ResultWithInfo {
   }
 
   try {
-    const content = readFileSync(globalConfigPath, 'utf-8');
+    const content = safeReadFileOrThrow(globalConfigPath);
     const parsed = JSON.parse(content);
 
     // スキーマでバリデーション

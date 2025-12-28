@@ -8,7 +8,7 @@
  * - .envファイルの生成
  */
 
-import { readFileSync, existsSync } from 'fs';
+import { existsSync } from 'fs';
 import * as readline from 'readline';
 import {
   getProjectIssueTypes,
@@ -17,6 +17,7 @@ import {
   filterStoryTypes,
   filterSubtaskTypes,
 } from './jira-issue-type-fetcher.js';
+import { safeReadFileOrThrow } from './safe-file-reader.js';
 
 /**
  * 環境変数の設定項目定義
@@ -112,7 +113,7 @@ export function parseEnvFile(filePath: string): Map<string, string> {
   }
 
   try {
-    const content = readFileSync(filePath, 'utf-8');
+    const content = safeReadFileOrThrow(filePath);
     const lines = content.split('\n');
 
     for (const line of lines) {

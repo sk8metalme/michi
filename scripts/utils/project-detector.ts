@@ -3,7 +3,8 @@
  * 既存ファイルからプロジェクト情報を自動検出
  */
 
-import { existsSync, readFileSync } from 'fs';
+import { existsSync } from 'fs';
+import { safeReadFileOrThrow } from './safe-file-reader.js';
 
 export interface ProjectInfo {
   language: 'nodejs' | 'java' | 'php' | 'python' | 'go' | 'rust' | 'other';
@@ -67,7 +68,7 @@ export function detectProject(projectRoot: string = process.cwd()): ProjectInfo 
  * Node.jsプロジェクトを検出
  */
 function detectNodeJsProject(projectRoot: string): ProjectInfo {
-  const packageJson = JSON.parse(readFileSync(`${projectRoot}/package.json`, 'utf-8'));
+  const packageJson = JSON.parse(safeReadFileOrThrow(`${projectRoot}/package.json`, 'utf-8'));
   
   // パッケージマネージャーを検出
   let packageManager = 'npm';
@@ -115,7 +116,7 @@ function detectJavaProject(projectRoot: string, buildTool: 'gradle' | 'maven'): 
  * PHPプロジェクトを検出
  */
 function detectPHPProject(projectRoot: string): ProjectInfo {
-  const composerJson = JSON.parse(readFileSync(`${projectRoot}/composer.json`, 'utf-8'));
+  const composerJson = JSON.parse(safeReadFileOrThrow(`${projectRoot}/composer.json`, 'utf-8'));
   
   // テストフレームワークを検出
   let testFramework: string | undefined;
@@ -142,14 +143,14 @@ function detectPythonProject(projectRoot: string): ProjectInfo {
   
   if (existsSync(`${projectRoot}/pyproject.toml`)) {
     buildTool = 'poetry or uv';
-    const pyproject = readFileSync(`${projectRoot}/pyproject.toml`, 'utf-8');
+    const pyproject = safeReadFileOrThrow(`${projectRoot}/pyproject.toml`, 'utf-8');
     if (pyproject.includes('pytest')) {
       testFramework = 'pytest';
     } else if (pyproject.includes('unittest')) {
       testFramework = 'unittest';
     }
   } else if (existsSync(`${projectRoot}/requirements.txt`)) {
-    const requirements = readFileSync(`${projectRoot}/requirements.txt`, 'utf-8');
+    const requirements = safeReadFileOrThrow(`${projectRoot}/requirements.txt`, 'utf-8');
     if (requirements.includes('pytest')) {
       testFramework = 'pytest';
     }

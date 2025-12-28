@@ -4,7 +4,7 @@
  */
 
 import { existsSync } from 'fs';
-import { safeReadFile, safeReadJsonFile } from './utils/safe-file-reader.js';
+import { safeReadFileOrThrow, safeReadJsonFile } from './utils/safe-file-reader.js';
 import { join } from 'path';
 import { validateFeatureName } from './utils/feature-name-validator.js';
 import { loadConfig } from './utils/config-loader.js';
@@ -189,12 +189,13 @@ function validateTasks(feature: string): ValidationResult {
     }
 
     // 営業日表記チェック（設定で無効化可能）
-    const contentResult = safeReadFile(tasksPath);
-    if (!contentResult.success) {
+    let tasksContent: string;
+    try {
+      tasksContent = safeReadFileOrThrow(tasksPath);
+    } catch (_error) {
       errors.push('❌ tasks.md の読み込みに失敗しました');
       return { phase: 'tasks', success: false, value: undefined, errors, warnings };
     }
-    const tasksContent = contentResult.value as string;
 
     if (config.validation?.weekdayNotation !== false) {
       // 日本語または英語の曜日表記をチェック

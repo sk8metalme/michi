@@ -17,7 +17,6 @@
  * 参考: https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/#api-rest-api-3-issue-post
  */
 
-import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import axios from 'axios';
 import { loadEnv } from './utils/env-loader.js';
@@ -29,6 +28,7 @@ import {
   updateSpecJsonAfterJiraSync,
   type SpecJson,
 } from './utils/spec-updater.js';
+import { safeReadFileOrThrow } from './utils/safe-file-reader.js';
 
 loadEnv();
 
@@ -1006,13 +1006,13 @@ async function syncTasksToJIRA(featureName: string): Promise<void> {
   );
 
   const tasksPath = resolve(`.kiro/specs/${featureName}/tasks.md`);
-  const tasksContent = readFileSync(tasksPath, 'utf-8');
+  const tasksContent = safeReadFileOrThrow(tasksPath);
 
   // spec.jsonを読み込んで既存のEpicキーを確認
   const specPath = resolve(`.kiro/specs/${featureName}/spec.json`);
   let spec: SpecJson = {};
   try {
-    spec = JSON.parse(readFileSync(specPath, 'utf-8')) as SpecJson;
+    spec = JSON.parse(safeReadFileOrThrow(specPath)) as SpecJson;
   } catch {
     console.error('spec.json not found or invalid');
   }
