@@ -13,6 +13,7 @@ import { validateFeatureNameOrThrow } from './utils/feature-name-validator.js';
 import { getTestCommands } from './constants/test-commands.js';
 import { loadSpecJson } from './utils/spec-updater.js';
 import { safeReadFileOrThrow, safeReadJsonFile } from './utils/safe-file-reader.js';
+import { type SpecJson } from './utils/spec-updater.js';
 import inquirer from 'inquirer';
 
 type Phase =
@@ -30,6 +31,10 @@ interface PhaseRunResult {
   jiraCreated: boolean;
   validationPassed: boolean;
   errors: string[];
+}
+
+interface TestTypeSelection {
+  selectedTypes?: string[];
 }
 
 /**
@@ -705,7 +710,7 @@ async function updateEnvironmentSpecJson(
     return;
   }
 
-  const readResult = safeReadJsonFile(specPath);
+  const readResult = safeReadJsonFile<SpecJson>(specPath);
   if (!readResult.success) {
     const error = readResult.errors[0];
     const message = error.type === 'InvalidJSON' ? error.cause : error.type;
@@ -714,7 +719,7 @@ async function updateEnvironmentSpecJson(
   }
 
   try {
-    const spec = readResult.value;
+    const spec = readResult.value!;
     spec.environmentSetup = {
       completed: true,
       language: answers.language,
@@ -856,9 +861,9 @@ function loadPhaseBTestTypes(feature: string): string[] {
 
   let selectedTypes: string[] = [];
   if (existsSync(selectionPath)) {
-    const readResult = safeReadJsonFile(selectionPath);
+    const readResult = safeReadJsonFile<TestTypeSelection>(selectionPath);
     if (readResult.success) {
-      const selection = readResult.value;
+      const selection = readResult.value!;
       selectedTypes = selection.selectedTypes || [];
       console.log(`\n✅ 選択されたテストタイプ: ${selectedTypes.join(', ')}`);
     } else {

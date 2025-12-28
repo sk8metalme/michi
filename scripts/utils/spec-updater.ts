@@ -95,7 +95,7 @@ export function loadSpecJson(featureName: string, projectRoot: string = process.
     };
   }
 
-  const result = safeReadJsonFile(specPath);
+  const result = safeReadJsonFile<SpecJson>(specPath);
 
   if (!result.success) {
     const errorType = result.errors[0].type;
@@ -111,7 +111,7 @@ export function loadSpecJson(featureName: string, projectRoot: string = process.
     };
   }
 
-  return result.value;
+  return result.value!;
 }
 
 /**

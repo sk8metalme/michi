@@ -40,7 +40,7 @@ function loadSpecJson(feature: string): SpecJson {
     throw new Error(`spec.json not found: ${specPath}`);
   }
 
-  const result = safeReadJsonFile(specPath);
+  const result = safeReadJsonFile<SpecJson>(specPath);
 
   if (!result.success) {
     const errorType = result.errors[0].type;
@@ -50,7 +50,7 @@ function loadSpecJson(feature: string): SpecJson {
     throw new Error(`spec.json読み込みエラー: ${errorMsg}`);
   }
 
-  return result.value;
+  return result.value!;
 }
 
 /**
