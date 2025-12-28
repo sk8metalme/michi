@@ -3,7 +3,8 @@
  * project-finder, project-detector, language-detector の統合
  */
 
-import { existsSync, readFileSync } from 'fs';
+import { existsSync } from 'fs';
+import { safeReadFileOrThrow } from './safe-file-reader.js';
 import { resolve, join, dirname } from 'path';
 import type { Result } from './types/validation.js';
 import { success, failure } from './types/validation.js';
@@ -158,7 +159,7 @@ export class ProjectAnalyzer {
     }
 
     try {
-      const content = readFileSync(projectJsonPath, 'utf-8');
+      const content = safeReadFileOrThrow(projectJsonPath, 'utf-8');
       const meta = JSON.parse(content) as ProjectMetadata;
 
       // Validate required fields
@@ -288,7 +289,7 @@ export class ProjectAnalyzer {
    */
   private detectNodeJsProject(projectRoot: string): Result<ProjectInfo, ProjectError> {
     try {
-      const packageJson = JSON.parse(readFileSync(join(projectRoot, 'package.json'), 'utf-8'));
+      const packageJson = JSON.parse(safeReadFileOrThrow(join(projectRoot, 'package.json'), 'utf-8'));
 
       // Detect package manager
       let packageManager = 'npm';
@@ -344,7 +345,7 @@ export class ProjectAnalyzer {
    */
   private detectPHPProject(projectRoot: string): Result<ProjectInfo, ProjectError> {
     try {
-      const composerJson = JSON.parse(readFileSync(join(projectRoot, 'composer.json'), 'utf-8'));
+      const composerJson = JSON.parse(safeReadFileOrThrow(join(projectRoot, 'composer.json'), 'utf-8'));
 
       // Detect test framework
       let testFramework: string | undefined;
@@ -378,14 +379,14 @@ export class ProjectAnalyzer {
 
     if (existsSync(join(projectRoot, 'pyproject.toml'))) {
       buildTool = 'poetry or uv';
-      const pyproject = readFileSync(join(projectRoot, 'pyproject.toml'), 'utf-8');
+      const pyproject = safeReadFileOrThrow(join(projectRoot, 'pyproject.toml'), 'utf-8');
       if (pyproject.includes('pytest')) {
         testFramework = 'pytest';
       } else if (pyproject.includes('unittest')) {
         testFramework = 'unittest';
       }
     } else if (existsSync(join(projectRoot, 'requirements.txt'))) {
-      const requirements = readFileSync(join(projectRoot, 'requirements.txt'), 'utf-8');
+      const requirements = safeReadFileOrThrow(join(projectRoot, 'requirements.txt'), 'utf-8');
       if (requirements.includes('pytest')) {
         testFramework = 'pytest';
       }

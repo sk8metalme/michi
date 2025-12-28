@@ -4,7 +4,7 @@
  * Provides template rendering functionality for Multi-Repo projects
  */
 
-import { readFileSync } from 'fs';
+import { safeReadFileOrThrow } from '../utils/safe-file-reader.js';
 import { resolve, relative, isAbsolute, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { renderTemplate, type TemplateContext } from './renderer.js';
@@ -82,7 +82,7 @@ export const loadMultiRepoTemplate = (
   }
 
   try {
-    return readFileSync(templatePath, 'utf-8');
+    return safeReadFileOrThrow(templatePath, 'utf-8');
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     throw new Error(

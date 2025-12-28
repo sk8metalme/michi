@@ -11,12 +11,12 @@ import {
   existsSync,
   mkdirSync,
   writeFileSync,
-  readFileSync,
   readdirSync,
   chmodSync,
 } from 'fs';
 import { join, basename, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { safeReadFileOrThrow } from '../../scripts/utils/safe-file-reader.js';
 import { execSync } from 'child_process';
 import { ProjectAnalyzer } from '../../scripts/utils/project-analyzer.js';
 import {
@@ -314,9 +314,14 @@ function copyAndRenderTemplates(
       mkdirSync(destPath, { recursive: true });
       copyAndRenderTemplates(sourcePath, destPath, context);
     } else if (entry.isFile()) {
-      const content = readFileSync(sourcePath, 'utf-8');
-      const rendered = renderTemplate(content, context);
-      writeFileSync(destPath, rendered, 'utf-8');
+      try {
+        const content = safeReadFileOrThrow(sourcePath);
+        const rendered = renderTemplate(content, context);
+        writeFileSync(destPath, rendered, 'utf-8');
+      } catch (error) {
+        console.warn(`⚠️  Failed to read template file: ${sourcePath}`, error);
+        return;
+      }
     }
   }
 }

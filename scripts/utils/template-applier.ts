@@ -3,7 +3,8 @@
  * テスト仕様書テンプレートにデータを適用
  */
 
-import { readFileSync, existsSync } from 'fs';
+import { existsSync } from 'fs';
+import { safeReadFileOrThrow } from './safe-file-reader.js';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import type { Component, Flow, Requirement } from './markdown-parser.js';
@@ -64,13 +65,13 @@ export function loadTestSpecTemplate(testType: string, projectRoot: string = pro
     );
     
     if (existsSync(michiTemplatePath)) {
-      return readFileSync(michiTemplatePath, 'utf-8');
+      return safeReadFileOrThrow(michiTemplatePath, 'utf-8');
     }
     
     throw new Error(`テンプレートが見つかりません: ${testType}-test-spec-template.md`);
   }
   
-  return readFileSync(templatePath, 'utf-8');
+  return safeReadFileOrThrow(templatePath, 'utf-8');
 }
 
 /**

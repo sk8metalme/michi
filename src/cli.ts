@@ -20,7 +20,8 @@ import { convertTasksFile } from '../scripts/utils/tasks-converter.js';
 import { isAIDLCFormat } from '../scripts/utils/aidlc-parser.js';
 import { specArchiveCommand } from './commands/spec-archive.js';
 import { specListCommand } from './commands/spec-list.js';
-import { readFileSync, existsSync } from 'fs';
+import { existsSync } from 'fs';
+import { safeReadFileOrThrow } from '../scripts/utils/safe-file-reader.js';
 import { dirname, join } from 'path';
 import { loadEnv } from '../scripts/utils/env-loader.js';
 
@@ -45,7 +46,7 @@ function getMichiVersion(): string {
   for (const path of possiblePaths) {
     if (existsSync(path)) {
       try {
-        const packageJson = JSON.parse(readFileSync(path, 'utf-8'));
+        const packageJson = JSON.parse(safeReadFileOrThrow(path, 'utf-8'));
         // name フィールドで確実にMichiのpackage.jsonか確認
         if (packageJson.name === '@sk8metal/michi-cli') {
           return packageJson.version;
@@ -445,7 +446,7 @@ export function createCLI(): Command {
           }
 
           // AI-DLC形式かチェック
-          const content = readFileSync(tasksPath, 'utf-8');
+          const content = safeReadFileOrThrow(tasksPath, 'utf-8');
           if (!isAIDLCFormat(content)) {
             console.log(
               'ℹ️  File is not in AI-DLC format (may already be in Michi format)',

@@ -28,7 +28,8 @@
     "scripts/**/*",
     ".kiro/**/*",
     "**/*.test.ts",
-    "vitest.config.ts"
+    "vitest.config.ts",
+    "test-confluence-auth.ts"
   ],
   "exclude": [
     "node_modules",

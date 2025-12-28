@@ -3,7 +3,8 @@
  * Confluence/JIRA 同期後に spec.json を更新する
  */
 
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
+import { writeFileSync, existsSync, mkdirSync } from 'fs';
+import { safeReadJsonFile } from './safe-file-reader.js';
 import { resolve } from 'path';
 
 /**
@@ -94,11 +95,14 @@ export function loadSpecJson(featureName: string, projectRoot: string = process.
     };
   }
 
-  try {
-    const content = readFileSync(specPath, 'utf-8');
-    return JSON.parse(content);
-  } catch (error) {
-    console.warn(`⚠️  Failed to load spec.json from ${specPath}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  const result = safeReadJsonFile(specPath);
+
+  if (!result.success) {
+    const errorType = result.errors[0].type;
+    const errorMsg = errorType === 'InvalidJSON'
+      ? `Invalid JSON: ${result.errors[0].cause}`
+      : errorType;
+    console.warn(`⚠️  Failed to load spec.json from ${specPath}: ${errorMsg}`);
     return {
       featureName,
       confluence: {},
@@ -106,6 +110,8 @@ export function loadSpecJson(featureName: string, projectRoot: string = process.
       milestones: {},
     };
   }
+
+  return result.value;
 }
 
 /**

@@ -3,12 +3,13 @@
  * デフォルト設定 + プロジェクト固有設定をマージ
  */
 
-import { readFileSync, writeFileSync, existsSync, statSync, renameSync, unlinkSync, mkdirSync } from 'fs';
+import { writeFileSync, existsSync, statSync, renameSync, unlinkSync, mkdirSync } from 'fs';
 import { resolve, relative, isAbsolute, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { homedir } from 'os';
 import { parse as dotenvParse } from 'dotenv';
 import { loadEnv } from './env-loader.js';
+import { safeReadFileOrThrow, safeReadJsonFile } from './safe-file-reader.js';
 import {
   AppConfigSchema,
   MultiRepoProjectSchema,
@@ -136,20 +137,26 @@ function loadDefaultConfig(): AppConfig {
     throw new Error(`Default config file not found: ${defaultConfigPath}\nPlease ensure the file exists in the scripts/config directory.`);
   }
   
+  const readResult = safeReadJsonFile(defaultConfigPath);
+
+  if (!readResult.success) {
+    const error = readResult.errors[0];
+    if (error.type === 'FileNotFound') {
+      throw new Error(`Default config file not found: ${defaultConfigPath}\nPlease ensure the file exists in the scripts/config directory.`);
+    }
+    if (error.type === 'InvalidJSON') {
+      throw new Error(`Invalid JSON in default config file ${defaultConfigPath}: ${error.cause}`);
+    }
+    throw new Error(`Failed to load default config from ${defaultConfigPath}: ${error.type}`);
+  }
+
   try {
-    const content = readFileSync(defaultConfigPath, 'utf-8');
-    const parsed = JSON.parse(content);
-    
     // 環境変数を展開
-    const expanded = expandEnvVarsInConfig(parsed);
-    
+    const expanded = expandEnvVarsInConfig(readResult.value);
+
     // スキーマでバリデーション
     return AppConfigSchema.parse(expanded);
   } catch (error) {
-    if (error instanceof SyntaxError) {
-      // SyntaxErrorには標準的なlineやcolumnプロパティはないため、messageのみ使用
-      throw new Error(`Invalid JSON in default config file ${defaultConfigPath}: ${error.message}`);
-    }
     if (error instanceof Error && error.name === 'ZodError') {
       throw new Error(`Default config validation failed: ${error.message}\nFile: ${defaultConfigPath}`);
     }
@@ -211,25 +218,22 @@ function loadProjectConfig(projectRoot: string = process.cwd()): Partial<AppConf
     return null;
   }
 
-  try {
-    const content = readFileSync(projectConfigPath, 'utf-8');
-    const parsed = JSON.parse(content);
+  const readResult = safeReadJsonFile(projectConfigPath);
 
-    // 環境変数を展開
-    const expanded = expandEnvVarsInConfig(parsed);
-
-    // 部分的な設定なので、スキーマで厳密にバリデーションしない
-    // ただし、存在するキーについては型チェック
-    return expanded as Partial<AppConfig>;
-  } catch (error) {
-    if (error instanceof SyntaxError) {
-      throw new Error(`Invalid JSON in ${projectConfigPath}: ${error.message}`);
+  if (!readResult.success) {
+    const error = readResult.errors[0];
+    if (error.type === 'InvalidJSON') {
+      throw new Error(`Invalid JSON in ${projectConfigPath}: ${error.cause}`);
     }
-    if (error instanceof Error && error.message.includes('Invalid config path')) {
-      throw error;
-    }
-    throw new Error(`Failed to load project config from ${projectConfigPath}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    throw new Error(`Failed to load project config from ${projectConfigPath}: ${error.type}`);
   }
+
+  // 環境変数を展開
+  const expanded = expandEnvVarsInConfig(readResult.value);
+
+  // 部分的な設定なので、スキーマで厳密にバリデーションしない
+  // ただし、存在するキーについては型チェック
+  return expanded as Partial<AppConfig>;
 }
 
 /**
@@ -242,22 +246,22 @@ function loadGlobalConfig(): Partial<AppConfig> | null {
     return null;
   }
 
-  try {
-    const content = readFileSync(globalConfigPath, 'utf-8');
-    const parsed = JSON.parse(content);
+  const readResult = safeReadJsonFile(globalConfigPath);
 
-    // 環境変数を展開
-    const expanded = expandEnvVarsInConfig(parsed);
-
-    return expanded as Partial<AppConfig>;
-  } catch (error) {
-    if (error instanceof SyntaxError) {
-      console.warn(`⚠️  Invalid JSON in global config ${globalConfigPath}: ${error.message}`);
+  if (!readResult.success) {
+    const error = readResult.errors[0];
+    if (error.type === 'InvalidJSON') {
+      console.warn(`⚠️  Invalid JSON in global config ${globalConfigPath}: ${error.cause}`);
     } else {
-      console.warn(`⚠️  Failed to load global config: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      console.warn(`⚠️  Failed to load global config: ${error.type}`);
     }
     return null;
   }
+
+  // 環境変数を展開
+  const expanded = expandEnvVarsInConfig(readResult.value);
+
+  return expanded as Partial<AppConfig>;
 }
 
 /**
@@ -272,10 +276,10 @@ function loadGlobalEnv(): Record<string, string> {
   }
 
   try {
-    const content = readFileSync(globalEnvPath, 'utf-8');
+    const content = safeReadFileOrThrow(globalEnvPath);
     return dotenvParse(content);
   } catch (error) {
-    console.warn(`⚠️  Failed to load global env from ${globalEnvPath}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    console.warn(`⚠️  Failed to load global env from ${globalEnvPath}: ${error instanceof Error ? error.message : String(error)}`);
     return {};
   }
 }
@@ -292,10 +296,10 @@ function loadProjectEnv(projectRoot: string): Record<string, string> {
   }
 
   try {
-    const content = readFileSync(projectEnvPath, 'utf-8');
+    const content = safeReadFileOrThrow(projectEnvPath);
     return dotenvParse(content);
   } catch (error) {
-    console.warn(`⚠️  Failed to load project env from ${projectEnvPath}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    console.warn(`⚠️  Failed to load project env from ${projectEnvPath}: ${error instanceof Error ? error.message : String(error)}`);
     return {};
   }
 }
@@ -311,20 +315,20 @@ function loadProjectMetadata(projectRoot: string): Partial<AppConfig> | null {
     return null;
   }
 
-  try {
-    const content = readFileSync(projectJsonPath, 'utf-8');
-    const meta = JSON.parse(content);
+  const readResult = safeReadJsonFile(projectJsonPath);
 
-    // project フィールドとして返す
-    return { project: meta } as Partial<AppConfig>;
-  } catch (error) {
-    if (error instanceof SyntaxError) {
-      console.warn(`⚠️  Invalid JSON in ${projectJsonPath}: ${error.message}`);
+  if (!readResult.success) {
+    const error = readResult.errors[0];
+    if (error.type === 'InvalidJSON') {
+      console.warn(`⚠️  Invalid JSON in ${projectJsonPath}: ${error.cause}`);
     } else {
-      console.warn(`⚠️  Failed to load project metadata from ${projectJsonPath}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      console.warn(`⚠️  Failed to load project metadata from ${projectJsonPath}: ${error.type}`);
     }
     return null;
   }
+
+  // project フィールドとして返す
+  return { project: readResult.value } as Partial<AppConfig>;
 }
 
 /**

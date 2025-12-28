@@ -8,7 +8,7 @@
  * - 任意の `(P)` 並列実行マーカー
  */
 
-import { readFileSync } from 'fs';
+import { safeReadFileOrThrow } from './safe-file-reader.js';
 
 /**
  * AI-DLC形式のタスク
@@ -240,7 +240,7 @@ function parseSummaryLine(document: AIDLCDocument, line: string): void {
  * @throws ファイルが存在しない、またはAI-DLC形式でない場合
  */
 export function parseAIDLCFile(filePath: string): AIDLCDocument {
-  const content = readFileSync(filePath, 'utf-8');
+  const content = safeReadFileOrThrow(filePath);
 
   if (!isAIDLCFormat(content)) {
     throw new Error(

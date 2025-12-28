@@ -6,7 +6,7 @@
  * - 旧6-Phase構造（Phase 0-5）も互換性のためサポート
  */
 
-import { readFileSync } from 'fs';
+import { safeReadFileOrThrow } from './safe-file-reader.js';
 
 /**
  * tasks.mdのフォーマットを検証
@@ -18,7 +18,7 @@ export function validateTasksFormat(tasksPath: string): void {
   let content: string;
 
   try {
-    content = readFileSync(tasksPath, 'utf-8');
+    content = safeReadFileOrThrow(tasksPath);
   } catch (error) {
     throw new Error(
       `Failed to read tasks.md: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -153,7 +153,7 @@ export function isValidTasksFormat(tasksPath: string): boolean {
  */
 export function countPhases(tasksPath: string): number {
   try {
-    const content = readFileSync(tasksPath, 'utf-8');
+    const content = safeReadFileOrThrow(tasksPath);
     const phasePattern = /## Phase \d+:/g;
     const matches = content.match(phasePattern);
     return matches ? matches.length : 0;
@@ -170,7 +170,7 @@ export function countPhases(tasksPath: string): number {
  */
 export function countStories(tasksPath: string): number {
   try {
-    const content = readFileSync(tasksPath, 'utf-8');
+    const content = safeReadFileOrThrow(tasksPath);
     const storyPattern = /### Story \d+\.\d+:/g;
     const matches = content.match(storyPattern);
     return matches ? matches.length : 0;

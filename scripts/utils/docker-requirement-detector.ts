@@ -3,7 +3,8 @@
  * design.md、requirements.md、test-type-selectionからDocker Composeの必要性を自動判断
  */
 
-import { readFileSync, existsSync } from 'fs';
+import { existsSync } from 'fs';
+import { safeReadFileOrThrow } from './safe-file-reader.js';
 import { join } from 'path';
 import { extractSection } from './markdown-parser.js';
 
@@ -25,7 +26,7 @@ export function analyzeDockerRequirement(feature: string, projectRoot: string = 
   // design.mdを解析
   const designPath = join(projectRoot, '.kiro', 'specs', feature, 'design.md');
   if (existsSync(designPath)) {
-    const design = readFileSync(designPath, 'utf-8');
+    const design = safeReadFileOrThrow(designPath, 'utf-8');
     
     // Technology Stackセクションを確認
     const techStack = extractSection(design, 'Technology Stack');
@@ -90,7 +91,7 @@ export function analyzeDockerRequirement(feature: string, projectRoot: string = 
   const testSelectionPath = join(projectRoot, '.kiro', 'specs', feature, 'test-type-selection.json');
   if (existsSync(testSelectionPath)) {
     try {
-      const testSelection = JSON.parse(readFileSync(testSelectionPath, 'utf-8'));
+      const testSelection = JSON.parse(safeReadFileOrThrow(testSelectionPath, 'utf-8'));
       const testTypes = testSelection.selectedTypes || [];
       
       // 統合テストが選択されている
@@ -118,7 +119,7 @@ export function analyzeDockerRequirement(feature: string, projectRoot: string = 
   // requirements.mdを解析
   const requirementsPath = join(projectRoot, '.kiro', 'specs', feature, 'requirements.md');
   if (existsSync(requirementsPath)) {
-    const requirements = readFileSync(requirementsPath, 'utf-8');
+    const requirements = safeReadFileOrThrow(requirementsPath, 'utf-8');
     
     // データ永続化の要件
     if (requirements.match(/データベース|database|永続化|persist/i)) {

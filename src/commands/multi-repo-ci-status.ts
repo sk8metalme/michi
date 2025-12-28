@@ -3,7 +3,8 @@
  * リポジトリのCI結果を集約して表示
  */
 
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
+import { existsSync, mkdirSync, writeFileSync } from 'fs';
+import { safeReadFileOrThrow } from '../../scripts/utils/safe-file-reader.js';
 import { join } from 'path';
 import { findProject } from '../../scripts/utils/config-loader.js';
 import {
@@ -153,7 +154,7 @@ function loadCache(cachePath: string): CIStatusCache | null {
       return null;
     }
 
-    const content = readFileSync(cachePath, 'utf-8');
+    const content = safeReadFileOrThrow(cachePath, 'utf-8');
     const cache = JSON.parse(content) as CIStatusCache;
 
     // キャッシュの有効期限チェック（15分）

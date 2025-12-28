@@ -23,6 +23,18 @@ const MICHI_PACKAGE_ROOT = resolve(__dirname, '..', '..', '..');
 
 vi.mock('fs');
 
+// safe-file-reader のモック（実際のreadFileSyncモックを使用するため）
+vi.mock('../../utils/safe-file-reader.js', async () => {
+  const mockFs = await import('fs');
+  return {
+    safeReadFileOrThrow: vi.fn((filePath: string, encoding: BufferEncoding = 'utf-8') => {
+      return (mockFs.readFileSync as ReturnType<typeof vi.fn>)(filePath, encoding);
+    }),
+    safeReadFile: vi.fn(),
+    safeReadJsonFile: vi.fn(),
+  };
+});
+
 describe('createMultiRepoTemplateContext', () => {
   it('必須フィールドを含むコンテキストを作成する', () => {
     const context = createMultiRepoTemplateContext(

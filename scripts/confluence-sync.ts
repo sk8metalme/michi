@@ -3,7 +3,6 @@
  * GitHub の Markdown ファイルを Confluence に同期
  */
 
-import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import axios from 'axios';
 import { loadEnv } from './utils/env-loader.js';
@@ -13,6 +12,7 @@ import { getConfig, getConfigPath } from './utils/config-loader.js';
 import { createPagesByGranularity } from './utils/confluence-hierarchy.js';
 import { validateForConfluenceSync } from './utils/config-validator.js';
 import { updateSpecJsonAfterConfluenceSync, loadSpecJson } from './utils/spec-updater.js';
+import { safeReadFileOrThrow } from './utils/safe-file-reader.js';
 
 // 環境変数読み込み
 loadEnv();
@@ -450,7 +450,7 @@ async function syncToConfluence(
   
   // Markdownファイル読み込み
   const markdownPath = resolve(`.kiro/specs/${featureName}/${docType}.md`);
-  const markdown = readFileSync(markdownPath, 'utf-8');
+  const markdown = safeReadFileOrThrow(markdownPath);
   
   // GitHub URL生成
   const githubUrl = `${projectMeta.repository}/blob/main/.kiro/specs/${featureName}/${docType}.md`;

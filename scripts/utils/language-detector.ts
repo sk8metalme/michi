@@ -3,7 +3,8 @@
  * design.md、requirements.mdから実装言語を自動推論
  */
 
-import { readFileSync, existsSync } from 'fs';
+import { existsSync } from 'fs';
+import { safeReadFileOrThrow } from './safe-file-reader.js';
 import { join } from 'path';
 import { extractSection } from './markdown-parser.js';
 
@@ -30,7 +31,7 @@ export function analyzeLanguage(feature: string, projectRoot: string = process.c
   // design.mdを解析
   const designPath = join(projectRoot, '.kiro', 'specs', feature, 'design.md');
   if (existsSync(designPath)) {
-    const design = readFileSync(designPath, 'utf-8');
+    const design = safeReadFileOrThrow(designPath, 'utf-8');
     
     // Technology Stackセクションを確認
     const techStack = extractSection(design, 'Technology Stack');
@@ -94,7 +95,7 @@ export function analyzeLanguage(feature: string, projectRoot: string = process.c
   // requirements.mdを解析
   const requirementsPath = join(projectRoot, '.kiro', 'specs', feature, 'requirements.md');
   if (existsSync(requirementsPath)) {
-    const requirements = readFileSync(requirementsPath, 'utf-8');
+    const requirements = safeReadFileOrThrow(requirementsPath, 'utf-8');
     
     // APIやWebアプリケーションの言及
     if (requirements.match(/REST API|GraphQL API/i)) {

@@ -3,7 +3,8 @@
  * 各フェーズで必須項目が完了しているかチェック
  */
 
-import { existsSync, readFileSync } from 'fs';
+import { existsSync } from 'fs';
+import { safeReadFileOrThrow, safeReadJsonFile } from './utils/safe-file-reader.js';
 import { join } from 'path';
 import { validateFeatureName } from './utils/feature-name-validator.js';
 import { loadConfig } from './utils/config-loader.js';
@@ -34,12 +35,22 @@ interface ValidationResult {
  */
 function loadSpecJson(feature: string): SpecJson {
   const specPath = join(process.cwd(), '.kiro', 'specs', feature, 'spec.json');
-  
+
   if (!existsSync(specPath)) {
     throw new Error(`spec.json not found: ${specPath}`);
   }
-  
-  return JSON.parse(readFileSync(specPath, 'utf-8'));
+
+  const result = safeReadJsonFile(specPath);
+
+  if (!result.success) {
+    const errorType = result.errors[0].type;
+    const errorMsg = errorType === 'InvalidJSON'
+      ? `Invalid JSON: ${result.errors[0].cause}`
+      : errorType;
+    throw new Error(`spec.json読み込みエラー: ${errorMsg}`);
+  }
+
+  return result.value;
 }
 
 /**
@@ -178,7 +189,13 @@ function validateTasks(feature: string): ValidationResult {
     }
 
     // 営業日表記チェック（設定で無効化可能）
-    const tasksContent = readFileSync(tasksPath, 'utf-8');
+    let tasksContent: string;
+    try {
+      tasksContent = safeReadFileOrThrow(tasksPath);
+    } catch (_error) {
+      errors.push('❌ tasks.md の読み込みに失敗しました');
+      return { phase: 'tasks', success: false, value: undefined, errors, warnings };
+    }
 
     if (config.validation?.weekdayNotation !== false) {
       // 日本語または英語の曜日表記をチェック

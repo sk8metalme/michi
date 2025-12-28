@@ -6,7 +6,8 @@ import { Octokit } from '@octokit/rest';
 import { loadEnv } from './utils/env-loader.js';
 import ExcelJS from 'exceljs';
 import { resolve, join, dirname } from 'path';
-import { writeFileSync, mkdirSync, unlinkSync, readFileSync } from 'fs';
+import { writeFileSync, mkdirSync, unlinkSync } from 'fs';
+import { safeReadFileOrThrow } from './utils/safe-file-reader.js';
 import { tmpdir } from 'os';
 import { mkdir } from 'fs/promises';
 
@@ -41,7 +42,7 @@ interface RiskEstimate {
  * design.mdから見積もりを抽出（estimate-generator.tsから統合）
  */
 function parseEstimateFromDesign(designPath: string): EstimateData {
-  const content = readFileSync(designPath, 'utf-8');
+  const content = safeReadFileOrThrow(designPath, 'utf-8');
   
   const tasks: TaskEstimate[] = [];
   let totalDays = 0;

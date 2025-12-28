@@ -3,7 +3,8 @@
  * プロジェクトの言語/ツールに応じてCI/CD設定を生成
  */
 
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
+import { writeFileSync, existsSync, mkdirSync } from 'fs';
+import { safeReadFileOrThrow } from './safe-file-reader.js';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -52,7 +53,7 @@ export async function generateCIConfig(
     return;
   }
   
-  const template = readFileSync(templatePath, 'utf-8');
+  const template = safeReadFileOrThrow(templatePath, 'utf-8');
   
   // GitHub Actionsの場合
   if (ciTool === 'GitHub Actions') {
@@ -74,7 +75,7 @@ export async function generateCIConfig(
     const screwdriverTemplatePath = join(__dirname, '..', '..', 'templates', 'ci', 'screwdriver', screwdriverFile);
     
     if (existsSync(screwdriverTemplatePath)) {
-      const screwdriverTemplate = readFileSync(screwdriverTemplatePath, 'utf-8');
+      const screwdriverTemplate = safeReadFileOrThrow(screwdriverTemplatePath, 'utf-8');
       const outputPath = join(projectRoot, 'screwdriver.yaml');
       writeFileSync(outputPath, screwdriverTemplate, 'utf-8');
       console.log('   ✅ CI/CD設定: screwdriver.yaml');
