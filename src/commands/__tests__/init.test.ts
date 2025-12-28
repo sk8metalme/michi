@@ -18,8 +18,12 @@ describe('init command', () => {
   let testProjectRoot: string;
   let testHomeDir: string;
   let originalEnv: NodeJS.ProcessEnv;
+  let originalCwd: string;
 
   beforeEach(() => {
+    // カレントディレクトリをバックアップ
+    originalCwd = process.cwd();
+
     // テスト用の一時ディレクトリを作成
     testProjectRoot = resolve(
       tmpdir(),
@@ -57,6 +61,9 @@ describe('init command', () => {
   });
 
   afterEach(() => {
+    // カレントディレクトリを復元（テストディレクトリ削除前に実行）
+    process.chdir(originalCwd);
+
     // 環境変数を復元
     process.env = originalEnv;
 
