@@ -12,8 +12,12 @@ describe('migrate command', () => {
   let testProjectRoot: string;
   let testHomeDir: string;
   let originalEnv: NodeJS.ProcessEnv;
+  let originalCwd: string;
 
   beforeEach(() => {
+    // カレントディレクトリをバックアップ
+    originalCwd = process.cwd();
+
     // テスト用の一時ディレクトリを作成（ランダム要素を追加して衝突を防ぐ）
     testProjectRoot = resolve(tmpdir(), `michi-test-project-${Date.now()}-${Math.random().toString(36).substring(7)}`);
     testHomeDir = resolve(tmpdir(), `michi-test-home-${Date.now()}-${Math.random().toString(36).substring(7)}`);
@@ -44,6 +48,9 @@ describe('migrate command', () => {
   });
 
   afterEach(() => {
+    // カレントディレクトリを復元（テストディレクトリ削除前に実行）
+    process.chdir(originalCwd);
+
     // 環境変数を復元
     process.env = originalEnv;
 
