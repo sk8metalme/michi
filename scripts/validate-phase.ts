@@ -17,9 +17,14 @@ type Phase =
   | 'phase-a'
   | 'phase-b';
 
+/**
+ * Phase validation result type
+ * Based on Result<T, E> pattern but specialized for phase validation
+ */
 interface ValidationResult {
   phase: Phase;
   success: boolean;
+  value: void;
   errors: string[];
   warnings: string[];
 }
@@ -63,7 +68,7 @@ function validateRequirements(feature: string): ValidationResult {
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : String(error);
     errors.push(`❌ spec.json読み込みエラー: ${message}`);
-    return { phase: 'requirements', success: false, errors, warnings };
+    return { phase: 'requirements', success: false, value: undefined, errors, warnings };
   }
   
   // 3. Confluenceページ作成チェック（必須）
@@ -85,6 +90,7 @@ function validateRequirements(feature: string): ValidationResult {
   return {
     phase: 'requirements',
     success: errors.length === 0,
+    value: undefined,
     errors,
     warnings
   };
@@ -116,7 +122,7 @@ function validateDesign(feature: string): ValidationResult {
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : String(error);
     errors.push(`❌ spec.json読み込みエラー: ${message}`);
-    return { phase: 'design', success: false, errors, warnings };
+    return { phase: 'design', success: false, value: undefined, errors, warnings };
   }
   
   // 3. 前提: 要件定義完了チェック
@@ -138,6 +144,7 @@ function validateDesign(feature: string): ValidationResult {
   return {
     phase: 'design',
     success: errors.length === 0,
+    value: undefined,
     errors,
     warnings
   };
@@ -198,7 +205,7 @@ function validateTasks(feature: string): ValidationResult {
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : String(error);
     errors.push(`❌ spec.json読み込みエラー: ${message}`);
-    return { phase: 'tasks', success: false, errors, warnings };
+    return { phase: 'tasks', success: false, value: undefined, errors, warnings };
   }
   
   // 3. 前提: 設計完了チェック
@@ -237,6 +244,7 @@ function validateTasks(feature: string): ValidationResult {
   return {
     phase: 'tasks',
     success: errors.length === 0,
+    value: undefined,
     errors,
     warnings
   };
@@ -262,6 +270,7 @@ function validateEnvironmentSetup(feature: string): ValidationResult {
   return {
     phase: 'environment-setup',
     success: errors.length === 0,
+    value: undefined,
     errors,
     warnings
   };
@@ -286,6 +295,7 @@ function validatePhaseA(feature: string): ValidationResult {
   return {
     phase: 'phase-a',
     success: errors.length === 0,
+    value: undefined,
     errors,
     warnings
   };
@@ -310,6 +320,7 @@ function validatePhaseB(feature: string): ValidationResult {
   return {
     phase: 'phase-b',
     success: errors.length === 0,
+    value: undefined,
     errors,
     warnings
   };

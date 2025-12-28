@@ -19,18 +19,6 @@ import type { Result } from './types/validation.js';
 import { success, failure } from './types/validation.js';
 
 /**
- * バリデーション結果（情報メッセージ付き）
- * info フィールドが必要な場合に使用
- * @deprecated 新規コードでは Result<boolean, string> の使用を推奨。infoは warnings に統合してください
- */
-export interface ValidationResult {
-  valid: boolean;
-  errors: string[];
-  warnings: string[];
-  info: string[];
-}
-
-/**
  * Result型を拡張した情報メッセージ付きバリデーション結果
  * config-validator固有の拡張型
  */

@@ -7,15 +7,6 @@ import type { Result } from './types/validation.js';
 import { success, failure } from './types/validation.js';
 
 /**
- * バリデーション結果
- * @deprecated Use Result<boolean, string> from ./types/validation.js
- */
-export interface ValidationResult {
-  valid: boolean;
-  errors: string[];
-}
-
-/**
  * kebab-case形式の正規表現
  * - 小文字の英数字で始まる
  * - 小文字の英数字とハイフンのみ
