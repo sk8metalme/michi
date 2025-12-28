@@ -5,12 +5,11 @@
 
 import { loadEnv } from './utils/env-loader.js';
 import { loadProjectMeta } from './utils/project-meta.js';
-import { syncToConfluence, getConfluenceConfig } from './confluence-sync.js';
+import { syncToConfluence } from './confluence-sync.js';
 import { syncTasksToJIRA } from './jira-sync.js';
 import { analyzeLanguage } from './utils/language-detector.js';
 import { executeTests, generateTestReport } from './utils/test-runner.js';
 import { createReleaseNotes } from './utils/release-notes-generator.js';
-import { pollForApproval, waitForManualApproval } from './utils/confluence-approval.js';
 
 loadEnv();
 
@@ -203,7 +202,7 @@ export class WorkflowOrchestrator {
   }
 
   /**
-   * 承認を待つ
+   * 承認を待つ（手動承認のみ）
    */
   private async waitForApproval(stage: WorkflowStage): Promise<void> {
     console.log(`\n⏸️  Approval required for: ${stage}`);
@@ -215,36 +214,7 @@ export class WorkflowOrchestrator {
 
     console.log('  ✅ Confluence で承認してください');
     console.log('  ⏳ 承認完了後、次のステージに進みます');
-
-    // Confluence自動ポーリングが有効な場合
-    if (process.env.CONFLUENCE_AUTO_POLL === 'true') {
-      try {
-        const confluenceConfig = getConfluenceConfig();
-
-        // TODO: ステージに応じたページIDを取得する必要があります
-        // 現在は環境変数から取得
-        const pageId = process.env.CONFLUENCE_APPROVAL_PAGE_ID;
-
-        if (!pageId) {
-          console.log('  ℹ️  CONFLUENCE_APPROVAL_PAGE_ID not set, falling back to manual approval');
-          waitForManualApproval('', approvers || []);
-          return;
-        }
-
-        console.log('  🔄 Polling for approval...');
-        const status = await pollForApproval(pageId, confluenceConfig);
-
-        console.log(`  ✅ Approved by: ${status.approvers.join(', ')}`);
-      } catch (error: unknown) {
-        const message = error instanceof Error ? error.message : String(error);
-        console.error('  ❌ Approval polling failed:', message);
-        throw error;
-      }
-    } else {
-      // 手動承認
-      waitForManualApproval('', approvers || []);
-      console.log('  （手動で承認を確認してください）');
-    }
+    console.log('  （手動で承認を確認してください）');
   }
 }
 

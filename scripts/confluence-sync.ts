@@ -4,7 +4,9 @@
  */
 
 import { resolve } from 'path';
-import axios from 'axios';
+import axios, { type AxiosInstance } from 'axios';
+import { Agent as HttpAgent } from 'http';
+import { Agent as HttpsAgent } from 'https';
 import { loadEnv } from './utils/env-loader.js';
 import { loadProjectMeta } from './utils/project-meta.js';
 import { validateFeatureNameOrThrow } from './utils/feature-name-validator.js';
@@ -126,11 +128,38 @@ class ConfluenceClient {
   private baseUrl: string;
   private auth: string;
   private requestDelay: number;
-  
+  private axiosInstance: AxiosInstance;
+  private httpAgent: HttpAgent | HttpsAgent;
+
   constructor(config: ConfluenceConfig) {
     this.baseUrl = `${config.url}/wiki/rest/api`;
     this.auth = Buffer.from(`${config.email}:${config.apiToken}`).toString('base64');
     this.requestDelay = getRequestDelay();
+
+    // HTTPエージェントを作成（Keep-Alive接続プーリング）
+    const isHttps = config.url.startsWith('https');
+    this.httpAgent = isHttps
+      ? new HttpsAgent({ keepAlive: true, maxSockets: 10 })
+      : new HttpAgent({ keepAlive: true, maxSockets: 10 });
+
+    // 共有axiosインスタンスを作成
+    this.axiosInstance = axios.create({
+      httpAgent: isHttps ? undefined : this.httpAgent,
+      httpsAgent: isHttps ? this.httpAgent : undefined,
+      timeout: 30000,
+      headers: {
+        Authorization: `Basic ${this.auth}`,
+        'Content-Type': 'application/json',
+      },
+    });
+  }
+
+  /**
+   * リソースをクリーンアップ
+   */
+  dispose(): void {
+    this.auth = '';
+    this.httpAgent.destroy();
   }
   
   /**
@@ -153,15 +182,11 @@ class ConfluenceClient {
         const cql = `space = ${spaceKey} AND title = "${escapedTitle}" AND parent = ${parentId}`;
         console.log(`  CQL Query: ${cql}`);
         
-        const response = await axios.get(`${this.baseUrl}/content/search`, {
+        const response = await this.axiosInstance.get(`${this.baseUrl}/content/search`, {
           params: {
             cql,
             expand: 'version'
           },
-          headers: {
-            'Authorization': `Basic ${this.auth}`,
-            'Content-Type': 'application/json'
-          }
         });
         
         console.log(`  CQL Search results: ${response.data.results?.length || 0} pages found`);
@@ -176,16 +201,12 @@ class ConfluenceClient {
       }
       
       // 親ページIDが指定されていない場合、従来の方法で検索
-      const response = await axios.get(`${this.baseUrl}/content`, {
+      const response = await this.axiosInstance.get(`${this.baseUrl}/content`, {
         params: {
           spaceKey,
           title,
           expand: 'version'
         },
-        headers: {
-          'Authorization': `Basic ${this.auth}`,
-          'Content-Type': 'application/json'
-        }
       });
       
       if (response.data.results && response.data.results.length > 0) {
@@ -256,12 +277,7 @@ class ConfluenceClient {
       payload.ancestors = [{ id: parentId }];
     }
     
-    const response = await axios.post(`${this.baseUrl}/content`, payload, {
-      headers: {
-        'Authorization': `Basic ${this.auth}`,
-        'Content-Type': 'application/json'
-      }
-    });
+    const response = await this.axiosInstance.post(`${this.baseUrl}/content`, payload);
     
     return response.data;
   }
@@ -298,12 +314,7 @@ class ConfluenceClient {
       }
     };
     
-    const response = await axios.put(`${this.baseUrl}/content/${pageId}`, payload, {
-      headers: {
-        'Authorization': `Basic ${this.auth}`,
-        'Content-Type': 'application/json'
-      }
-    });
+    const response = await this.axiosInstance.put(`${this.baseUrl}/content/${pageId}`, payload);
     
     return response.data;
   }
@@ -318,14 +329,10 @@ class ConfluenceClient {
     await sleep(this.requestDelay);
     
     try {
-      const response = await axios.get(`${this.baseUrl}/content/${pageId}`, {
+      const response = await this.axiosInstance.get(`${this.baseUrl}/content/${pageId}`, {
         params: {
           expand: 'ancestors'
         },
-        headers: {
-          'Authorization': `Basic ${this.auth}`,
-          'Content-Type': 'application/json'
-        }
       });
       
       // ancestors配列の最後の要素が直接の親ページ
@@ -375,16 +382,10 @@ class ConfluenceClient {
     for (const label of labels) {
       // レートリミット対策: リクエスト前に待機
       await sleep(this.requestDelay);
-      
-      await axios.post(
+
+      await this.axiosInstance.post(
         `${this.baseUrl}/content/${pageId}/label`,
         [{ name: label }],
-        {
-          headers: {
-            'Authorization': `Basic ${this.auth}`,
-            'Content-Type': 'application/json'
-          }
-        }
       );
     }
   }
@@ -517,6 +518,9 @@ async function syncToConfluence(
     title: firstPage.title,
     spaceKey: spaceKey
   });
+
+  // ConfluenceClientのリソースをクリーンアップ
+  client.dispose();
 
   return firstPageUrl;
 }

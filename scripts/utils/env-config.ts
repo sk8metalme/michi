@@ -317,28 +317,37 @@ async function promptJiraIssueTypeId(
       ? '   値を入力（Enter=デフォルト）: '
       : '   値を入力: ';
 
-  const input = await question(rl, promptText);
+  const MAX_RETRIES = 5;
+  let retryCount = 0;
 
-  // 入力が空の場合
-  if (!input) {
-    // 既存値があればそれを使用
-    if (existingValue) {
-      return existingValue;
+  while (true) {
+    const input = await question(rl, promptText);
+
+    // 入力が空の場合
+    if (!input) {
+      // 既存値があればそれを使用
+      if (existingValue) {
+        return existingValue;
+      }
+      // デフォルト値があればそれを使用
+      if (config.defaultValue) {
+        return config.defaultValue;
+      }
+      // 必須項目で値がない場合はエラー
+      if (config.required) {
+        retryCount++;
+        if (retryCount >= MAX_RETRIES) {
+          throw new Error(`必須項目 ${config.key} の入力が ${MAX_RETRIES} 回失敗しました`);
+        }
+        console.log(`   ⚠️  必須項目です。値を入力してください。(残り ${MAX_RETRIES - retryCount} 回)`);
+        continue;
+      }
+      // オプション項目は空文字を返す
+      return '';
     }
-    // デフォルト値があればそれを使用
-    if (config.defaultValue) {
-      return config.defaultValue;
-    }
-    // 必須項目で値がない場合はエラー
-    if (config.required) {
-      console.log('   ⚠️  必須項目です。値を入力してください。');
-      return promptJiraIssueTypeId(rl, config, projectKey, existingValue);
-    }
-    // オプション項目は空文字を返す
-    return '';
+
+    return input;
   }
-
-  return input;
 }
 
 /**
@@ -385,28 +394,37 @@ export async function promptEnvValue(
       ? '   値を入力（Enter=デフォルト）: '
       : '   値を入力: ';
 
-  const input = await question(rl, promptText);
+  const MAX_RETRIES = 5;
+  let retryCount = 0;
 
-  // 入力が空の場合
-  if (!input) {
-    // 既存値があればそれを使用
-    if (existingValue) {
-      return existingValue;
+  while (true) {
+    const input = await question(rl, promptText);
+
+    // 入力が空の場合
+    if (!input) {
+      // 既存値があればそれを使用
+      if (existingValue) {
+        return existingValue;
+      }
+      // デフォルト値があればそれを使用
+      if (config.defaultValue) {
+        return config.defaultValue;
+      }
+      // 必須項目で値がない場合はエラー
+      if (config.required) {
+        retryCount++;
+        if (retryCount >= MAX_RETRIES) {
+          throw new Error(`必須項目 ${config.key} の入力が ${MAX_RETRIES} 回失敗しました`);
+        }
+        console.log(`   ⚠️  必須項目です。値を入力してください。(残り ${MAX_RETRIES - retryCount} 回)`);
+        continue;
+      }
+      // オプション項目は空文字を返す
+      return '';
     }
-    // デフォルト値があればそれを使用
-    if (config.defaultValue) {
-      return config.defaultValue;
-    }
-    // 必須項目で値がない場合はエラー
-    if (config.required) {
-      console.log('   ⚠️  必須項目です。値を入力してください。');
-      return promptEnvValue(rl, config, existingValue, projectKey);
-    }
-    // オプション項目は空文字を返す
-    return '';
+
+    return input;
   }
-
-  return input;
 }
 
 /**

@@ -12,6 +12,7 @@ const { mockGitHubClient } = vi.hoisted(() => {
   return {
     mockGitHubClient: {
       getLatestWorkflowRun: vi.fn(),
+      destroy: vi.fn(),
     },
   };
 });

@@ -334,8 +334,14 @@ export async function multiRepoCIStatus(
     };
   });
 
-  const results = await Promise.all(promises);
-  repositories.push(...results);
+  const results = await Promise.allSettled(promises);
+  results.forEach((result) => {
+    if (result.status === 'fulfilled') {
+      repositories.push(result.value);
+    } else {
+      console.error('予期しないエラーが発生しました:', result.reason);
+    }
+  });
 
   // 6. 差分計算（--diffオプションが指定されている場合）
   let diff: CIStatusDiff | undefined;
@@ -373,6 +379,9 @@ export async function multiRepoCIStatus(
     running: repositories.filter((r) => r.status === 'running').length,
     unknown: repositories.filter((r) => r.status === 'unknown').length,
   };
+
+  // GitHubActionsClientのリソースをクリーンアップ
+  client.destroy();
 
   return {
     success: true,
