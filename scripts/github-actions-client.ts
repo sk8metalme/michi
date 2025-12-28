@@ -255,4 +255,11 @@ export class GitHubActionsClient {
       }
     }
   }
+
+  /**
+   * リソースをクリーンアップ
+   */
+  destroy(): void {
+    // Octokitは特にクリーンアップ不要だが、将来的な拡張のためにメソッドを用意
+  }
 }

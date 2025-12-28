@@ -6,18 +6,48 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import axios from 'axios';
 
 // axiosをモック
-vi.mock('axios');
+vi.mock('axios', async () => {
+  const actual = await vi.importActual<typeof import('axios')>('axios');
+  return {
+    ...actual,
+    default: {
+      ...actual.default,
+      create: vi.fn(() => ({
+        get: vi.fn(),
+        post: vi.fn(),
+        put: vi.fn(),
+        delete: vi.fn(),
+      })),
+      get: vi.fn(),
+      post: vi.fn(),
+      put: vi.fn(),
+      isAxiosError: vi.fn(),
+    },
+  };
+});
 
 // dotenvをモック
 vi.mock('dotenv', () => ({ config: vi.fn() }));
 
 describe('JIRAClient transitions', () => {
+  let mockAxiosInstance: any;
   const mockAxiosGet = vi.mocked(axios.get);
   const mockAxiosPost = vi.mocked(axios.post);
   const mockAxiosIsAxiosError = vi.mocked(axios.isAxiosError);
+  const mockAxiosCreate = vi.mocked(axios.create);
 
   beforeEach(() => {
     vi.clearAllMocks();
+
+    // axios.createから返されるモックインスタンス
+    mockAxiosInstance = {
+      get: vi.fn(),
+      post: vi.fn(),
+      put: vi.fn(),
+      delete: vi.fn(),
+    };
+    mockAxiosCreate.mockReturnValue(mockAxiosInstance);
+
     // isAxiosError をデフォルトでtrueに
     mockAxiosIsAxiosError.mockReturnValue(true);
   });
@@ -29,7 +59,7 @@ describe('JIRAClient transitions', () => {
   describe('transitionIssue', () => {
     it('利用可能なトランジションを取得してステータスを変更できる', async () => {
       // トランジション一覧のモック
-      mockAxiosGet.mockResolvedValueOnce({
+      mockAxiosInstance.get.mockResolvedValueOnce({
         data: {
           transitions: [
             { id: '21', name: 'In Progress' },
@@ -40,7 +70,7 @@ describe('JIRAClient transitions', () => {
       });
 
       // トランジション実行のモック
-      mockAxiosPost.mockResolvedValueOnce({
+      mockAxiosInstance.post.mockResolvedValueOnce({
         data: {},
       });
 
@@ -55,29 +85,19 @@ describe('JIRAClient transitions', () => {
       await client.transitionIssue('PROJ-123', 'In Progress');
 
       // GETリクエストの検証
-      expect(mockAxiosGet).toHaveBeenCalledWith(
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith(
         'https://test.atlassian.net/rest/api/3/issue/PROJ-123/transitions',
-        expect.objectContaining({
-          headers: expect.objectContaining({
-            'Content-Type': 'application/json',
-          }),
-        }),
       );
 
       // POSTリクエストの検証
-      expect(mockAxiosPost).toHaveBeenCalledWith(
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith(
         'https://test.atlassian.net/rest/api/3/issue/PROJ-123/transitions',
         { transition: { id: '21' } },
-        expect.objectContaining({
-          headers: expect.objectContaining({
-            'Content-Type': 'application/json',
-          }),
-        }),
       );
     });
 
     it('部分一致でトランジションを検索できる', async () => {
-      mockAxiosGet.mockResolvedValueOnce({
+      mockAxiosInstance.get.mockResolvedValueOnce({
         data: {
           transitions: [
             { id: '21', name: 'Start Progress' },
@@ -86,7 +106,7 @@ describe('JIRAClient transitions', () => {
         },
       });
 
-      mockAxiosPost.mockResolvedValueOnce({
+      mockAxiosInstance.post.mockResolvedValueOnce({
         data: {},
       });
 
@@ -100,15 +120,14 @@ describe('JIRAClient transitions', () => {
       // "Progress" で部分一致
       await client.transitionIssue('PROJ-123', 'Progress');
 
-      expect(mockAxiosPost).toHaveBeenCalledWith(
-        expect.any(String),
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith(
+        'https://test.atlassian.net/rest/api/3/issue/PROJ-123/transitions',
         { transition: { id: '21' } },
-        expect.any(Object),
       );
     });
 
     it('トランジションが見つからない場合はエラーをスロー', async () => {
-      mockAxiosGet.mockResolvedValueOnce({
+      mockAxiosInstance.get.mockResolvedValueOnce({
         data: {
           transitions: [
             { id: '21', name: 'In Progress' },
@@ -130,7 +149,7 @@ describe('JIRAClient transitions', () => {
     });
 
     it('利用可能なトランジションがない場合もエラーをスロー', async () => {
-      mockAxiosGet.mockResolvedValueOnce({
+      mockAxiosInstance.get.mockResolvedValueOnce({
         data: {
           transitions: [],
         },
@@ -151,7 +170,7 @@ describe('JIRAClient transitions', () => {
 
   describe('addComment', () => {
     it('コメントを追加できる', async () => {
-      mockAxiosPost.mockResolvedValueOnce({
+      mockAxiosInstance.post.mockResolvedValueOnce({
         data: {
           id: 'comment-123',
         },
@@ -169,7 +188,7 @@ describe('JIRAClient transitions', () => {
         'PRを作成しました: https://github.com/...',
       );
 
-      expect(mockAxiosPost).toHaveBeenCalledWith(
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith(
         'https://test.atlassian.net/rest/api/3/issue/PROJ-123/comment',
         {
           body: {
@@ -188,16 +207,11 @@ describe('JIRAClient transitions', () => {
             ],
           },
         },
-        expect.objectContaining({
-          headers: expect.objectContaining({
-            'Content-Type': 'application/json',
-          }),
-        }),
       );
     });
 
     it('APIエラー時は適切なエラーメッセージを表示', async () => {
-      mockAxiosPost.mockRejectedValueOnce({
+      mockAxiosInstance.post.mockRejectedValueOnce({
         response: {
           status: 404,
           data: {

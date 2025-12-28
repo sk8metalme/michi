@@ -18,7 +18,9 @@
  */
 
 import { resolve } from 'path';
-import axios from 'axios';
+import axios, { type AxiosInstance } from 'axios';
+import { Agent as HttpAgent } from 'http';
+import { Agent as HttpsAgent } from 'https';
 import { loadEnv } from './utils/env-loader.js';
 import { loadProjectMeta } from './utils/project-meta.js';
 import { validateFeatureNameOrThrow } from './utils/feature-name-validator.js';
@@ -385,6 +387,8 @@ class JIRAClient {
   private baseUrl: string;
   private auth: string;
   private requestDelay: number;
+  private axiosInstance: AxiosInstance;
+  private httpAgent: HttpAgent | HttpsAgent;
 
   constructor(config: JIRAConfig) {
     this.baseUrl = `${config.url}/rest/api/3`;
@@ -392,6 +396,31 @@ class JIRAClient {
       'base64',
     );
     this.requestDelay = getRequestDelay();
+
+    // HTTPエージェントを作成（Keep-Alive接続プーリング）
+    const isHttps = config.url.startsWith('https');
+    this.httpAgent = isHttps
+      ? new HttpsAgent({ keepAlive: true, maxSockets: 10 })
+      : new HttpAgent({ keepAlive: true, maxSockets: 10 });
+
+    // 共有axiosインスタンスを作成
+    this.axiosInstance = axios.create({
+      httpAgent: isHttps ? undefined : this.httpAgent,
+      httpsAgent: isHttps ? this.httpAgent : undefined,
+      timeout: 30000,
+      headers: {
+        Authorization: `Basic ${this.auth}`,
+        'Content-Type': 'application/json',
+      },
+    });
+  }
+
+  /**
+   * リソースをクリーンアップ
+   */
+  dispose(): void {
+    this.auth = '';
+    this.httpAgent.destroy();
   }
 
   /**
@@ -405,15 +434,11 @@ class JIRAClient {
     try {
       // JIRA API v3の検索エンドポイントを使用
       // GET /rest/api/3/search でJQL検索を実行（GETメソッドが推奨）
-      const response = await axios.get(`${this.baseUrl}/search`, {
+      const response = await this.axiosInstance.get(`${this.baseUrl}/search`, {
         params: {
           jql,
           maxResults: 100,
           fields: 'summary,issuetype,status,key',
-        },
-        headers: {
-          Authorization: `Basic ${this.auth}`,
-          'Content-Type': 'application/json',
         },
       });
       return response.data.issues || [];
@@ -461,15 +486,9 @@ class JIRAClient {
     // レートリミット対策: リクエスト前に待機
     await sleep(this.requestDelay);
 
-    const response = await axios.post<JIRAIssueCreateResponse>(
+    const response = await this.axiosInstance.post<JIRAIssueCreateResponse>(
       `${this.baseUrl}/issue`,
       payload,
-      {
-        headers: {
-          Authorization: `Basic ${this.auth}`,
-          'Content-Type': 'application/json',
-        },
-      },
     );
     return response.data;
   }
@@ -481,12 +500,7 @@ class JIRAClient {
     // レートリミット対策: リクエスト前に待機
     await sleep(this.requestDelay);
 
-    await axios.put(`${this.baseUrl}/issue/${issueKey}`, payload, {
-      headers: {
-        Authorization: `Basic ${this.auth}`,
-        'Content-Type': 'application/json',
-      },
-    });
+    await this.axiosInstance.put(`${this.baseUrl}/issue/${issueKey}`, payload);
   }
 
   /**
@@ -504,14 +518,8 @@ class JIRAClient {
 
     try {
       // 1. 利用可能なトランジションを取得
-      const transitionsResponse = await axios.get(
+      const transitionsResponse = await this.axiosInstance.get(
         `${this.baseUrl}/issue/${issueKey}/transitions`,
-        {
-          headers: {
-            Authorization: `Basic ${this.auth}`,
-            'Content-Type': 'application/json',
-          },
-        },
       );
 
       const transitions = transitionsResponse.data.transitions || [];
@@ -538,16 +546,10 @@ class JIRAClient {
       await sleep(this.requestDelay);
 
       // 3. トランジションを実行
-      await axios.post(
+      await this.axiosInstance.post(
         `${this.baseUrl}/issue/${issueKey}/transitions`,
         {
           transition: { id: transition.id },
-        },
-        {
-          headers: {
-            Authorization: `Basic ${this.auth}`,
-            'Content-Type': 'application/json',
-          },
         },
       );
 
@@ -605,16 +607,10 @@ class JIRAClient {
         ],
       };
 
-      await axios.post(
+      await this.axiosInstance.post(
         `${this.baseUrl}/issue/${issueKey}/comment`,
         {
           body: commentBody,
-        },
-        {
-          headers: {
-            Authorization: `Basic ${this.auth}`,
-            'Content-Type': 'application/json',
-          },
         },
       );
 
@@ -652,14 +648,8 @@ class JIRAClient {
     await sleep(this.requestDelay);
 
     try {
-      const response = await axios.get(
+      const response = await this.axiosInstance.get(
         `${this.baseUrl}/project/${projectKey}`,
-        {
-          headers: {
-            Authorization: `Basic ${this.auth}`,
-            'Content-Type': 'application/json',
-          },
-        },
       );
 
       const issueTypes = (response.data.issueTypes || []) as JIRAIssueType[];
@@ -1256,6 +1246,15 @@ async function syncTasksToJIRA(featureName: string): Promise<void> {
   console.log(
     `   Stories: ${createdStories.length} processed (${newStoryCount} new, ${reusedStoryCount} reused)`,
   );
+
+  // メモリリーク対策: 配列をクリア
+  existingStories.length = 0;
+  createdStories.length = 0;
+  existingStorySummaries.clear();
+  existingStoryKeys.clear();
+
+  // JIRAClientのリソースをクリーンアップ
+  client.dispose();
 
   // spec.json を更新
   const jiraBaseUrl = process.env.ATLASSIAN_URL || '';
