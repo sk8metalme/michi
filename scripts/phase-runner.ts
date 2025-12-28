@@ -3,7 +3,7 @@
  * 各フェーズを実行し、Confluence/JIRA作成を確実に実行
  */
 
-import { existsSync, writeFileSync, readFileSync } from 'fs';
+import { existsSync, writeFileSync } from 'fs';
 import { join, relative } from 'path';
 import { syncToConfluence } from './confluence-sync.js';
 import { syncTasksToJIRA } from './jira-sync.js';
@@ -12,6 +12,7 @@ import { runPreFlightCheck } from './pre-flight-check.js';
 import { validateFeatureNameOrThrow } from './utils/feature-name-validator.js';
 import { getTestCommands } from './constants/test-commands.js';
 import { loadSpecJson } from './utils/spec-updater.js';
+import { safeReadFile, safeReadJsonFile } from './utils/safe-file-reader.js';
 import inquirer from 'inquirer';
 
 type Phase =
@@ -249,7 +250,13 @@ async function detectAndConvertAIDLCFormat(
 
   console.log('\n🔍 tasks.mdフォーマット検証中...');
   const { isAIDLCFormat } = await import('./utils/aidlc-parser.js');
-  const tasksContent = readFileSync(tasksPath, 'utf-8');
+
+  const readResult = safeReadFile(tasksPath);
+  if (!readResult.success) {
+    errors.push(`tasks.md読み込み失敗: ${readResult.errors[0].type}`);
+    return { success: false, errors };
+  }
+  const tasksContent = readResult.value as string;
 
   if (!isAIDLCFormat(tasksContent)) {
     return { success: true, errors: [] };
@@ -697,8 +704,16 @@ async function updateEnvironmentSpecJson(
     return;
   }
 
+  const readResult = safeReadJsonFile(specPath);
+  if (!readResult.success) {
+    const error = readResult.errors[0];
+    const message = error.type === 'InvalidJSON' ? error.cause : error.type;
+    errors.push(`spec.json読み込み失敗: ${message}`);
+    return { success: false, errors };
+  }
+
   try {
-    const spec = JSON.parse(readFileSync(specPath, 'utf-8'));
+    const spec = readResult.value;
     spec.environmentSetup = {
       completed: true,
       language: answers.language,
@@ -840,11 +855,12 @@ function loadPhaseBTestTypes(feature: string): string[] {
 
   let selectedTypes: string[] = [];
   if (existsSync(selectionPath)) {
-    try {
-      const selection = JSON.parse(readFileSync(selectionPath, 'utf-8'));
+    const readResult = safeReadJsonFile(selectionPath);
+    if (readResult.success) {
+      const selection = readResult.value;
       selectedTypes = selection.selectedTypes || [];
       console.log(`\n✅ 選択されたテストタイプ: ${selectedTypes.join(', ')}`);
-    } catch {
+    } else {
       console.warn('⚠️  test-type-selection.jsonの読み込みに失敗しました');
     }
   } else {
