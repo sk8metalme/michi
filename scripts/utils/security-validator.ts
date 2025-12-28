@@ -9,16 +9,6 @@ import type { Result } from './types/validation.js';
 import { success, failure } from './types/validation.js';
 
 /**
- * バリデーション結果
- * @deprecated Use Result<boolean, string> from ./types/validation.js
- */
-export interface ValidationResult {
-  isValid: boolean;
-  errors: string[];
-  warnings: string[];
-}
-
-/**
  * APIトークン形式の検証
  */
 export function validateAtlassianToken(token: string): Result<boolean, string> {

@@ -13,19 +13,15 @@ import type { Result } from './types/validation.js';
 import { success, failure } from './types/validation.js';
 
 /**
- * バリデーション結果
- * @deprecated Use Result<boolean, string> from ./types/validation.js
+ * LocalPathバリデーション結果（詳細情報付き）
+ *
+ * Note: This is a specialized validation result type for local path validation.
+ * It includes additional metadata beyond the standard Result<T, E> pattern.
  */
-export interface ValidationResult {
+export interface LocalPathValidationResult {
   isValid: boolean;
   errors: string[];
   warnings: string[];
-}
-
-/**
- * LocalPathバリデーション結果（詳細情報付き）
- */
-export interface LocalPathValidationResult extends ValidationResult {
   exists: boolean;
   isGitRepository: boolean;
   currentBranch: string | null;
