@@ -18,7 +18,7 @@ import {
 import { join, basename, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { execSync } from 'child_process';
-import { findRepositoryRoot } from '../../scripts/utils/project-finder.js';
+import { ProjectAnalyzer } from '../../scripts/utils/project-analyzer.js';
 import {
   type Environment,
   getEnvironmentConfig,
@@ -430,10 +430,17 @@ export async function initProject(options: InitOptions): Promise<void> {
   console.log('');
 
   // リポジトリルートを検出
-  const repoRoot = findRepositoryRoot(currentDir);
+  const analyzer = new ProjectAnalyzer();
+  const repoRootResult = analyzer.findProjectRoot(currentDir);
+
+  if (!repoRootResult.success || !repoRootResult.value) {
+    throw new Error('リポジトリルートが見つかりません');
+  }
+
+  const repoRoot: string = repoRootResult.value;
   console.log(`📁 リポジトリルート: ${repoRoot}`);
 
-  if (!repoRoot || !existsSync(repoRoot)) {
+  if (!existsSync(repoRoot)) {
     throw new Error('リポジトリルートが見つかりません');
   }
 
