@@ -257,9 +257,13 @@ export async function runPreFlightCheck(phase: 'confluence' | 'jira' | 'all'): P
       allErrors.push(`❌ project.json読み込み失敗: ${readResult.errors[0].type}`);
     } else {
       const projectMeta = readResult.value!;
-      const jiraCheck = await checkJiraProject(projectMeta.jiraProjectKey!);
-      allErrors.push(...jiraCheck.errors);
-      allWarnings.push(...jiraCheck.warnings);
+      if (!projectMeta.jiraProjectKey) {
+        allErrors.push('❌ project.jsonにjiraProjectKeyが設定されていません');
+      } else {
+        const jiraCheck = await checkJiraProject(projectMeta.jiraProjectKey);
+        allErrors.push(...jiraCheck.errors);
+        allWarnings.push(...jiraCheck.warnings);
+      }
     }
   }
   
