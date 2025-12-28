@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { mkdirSync, rmSync, writeFileSync } from 'fs';
+import { mkdirSync, rmSync, writeFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import { ProjectAnalyzer } from '../project-analyzer.js';
 
@@ -63,7 +63,9 @@ describe('ProjectAnalyzer', () => {
       expect(result.success).toBe(true);
       if (result.success) {
         // Should find the actual project root (with .git)
-        expect(result.value).toContain('/michi');
+        expect(existsSync(join(result.value, '.git'))).toBe(true);
+        // Verify that testDir is inside the returned root
+        expect(testDir.startsWith(result.value)).toBe(true);
       }
     });
   });
