@@ -181,6 +181,142 @@ describe('ProjectAnalyzer', () => {
         expect(result.errors[0].type).toBe('InvalidJSON');
       }
     });
+
+    it('should reject path traversal attacks in projectId (..)', () => {
+      // Setup: malicious projectId
+      const kiroDir = join(testDir, '.kiro');
+      mkdirSync(kiroDir);
+      const projectJson = {
+        projectId: '../tmp/evil',
+        projectName: 'Evil Project',
+        jiraProjectKey: 'EVIL',
+        confluenceLabels: ['test']
+      };
+      writeFileSync(join(kiroDir, 'project.json'), JSON.stringify(projectJson));
+
+      // Execute
+      const result = analyzer.getProjectMetadata(testDir);
+
+      // Verify
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.errors[0].message).toContain('Invalid projectId');
+      }
+    });
+
+    it('should reject path traversal attacks in projectId (/)', () => {
+      // Setup: malicious projectId
+      const kiroDir = join(testDir, '.kiro');
+      mkdirSync(kiroDir);
+      const projectJson = {
+        projectId: 'foo/bar',
+        projectName: 'Evil Project',
+        jiraProjectKey: 'EVIL',
+        confluenceLabels: ['test']
+      };
+      writeFileSync(join(kiroDir, 'project.json'), JSON.stringify(projectJson));
+
+      // Execute
+      const result = analyzer.getProjectMetadata(testDir);
+
+      // Verify
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.errors[0].message).toContain('Invalid projectId');
+      }
+    });
+
+    it('should reject path traversal attacks in projectId (\\)', () => {
+      // Setup: malicious projectId
+      const kiroDir = join(testDir, '.kiro');
+      mkdirSync(kiroDir);
+      const projectJson = {
+        projectId: 'foo\\bar',
+        projectName: 'Evil Project',
+        jiraProjectKey: 'EVIL',
+        confluenceLabels: ['test']
+      };
+      writeFileSync(join(kiroDir, 'project.json'), JSON.stringify(projectJson));
+
+      // Execute
+      const result = analyzer.getProjectMetadata(testDir);
+
+      // Verify
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.errors[0].message).toContain('Invalid projectId');
+      }
+    });
+
+    it('should reject empty projectId', () => {
+      // Setup: empty projectId
+      const kiroDir = join(testDir, '.kiro');
+      mkdirSync(kiroDir);
+      const projectJson = {
+        projectId: '   ',
+        projectName: 'Test Project',
+        jiraProjectKey: 'TEST',
+        confluenceLabels: ['test']
+      };
+      writeFileSync(join(kiroDir, 'project.json'), JSON.stringify(projectJson));
+
+      // Execute
+      const result = analyzer.getProjectMetadata(testDir);
+
+      // Verify
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.errors[0].message).toContain('Invalid projectId');
+      }
+    });
+
+    it('should reject projectId with invalid characters', () => {
+      // Setup: invalid characters in projectId
+      const kiroDir = join(testDir, '.kiro');
+      mkdirSync(kiroDir);
+      const projectJson = {
+        projectId: 'test@project!',
+        projectName: 'Test Project',
+        jiraProjectKey: 'TEST',
+        confluenceLabels: ['test']
+      };
+      writeFileSync(join(kiroDir, 'project.json'), JSON.stringify(projectJson));
+
+      // Execute
+      const result = analyzer.getProjectMetadata(testDir);
+
+      // Verify
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.errors[0].message).toContain('Invalid projectId');
+      }
+    });
+
+    it('should accept valid projectId with alphanumeric, hyphens, and underscores', () => {
+      // Setup: valid projectId
+      const kiroDir = join(testDir, '.kiro');
+      mkdirSync(kiroDir);
+      const projectJson = {
+        projectId: 'Valid-Project_123',
+        projectName: 'Test Project',
+        jiraProjectKey: 'TEST',
+        confluenceLabels: ['test'],
+        status: 'active',
+        team: [],
+        stakeholders: [],
+        repository: ''
+      };
+      writeFileSync(join(kiroDir, 'project.json'), JSON.stringify(projectJson));
+
+      // Execute
+      const result = analyzer.getProjectMetadata(testDir);
+
+      // Verify
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.value.projectId).toBe('Valid-Project_123');
+      }
+    });
   });
 
   describe('getProjectInfo (統合)', () => {
@@ -203,6 +339,201 @@ describe('ProjectAnalyzer', () => {
         expect(result.value.buildTool).toBe('npm');
         expect(result.value.testFramework).toBe('vitest');
         expect(result.value.hasCI).toBe(true);
+      }
+    });
+
+    it('should detect pnpm as package manager', () => {
+      // Setup: create package.json with pnpm-lock.yaml
+      writeFileSync(join(testDir, 'package.json'), JSON.stringify({
+        name: 'test-project',
+        devDependencies: { jest: '^29.0.0' }
+      }));
+      writeFileSync(join(testDir, 'pnpm-lock.yaml'), '');
+
+      // Execute
+      const result = analyzer.getProjectInfo(testDir);
+
+      // Verify
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.value.packageManager).toBe('pnpm');
+        expect(result.value.testFramework).toBe('jest');
+      }
+    });
+
+    it('should detect yarn as package manager', () => {
+      // Setup: create package.json with yarn.lock
+      writeFileSync(join(testDir, 'package.json'), JSON.stringify({
+        name: 'test-project',
+        devDependencies: { mocha: '^10.0.0' }
+      }));
+      writeFileSync(join(testDir, 'yarn.lock'), '');
+
+      // Execute
+      const result = analyzer.getProjectInfo(testDir);
+
+      // Verify
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.value.packageManager).toBe('yarn');
+        expect(result.value.testFramework).toBe('mocha');
+      }
+    });
+
+    it('should handle invalid package.json', () => {
+      // Setup: create invalid package.json
+      writeFileSync(join(testDir, 'package.json'), '{ invalid json }');
+
+      // Execute
+      const result = analyzer.getProjectInfo(testDir);
+
+      // Verify
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.errors[0].type).toBe('InvalidJSON');
+      }
+    });
+
+    it('should detect Gradle project', () => {
+      // Setup: create build.gradle
+      writeFileSync(join(testDir, 'build.gradle'), 'plugins { id "java" }');
+
+      // Execute
+      const result = analyzer.getProjectInfo(testDir);
+
+      // Verify
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.value.language).toBe('java');
+        expect(result.value.buildTool).toBe('gradle');
+        expect(result.value.testFramework).toBe('junit');
+      }
+    });
+
+    it('should detect Maven project', () => {
+      // Setup: create pom.xml
+      writeFileSync(join(testDir, 'pom.xml'), '<project></project>');
+
+      // Execute
+      const result = analyzer.getProjectInfo(testDir);
+
+      // Verify
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.value.language).toBe('java');
+        expect(result.value.buildTool).toBe('maven');
+        expect(result.value.testFramework).toBe('junit');
+      }
+    });
+
+    it('should detect PHP project with PHPUnit', () => {
+      // Setup: create composer.json
+      writeFileSync(join(testDir, 'composer.json'), JSON.stringify({
+        name: 'test/project',
+        'require-dev': { 'phpunit/phpunit': '^9.0' }
+      }));
+
+      // Execute
+      const result = analyzer.getProjectInfo(testDir);
+
+      // Verify
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.value.language).toBe('php');
+        expect(result.value.buildTool).toBe('composer');
+        expect(result.value.testFramework).toBe('phpunit');
+      }
+    });
+
+    it('should handle invalid composer.json', () => {
+      // Setup: create invalid composer.json
+      writeFileSync(join(testDir, 'composer.json'), '{ invalid json }');
+
+      // Execute
+      const result = analyzer.getProjectInfo(testDir);
+
+      // Verify
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.errors[0].type).toBe('InvalidJSON');
+      }
+    });
+
+    it('should detect Python project with pytest', () => {
+      // Setup: create pyproject.toml
+      writeFileSync(join(testDir, 'pyproject.toml'), '[tool.poetry]\nname = "test"\n\n[tool.poetry.dev-dependencies]\npytest = "^7.0"');
+
+      // Execute
+      const result = analyzer.getProjectInfo(testDir);
+
+      // Verify
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.value.language).toBe('python');
+        expect(result.value.buildTool).toBe('poetry or uv');
+        expect(result.value.testFramework).toBe('pytest');
+      }
+    });
+
+    it('should detect Python project with requirements.txt', () => {
+      // Setup: create requirements.txt
+      writeFileSync(join(testDir, 'requirements.txt'), 'pytest==7.0.0');
+
+      // Execute
+      const result = analyzer.getProjectInfo(testDir);
+
+      // Verify
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.value.language).toBe('python');
+        expect(result.value.buildTool).toBe('pip');
+        expect(result.value.testFramework).toBe('pytest');
+      }
+    });
+
+    it('should detect Go project', () => {
+      // Setup: create go.mod
+      writeFileSync(join(testDir, 'go.mod'), 'module example.com/test');
+
+      // Execute
+      const result = analyzer.getProjectInfo(testDir);
+
+      // Verify
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.value.language).toBe('go');
+        expect(result.value.buildTool).toBe('go');
+        expect(result.value.testFramework).toBe('testing');
+      }
+    });
+
+    it('should detect Rust project', () => {
+      // Setup: create Cargo.toml
+      writeFileSync(join(testDir, 'Cargo.toml'), '[package]\nname = "test"');
+
+      // Execute
+      const result = analyzer.getProjectInfo(testDir);
+
+      // Verify
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.value.language).toBe('rust');
+        expect(result.value.buildTool).toBe('cargo');
+        expect(result.value.testFramework).toBe('cargo-test');
+      }
+    });
+
+    it('should detect unknown project without CI', () => {
+      // Execute (no files created)
+      const result = analyzer.getProjectInfo(testDir);
+
+      // Verify
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.value.language).toBe('unknown');
+        expect(result.value.buildTool).toBe('unknown');
+        expect(result.value.hasCI).toBe(false);
+        expect(result.value.hasDependencies).toBe(false);
       }
     });
   });

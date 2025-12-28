@@ -178,6 +178,14 @@ export class ProjectAnalyzer {
         }
       }
 
+      // Validate projectId against path traversal attacks
+      if (!this.validateProjectId(meta.projectId)) {
+        return failure([{
+          type: 'Unknown',
+          message: 'Invalid projectId: must contain only alphanumeric characters, hyphens, and underscores'
+        }]);
+      }
+
       return success(meta);
     } catch (error) {
       if (error instanceof SyntaxError) {
@@ -192,6 +200,26 @@ export class ProjectAnalyzer {
         message: error instanceof Error ? error.message : String(error)
       }]);
     }
+  }
+
+  /**
+   * Validate project ID against path traversal attacks
+   * Security: Prevents malicious project IDs like "../tmp/evil"
+   *
+   * @param projectId - Project ID to validate
+   * @returns true if valid, false otherwise
+   */
+  private validateProjectId(projectId: string): boolean {
+    // Reject empty or whitespace-only IDs
+    if (!projectId.trim() || /^\s+$/.test(projectId)) {
+      return false;
+    }
+    // Reject path traversal attempts (.. / \)
+    if (projectId.includes('..') || projectId.includes('/') || projectId.includes('\\')) {
+      return false;
+    }
+    // Only allow alphanumeric, hyphens, and underscores
+    return /^[A-Za-z0-9_-]+$/.test(projectId);
   }
 
   /**
