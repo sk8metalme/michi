@@ -97,7 +97,7 @@ async function testListSpaces(): Promise<boolean> {
 
     console.log('✅ スペース一覧取得成功:');
     if (response.data.results && response.data.results.length > 0) {
-      response.data.results.forEach(space => {
+      response.data.results.forEach((space: { key: string; name: string }) => {
         console.log(`   - ${space.key}: ${space.name}`);
       });
     } else {
