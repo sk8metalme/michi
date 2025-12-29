@@ -1,0 +1,57 @@
+{
+  "confluence": {
+    "pageCreationGranularity": "single",
+    "pageTitleFormat": "[{projectName}] {featureName} {docTypeLabel}",
+    "autoLabels": [
+      "{projectLabel}",
+      "{docType}",
+      "{featureName}",
+      "github-sync"
+    ],
+    "spaces": {
+      "requirements": "${CONFLUENCE_PRD_SPACE}",
+      "design": "${CONFLUENCE_PRD_SPACE}",
+      "tasks": "${CONFLUENCE_PRD_SPACE}"
+    },
+    "hierarchy": {
+      "enabled": false
+    }
+  },
+  "jira": {
+    "storyCreationGranularity": "all",
+    "createEpic": true,
+    "storyPoints": "auto",
+    "autoLabels": [
+      "{projectLabel}",
+      "{featureName}",
+      "{phaseLabel}"
+    ],
+    "issueTypes": {
+      "epic": "Epic",
+      "story": null,
+      "subtask": null
+    }
+  },
+  "workflow": {
+    "enabledPhases": [
+      "requirements",
+      "design",
+      "tasks"
+    ],
+    "approvalGates": {
+      "requirements": [
+        "pm",
+        "director"
+      ],
+      "design": [
+        "architect",
+        "director"
+      ],
+      "release": [
+        "sm",
+        "director"
+      ]
+    }
+  }
+}
+
