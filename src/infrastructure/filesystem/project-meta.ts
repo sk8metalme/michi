@@ -62,9 +62,9 @@ export function formatProjectInfo(meta: ProjectMetadata): string {
   return `
 Project: ${meta.projectName} (${meta.projectId})
 JIRA: ${meta.jiraProjectKey}
-Labels: ${meta.confluenceLabels.join(', ')}
-Status: ${meta.status}
-Team: ${meta.team.join(', ')}
+Labels: ${(meta.confluenceLabels ?? []).join(', ')}
+Status: ${meta.status ?? 'N/A'}
+Team: ${(meta.team ?? []).join(', ')}
 `.trim();
 }
 
@@ -86,11 +86,13 @@ export function getRepositoryInfo(projectRoot: string = process.cwd()): string {
   // URL形式から owner/repo を抽出
   // 例: https://github.com/owner/repo.git -> owner/repo
   // 例: git@github.com:owner/repo.git -> owner/repo
-  const match = meta.repository.match(/github\.com[:/]([\w-]+\/[\w-]+)(\.git)?/);
+  // 例: https://github.com/owner/my.repo.name.git -> owner/my.repo.name
+  const match = meta.repository.match(/github\.com[:/]([\w.-]+\/[\w.-]+?)(\.git)?$/);
 
   if (!match) {
     throw new Error(`Invalid GitHub repository format: ${meta.repository}`);
   }
 
-  return match[1];
+  // .gitサフィックスを除外
+  return match[1].replace(/\.git$/, '');
 }

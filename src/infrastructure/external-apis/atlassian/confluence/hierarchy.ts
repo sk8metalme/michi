@@ -6,7 +6,7 @@
 import type { ConfluencePage } from './types.js';
 import type { ConfluenceClient } from './client.js';
 import { convertMarkdownToConfluence, createConfluencePage } from './approval.js';
-import type { ProjectMetadata } from '../../../../../scripts/utils/project-meta.js';
+import type { ProjectMetadata } from '../../../filesystem/project-meta.js';
 import type { ConfluenceConfig } from './types.js';
 
 /**
@@ -266,11 +266,14 @@ export async function createSinglePage(
 
   let page: ConfluencePage;
   if (existingPage) {
+    if (!existingPage.version?.number) {
+      throw new Error(`Existing page "${pageTitle}" has no version information`);
+    }
     page = await client.updatePage(
       existingPage.id,
       pageTitle,
       fullContent,
-      existingPage.version!.number
+      existingPage.version.number
     );
     console.log(`✅ Page updated: ${pageTitle}`);
   } else {
@@ -278,11 +281,19 @@ export async function createSinglePage(
     console.log(`✅ Page created: ${pageTitle}`);
   }
 
-  const baseUrl = process.env.ATLASSIAN_URL || '';
+  if (!page._links?.webui) {
+    throw new Error(`Page "${pageTitle}" has no webui link`);
+  }
+
+  const baseUrl = process.env.ATLASSIAN_URL;
+  if (!baseUrl) {
+    throw new Error('ATLASSIAN_URL environment variable is not set');
+  }
+
   return {
     pages: [{
       id: page.id,
-      url: `${baseUrl}/wiki${page._links!.webui}`,
+      url: `${baseUrl}/wiki${page._links.webui}`,
       pageId: page.id,
       title: pageTitle
     }]

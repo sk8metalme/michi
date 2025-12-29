@@ -129,40 +129,42 @@ export async function syncToConfluence(
     space: spaceKey
   });
 
-  const result = await createPagesByGranularity(
-    client,
-    spaceKey,
-    markdown,
-    confluenceConfig,
-    projectMeta,
-    featureName,
-    docType,
-    githubUrl
-  );
+  try {
+    const result = await createPagesByGranularity(
+      client,
+      spaceKey,
+      markdown,
+      confluenceConfig,
+      projectMeta,
+      featureName,
+      docType,
+      githubUrl
+    );
 
-  if (result.pages.length === 0) {
-    throw new Error('No pages were created');
-  }
+    if (result.pages.length === 0) {
+      throw new Error('No pages were created');
+    }
 
-  const firstPageUrl = result.pages[0].url;
-  console.log(`✅ Sync completed: ${result.pages.length} page(s) created/updated`);
+    const firstPageUrl = result.pages[0].url;
+    console.log(`✅ Sync completed: ${result.pages.length} page(s) created/updated`);
 
-  if (result.pages.length > 1) {
-    console.log('📄 Created pages:');
-    result.pages.forEach((page, index) => {
-      console.log(`   ${index + 1}. ${page.title} - ${page.url}`);
+    if (result.pages.length > 1) {
+      console.log('📄 Created pages:');
+      result.pages.forEach((page, index) => {
+        console.log(`   ${index + 1}. ${page.title} - ${page.url}`);
+      });
+    }
+
+    const firstPage = result.pages[0];
+    updateSpecJsonAfterConfluenceSync(featureName, docType, {
+      pageId: firstPage.id,
+      url: firstPage.url,
+      title: firstPage.title,
+      spaceKey: spaceKey
     });
+
+    return firstPageUrl;
+  } finally {
+    client.dispose();
   }
-
-  const firstPage = result.pages[0];
-  updateSpecJsonAfterConfluenceSync(featureName, docType, {
-    pageId: firstPage.id,
-    url: firstPage.url,
-    title: firstPage.title,
-    spaceKey: spaceKey
-  });
-
-  client.dispose();
-
-  return firstPageUrl;
 }

@@ -370,16 +370,7 @@ export async function syncTasksToJIRA(featureName: string): Promise<void> {
     `   Stories: ${createdStories.length} processed (${newStoryCount} new, ${reusedStoryCount} reused)`,
   );
 
-  // メモリリーク対策: 配列をクリア
-  existingStories.length = 0;
-  createdStories.length = 0;
-  existingStorySummaries.clear();
-  existingStoryKeys.clear();
-
-  // JIRAClientのリソースをクリーンアップ
-  client.dispose();
-
-  // spec.json を更新
+  // spec.json を更新（配列クリア前に実行）
   const jiraBaseUrl = process.env.ATLASSIAN_URL || '';
   try {
     updateSpecJsonAfterJiraSync(featureName, {
@@ -394,4 +385,13 @@ export async function syncTasksToJIRA(featureName: string): Promise<void> {
     );
     // spec.json更新の失敗はスクリプト全体の失敗とはしない（JIRA同期は成功しているため）
   }
+
+  // メモリリーク対策: 配列をクリア
+  existingStories.length = 0;
+  createdStories.length = 0;
+  existingStorySummaries.clear();
+  existingStoryKeys.clear();
+
+  // JIRAClientのリソースをクリーンアップ
+  client.dispose();
 }
