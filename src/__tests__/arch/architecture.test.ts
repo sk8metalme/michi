@@ -5,7 +5,7 @@
  * ts-arch-kitを使用して、各層が正しい依存関係を持っているかをテストします。
  */
 
-import { describe, it } from 'vitest';
+import { describe, it, expect } from 'vitest';
 // import { filesOfProject } from 'ts-arch-kit';
 
 describe('Architecture Rules', () => {
