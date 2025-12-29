@@ -8,6 +8,17 @@ import type { Result } from './types/validation.js';
 import { success, failure } from './types/validation.js';
 
 /**
+ * JSON value type - represents any valid JSON value
+ */
+export type JsonValue =
+  | string
+  | number
+  | boolean
+  | null
+  | JsonValue[]
+  | { [key: string]: JsonValue };
+
+/**
  * File read error types
  */
 export type FileReadError =
@@ -82,19 +93,19 @@ export function safeReadFile(
  * }
  * ```
  */
-export function safeReadJsonFile(
+export function safeReadJsonFile<T = JsonValue>(
   filePath: string
-): Result<any, FileReadError> {
+): Result<T, FileReadError> {
   // First, read the file
   const readResult = safeReadFile(filePath);
 
   if (!readResult.success) {
-    return readResult;
+    return readResult as Result<T, FileReadError>;
   }
 
   // Then, parse JSON
   try {
-    const parsed = JSON.parse(readResult.value as string);
+    const parsed = JSON.parse(readResult.value as string) as T;
     return success(parsed);
   } catch (error) {
     return failure([{

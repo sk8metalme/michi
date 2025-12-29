@@ -86,7 +86,7 @@ function checkProjectJson(): { errors: string[], warnings: string[] } {
     return { errors, warnings };
   }
   
-  const readResult = safeReadJsonFile(projectJsonPath);
+  const readResult = safeReadJsonFile<ProjectMeta>(projectJsonPath);
   if (!readResult.success) {
     const error = readResult.errors[0];
     if (error.type === 'InvalidJSON') {
@@ -97,8 +97,8 @@ function checkProjectJson(): { errors: string[], warnings: string[] } {
     return { errors, warnings };
   }
 
-  const projectMeta: ProjectMeta = readResult.value;
-  
+  const projectMeta = readResult.value!;
+
   // 必須フィールドチェック
   const required = ['projectId', 'projectName', 'jiraProjectKey'];
   const missing = required.filter(key => !projectMeta[key]);
@@ -252,14 +252,18 @@ export async function runPreFlightCheck(phase: 'confluence' | 'jira' | 'all'): P
     console.log('\n📋 Step 4: JIRAプロジェクト存在チェック');
     const projectJsonPath = join(process.cwd(), '.kiro', 'project.json');
 
-    const readResult = safeReadJsonFile(projectJsonPath);
+    const readResult = safeReadJsonFile<ProjectMeta>(projectJsonPath);
     if (!readResult.success) {
       allErrors.push(`❌ project.json読み込み失敗: ${readResult.errors[0].type}`);
     } else {
-      const projectMeta = readResult.value;
-      const jiraCheck = await checkJiraProject(projectMeta.jiraProjectKey);
-      allErrors.push(...jiraCheck.errors);
-      allWarnings.push(...jiraCheck.warnings);
+      const projectMeta = readResult.value!;
+      if (!projectMeta.jiraProjectKey) {
+        allErrors.push('❌ project.jsonにjiraProjectKeyが設定されていません');
+      } else {
+        const jiraCheck = await checkJiraProject(projectMeta.jiraProjectKey);
+        allErrors.push(...jiraCheck.errors);
+        allWarnings.push(...jiraCheck.warnings);
+      }
     }
   }
   
