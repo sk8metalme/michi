@@ -1,55 +1,5 @@
 /**
- * Environment configuration mapping for cc-sdd environments
- *
- * Issue #37: 環境別コピー実装
+ * Re-export from Domain layer for backward compatibility
+ * @deprecated Import from @domain/constants instead
  */
-
-export interface EnvironmentConfig {
-  rulesDir: string;
-  commandsDir: string;
-  templateSource: string;
-}
-
-export type Environment = 'claude' | 'claude-agent';
-
-export const ENV_CONFIG: Record<Environment, EnvironmentConfig> = {
-  claude: {
-    rulesDir: '.claude/rules',
-    commandsDir: '.claude/commands',
-    templateSource: 'claude',
-  },
-  'claude-agent': {
-    rulesDir: '.claude/agents',
-    commandsDir: '.claude/commands',
-    templateSource: 'claude-agent',
-  },
-};
-
-/**
- * Get environment configuration
- *
- * @param env - Environment name
- * @returns Environment configuration
- */
-export const getEnvironmentConfig = (env: Environment): EnvironmentConfig => {
-  return ENV_CONFIG[env];
-};
-
-/**
- * Validate if an environment is supported
- *
- * @param env - Environment name to validate
- * @returns True if supported, false otherwise
- */
-export const isSupportedEnvironment = (env: string): env is Environment => {
-  return env in ENV_CONFIG;
-};
-
-/**
- * Get all supported environments
- *
- * @returns Array of supported environment names
- */
-export const getSupportedEnvironments = (): Environment[] => {
-  return Object.keys(ENV_CONFIG) as Environment[];
-};
+export * from '../../src/domain/constants/environments.js';
