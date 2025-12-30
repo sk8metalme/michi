@@ -188,7 +188,7 @@ Phase 5: Presentation Layer Refactoring (Tasks 6.1-6.7) の完了を確認する
 **テスト結果**: ✅ 16/16 PASS
 
 #### 2. 全体テスト実行
-```
+```bash
 Test Files: 68 passed | 1 skipped (69)
 Tests: 1017 passed | 5 skipped (1022)
 Duration: 4.40s
@@ -321,7 +321,7 @@ node dist/src/cli.js --version
 ## パフォーマンス
 
 ### ビルドサイズ
-```
+```text
 dist/
 ├── src/
 │   ├── cli.js (minimal)
@@ -362,7 +362,7 @@ dist/
 
 ### Phase 5: Presentation Layer Refactoring のステータス
 
-**✅ 完了**
+#### ✅ 完了
 
 ### 達成事項
 
