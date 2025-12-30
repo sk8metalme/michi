@@ -68,19 +68,19 @@ templates/
 ## 実装タスク
 
 ### Phase 1: 基盤準備
-- [ ] Task 1.1: ワークフローテンプレートファイルの作成
-- [ ] Task 1.2: 配布スクリプトの雛形作成
+- [x] Task 1.1: ワークフローテンプレートファイルの作成
+- [x] Task 1.2: 配布スクリプトの雛形作成
 
 ### Phase 2: コア機能実装
-- [ ] Task 2.1: GitHub API接続・リポジトリ一覧取得機能
-- [ ] Task 2.2: リポジトリフィルタリング機能（knowledge除外）
-- [ ] Task 2.3: ブランチ作成・ファイル追加機能
-- [ ] Task 2.4: PR作成機能
+- [x] Task 2.1: GitHub API接続・リポジトリ一覧取得機能
+- [x] Task 2.2: リポジトリフィルタリング機能（knowledge除外）
+- [x] Task 2.3: ブランチ作成・ファイル追加機能
+- [x] Task 2.4: PR作成機能
 
 ### Phase 3: 完成・テスト
-- [ ] Task 3.1: エラーハンドリング・ログ出力の整備
-- [ ] Task 3.2: ドライランモードの追加
-- [ ] Task 3.3: README/使用方法ドキュメント
+- [x] Task 3.1: エラーハンドリング・ログ出力の整備
+- [x] Task 3.2: ドライランモードの追加
+- [x] Task 3.3: README/使用方法ドキュメント（CLIヘルプに統合）
 
 ## CLI インターフェース
 
@@ -117,9 +117,20 @@ npx tsx scripts/distribute-workflow.ts --org sk8metalme --repos repo1,repo2
 2. **既存ワークフロー**: 既にファイルが存在する場合の挙動を定義
 3. **権限エラー**: リポジトリごとの権限差異でエラーが発生する可能性
 
-## 次のステップ
+## ステータス
 
-1. この計画のレビュー・承認
-2. Phase 1 から順次実装
-3. ドライランでテスト
-4. 本番実行
+✅ **実装完了**
+
+### 作成ファイル
+- `scripts/distribute-workflow.ts` - メインスクリプト
+- `templates/workflows/trigger-knowledge-collection.yml` - 配布テンプレート
+
+### 使用方法
+
+```bash
+# ドライラン（実際には実行しない）
+npx tsx scripts/distribute-workflow.ts --org sk8metalme --dry-run
+
+# 実行
+npx tsx scripts/distribute-workflow.ts --org sk8metalme
+```
