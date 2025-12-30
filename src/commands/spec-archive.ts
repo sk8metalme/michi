@@ -1,51 +1,10 @@
 /**
- * spec:archive command implementation
- * 完了した仕様書をアーカイブする
- */
-
-import { archiveSpec, canArchiveSpec } from '../../scripts/utils/spec-archiver.js';
-
-export interface ArchiveCommandOptions {
-  reason?: string;
-}
-
-/**
- * 仕様書をアーカイブするコマンド
+ * spec:archive command - Entry Point
  *
- * @param featureName 機能名
- * @param options オプション
- * @param projectRoot プロジェクトルート（デフォルト: process.cwd()）
- * @throws Error アーカイブに失敗した場合
+ * This file is now a thin wrapper that delegates to the Presentation layer.
+ * The actual logic has been moved to src/presentation/commands/spec/archive.ts as part of
+ * the Onion Architecture migration (Phase 5, Task 6.3).
  */
-export async function specArchiveCommand(
-  featureName: string,
-  options?: ArchiveCommandOptions,
-  projectRoot: string = process.cwd()
-): Promise<void> {
-  console.log(`\n📦 Archiving specification: ${featureName}`);
 
-  // アーカイブ可能かチェック
-  const check = canArchiveSpec(featureName, projectRoot);
-
-  if (!check.canArchive) {
-    throw new Error(`Cannot archive ${featureName}: ${check.reason}`);
-  }
-
-  // アーカイブ実行（エラーハンドリング付き）
-  try {
-    const result = archiveSpec(featureName, options, projectRoot);
-
-    if (result.success) {
-      console.log(`✅ Successfully archived ${featureName}`);
-      console.log(`📁 Archive path: ${result.archivePath}`);
-      if (options?.reason) {
-        console.log(`📝 Reason: ${options.reason}`);
-      }
-    } else {
-      throw new Error(`Failed to archive ${featureName}: ${result.error}`);
-    }
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    throw new Error(`Unexpected error during archiving: ${errorMessage}`);
-  }
-}
+export { specArchiveCommand } from '../presentation/commands/spec/archive.js';
+export type { ArchiveCommandOptions } from '../presentation/commands/spec/archive.js';
