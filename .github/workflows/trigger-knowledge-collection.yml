@@ -22,13 +22,13 @@ jobs:
           event-type: pr-merged
           client-payload: |
             {
-              "pr_url": "${{ github.event.pull_request.html_url }}",
-              "repo_owner": "${{ github.repository_owner }}",
-              "repo_name": "${{ github.event.repository.name }}",
-              "pr_number": "${{ github.event.pull_request.number }}",
-              "pr_title": "${{ github.event.pull_request.title }}",
-              "merged_by": "${{ github.event.pull_request.merged_by.login }}",
-              "merged_at": "${{ github.event.pull_request.merged_at }}"
+              "pr_url": ${{ toJson(github.event.pull_request.html_url) }},
+              "repo_owner": ${{ toJson(github.repository_owner) }},
+              "repo_name": ${{ toJson(github.event.repository.name) }},
+              "pr_number": ${{ github.event.pull_request.number }},
+              "pr_title": ${{ toJson(github.event.pull_request.title) }},
+              "merged_by": ${{ toJson(github.event.pull_request.merged_by.login) }},
+              "merged_at": ${{ toJson(github.event.pull_request.merged_at) }}
             }
 
       - name: Log dispatch
