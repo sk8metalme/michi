@@ -1,13 +1,11 @@
 /**
- * Confluence同期スクリプト
- * GitHub の Markdown ファイルを Confluence に同期
- *
- * このファイルはCLIエントリーポイントとして機能します。
- * 実装は src/infrastructure/external-apis/atlassian/confluence/ に移行されました。
+ * Confluence同期スクリプト - Entry Point
+ * The actual logic has been moved to src/presentation/commands/confluence/
  */
 
 import { loadEnv } from './utils/env-loader.js';
-import { syncToConfluence, ConfluenceClient } from '../src/infrastructure/external-apis/atlassian/confluence/index.js';
+import { confluenceSyncCommand } from '../src/presentation/commands/confluence/sync.js';
+import { syncToConfluence, ConfluenceClient, getConfluenceConfig } from '../src/infrastructure/external-apis/atlassian/confluence/index.js';
 
 loadEnv();
 
@@ -23,7 +21,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     process.exit(1);
   }
 
-  syncToConfluence(featureName, docType)
+  confluenceSyncCommand({ featureName, docType })
     .then((url) => {
       console.log(`\nConfluence URL: ${url}`);
       process.exit(0);
@@ -34,6 +32,5 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     });
 }
 
-export { syncToConfluence, ConfluenceClient };
-export { getConfluenceConfig } from '../src/infrastructure/external-apis/atlassian/confluence/index.js';
+export { syncToConfluence, ConfluenceClient, getConfluenceConfig };
 export type { ConfluencePage } from '../src/infrastructure/external-apis/atlassian/confluence/index.js';
