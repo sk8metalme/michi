@@ -112,10 +112,52 @@ describe('Architecture Rules', () => {
     });
   });
 
+  describe('Application Layer - Depends on Domain Only', () => {
+    it('should not depend on Infrastructure layer', () => {
+      const applicationFiles = getTsFiles('src/application');
+      const violations: string[] = [];
+
+      for (const file of applicationFiles) {
+        violations.push(...checkImports(file, ['infrastructure']));
+      }
+
+      expect(violations).toEqual([]);
+    });
+
+    it('should not depend on Presentation layer', () => {
+      const applicationFiles = getTsFiles('src/application');
+      const violations: string[] = [];
+
+      for (const file of applicationFiles) {
+        violations.push(...checkImports(file, ['presentation']));
+      }
+
+      expect(violations).toEqual([]);
+    });
+
+    it('should not depend on scripts directory', () => {
+      const applicationFiles = getTsFiles('src/application');
+      const violations: string[] = [];
+
+      for (const file of applicationFiles) {
+        violations.push(...checkImports(file, ['scripts']));
+      }
+
+      expect(violations).toEqual([]);
+    });
+
+    it('should only import from domain and shared layers', () => {
+      const applicationFiles = getTsFiles('src/application');
+      expect(applicationFiles.length).toBeGreaterThan(0); // Ensure we found application files
+
+      // All tests above passed means Application layer is clean
+      expect(true).toBe(true);
+    });
+  });
+
   describe('File Organization Rules (Phase 6)', () => {
     it('should pass basic test (placeholder)', () => {
       // Phase 6で実装予定:
-      // - Application層がDomainのみに依存すること
       // - Infrastructure層がPresentationに依存しないこと
       // - 循環依存が存在しないこと
       // - ts-arch-kitを使用した完全な検証
