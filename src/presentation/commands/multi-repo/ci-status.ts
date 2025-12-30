@@ -275,120 +275,122 @@ export async function multiRepoCIStatus(
   const client = new GitHubActionsClient();
   const repositories: IRepositoryCIStatus[] = [];
 
-  const promises = project.repositories.map(async (repo) => {
-    const parsed = extractGitHubOwnerRepo(repo.url);
-    if (!parsed) {
-      console.warn(
-        `リポジトリURL「${repo.url}」が無効です。スキップします。`
-      );
-      return {
-        name: repo.name,
-        url: repo.url,
-        branch: repo.branch,
-        status: 'unknown' as const,
-        testStatus: 'unknown' as const,
-        lastExecutionTime: new Date(),
-      };
-    }
-
-    const result = await client.getLatestWorkflowRun(
-      parsed.owner,
-      parsed.repo,
-      repo.branch
-    );
-
-    if (!result.success) {
-      // エラーハンドリング
-      const error = result.error;
-      if (error.type === 'RATE_LIMIT_EXCEEDED') {
+  try {
+    const promises = project.repositories.map(async (repo) => {
+      const parsed = extractGitHubOwnerRepo(repo.url);
+      if (!parsed) {
         console.warn(
-          `GitHub APIのレート制限に達しました。${error.retryAfter}秒後に再試行してください。`
+          `リポジトリURL「${repo.url}」が無効です。スキップします。`
         );
-      } else if (error.type === 'NOT_FOUND') {
-        console.warn(`リポジトリ「${repo.name}」のWorkflow Runが見つかりません。`);
-      } else if (error.type === 'UNAUTHORIZED') {
-        console.warn(`GitHub認証エラー: ${error.message}`);
-      } else {
-        console.warn(
-          `GitHub APIエラー (${repo.name}): ${error.message} (HTTP ${error.statusCode})`
-        );
+        return {
+          name: repo.name,
+          url: repo.url,
+          branch: repo.branch,
+          status: 'unknown' as const,
+          testStatus: 'unknown' as const,
+          lastExecutionTime: new Date(),
+        };
       }
 
+      const result = await client.getLatestWorkflowRun(
+        parsed.owner,
+        parsed.repo,
+        repo.branch
+      );
+
+      if (!result.success) {
+      // エラーハンドリング
+        const error = result.error;
+        if (error.type === 'RATE_LIMIT_EXCEEDED') {
+          console.warn(
+            `GitHub APIのレート制限に達しました。${error.retryAfter}秒後に再試行してください。`
+          );
+        } else if (error.type === 'NOT_FOUND') {
+          console.warn(`リポジトリ「${repo.name}」のWorkflow Runが見つかりません。`);
+        } else if (error.type === 'UNAUTHORIZED') {
+          console.warn(`GitHub認証エラー: ${error.message}`);
+        } else {
+          console.warn(
+            `GitHub APIエラー (${repo.name}): ${error.message} (HTTP ${error.statusCode})`
+          );
+        }
+
+        return {
+          name: repo.name,
+          url: repo.url,
+          branch: repo.branch,
+          status: 'unknown' as const,
+          testStatus: 'unknown' as const,
+          lastExecutionTime: new Date(),
+        };
+      }
+
+      // CI結果を解析
+      const parsed結果 = parseGitHubWorkflowRun(result.data);
       return {
         name: repo.name,
         url: repo.url,
         branch: repo.branch,
-        status: 'unknown' as const,
-        testStatus: 'unknown' as const,
-        lastExecutionTime: new Date(),
+        ...parsed結果,
       };
+    });
+
+    const results = await Promise.allSettled(promises);
+    results.forEach((result) => {
+      if (result.status === 'fulfilled') {
+        repositories.push(result.value);
+      } else {
+        console.error('予期しないエラーが発生しました:', result.reason);
+      }
+    });
+
+    // 6. 差分計算（--diffオプションが指定されている場合）
+    let diff: CIStatusDiff | undefined;
+    if (options.diff && previousCache) {
+      diff = calculateDiff(previousCache.repositories, repositories);
     }
 
-    // CI結果を解析
-    const parsed結果 = parseGitHubWorkflowRun(result.data);
-    return {
-      name: repo.name,
-      url: repo.url,
-      branch: repo.branch,
-      ...parsed結果,
-    };
-  });
+    // 7. Markdownファイルに出力
+    const outputPath = join(baseDir, 'ci-status.md');
+    const markdown = formatCIStatusMarkdown(repositories, diff);
 
-  const results = await Promise.allSettled(promises);
-  results.forEach((result) => {
-    if (result.status === 'fulfilled') {
-      repositories.push(result.value);
-    } else {
-      console.error('予期しないエラーが発生しました:', result.reason);
-    }
-  });
-
-  // 6. 差分計算（--diffオプションが指定されている場合）
-  let diff: CIStatusDiff | undefined;
-  if (options.diff && previousCache) {
-    diff = calculateDiff(previousCache.repositories, repositories);
-  }
-
-  // 7. Markdownファイルに出力
-  const outputPath = join(baseDir, 'ci-status.md');
-  const markdown = formatCIStatusMarkdown(repositories, diff);
-
-  try {
-    if (!existsSync(baseDir)) {
-      mkdirSync(baseDir, { recursive: true });
-    }
-    writeFileSync(outputPath, markdown, 'utf-8');
-  } catch (error) {
-    const errorMessage =
+    try {
+      if (!existsSync(baseDir)) {
+        mkdirSync(baseDir, { recursive: true });
+      }
+      writeFileSync(outputPath, markdown, 'utf-8');
+    } catch (error) {
+      const errorMessage =
       error instanceof Error ? error.message : String(error);
-    throw new Error(`Markdownファイルの書き込みに失敗しました: ${errorMessage}`);
+      throw new Error(`Markdownファイルの書き込みに失敗しました: ${errorMessage}`);
+    }
+
+    // 8. キャッシュ保存
+    const cache: CIStatusCache = {
+      timestamp: new Date().toISOString(),
+      repositories,
+    };
+    saveCache(cachePath, cache);
+
+    // 9. サマリー計算
+    const summary = {
+      total: repositories.length,
+      success: repositories.filter((r) => r.status === 'success').length,
+      failure: repositories.filter((r) => r.status === 'failure').length,
+      running: repositories.filter((r) => r.status === 'running').length,
+      unknown: repositories.filter((r) => r.status === 'unknown').length,
+    };
+
+    return {
+      success: true,
+      projectName,
+      repositories,
+      outputPath,
+      diff,
+      summary,
+    };
+  } finally {
+    // GitHubActionsClientのリソースをクリーンアップ
+    client.destroy();
   }
-
-  // 8. キャッシュ保存
-  const cache: CIStatusCache = {
-    timestamp: new Date().toISOString(),
-    repositories,
-  };
-  saveCache(cachePath, cache);
-
-  // 9. サマリー計算
-  const summary = {
-    total: repositories.length,
-    success: repositories.filter((r) => r.status === 'success').length,
-    failure: repositories.filter((r) => r.status === 'failure').length,
-    running: repositories.filter((r) => r.status === 'running').length,
-    unknown: repositories.filter((r) => r.status === 'unknown').length,
-  };
-
-  // GitHubActionsClientのリソースをクリーンアップ
-  client.destroy();
-
-  return {
-    success: true,
-    projectName,
-    repositories,
-    outputPath,
-    diff,
-    summary,
-  };
 }

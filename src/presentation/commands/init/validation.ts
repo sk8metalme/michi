@@ -40,6 +40,7 @@ export function validateProjectName(name: string): string {
     throw new Error('プロジェクト名に相対パス（. または ..）は使用できません');
   }
 
+  // biome-ignore lint/suspicious/noControlCharactersInRegex: control character detection for input validation
   // eslint-disable-next-line no-control-regex
   if (/[\x00-\x1F\x7F]/.test(trimmed)) {
     throw new Error('プロジェクト名に制御文字は使用できません');

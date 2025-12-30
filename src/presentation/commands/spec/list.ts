@@ -15,10 +15,10 @@ export interface ListCommandOptions {
  * @param options オプション
  * @param projectRoot プロジェクトルート（デフォルト: process.cwd()）
  */
-export async function specListCommand(
+export function specListCommand(
   options?: ListCommandOptions,
   projectRoot: string = process.cwd()
-): Promise<void> {
+): void {
   const specs = listSpecs(
     { includeArchived: options?.all },
     projectRoot

@@ -79,7 +79,7 @@ export function copyAndRenderTemplates(
         writeFileSync(destPath, rendered, 'utf-8');
       } catch (error) {
         console.warn(`⚠️  Failed to read template file: ${sourcePath}`, error);
-        return;
+        continue;
       }
     }
   }

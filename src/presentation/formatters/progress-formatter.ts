@@ -117,7 +117,7 @@ export class ProgressFormatter {
     };
 
     const percentage = total > 0 ? Math.floor((current / total) * 100) : 0;
-    const completed = Math.floor((current / total) * opts.width);
+    const completed = total > 0 ? Math.floor((current / total) * opts.width) : 0;
     const incomplete = opts.width - completed;
 
     const bar =
