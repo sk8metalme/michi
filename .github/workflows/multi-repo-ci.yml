@@ -4,8 +4,7 @@ on:
   push:
     branches: [main, master, develop]
     paths:
-      - 'src/commands/multi-repo-*.ts'
-      - 'src/commands/__tests__/multi-repo-*.test.ts'
+      - 'src/presentation/commands/multi-repo/**/*.ts'
       - 'scripts/config/**'
       - 'scripts/github-actions-client.ts'
       - 'scripts/confluence-sync.ts'
@@ -18,8 +17,7 @@ on:
   pull_request:
     branches: [main, master, develop]
     paths:
-      - 'src/commands/multi-repo-*.ts'
-      - 'src/commands/__tests__/multi-repo-*.test.ts'
+      - 'src/presentation/commands/multi-repo/**/*.ts'
       - 'scripts/config/**'
       - 'scripts/github-actions-client.ts'
       - 'scripts/confluence-sync.ts'
@@ -51,7 +49,7 @@ jobs:
         run: npm ci
 
       - name: Run multi-repo tests with coverage
-        run: npm run test:coverage -- src/commands/__tests__/multi-repo-*.test.ts
+        run: npm run test:coverage -- src/presentation/commands/multi-repo/__tests__/multi-repo-*.test.ts
         env:
           # Environment variables for tests
           CI: true
@@ -117,12 +115,13 @@ jobs:
 
       - name: Verify multi-repo commands exist
         run: |
-          test -f dist/src/commands/multi-repo-init.js || exit 1
-          test -f dist/src/commands/multi-repo-add-repo.js || exit 1
-          test -f dist/src/commands/multi-repo-list.js || exit 1
-          test -f dist/src/commands/multi-repo-ci-status.js || exit 1
-          test -f dist/src/commands/multi-repo-test.js || exit 1
-          test -f dist/src/commands/multi-repo-confluence-sync.js || exit 1
+          test -f dist/src/presentation/commands/multi-repo/init.js || exit 1
+          test -f dist/src/presentation/commands/multi-repo/add-repo.js || exit 1
+          test -f dist/src/presentation/commands/multi-repo/list.js || exit 1
+          test -f dist/src/presentation/commands/multi-repo/ci-status.js || exit 1
+          test -f dist/src/presentation/commands/multi-repo/test.js || exit 1
+          test -f dist/src/presentation/commands/multi-repo/confluence-sync.js || exit 1
+          test -f dist/src/presentation/commands/multi-repo/register.js || exit 1
           echo "✅ All multi-repo commands built successfully"
 
       - name: Upload build artifacts
@@ -172,8 +171,7 @@ jobs:
       - name: Run ESLint on multi-repo files
         run: |
           npm run lint -- \
-            src/commands/multi-repo-*.ts \
-            src/commands/__tests__/multi-repo-*.test.ts \
+            "src/presentation/commands/multi-repo/**/*.ts" \
             scripts/github-actions-client.ts \
             scripts/confluence-sync.ts \
             scripts/mermaid-converter.ts \

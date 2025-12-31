@@ -3,10 +3,10 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { multiRepoList } from '../multi-repo-list.js';
-import * as configLoader from '../../../scripts/utils/config-loader.js';
+import { multiRepoList } from '../list.js';
+import * as configLoader from '../../../../../scripts/utils/config-loader.js';
 
-vi.mock('../../../scripts/utils/config-loader.js');
+vi.mock('../../../../../scripts/utils/config-loader.js');
 
 describe('multiRepoList', () => {
   beforeEach(() => {

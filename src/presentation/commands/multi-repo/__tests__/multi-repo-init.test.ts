@@ -3,14 +3,14 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { multiRepoInit } from '../multi-repo-init.js';
-import * as configLoader from '../../../scripts/utils/config-loader.js';
-import * as multiRepoRenderer from '../../../scripts/template/multi-repo-renderer.js';
+import { multiRepoInit } from '../init.js';
+import * as configLoader from '../../../../../scripts/utils/config-loader.js';
+import * as multiRepoRenderer from '../../../../../scripts/template/multi-repo-renderer.js';
 import * as fs from 'fs';
 
 vi.mock('fs');
-vi.mock('../../../scripts/utils/config-loader.js');
-vi.mock('../../../scripts/template/multi-repo-renderer.js');
+vi.mock('../../../../../scripts/utils/config-loader.js');
+vi.mock('../../../../../scripts/template/multi-repo-renderer.js');
 
 describe('multiRepoInit', () => {
   beforeEach(() => {

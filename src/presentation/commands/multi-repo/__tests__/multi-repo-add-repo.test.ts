@@ -3,12 +3,12 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { multiRepoAddRepo } from '../multi-repo-add-repo.js';
-import * as configLoader from '../../../scripts/utils/config-loader.js';
-import * as validator from '../../../scripts/utils/multi-repo-validator.js';
+import { multiRepoAddRepo } from '../add-repo.js';
+import * as configLoader from '../../../../../scripts/utils/config-loader.js';
+import * as validator from '../../../../../scripts/utils/multi-repo-validator.js';
 
-vi.mock('../../../scripts/utils/config-loader.js');
-vi.mock('../../../scripts/utils/multi-repo-validator.js');
+vi.mock('../../../../../scripts/utils/config-loader.js');
+vi.mock('../../../../../scripts/utils/multi-repo-validator.js');
 
 describe('multiRepoAddRepo', () => {
   beforeEach(() => {

@@ -23,9 +23,7 @@ export function registerMultiRepoCommands(program: Command): void {
         options: { jira: string; confluenceSpace: string },
       ) => {
         try {
-          const { multiRepoInit } = await import(
-            '../../../commands/multi-repo-init.js'
-          );
+          const { multiRepoInit } = await import('./init.js');
           const result = await multiRepoInit(
             projectName,
             options.jira,
@@ -66,9 +64,7 @@ export function registerMultiRepoCommands(program: Command): void {
         options: { name: string; url: string; branch: string },
       ) => {
         try {
-          const { multiRepoAddRepo } = await import(
-            '../../../commands/multi-repo-add-repo.js'
-          );
+          const { multiRepoAddRepo } = await import('./add-repo.js');
           const result = await multiRepoAddRepo(
             projectName,
             options.name,
@@ -95,9 +91,7 @@ export function registerMultiRepoCommands(program: Command): void {
     .description('List Multi-Repo projects')
     .action(async () => {
       try {
-        const { multiRepoList } = await import(
-          '../../../commands/multi-repo-list.js'
-        );
+        const { multiRepoList } = await import('./list.js');
         const result = await multiRepoList();
 
         console.log('');
@@ -130,9 +124,7 @@ export function registerMultiRepoCommands(program: Command): void {
     .action(
       async (projectName: string, options: { diff?: boolean }) => {
         try {
-          const { multiRepoCIStatus } = await import(
-            '../../../commands/multi-repo-ci-status.js'
-          );
+          const { multiRepoCIStatus } = await import('./ci-status.js');
           const result = await multiRepoCIStatus(projectName, {
             diff: options.diff,
           });
@@ -190,7 +182,7 @@ export function registerMultiRepoCommands(program: Command): void {
       ) => {
         try {
           const { multiRepoConfluenceSync } = await import(
-            '../../../commands/multi-repo-confluence-sync.js'
+            './confluence-sync.js'
           );
           const result = await multiRepoConfluenceSync(projectName, {
             docType: options.docType as
@@ -240,9 +232,7 @@ export function registerMultiRepoCommands(program: Command): void {
         options: { type: string; skipHealthCheck?: boolean },
       ) => {
         try {
-          const { multiRepoTest } = await import(
-            '../../../commands/multi-repo-test.js'
-          );
+          const { multiRepoTest } = await import('./test.js');
           const result = await multiRepoTest(projectName, options.type, {
             skipHealthCheck: options.skipHealthCheck,
           });
@@ -289,7 +279,7 @@ export function registerMultiRepoCommands(program: Command): void {
       async (projectName: string, options: { docType?: string }) => {
         try {
           const { multiRepoConfluenceSync } = await import(
-            '../../../commands/multi-repo-confluence-sync.js'
+            './confluence-sync.js'
           );
           const result = await multiRepoConfluenceSync(projectName, {
             docType: options.docType as
