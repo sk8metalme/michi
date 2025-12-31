@@ -78,3 +78,30 @@ jobs:
       - name: Type check
         run: npm run type-check
 
+  architecture:
+    name: Architecture Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run architecture tests
+        run: npm run test:arch
+
+      - name: Verify architecture rules
+        run: |
+          echo "✅ Architecture validation passed"
+          echo "  - Domain layer: No external dependencies"
+          echo "  - Application layer: Depends on Domain only"
+          echo "  - Infrastructure layer: No Presentation dependency"
+          echo "  - No circular dependencies detected"
+

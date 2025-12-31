@@ -11,7 +11,7 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const cliPath = join(__dirname, '..', 'dist', 'src', 'cli.js');
+const cliPath = join(__dirname, '..', '..', 'dist', 'src', 'cli.js');
 
 // Skip on Windows where chmod is not needed
 if (process.platform === 'win32') {
