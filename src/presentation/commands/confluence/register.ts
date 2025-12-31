@@ -5,7 +5,7 @@
  */
 
 import { Command } from 'commander';
-import { syncToConfluence } from '../../../../scripts/confluence-sync.js';
+import { syncToConfluence } from '../../../infrastructure/external-apis/atlassian/confluence/index.js';
 
 /**
  * Register Confluence-related commands

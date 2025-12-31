@@ -5,8 +5,8 @@
  */
 
 import { Command } from 'commander';
-import { WorkflowOrchestrator } from '../../../../scripts/workflow-orchestrator.js';
-import { getApprovalGates } from '../../../presentation/cli/config.js';
+import { WorkflowOrchestrator } from './orchestrator.js';
+import { getApprovalGates } from '../../cli/config.js';
 
 /**
  * Register workflow-related commands
