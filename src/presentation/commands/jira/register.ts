@@ -5,7 +5,7 @@
  */
 
 import { Command } from 'commander';
-import { syncTasksToJIRA, JIRAClient } from '../../../../scripts/jira-sync.js';
+import { syncTasksToJIRA, JIRAClient } from '../../../infrastructure/external-apis/atlassian/jira/index.js';
 
 /**
  * Register JIRA-related commands
