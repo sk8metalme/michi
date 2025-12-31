@@ -3,8 +3,8 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { multiRepoCIStatus } from '../multi-repo-ci-status.js';
-import * as configLoader from '../../../scripts/utils/config-loader.js';
+import { multiRepoCIStatus } from '../ci-status.js';
+import * as configLoader from '../../../../../scripts/utils/config-loader.js';
 import * as fs from 'fs';
 
 // GitHubActionsClientのモックをhoistで定義
@@ -18,8 +18,8 @@ const { mockGitHubClient } = vi.hoisted(() => {
 });
 
 vi.mock('fs');
-vi.mock('../../../scripts/utils/config-loader.js');
-vi.mock('../../../scripts/github-actions-client.js', () => {
+vi.mock('../../../../../scripts/utils/config-loader.js');
+vi.mock('../../../../../scripts/github-actions-client.js', () => {
   return {
     GitHubActionsClient: function () {
       return mockGitHubClient;

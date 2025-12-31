@@ -3,8 +3,8 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { multiRepoTest } from '../multi-repo-test.js';
-import * as configLoader from '../../../scripts/utils/config-loader.js';
+import { multiRepoTest } from '../test.js';
+import * as configLoader from '../../../../../scripts/utils/config-loader.js';
 import * as fs from 'fs';
 
 // HealthCheckServiceとTestScriptRunnerのモックをhoistで定義
@@ -20,15 +20,15 @@ const { mockHealthCheckService, mockTestScriptRunner } = vi.hoisted(() => {
 });
 
 vi.mock('fs');
-vi.mock('../../../scripts/utils/config-loader.js');
-vi.mock('../../../scripts/health-check-service.js', () => {
+vi.mock('../../../../../scripts/utils/config-loader.js');
+vi.mock('../../../../../scripts/health-check-service.js', () => {
   return {
     HealthCheckService: function () {
       return mockHealthCheckService;
     },
   };
 });
-vi.mock('../../../scripts/test-script-runner.js', () => {
+vi.mock('../../../../../scripts/test-script-runner.js', () => {
   return {
     TestScriptRunner: function () {
       return mockTestScriptRunner;

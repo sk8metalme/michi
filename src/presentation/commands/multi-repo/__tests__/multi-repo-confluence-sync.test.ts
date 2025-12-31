@@ -3,12 +3,12 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { multiRepoConfluenceSync } from '../multi-repo-confluence-sync.js';
+import { multiRepoConfluenceSync } from '../confluence-sync.js';
 import * as fs from 'fs';
-import * as configLoader from '../../../scripts/utils/config-loader.js';
+import * as configLoader from '../../../../../scripts/utils/config-loader.js';
 
 vi.mock('fs');
-vi.mock('../../../scripts/utils/config-loader.js');
+vi.mock('../../../../../scripts/utils/config-loader.js');
 
 // ConfluenceClientのモックインスタンス型
 type MockConfluenceClient = {
@@ -25,7 +25,7 @@ const mockClientInstance: MockConfluenceClient = {
   updatePage: vi.fn(),
 };
 
-vi.mock('../../../scripts/confluence-sync.js', () => {
+vi.mock('../../../../../scripts/confluence-sync.js', () => {
   class MockedConfluenceClient {
     searchPage = mockClientInstance.searchPage;
     createPage = mockClientInstance.createPage;
