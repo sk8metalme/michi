@@ -67,6 +67,12 @@ export function registerInitCommands(program: Command): void {
         options: { dryRun?: boolean; backup?: boolean; lang?: string },
       ) => {
         try {
+          // Validate feature name to prevent path traversal
+          if (!feature || /[/\\]/.test(feature) || feature.startsWith('.')) {
+            console.error(`❌ Invalid feature name: ${feature}`);
+            process.exit(1);
+          }
+
           const kiroDir = '.kiro';
           const tasksPath = join(kiroDir, 'specs', feature, 'tasks.md');
 

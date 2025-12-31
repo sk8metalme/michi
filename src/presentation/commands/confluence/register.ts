@@ -15,7 +15,7 @@ export function registerConfluenceCommands(program: Command): void {
     .command('confluence:sync')
     .description('Sync spec to Confluence')
     .argument('<feature>', 'Feature name')
-    .argument('[type]', 'Document type (requirements, design)', 'requirements')
+    .argument('[type]', 'Document type (requirements, design, tasks)', 'requirements')
     .action(async (feature: string, type?: string) => {
       try {
         await syncToConfluence(
