@@ -1,0 +1,28 @@
+# Codecov Configuration
+# https://docs.codecov.io/docs/codecov-yaml
+
+coverage:
+  status:
+    project:
+      default:
+        target: auto
+        threshold: 1%
+    patch:
+      default:
+        target: auto
+        threshold: 1%
+
+ignore:
+  # CLI command registration files - tested via integration/E2E tests
+  - "src/presentation/commands/**/register.ts"
+
+  # Test files
+  - "**/*.test.ts"
+  - "**/*.spec.ts"
+  - "**/test/**"
+  - "**/__tests__/**"
+
+  # Build artifacts
+  - "dist/**"
+  - "build/**"
+  - "coverage/**"
