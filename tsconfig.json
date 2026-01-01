@@ -17,8 +17,6 @@
     "rootDir": "./",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"],
-      "@scripts/*": ["./scripts/*"],
       "@kiro/*": ["./.kiro/*"],
       "@domain/*": ["./src/domain/*"],
       "@application/*": ["./src/application/*"],

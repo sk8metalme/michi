@@ -2,8 +2,8 @@
  * Tests for MermaidConverter
  */
 
-import { describe, it, expect } from 'vitest';
-import { MermaidConverter } from '../mermaid-converter.js';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { MermaidConverter } from '../dev-tools/mermaid-converter.js';
 
 describe('MermaidConverter', () => {
   let converter: MermaidConverter;

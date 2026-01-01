@@ -8,7 +8,7 @@ on:
       - 'scripts/config/**'
       - 'scripts/github-actions-client.ts'
       - 'scripts/confluence-sync.ts'
-      - 'scripts/mermaid-converter.ts'
+      - 'scripts/dev-tools/mermaid-converter.ts'
       - 'scripts/utils/multi-repo-validator.ts'
       - 'scripts/template/multi-repo-renderer.ts'
       - 'docs/user-guide/guides/multi-repo-*.md'
@@ -21,7 +21,7 @@ on:
       - 'scripts/config/**'
       - 'scripts/github-actions-client.ts'
       - 'scripts/confluence-sync.ts'
-      - 'scripts/mermaid-converter.ts'
+      - 'scripts/dev-tools/mermaid-converter.ts'
       - 'scripts/utils/multi-repo-validator.ts'
       - 'scripts/template/multi-repo-renderer.ts'
       - 'docs/user-guide/guides/multi-repo-*.md'
@@ -174,7 +174,7 @@ jobs:
             "src/presentation/commands/multi-repo/**/*.ts" \
             scripts/github-actions-client.ts \
             scripts/confluence-sync.ts \
-            scripts/mermaid-converter.ts \
+            scripts/dev-tools/mermaid-converter.ts \
             scripts/utils/multi-repo-validator.ts \
             scripts/template/multi-repo-renderer.ts
 

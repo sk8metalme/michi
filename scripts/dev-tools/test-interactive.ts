@@ -4,7 +4,7 @@
  */
 
 import { writeFileSync, existsSync, mkdirSync } from 'fs';
-import { safeReadFileOrThrow } from './utils/safe-file-reader.js';
+import { safeReadFileOrThrow } from '../utils/safe-file-reader.js';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import * as readline from 'readline';
@@ -13,7 +13,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // テンプレートディレクトリ
-const TEMPLATES_DIR = join(__dirname, '..', 'templates', 'testing');
+const TEMPLATES_DIR = join(__dirname, '..', '..', 'templates', 'testing');
 
 /**
  * テストタイプの定義

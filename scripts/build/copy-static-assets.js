@@ -8,7 +8,7 @@ import { dirname, resolve, join } from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const projectRoot = resolve(__dirname, '..');
+const projectRoot = resolve(__dirname, '..', '..');
 
 /**
  * ファイルをコピーし、ディレクトリが存在しない場合は作成
