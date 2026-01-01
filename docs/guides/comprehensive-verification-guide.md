@@ -73,7 +73,7 @@ gh --version    # 2.x以上
 <details>
 <summary>サンプル出力</summary>
 
-```
+```text
 $ node --version
 v20.11.0
 
@@ -142,7 +142,7 @@ npx cc-sdd@latest --claude --lang ja
 <details>
 <summary>サンプル出力</summary>
 
-```
+```text
 ✔ Claude Code detected
 ✔ Setting up cc-sdd for Claude...
 ✔ Created .kiro/ directory structure
@@ -161,7 +161,7 @@ Next steps:
 
 **Claude Code内で実行**:
 
-```
+```text
 /plugin marketplace add sk8metalme/michi
 /plugin install michi@sk8metalme
 ```
@@ -169,7 +169,7 @@ Next steps:
 <details>
 <summary>サンプル出力</summary>
 
-```
+```text
 ✔ Added marketplace: sk8metalme/michi
 ✔ Installed plugin: michi@sk8metalme
 
@@ -195,7 +195,7 @@ npm install -g @sk8metal/michi-cli
 <details>
 <summary>サンプル出力</summary>
 
-```
+```text
 added 342 packages, and audited 343 packages in 12s
 
 98 packages are looking for funding
@@ -215,7 +215,7 @@ michi --version
 <details>
 <summary>サンプル出力</summary>
 
-```
+```text
 @sk8metal/michi-cli/0.19.0 darwin-arm64 node-v20.11.0
 ```
 </details>
@@ -269,7 +269,7 @@ michi preflight
 <details>
 <summary>サンプル出力</summary>
 
-```
+```text
 🔍 Michi環境チェック
 
 ✅ Node.js: v20.11.0
@@ -314,14 +314,14 @@ michi config:check-security # セキュリティチェック
 #### 3.1 仕様初期化 (Phase 0.0)
 
 **コマンド**:
-```
+```text
 /kiro:spec-init "test-feature: テスト用の新機能実装"
 ```
 
 <details>
 <summary>サンプル出力</summary>
 
-```
+```text
 📋 仕様初期化: test-feature
 
 ✅ ディレクトリ作成: .kiro/specs/test-feature/
@@ -341,14 +341,14 @@ michi config:check-security # セキュリティチェック
 #### 3.2 要件定義 (Phase 0.1)
 
 **コマンド**:
-```
+```text
 /kiro:spec-requirements test-feature
 ```
 
 <details>
 <summary>サンプル出力</summary>
 
-```
+```text
 📝 要件定義生成中...
 
 ✅ requirements.md生成完了（152行）
@@ -372,14 +372,14 @@ michi config:check-security # セキュリティチェック
 #### 3.3 設計 (Phase 0.2) - Michi版
 
 **コマンド**:
-```
+```text
 /michi:spec-design test-feature
 ```
 
 <details>
 <summary>サンプル出力</summary>
 
-```
+```text
 🎨 技術設計書生成中...
 
 📋 Phase 0.3: テストタイプ選択
@@ -414,14 +414,14 @@ michi config:check-security # セキュリティチェック
 #### 3.4 設計検証（オプション）
 
 **コマンド**:
-```
+```text
 /kiro:validate-design test-feature
 ```
 
 <details>
 <summary>サンプル出力</summary>
 
-```
+```text
 🔍 設計品質レビュー実行中...
 
 ✅ アーキテクチャ整合性: OK
@@ -448,14 +448,14 @@ michi config:check-security # セキュリティチェック
 #### 3.5 タスク分割 (Phase 0.5) - Michi版
 
 **コマンド**:
-```
+```text
 /michi:spec-tasks test-feature
 ```
 
 <details>
 <summary>サンプル出力</summary>
 
-```
+```text
 📋 実装タスク生成中...
 
 ✅ tasks.md生成完了（218行）
@@ -492,7 +492,7 @@ michi jira:sync test-feature
 <details>
 <summary>サンプル出力</summary>
 
-```
+```text
 🔗 JIRA同期実行中...
 
 📌 Epic作成:
@@ -523,14 +523,14 @@ michi jira:sync test-feature
 #### 3.7 Confluence同期 (Phase 0.7)
 
 **コマンド**:
-```
+```text
 /michi:confluence-sync test-feature
 ```
 
 <details>
 <summary>サンプル出力</summary>
 
-```
+```text
 📚 Confluence同期実行中...
 
 ✅ スペース確認: MICHI-TEST
@@ -568,7 +568,7 @@ michi phase:run test-feature environment-setup
 <details>
 <summary>サンプル出力</summary>
 
-```
+```text
 🔧 Phase 1: 環境構築実行中...
 
 ✅ プロジェクト構造作成
@@ -591,14 +591,14 @@ michi phase:run test-feature environment-setup
 #### 3.9 TDD実装 - Michi版
 
 **コマンド**:
-```
+```text
 /michi:spec-impl test-feature
 ```
 
 <details>
 <summary>サンプル出力</summary>
 
-```
+```text
 🚀 Phase 2: TDD実装開始
 
 📋 Phase 1: OSSライセンスチェック
@@ -656,14 +656,14 @@ michi phase:run test-feature environment-setup
 #### 3.10 実装検証
 
 **コマンド**:
-```
+```text
 /kiro:validate-impl test-feature
 ```
 
 <details>
 <summary>サンプル出力</summary>
 
-```
+```text
 🔍 実装検証実行中...
 
 📋 要件カバレッジ:
@@ -705,7 +705,7 @@ michi phase:run test-feature phase-a
 <details>
 <summary>サンプル出力</summary>
 
-```
+```text
 🧪 Phase A: PR前自動テスト実行中...
 
 ✅ 単体テスト: 82/82 passed
@@ -726,14 +726,14 @@ michi phase:run test-feature phase-a
 #### 3.12 PR作成
 
 **コマンド**:
-```
+```text
 /development-toolkit:create_pr
 ```
 
 <details>
 <summary>サンプル出力</summary>
 
-```
+```text
 📝 PR作成中...
 
 ✅ ブランチ確認: feature/test-feature
@@ -761,14 +761,14 @@ michi phase:run test-feature phase-a
 #### 3.13 コードレビュー
 
 **コマンド**:
-```
+```text
 /code-review:code-review
 ```
 
 <details>
 <summary>サンプル出力</summary>
 
-```
+```text
 🔍 コードレビュー実行中...
 
 📋 コード品質レビュー:
@@ -825,7 +825,7 @@ michi phase:run test-feature phase-b
 <details>
 <summary>サンプル出力</summary>
 
-```
+```text
 🧪 Phase B: リリース準備テスト実行中...
 
 ✅ 統合テスト: 28/28 passed (実行時間: 45秒)
@@ -887,7 +887,7 @@ npm publish
 <details>
 <summary>サンプル出力</summary>
 
-```
+```text
 npm notice
 npm notice 📦  your-package@1.2.0
 npm notice === Tarball Contents ===
@@ -918,14 +918,14 @@ npm notice
 #### 3.18 仕様アーカイブ
 
 **コマンド**:
-```
+```text
 /kiro:spec-archive test-feature
 ```
 
 <details>
 <summary>サンプル出力</summary>
 
-```
+```text
 📦 仕様アーカイブ実行中...
 
 ✅ アーカイブ作成: .kiro/specs/archived/test-feature-20260101/
@@ -947,14 +947,14 @@ npm notice
 ### 4.1 Multi-Repoプロジェクト初期化
 
 **コマンド**:
-```
+```text
 /michi-multi-repo:spec-init "multi-repo-test: マイクロサービステストプロジェクト"
 ```
 
 <details>
 <summary>サンプル出力</summary>
 
-```
+```text
 🚀 Multi-Repoプロジェクト初期化中...
 
 ✅ 親プロジェクト作成: .kiro/multi-repo/multi-repo-test/
@@ -995,7 +995,7 @@ michi multi-repo:add-repo multi-repo-test \
 <details>
 <summary>サンプル出力</summary>
 
-```
+```text
 ✅ リポジトリ追加: service-a
    URL: https://github.com/your-org/service-a
    Branch: main
@@ -1019,7 +1019,7 @@ michi multi-repo:list
 <details>
 <summary>サンプル出力</summary>
 
-```
+```text
 📋 Multi-Repoプロジェクト一覧:
 
 multi-repo-test
@@ -1039,14 +1039,14 @@ multi-repo-test
 ### 4.3 Multi-Repo要件定義
 
 **コマンド**:
-```
+```text
 /michi-multi-repo:spec-requirements multi-repo-test
 ```
 
 <details>
 <summary>サンプル出力</summary>
 
-```
+```text
 📝 Multi-Repo要件定義生成中...
 
 ✅ 統合要件定義書生成: overview/requirements.md (245行)
@@ -1068,14 +1068,14 @@ multi-repo-test
 ### 4.4 Multi-Repo設計
 
 **コマンド**:
-```
+```text
 /michi-multi-repo:spec-design multi-repo-test
 ```
 
 <details>
 <summary>サンプル出力</summary>
 
-```
+```text
 🎨 Multi-Repo設計書生成中...
 
 ✅ 統合設計書生成: overview/design.md (412行)
@@ -1102,14 +1102,14 @@ multi-repo-test
 ### 4.5 クロスリポジトリレビュー
 
 **コマンド**:
-```
+```text
 /michi-multi-repo:spec-review multi-repo-test
 ```
 
 <details>
 <summary>サンプル出力</summary>
 
-```
+```text
 🔍 クロスリポジトリレビュー実行中...
 
 📋 API契約整合性:
@@ -1159,14 +1159,14 @@ multi-repo-test
 ### 4.6 仕様展開（並列実行）
 
 **コマンド**:
-```
+```text
 /michi-multi-repo:propagate-specs multi-repo-test
 ```
 
 <details>
 <summary>サンプル出力</summary>
 
-```
+```text
 🚀 仕様展開開始（並列実行）...
 
 並列実行（最大3並列）:
@@ -1200,14 +1200,14 @@ service-b:
 ### 4.7 全リポジトリ実装（並列実行）
 
 **コマンド**:
-```
+```text
 /michi-multi-repo:impl-all multi-repo-test
 ```
 
 <details>
 <summary>サンプル出力</summary>
 
-```
+```text
 🚀 全リポジトリ実装開始（並列実行）...
 
 並列実行（2リポジトリ）:
@@ -1247,7 +1247,7 @@ michi multi-repo:ci-status multi-repo-test
 <details>
 <summary>サンプル出力</summary>
 
-```
+```text
 📊 Multi-Repo CI結果集約
 
 service-a:
@@ -1287,7 +1287,7 @@ michi multi-repo:confluence-sync multi-repo-test
 <details>
 <summary>サンプル出力</summary>
 
-```
+```text
 📚 Multi-Repo Confluence同期実行中...
 
 ✅ 親ページ作成: multi-repo-test
@@ -1318,7 +1318,7 @@ michi multi-repo:test multi-repo-test --type integration
 <details>
 <summary>サンプル出力</summary>
 
-```
+```text
 🧪 Multi-Repo統合テスト実行中...
 
 ✅ ヘルスチェック:
@@ -1361,7 +1361,7 @@ michi jira:transition MICHI-TEST-123 "Done"
 <details>
 <summary>サンプル出力</summary>
 
-```
+```text
 ✅ MICHI-TEST-123: To Do → In Progress
 ✅ MICHI-TEST-123: In Progress → Done
 ```
@@ -1380,7 +1380,7 @@ michi jira:comment MICHI-TEST-123 "実装完了、レビュー依頼"
 <details>
 <summary>サンプル出力</summary>
 
-```
+```text
 ✅ MICHI-TEST-123にコメント追加
    コメント: 実装完了、レビュー依頼
    投稿者: your-email@example.com
@@ -1405,7 +1405,7 @@ michi confluence:sync test-feature tasks
 <details>
 <summary>サンプル出力</summary>
 
-```
+```text
 ✅ requirements.md → Confluence同期完了
    URL: https://your-domain.atlassian.net/wiki/.../requirements
 
@@ -1449,7 +1449,7 @@ michi confluence:sync test-feature tasks
 - [ ] 代替パッケージ提案確認
 
 **サンプル出力**（問題検出時）:
-```
+```text
 ❌ OSSライセンスチェック失敗
 
 Critical:
@@ -1472,7 +1472,7 @@ Critical:
 - [ ] アップグレードパス提案確認
 
 **サンプル出力**（問題検出時）:
-```
+```text
 ⚠️  バージョン監査警告
 
 Warning:
@@ -1505,7 +1505,7 @@ Info:
 - [ ] 最大5回ループ確認
 
 **サンプル出力**:
-```
+```text
 📋 Phase 2: 自動修正ループ
 
 ループ 1:
@@ -1530,7 +1530,7 @@ Info:
 ### 7.1 Steeringドキュメント管理
 
 **コマンド**:
-```
+```text
 /kiro:steering
 /kiro:steering-custom
 ```
@@ -1538,7 +1538,7 @@ Info:
 <details>
 <summary>サンプル出力</summary>
 
-```
+```text
 📝 Steeringドキュメント管理
 
 /kiro:steering:
@@ -1563,14 +1563,14 @@ Info:
 ### 7.2 ドキュメントレビュー
 
 **コマンド**:
-```
+```text
 /doc:review
 ```
 
 <details>
 <summary>サンプル出力</summary>
 
-```
+```text
 ## ドキュメントレビュー結果
 
 ### 📊 文量チェック
@@ -1600,14 +1600,14 @@ Info:
 ### 7.3 仕様ステータス確認
 
 **コマンド**:
-```
+```text
 /kiro:spec-status test-feature
 ```
 
 <details>
 <summary>サンプル出力</summary>
 
-```
+```text
 📊 仕様ステータス: test-feature
 
 基本情報:
@@ -1652,7 +1652,7 @@ michi migrate --dry-run
 <details>
 <summary>サンプル出力</summary>
 
-```
+```text
 🔄 Michi設定移行ツール
    (ドライランモード - 実際の変更は行われません)
 
@@ -1738,7 +1738,7 @@ michi migrate --rollback /path/to/backup
    - スペースキーが正しいか
 
 3. **再同期**:
-   ```
+   ```text
    /michi:confluence-sync <feature>
    ```
 
@@ -1749,18 +1749,18 @@ michi migrate --rollback /path/to/backup
 **対処手順**:
 
 1. **タスクステータス確認**:
-   ```
+   ```text
    /kiro:spec-status <feature>
    ```
 
 2. **部分再実装**（特定タスクのみ）:
-   ```
+   ```text
    /michi:spec-impl <feature> <task-id>
    ```
    例: `/michi:spec-impl test-feature 2.3`
 
 3. **全体再実装**:
-   ```
+   ```text
    /michi:spec-impl <feature>
    ```
 
@@ -1783,11 +1783,11 @@ michi migrate --rollback /path/to/backup
    - 手動で `/michi:spec-impl` 実行
 
 3. **再実行**:
-   ```
+   ```text
    /michi-multi-repo:propagate-specs <project>
    ```
    または
-   ```
+   ```text
    /michi-multi-repo:impl-all <project>
    ```
 
