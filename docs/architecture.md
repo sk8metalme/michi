@@ -771,4 +771,4 @@ export class InfrastructureError extends Error {
 ---
 
 **Last Updated**: 2026-01-01
-**Version**: 0.18.2
+**Version**: 0.19.0
