@@ -394,7 +394,7 @@ michi config:check-security # セキュリティチェック
 ✅ test-plan.md生成完了（156行）
 
 設計サマリー:
-  - アーキテクチャ: 3層構造（Presentation/Business/Data）
+  - アーキテクチャ: 4層構造（Domain/Application/Infrastructure/Presentation）
   - テーブル設計: 5テーブル
   - API設計: 8エンドポイント
   - テスト計画: 42テストケース
