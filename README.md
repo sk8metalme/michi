@@ -23,7 +23,29 @@ Michiは、開発フロー全体（要件定義→設計→タスク分割→実
 - ✅ **Multi-Repo管理**: マイクロサービス・モノレポ対応
 - ✅ **多言語サポート**: Node.js、Java（Gradle）、PHP対応
 
-### アーキテクチャ
+### コードアーキテクチャ
+
+Michiは**オニオンアーキテクチャ（4層構造）**を採用しています：
+
+```
+┌─────────────────────────────────────────┐
+│       Presentation Layer (CLI)          │  ← ユーザーインターフェース
+├─────────────────────────────────────────┤
+│       Application Layer (Use Cases)     │  ← ビジネスロジック調整
+├─────────────────────────────────────────┤
+│    Infrastructure Layer (External APIs) │  ← 外部サービス統合
+├─────────────────────────────────────────┤
+│       Domain Layer (Business Logic)     │  ← コアビジネスルール
+└─────────────────────────────────────────┘
+```
+
+**ハイブリッドアプローチ**:
+- `src/` - プロダクションコード（4層構造）
+- `scripts/` - ビルド・開発ツール（層なし）
+
+詳細は [アーキテクチャガイド](docs/architecture.md) と [移行ガイド](docs/MIGRATION.md) を参照してください。
+
+### ワークフローアーキテクチャ
 
 ```text
 GitHub (.kiro/specs/) ← 情報源（Single Source of Truth）
@@ -112,6 +134,8 @@ npm install -g @sk8metal/michi-cli
 - [CLIコマンド](docs/reference/cli.md) - すべてのmichiコマンド
 - [AIコマンド](docs/reference/ai-commands.md) - /kiro:*, /michi:*コマンド
 - [環境変数](docs/reference/environment-variables.md) - 環境変数一覧
+- [アーキテクチャ](docs/architecture.md) - オニオンアーキテクチャ（4層構造）
+- [移行ガイド](docs/MIGRATION.md) - アーキテクチャ移行の詳細
 
 ### トラブルシューティング
 
