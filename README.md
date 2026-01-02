@@ -128,6 +128,7 @@ npm install -g @sk8metal/michi-cli
 - [Atlassian連携](docs/guides/atlassian-integration.md) - JIRA/Confluence連携
 - [Multi-Repo管理](docs/guides/multi-repo.md) - マイクロサービス開発
 - [Claude Code](docs/guides/claude-code.md) - Claude Code統合
+- [統括動作確認手順書](docs/guides/comprehensive-verification-guide.md) - 全機能網羅の動作確認手順（85項目）
 
 ### リファレンス
 
