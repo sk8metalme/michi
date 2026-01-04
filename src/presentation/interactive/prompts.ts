@@ -27,16 +27,11 @@ export function question(rl: readline.Interface, query: string): Promise<string>
 
 /**
  * パスワードなど、非表示で入力を受け取る
- * 注: Node.jsの標準機能ではパスワード入力を隠すことは難しいため、
- *      実際のプロダクションでは inquirer や prompts などのライブラリを使用することを推奨
+ * inquirerを使用してパスワードを非表示で入力
  */
-export async function password(
-  rl: readline.Interface,
-  query: string
-): Promise<string> {
-  // 基本的な実装として、通常の質問と同じ処理を行う
-  // TODO: より高度なパスワード入力機能が必要な場合は、外部ライブラリを検討
-  return question(rl, query);
+export async function password(query: string): Promise<string> {
+  const { password: inquirerPassword } = await import('@inquirer/prompts');
+  return inquirerPassword({ message: query });
 }
 
 /**

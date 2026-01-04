@@ -71,7 +71,7 @@ export class GenerateRequirementsUseCase {
     return ok({
       featureName,
       requirementsFile: 'requirements.md',
-      nextCommand: `/kiro:spec-design ${featureName.value}`,
+      nextCommand: `/michi:spec-design ${featureName.value}`,
     });
   }
 }
