@@ -314,6 +314,12 @@ else
     echo "  → Primary language (for infra check): $DETECTED_LANG"
     echo "  → Note: All detected languages will be included in quality checks"
 fi
+
+# 変数初期化（言語不明の場合でもStep 4でエラーにならないように）
+INFRA_MISSING=()
+INFRA_OPTIONAL_MISSING=()
+INFRA_RECOMMENDED_MISSING=()
+DEVCONTAINER_MISSING=false
 ```
 
 ##### Step 3: 言語別チェック実行
@@ -394,23 +400,76 @@ if [ "$DETECTED_LANG" = "Java" ]; then
         INFRA_MISSING+=("Checkstyle/PMD")
     fi
 
-    if ! grep -q "nullaway\|error_prone" pom.xml 2>/dev/null && \
-       ! grep -q "nullaway\|errorprone" build.gradle* 2>/dev/null; then
+    # NullAway チェック（Error Prone経由）
+    # Note: 現在はgrep検索。将来的にはXMLパーサー(xmlstarlet)やGradle parser使用を検討
+    HAS_NULLAWAY=false
+
+    # Maven (pom.xml) チェック - 複数の依存記述パターンに対応
+    if [ -f "pom.xml" ]; then
+        # groupId/artifactId形式、コメント内を除外、大小文字区別なし
+        if grep -i "com\.uber\.nullaway\|nullaway.*artifactId\|error.prone.*core" pom.xml 2>/dev/null | grep -v "<!--" | grep -q "nullaway\|error.prone"; then
+            HAS_NULLAWAY=true
+        fi
+    fi
+
+    # Gradle (build.gradle / build.gradle.kts) チェック
+    if [ "$HAS_NULLAWAY" = false ]; then
+        for gradle_file in build.gradle build.gradle.kts; do
+            if [ -f "$gradle_file" ]; then
+                # dependencies, errorprone(), nullaway() 等のパターン
+                if grep -i "com\.uber\.nullaway\|nullaway\|errorprone.*nullaway\|error.prone.*core" "$gradle_file" 2>/dev/null | grep -v "//" | grep -q "nullaway\|error.prone"; then
+                    HAS_NULLAWAY=true
+                    break
+                fi
+            fi
+        done
+    fi
+
+    if [ "$HAS_NULLAWAY" = false ]; then
         INFRA_MISSING+=("NullAway")
     fi
 
     [ "$CI_PLATFORM" = "none" ] && INFRA_MISSING+=("CI")
 
-    # オプションチェック（pre-commit）
-    if [ ! -f ".pre-commit-config.yaml" ] && \
-       ! grep -q "spotless" pom.xml 2>/dev/null && \
-       ! grep -q "spotless" build.gradle* 2>/dev/null; then
+    # オプションチェック（pre-commit / Spotless）
+    HAS_PRECOMMIT=false
+
+    # .pre-commit-config.yaml チェック
+    if [ -f ".pre-commit-config.yaml" ]; then
+        HAS_PRECOMMIT=true
+    # Maven/Gradle の Spotless プラグインチェック
+    elif [ -f "pom.xml" ] && grep -i "spotless" pom.xml 2>/dev/null | grep -v "<!--" | grep -q "spotless"; then
+        HAS_PRECOMMIT=true
+    else
+        for gradle_file in build.gradle build.gradle.kts; do
+            if [ -f "$gradle_file" ] && grep -i "spotless\|com\.diffplug\.spotless" "$gradle_file" 2>/dev/null | grep -v "//" | grep -q "spotless"; then
+                HAS_PRECOMMIT=true
+                break
+            fi
+        done
+    fi
+
+    if [ "$HAS_PRECOMMIT" = false ]; then
         INFRA_OPTIONAL_MISSING+=("pre-commit/Spotless")
     fi
 
     # 推奨チェック（ArchUnit）
-    if ! grep -q "archunit" pom.xml 2>/dev/null && \
-       ! grep -q "archunit" build.gradle* 2>/dev/null; then
+    HAS_ARCHUNIT=false
+
+    # Maven (pom.xml) チェック
+    if [ -f "pom.xml" ] && grep -i "archunit\|com\.tngtech\.archunit" pom.xml 2>/dev/null | grep -v "<!--" | grep -q "archunit"; then
+        HAS_ARCHUNIT=true
+    else
+        # Gradle チェック
+        for gradle_file in build.gradle build.gradle.kts; do
+            if [ -f "$gradle_file" ] && grep -i "archunit\|com\.tngtech\.archunit" "$gradle_file" 2>/dev/null | grep -v "//" | grep -q "archunit"; then
+                HAS_ARCHUNIT=true
+                break
+            fi
+        done
+    fi
+
+    if [ "$HAS_ARCHUNIT" = false ]; then
         INFRA_RECOMMENDED_MISSING+=("ArchUnit")
     fi
 
@@ -539,9 +598,23 @@ if [ "$DETECTED_LANG" = "PHP" ]; then
     INFRA_OPTIONAL_MISSING=()
     INFRA_RECOMMENDED_MISSING=()
 
-    # 必須チェック
-    if [ ! -f "phpstan.neon" ] && [ ! -f "phpcs.xml" ] && \
-       ! grep -q "phpstan\|php-cs-fixer" composer.json 2>/dev/null; then
+    # 必須チェック（PHPStan/php-cs-fixer）
+    HAS_PHPSTAN=false
+
+    # ファイル存在チェック
+    if [ -f "phpstan.neon" ] || [ -f "phpcs.xml" ]; then
+        HAS_PHPSTAN=true
+    # composer.json をjqでパース（フォールバック付き）
+    elif [ -f "composer.json" ] && command -v jq >/dev/null 2>&1; then
+        if jq -e '.require["phpstan/phpstan"] // .["require-dev"]["phpstan/phpstan"] // .require["friendsofphp/php-cs-fixer"] // .["require-dev"]["friendsofphp/php-cs-fixer"]' composer.json >/dev/null 2>&1; then
+            HAS_PHPSTAN=true
+        fi
+    # jq が利用できない場合はgrepにフォールバック
+    elif grep -q "phpstan\|php-cs-fixer" composer.json 2>/dev/null; then
+        HAS_PHPSTAN=true
+    fi
+
+    if [ "$HAS_PHPSTAN" = false ]; then
         INFRA_MISSING+=("PHPStan")
     fi
 
@@ -553,8 +626,23 @@ if [ "$DETECTED_LANG" = "PHP" ]; then
         INFRA_OPTIONAL_MISSING+=("pre-commit/GrumPHP")
     fi
 
-    # 推奨チェック
-    if [ ! -f "deptrac.yaml" ] && ! grep -q "deptrac" composer.json 2>/dev/null; then
+    # 推奨チェック（deptrac）
+    HAS_DEPTRAC=false
+
+    # ファイル存在チェック
+    if [ -f "deptrac.yaml" ]; then
+        HAS_DEPTRAC=true
+    # composer.json をjqでパース（フォールバック付き）
+    elif [ -f "composer.json" ] && command -v jq >/dev/null 2>&1; then
+        if jq -e '.require.deptrac // .["require-dev"].deptrac // .require["qossmic/deptrac-shim"] // .["require-dev"]["qossmic/deptrac-shim"]' composer.json >/dev/null 2>&1; then
+            HAS_DEPTRAC=true
+        fi
+    # jq が利用できない場合はgrepにフォールバック
+    elif grep -q "deptrac" composer.json 2>/dev/null; then
+        HAS_DEPTRAC=true
+    fi
+
+    if [ "$HAS_DEPTRAC" = false ]; then
         INFRA_RECOMMENDED_MISSING+=("deptrac")
     fi
 
