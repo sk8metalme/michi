@@ -212,6 +212,508 @@ fi
 echo "Frontend detected: $FRONTEND_DETECTED"
 ```
 
+#### サブエージェント結果の集約
+
+```bash
+# サブエージェント実行完了後、結果を変数に格納
+# oss-license-checker の結果
+OSS_LICENSE_CRITICAL=$(cat /tmp/oss-license-result.json 2>/dev/null | jq -r '.critical_count // 0')
+OSS_LICENSE_WARNING=$(cat /tmp/oss-license-result.json 2>/dev/null | jq -r '.warning_count // 0')
+
+# stable-version-auditor の結果
+VERSION_AUDIT_CRITICAL=$(cat /tmp/version-audit-result.json 2>/dev/null | jq -r '.critical_count // 0')
+VERSION_AUDIT_WARNING=$(cat /tmp/version-audit-result.json 2>/dev/null | jq -r '.warning_count // 0')
+
+# デフォルト値の設定（ファイルが存在しない場合）
+OSS_LICENSE_CRITICAL=${OSS_LICENSE_CRITICAL:-0}
+OSS_LICENSE_WARNING=${OSS_LICENSE_WARNING:-0}
+VERSION_AUDIT_CRITICAL=${VERSION_AUDIT_CRITICAL:-0}
+VERSION_AUDIT_WARNING=${VERSION_AUDIT_WARNING:-0}
+
+echo "📊 Subagent Results:"
+echo "  - OSS License: Critical=$OSS_LICENSE_CRITICAL, Warning=$OSS_LICENSE_WARNING"
+echo "  - Version Audit: Critical=$VERSION_AUDIT_CRITICAL, Warning=$VERSION_AUDIT_WARNING"
+```
+
+#### Step 1.2.5: 品質インフラチェック(多言語対応版)
+
+> **優先度制御の仕組み**: このMichi Extensionの品質インフラチェックは、base command（kiro版）のNode.js固有チェックより**優先**されます。
+>
+> **上書きメカニズム**:
+> 1. **Phase 1.2.5で多言語対応チェックを先に実行** - このセクションで言語検出と言語別チェックを完了します
+> 2. **Base Commandの実行を条件付きスキップ** - Michi版のチェックが完了済みの場合、base commandの品質インフラチェックステップは実行されません
+> 3. **結果の一元管理** - Michi版で収集した`INFRA_MISSING`配列などの変数を、base commandのフローでも参照可能にします
+>
+> **重複実行の防止**:
+> - Michi版でチェック済みフラグ(`MICHI_INFRA_CHECK_DONE=true`)を設定
+> - Base commandはこのフラグを確認し、trueの場合は品質インフラチェックをスキップ
+> - これにより、Node.js固有チェックとの二重実行を回避します
+
+実装前に、プロジェクトの言語を検出し、言語別の品質インフラ設定をチェックします。
+
+##### Step 1: CI設定の確認
+
+```bash
+# CI設定を確認
+CI_PLATFORM="none"
+
+if [ -d ".github/workflows" ]; then
+    CI_PLATFORM="GitHub Actions"
+elif [ -f "screwdriver.yaml" ]; then
+    CI_PLATFORM="Screwdriver"
+fi
+
+echo "📋 CI Platform: $CI_PLATFORM"
+```
+
+##### Step 2: 言語検出（複数言語プロジェクト対応）
+
+```bash
+# 言語検出（複数言語が存在する場合は全て検出）
+DETECTED_LANGS=()
+
+if [ -f "package.json" ]; then
+    DETECTED_LANGS+=("Node.js")
+fi
+
+if [ -f "pom.xml" ] || [ -f "build.gradle" ] || [ -f "build.gradle.kts" ]; then
+    DETECTED_LANGS+=("Java")
+fi
+
+if [ -f "pyproject.toml" ] || [ -f "requirements.txt" ]; then
+    DETECTED_LANGS+=("Python")
+fi
+
+if [ -f "composer.json" ]; then
+    DETECTED_LANGS+=("PHP")
+fi
+
+# 主要言語の判定（複数言語が検出された場合）
+if [ ${#DETECTED_LANGS[@]} -eq 0 ]; then
+    DETECTED_LANG="unknown"
+    echo "⚠️ No supported language detected"
+elif [ ${#DETECTED_LANGS[@]} -eq 1 ]; then
+    DETECTED_LANG="${DETECTED_LANGS[0]}"
+    echo "🔍 Detected Language: $DETECTED_LANG"
+else
+    # 複数言語検出時は優先度順に主要言語を決定
+    # 優先度: Node.js > Java > Python > PHP
+    echo "🔍 Multiple languages detected: ${DETECTED_LANGS[*]}"
+
+    # 優先度順にチェック
+    if [[ " ${DETECTED_LANGS[*]} " =~ " Node.js " ]]; then
+        DETECTED_LANG="Node.js"
+    elif [[ " ${DETECTED_LANGS[*]} " =~ " Java " ]]; then
+        DETECTED_LANG="Java"
+    elif [[ " ${DETECTED_LANGS[*]} " =~ " Python " ]]; then
+        DETECTED_LANG="Python"
+    elif [[ " ${DETECTED_LANGS[*]} " =~ " PHP " ]]; then
+        DETECTED_LANG="PHP"
+    fi
+
+    echo "  → Primary language (for infra check): $DETECTED_LANG"
+    echo "  → Note: All detected languages will be included in quality checks"
+fi
+
+# 変数初期化（言語不明の場合でもStep 4でエラーにならないように）
+INFRA_MISSING=()
+INFRA_OPTIONAL_MISSING=()
+INFRA_RECOMMENDED_MISSING=()
+DEVCONTAINER_MISSING=false
+```
+
+##### Step 3: 言語別チェック実行
+
+> **Note**: 各言語のチェックブロックは現在、同様のパターンを繰り返しています。
+> 将来的なリファクタリング案:
+> - 言語別チェック関数（`check_nodejs_infra()`, `check_java_infra()` 等）を抽出
+> - 共通の結果フォーマットを定義
+> - メイン処理で言語に応じて適切な関数を呼び出す
+> - これにより、新しい言語追加時の複雑性も軽減される
+
+###### Node.js の場合
+
+```bash
+if [ "$DETECTED_LANG" = "Node.js" ]; then
+    INFRA_MISSING=()
+    INFRA_RECOMMENDED_MISSING=()
+
+    # 必須チェック
+    [ ! -d ".husky" ] && INFRA_MISSING+=("husky")
+    [ ! -f ".husky/pre-commit" ] && INFRA_MISSING+=("pre-commit hook")
+
+    # lint-staged チェック（jq使用、フォールバックあり）
+    if command -v jq >/dev/null 2>&1 && [ -f "package.json" ]; then
+        if ! jq -e '.dependencies["lint-staged"] // .devDependencies["lint-staged"] // ."lint-staged"' package.json >/dev/null 2>&1 && \
+           ! ls .lintstagedrc* >/dev/null 2>&1; then
+            INFRA_MISSING+=("lint-staged")
+        fi
+    else
+        # jq が利用できない場合はgrep方式にフォールバック
+        if ! grep -q "lint-staged" package.json 2>/dev/null && ! ls .lintstagedrc* 2>/dev/null | grep -q .; then
+            INFRA_MISSING+=("lint-staged")
+        fi
+    fi
+
+    # TypeScript strict チェック（jq使用、フォールバックあり）
+    if command -v jq >/dev/null 2>&1 && [ -f "tsconfig.json" ]; then
+        if ! jq -e '.compilerOptions.strict == true' tsconfig.json >/dev/null 2>&1; then
+            INFRA_MISSING+=("TypeScript strict")
+        fi
+    else
+        # jq が利用できない場合はgrep方式にフォールバック
+        if ! grep -q '"strict".*true' tsconfig.json 2>/dev/null; then
+            INFRA_MISSING+=("TypeScript strict")
+        fi
+    fi
+
+    [ "$CI_PLATFORM" = "none" ] && INFRA_MISSING+=("CI")
+
+    # 推奨チェック（tsarch）
+    if command -v jq >/dev/null 2>&1 && [ -f "package.json" ]; then
+        if ! jq -e '.dependencies.tsarch // .devDependencies.tsarch' package.json >/dev/null 2>&1; then
+            INFRA_RECOMMENDED_MISSING+=("tsarch")
+        fi
+    else
+        # jq が利用できない場合はgrep方式にフォールバック
+        if ! grep -q "tsarch" package.json 2>/dev/null; then
+            INFRA_RECOMMENDED_MISSING+=("tsarch")
+        fi
+    fi
+
+    # DevContainer (任意)
+    DEVCONTAINER_MISSING=false
+    [ ! -d ".devcontainer" ] && DEVCONTAINER_MISSING=true
+fi
+```
+
+###### Java の場合
+
+```bash
+if [ "$DETECTED_LANG" = "Java" ]; then
+    INFRA_MISSING=()
+    INFRA_OPTIONAL_MISSING=()
+    INFRA_RECOMMENDED_MISSING=()
+
+    # 必須チェック
+    if [ ! -f "checkstyle.xml" ] && [ ! -f "pmd.xml" ] && [ ! -d "config/checkstyle" ]; then
+        INFRA_MISSING+=("Checkstyle/PMD")
+    fi
+
+    # NullAway チェック（Error Prone経由）
+    # Note: 現在はgrep検索。将来的にはXMLパーサー(xmlstarlet)やGradle parser使用を検討
+    HAS_NULLAWAY=false
+
+    # Maven (pom.xml) チェック - 複数の依存記述パターンに対応
+    if [ -f "pom.xml" ]; then
+        # groupId/artifactId形式、コメント内を除外、大小文字区別なし
+        if grep -i "com\.uber\.nullaway\|nullaway.*artifactId\|error.prone.*core" pom.xml 2>/dev/null | grep -v "<!--" | grep -q "nullaway\|error.prone"; then
+            HAS_NULLAWAY=true
+        fi
+    fi
+
+    # Gradle (build.gradle / build.gradle.kts) チェック
+    if [ "$HAS_NULLAWAY" = false ]; then
+        for gradle_file in build.gradle build.gradle.kts; do
+            if [ -f "$gradle_file" ]; then
+                # dependencies, errorprone(), nullaway() 等のパターン
+                if grep -i "com\.uber\.nullaway\|nullaway\|errorprone.*nullaway\|error.prone.*core" "$gradle_file" 2>/dev/null | grep -v "//" | grep -q "nullaway\|error.prone"; then
+                    HAS_NULLAWAY=true
+                    break
+                fi
+            fi
+        done
+    fi
+
+    if [ "$HAS_NULLAWAY" = false ]; then
+        INFRA_MISSING+=("NullAway")
+    fi
+
+    [ "$CI_PLATFORM" = "none" ] && INFRA_MISSING+=("CI")
+
+    # オプションチェック（pre-commit / Spotless）
+    HAS_PRECOMMIT=false
+
+    # .pre-commit-config.yaml チェック
+    if [ -f ".pre-commit-config.yaml" ]; then
+        HAS_PRECOMMIT=true
+    # Maven/Gradle の Spotless プラグインチェック
+    elif [ -f "pom.xml" ] && grep -i "spotless" pom.xml 2>/dev/null | grep -v "<!--" | grep -q "spotless"; then
+        HAS_PRECOMMIT=true
+    else
+        for gradle_file in build.gradle build.gradle.kts; do
+            if [ -f "$gradle_file" ] && grep -i "spotless\|com\.diffplug\.spotless" "$gradle_file" 2>/dev/null | grep -v "//" | grep -q "spotless"; then
+                HAS_PRECOMMIT=true
+                break
+            fi
+        done
+    fi
+
+    if [ "$HAS_PRECOMMIT" = false ]; then
+        INFRA_OPTIONAL_MISSING+=("pre-commit/Spotless")
+    fi
+
+    # 推奨チェック（ArchUnit）
+    HAS_ARCHUNIT=false
+
+    # Maven (pom.xml) チェック
+    if [ -f "pom.xml" ] && grep -i "archunit\|com\.tngtech\.archunit" pom.xml 2>/dev/null | grep -v "<!--" | grep -q "archunit"; then
+        HAS_ARCHUNIT=true
+    else
+        # Gradle チェック
+        for gradle_file in build.gradle build.gradle.kts; do
+            if [ -f "$gradle_file" ] && grep -i "archunit\|com\.tngtech\.archunit" "$gradle_file" 2>/dev/null | grep -v "//" | grep -q "archunit"; then
+                HAS_ARCHUNIT=true
+                break
+            fi
+        done
+    fi
+
+    if [ "$HAS_ARCHUNIT" = false ]; then
+        INFRA_RECOMMENDED_MISSING+=("ArchUnit")
+    fi
+
+    # DevContainer (任意)
+    DEVCONTAINER_MISSING=false
+    [ ! -d ".devcontainer" ] && DEVCONTAINER_MISSING=true
+fi
+```
+
+###### Python の場合
+
+```bash
+if [ "$DETECTED_LANG" = "Python" ]; then
+    INFRA_MISSING=()
+    INFRA_OPTIONAL_MISSING=()
+    INFRA_RECOMMENDED_MISSING=()
+
+    # 必須チェック（lint/format tools）
+    HAS_LINT_TOOL=false
+    if [ -f "pyproject.toml" ] && command -v python3 >/dev/null 2>&1; then
+        # Python one-linerでpyproject.tomlを解析
+        if python3 -c "
+try:
+    try:
+        import tomllib
+    except ImportError:
+        import tomli as tomllib
+    with open('pyproject.toml', 'rb') as f:
+        data = tomllib.load(f)
+    tools = data.get('tool', {})
+    if 'ruff' in tools or 'black' in tools or 'flake8' in tools:
+        exit(0)
+    exit(1)
+except Exception:
+    exit(1)
+" 2>/dev/null; then
+            HAS_LINT_TOOL=true
+        fi
+    else
+        # Python3が利用できない場合はgrep方式にフォールバック
+        if grep -q "ruff\|black\|flake8" pyproject.toml 2>/dev/null; then
+            HAS_LINT_TOOL=true
+        fi
+    fi
+
+    if [ "$HAS_LINT_TOOL" = false ] && [ ! -f "setup.cfg" ] && [ ! -f ".flake8" ]; then
+        INFRA_MISSING+=("lint/format (ruff/black)")
+    fi
+
+    [ "$CI_PLATFORM" = "none" ] && INFRA_MISSING+=("CI")
+
+    # オプションチェック（pre-commit）
+    if [ ! -f ".pre-commit-config.yaml" ]; then
+        INFRA_OPTIONAL_MISSING+=("pre-commit")
+    fi
+
+    # 推奨チェック（mypy）
+    HAS_MYPY=false
+    if [ -f "pyproject.toml" ] && command -v python3 >/dev/null 2>&1; then
+        if python3 -c "
+try:
+    try:
+        import tomllib
+    except ImportError:
+        import tomli as tomllib
+    with open('pyproject.toml', 'rb') as f:
+        data = tomllib.load(f)
+    if 'mypy' in data.get('tool', {}):
+        exit(0)
+    exit(1)
+except Exception:
+    exit(1)
+" 2>/dev/null; then
+            HAS_MYPY=true
+        fi
+    else
+        if grep -q "mypy" pyproject.toml 2>/dev/null; then
+            HAS_MYPY=true
+        fi
+    fi
+
+    if [ "$HAS_MYPY" = false ] && [ ! -f "mypy.ini" ] && [ ! -f ".mypy.ini" ]; then
+        INFRA_RECOMMENDED_MISSING+=("mypy strict")
+    fi
+
+    # 推奨チェック（import-linter）
+    HAS_IMPORTLINTER=false
+    if [ -f "pyproject.toml" ] && command -v python3 >/dev/null 2>&1; then
+        if python3 -c "
+try:
+    try:
+        import tomllib
+    except ImportError:
+        import tomli as tomllib
+    with open('pyproject.toml', 'rb') as f:
+        data = tomllib.load(f)
+    if 'importlinter' in data.get('tool', {}):
+        exit(0)
+    exit(1)
+except Exception:
+    exit(1)
+" 2>/dev/null; then
+            HAS_IMPORTLINTER=true
+        fi
+    else
+        if grep -q "importlinter" pyproject.toml 2>/dev/null; then
+            HAS_IMPORTLINTER=true
+        fi
+    fi
+
+    if [ "$HAS_IMPORTLINTER" = false ] && [ ! -f ".importlinter" ]; then
+        INFRA_RECOMMENDED_MISSING+=("import-linter")
+    fi
+
+    # DevContainer (任意)
+    DEVCONTAINER_MISSING=false
+    [ ! -d ".devcontainer" ] && DEVCONTAINER_MISSING=true
+fi
+```
+
+###### PHP の場合
+
+```bash
+if [ "$DETECTED_LANG" = "PHP" ]; then
+    INFRA_MISSING=()
+    INFRA_OPTIONAL_MISSING=()
+    INFRA_RECOMMENDED_MISSING=()
+
+    # 必須チェック（PHPStan/php-cs-fixer）
+    HAS_PHPSTAN=false
+
+    # ファイル存在チェック
+    if [ -f "phpstan.neon" ] || [ -f "phpcs.xml" ]; then
+        HAS_PHPSTAN=true
+    # composer.json をjqでパース（フォールバック付き）
+    elif [ -f "composer.json" ] && command -v jq >/dev/null 2>&1; then
+        if jq -e '.require["phpstan/phpstan"] // .["require-dev"]["phpstan/phpstan"] // .require["friendsofphp/php-cs-fixer"] // .["require-dev"]["friendsofphp/php-cs-fixer"]' composer.json >/dev/null 2>&1; then
+            HAS_PHPSTAN=true
+        fi
+    # jq が利用できない場合はgrepにフォールバック
+    elif grep -q "phpstan\|php-cs-fixer" composer.json 2>/dev/null; then
+        HAS_PHPSTAN=true
+    fi
+
+    if [ "$HAS_PHPSTAN" = false ]; then
+        INFRA_MISSING+=("PHPStan")
+    fi
+
+    [ "$CI_PLATFORM" = "none" ] && INFRA_MISSING+=("CI")
+
+    # オプションチェック（pre-commit）
+    if [ ! -f "grumphp.yml" ] && [ ! -f "captainhook.json" ] && \
+       [ ! -f ".pre-commit-config.yaml" ]; then
+        INFRA_OPTIONAL_MISSING+=("pre-commit/GrumPHP")
+    fi
+
+    # 推奨チェック（deptrac）
+    HAS_DEPTRAC=false
+
+    # ファイル存在チェック
+    if [ -f "deptrac.yaml" ]; then
+        HAS_DEPTRAC=true
+    # composer.json をjqでパース（フォールバック付き）
+    elif [ -f "composer.json" ] && command -v jq >/dev/null 2>&1; then
+        if jq -e '.require.deptrac // .["require-dev"].deptrac // .require["qossmic/deptrac-shim"] // .["require-dev"]["qossmic/deptrac-shim"]' composer.json >/dev/null 2>&1; then
+            HAS_DEPTRAC=true
+        fi
+    # jq が利用できない場合はgrepにフォールバック
+    elif grep -q "deptrac" composer.json 2>/dev/null; then
+        HAS_DEPTRAC=true
+    fi
+
+    if [ "$HAS_DEPTRAC" = false ]; then
+        INFRA_RECOMMENDED_MISSING+=("deptrac")
+    fi
+
+    # DevContainer (任意)
+    DEVCONTAINER_MISSING=false
+    [ ! -d ".devcontainer" ] && DEVCONTAINER_MISSING=true
+fi
+```
+
+##### Step 4: 結果表示
+
+```bash
+echo "📋 Quality Infrastructure Check ($DETECTED_LANG detected)"
+
+# 必須項目
+if [ ${#INFRA_MISSING[@]} -eq 0 ]; then
+    echo "✅ All required infrastructure configured"
+else
+    echo "⚠️ Missing required infrastructure:"
+    for item in "${INFRA_MISSING[@]}"; do
+        echo "   - $item (REQUIRED)"
+    done
+fi
+
+# オプション項目（情報表示のみ）
+if [ ${#INFRA_OPTIONAL_MISSING[@]} -gt 0 ]; then
+    echo "ℹ️ Optional infrastructure (not required):"
+    for item in "${INFRA_OPTIONAL_MISSING[@]}"; do
+        echo "   - $item (optional)"
+    done
+fi
+
+# 推奨項目（情報表示のみ）
+if [ ${#INFRA_RECOMMENDED_MISSING[@]} -gt 0 ]; then
+    echo "ℹ️ Recommended infrastructure:"
+    for item in "${INFRA_RECOMMENDED_MISSING[@]}"; do
+        echo "   - $item (recommended)"
+    done
+fi
+
+# DevContainer（任意）
+if [ "$DEVCONTAINER_MISSING" = true ]; then
+    echo "ℹ️ DevContainer: Not configured (optional)"
+else
+    echo "✅ DevContainer: Configured"
+fi
+
+# 最終メッセージ
+if [ ${#INFRA_MISSING[@]} -gt 0 ]; then
+    echo ""
+    echo "⚠️ Warning: Some required quality infrastructure is not configured"
+    echo "   Recommendation: Set up quality infrastructure before implementation"
+    echo "   → See tasks.md for setup instructions (auto-added by spec-tasks)"
+    echo "   → Processing continues"
+else
+    echo ""
+    echo "✅ Quality infrastructure check passed"
+fi
+
+# チェック済みフラグを設定（base commandとの重複実行を防ぐ）
+MICHI_INFRA_CHECK_DONE=true
+export MICHI_INFRA_CHECK_DONE
+```
+
+**Important**:
+- 必須項目（✅）の不足 → ⚠️ 警告（処理は継続）
+- オプション項目（ℹ️）の不足 → 情報表示のみ
+- 推奨項目（ℹ️）の不足 → 情報表示のみ
+- tasks.md に品質インフラセットアップタスクがあれば、そちらを参照してください
+- DevContainerは任意のため、未設定でも問題ありません
+
 
 #### Step 1.3: 結果集約とゲート判定
 
