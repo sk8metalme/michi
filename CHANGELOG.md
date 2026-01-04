@@ -5,6 +5,135 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+## [0.22.0] - 2026-01-05
+
+### Added
+
+- **Multi-Language Quality Infrastructure Checks** (#170)
+  - Extended quality infrastructure checks to support Java, Python, and PHP projects in addition to Node.js
+  - Language detection (Node.js, Java, Python, PHP)
+  - CI platform detection (GitHub Actions / Screwdriver)
+  - Language-specific quality checks:
+    - **Java**: NullAway (required), Spotless (required), ArchUnit (recommended)
+    - **Python**: ruff/black (required), mypy strict (recommended), import-linter (recommended)
+    - **PHP**: PHPStan (required), PHP-CS-Fixer (required), deptrac (recommended)
+    - **Node.js**: husky, lint-staged, TypeScript strict, tsarch
+  - Auto-generated setup tasks for each language with code examples
+  - Robust parsers for quality checks (jq for JSON, Python for TOML) with grep fallback
+
+- **8 New `/michi:*` Command Wrappers** (#164, #167, #169)
+  - `/michi:spec-init` - Initialize new specification
+  - `/michi:spec-requirements` - Generate requirements document
+  - `/michi:spec-design` - Create design document
+  - `/michi:spec-tasks` - Generate implementation tasks
+  - `/michi:spec-impl` - TDD implementation with 5-phase quality automation
+  - `/michi:validate-design` - Interactive design validation
+  - `/michi:validate-impl` - Validate implementation against requirements
+  - `/michi:validate-gap` - Analyze implementation gap
+  - Full abstraction layer over `/kiro:*` base commands
+
+### Changed
+
+- **BREAKING: Directory Structure Migration** (#164, #167, #169)
+  - Migrated `.kiro/` to `.michi/` directory structure
+  - Updated `KIRO_DIR` to `SPEC_DIR` variable naming throughout codebase
+  - Updated path aliases from `@kiro/*` to `@spec/*`
+  - **Backward compatibility**: Warning message for legacy `.kiro/config.json`
+  - **Migration**: Automatic detection and migration support
+
+- **Priority Control for Quality Checks**
+  - Michi Extension commands override base (kiro) Node.js-specific checks
+  - Prevents duplicate execution with `MICHI_INFRA_CHECK_DONE` flag
+
+### Fixed
+
+- **CodeRabbit Review Comments - Critical Fixes**
+  - Line 316-322: Initialize variables before language blocks to prevent errors when language is unknown/unsupported
+    - `INFRA_MISSING`, `INFRA_OPTIONAL_MISSING`, `INFRA_RECOMMENDED_MISSING`, `DEVCONTAINER_MISSING`
+    - Ensures Step 4 (result display) never fails due to uninitialized variables
+
+- **CodeRabbit Review Comments - Major Fixes**
+  - Java quality tool detection (NullAway, Spotless, ArchUnit):
+    - Check multiple dependency declaration patterns (Maven groupId/artifactId, Gradle)
+    - Handle both pom.xml and build.gradle/build.gradle.kts
+    - Exclude comments (<!-- --> for Maven, // for Gradle)
+    - Case-insensitive matching for robustness
+  - PHP quality tool detection (PHPStan, deptrac):
+    - Use jq parser for composer.json (.require and .require-dev)
+    - Graceful fallback to grep if jq unavailable
+
+- **Package Name Correction**
+  - Fixed incorrect package name `ts-arch-kit` → `tsarch` in documentation and checks
+  - Updated spec-tasks.md, spec-design.md, spec-impl.md
+
+- **Markdown Syntax Fixes (MD040)**
+  - Added language specifiers to all code blocks
+  - Removed empty code blocks
+  - Resolved all markdownlint-cli2 MD040 errors
+
+- **Documentation Link Fixes**
+  - Fixed broken links to gitignored `.michi/` files
+  - Updated steering/structure.md → architecture.md#ディレクトリ構造
+  - Updated steering/workflow.md → guides/workflow.md
+  - Updated .michi/specs/ references → docs/architecture.md
+
+- **Language Detection Improvements**
+  - Support for multi-language projects with `DETECTED_LANGS` array
+  - Strict file existence check with `test -f`
+  - Primary language priority detection logic
+
+- **User-Facing Error Messages**
+  - Updated `/kiro:` to `/michi:` in all user-facing error messages
+  - Fixed label inconsistency: "Kiro directory" → "Spec directory"
+
+### Refactored
+
+- **Quality Check Parsers**
+  - Replaced brittle grep patterns with robust parsers
+  - Node.js: jq parser for package.json and tsconfig.json with grep fallback
+  - Python: Python one-liner with tomllib/tomli for pyproject.toml with grep fallback
+  - All parsers gracefully fallback to grep if unavailable
+  - All parsers suppress stderr to avoid noise
+
+### Tests
+
+- **All Tests Passing**: 1,022/1,027 tests (99.5% pass rate)
+- **Architecture Validated**: Onion Architecture constraints verified with tsarch
+
+### Migration Guide
+
+**For Existing Users**:
+
+1. **Directory Migration**:
+   ```bash
+   # Automatic migration on first use
+   # Warning message will appear if .kiro/config.json detected
+   ```
+
+2. **Command Updates**:
+   - Prefer `/michi:*` commands over `/kiro:*` for Michi-specific features
+   - `/kiro:*` base commands remain available for cc-sdd compatibility
+
+3. **Path Aliases**:
+   - Update custom code from `@kiro/*` to `@spec/*` if using TypeScript path aliases
+
+**Breaking Changes**:
+- `.kiro/` directory structure → `.michi/` (automatic migration)
+- `KIRO_DIR` variable → `SPEC_DIR` (internal change, no action needed)
+- Path aliases `@kiro/*` → `@spec/*` (affects custom TypeScript code only)
+
+### Related PRs
+
+- #170 - Multi-language quality infrastructure checks
+- #169 - Complete migration to /michi commands and .michi directory
+- #167 - Part of /michi migration
+- #164 - Part of /michi migration
+- #171 - PR review comments addressing
+
+---
+
 ## [0.19.0] - 2026-01-01
 
 ### 🎉 Major Release: Onion Architecture Migration Complete

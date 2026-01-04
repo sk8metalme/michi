@@ -3,7 +3,7 @@
 AI駆動開発ワークフロー自動化CLI
 
 - **パッケージ**: `@sk8metal/michi-cli`
-- **バージョン**: 0.19.0
+- **バージョン**: 0.22.0
 - **アーキテクチャ**: Onion Architecture（4層構造）
 - **主要機能**: JIRA/Confluence/GitHub連携、Spec-Driven Development
 
