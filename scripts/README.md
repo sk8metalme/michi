@@ -144,5 +144,5 @@ npm run markdown:convert <input.md> <output.html>
 ## 関連ドキュメント
 
 - [Onion Architecture設計書](../.michi/specs/onion-architecture/design.md)
-- [プロジェクト構成](../.michi/steering/structure.md)
-- [開発ワークフロー](../.michi/steering/workflow.md)
+- [プロジェクト構成](../docs/architecture.md#ディレクトリ構造)
+- [開発ワークフロー](../docs/guides/workflow.md)
