@@ -29,7 +29,7 @@ export function analyzeLanguage(feature: string, projectRoot: string = process.c
   };
   
   // design.mdを解析
-  const designPath = join(projectRoot, '.kiro', 'specs', feature, 'design.md');
+  const designPath = join(projectRoot, '.michi', 'specs', feature, 'design.md');
   if (existsSync(designPath)) {
     const design = safeReadFileOrThrow(designPath, 'utf-8');
     
@@ -93,7 +93,7 @@ export function analyzeLanguage(feature: string, projectRoot: string = process.c
   }
   
   // requirements.mdを解析
-  const requirementsPath = join(projectRoot, '.kiro', 'specs', feature, 'requirements.md');
+  const requirementsPath = join(projectRoot, '.michi', 'specs', feature, 'requirements.md');
   if (existsSync(requirementsPath)) {
     const requirements = safeReadFileOrThrow(requirementsPath, 'utf-8');
     

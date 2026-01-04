@@ -175,9 +175,9 @@ export async function generateLoadTestExecution(
   const files: string[] = [];
 
   try {
-    const designPath = join(projectRoot, '.kiro', 'specs', feature, 'design.md');
-    const requirementsPath = join(projectRoot, '.kiro', 'specs', feature, 'requirements.md');
-    const outputDir = join(projectRoot, '.kiro', 'specs', feature, 'test-execution', 'performance');
+    const designPath = join(projectRoot, '.michi', 'specs', feature, 'design.md');
+    const requirementsPath = join(projectRoot, '.michi', 'specs', feature, 'requirements.md');
+    const outputDir = join(projectRoot, '.michi', 'specs', feature, 'test-execution', 'performance');
 
     mkdirSync(outputDir, { recursive: true });
 
@@ -327,7 +327,7 @@ pip install locust
 
 \`\`\`bash
 # このディレクトリに移動
-cd .kiro/specs/${feature}/test-execution/performance
+cd .michi/specs/${feature}/test-execution/performance
 
 # Locust起動（Web UI）
 locust -f locustfile.py
@@ -369,8 +369,8 @@ export async function generateSecurityTestExecution(
   const files: string[] = [];
 
   try {
-    const designPath = join(projectRoot, '.kiro', 'specs', feature, 'design.md');
-    const outputDir = join(projectRoot, '.kiro', 'specs', feature, 'test-execution', 'security');
+    const designPath = join(projectRoot, '.michi', 'specs', feature, 'design.md');
+    const outputDir = join(projectRoot, '.michi', 'specs', feature, 'test-execution', 'security');
 
     mkdirSync(outputDir, { recursive: true });
 
@@ -530,7 +530,7 @@ function generateSecurityTestPlan(
 
 \`\`\`bash
 # このディレクトリに移動
-cd .kiro/specs/${feature}/test-execution/security
+cd .michi/specs/${feature}/test-execution/security
 
 # スキャン実行
 ./run-zap-scan.sh
@@ -564,8 +564,8 @@ export async function generateManualRegressionExecution(
   const files: string[] = [];
 
   try {
-    const designPath = join(projectRoot, '.kiro', 'specs', feature, 'design.md');
-    const outputDir = join(projectRoot, '.kiro', 'specs', feature, 'test-execution', 'manual-regression');
+    const designPath = join(projectRoot, '.michi', 'specs', feature, 'design.md');
+    const outputDir = join(projectRoot, '.michi', 'specs', feature, 'test-execution', 'manual-regression');
 
     mkdirSync(outputDir, { recursive: true });
 
@@ -658,7 +658,7 @@ export async function generateIntegrationE2EExecution(
   const files: string[] = [];
 
   try {
-    const outputDir = join(projectRoot, '.kiro', 'specs', feature, 'test-execution', testType);
+    const outputDir = join(projectRoot, '.michi', 'specs', feature, 'test-execution', testType);
     mkdirSync(outputDir, { recursive: true });
 
     // チェックリストを生成
@@ -766,7 +766,7 @@ export async function generateAllTestExecutions(
   feature: string,
   projectRoot: string = process.cwd()
 ): Promise<GenerationResult[]> {
-  const selectionPath = join(projectRoot, '.kiro', 'specs', feature, 'test-type-selection.json');
+  const selectionPath = join(projectRoot, '.michi', 'specs', feature, 'test-type-selection.json');
 
   if (!existsSync(selectionPath)) {
     throw new Error('test-type-selection.jsonが存在しません。先にtest-type-selectionフェーズを実行してください');

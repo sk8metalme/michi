@@ -34,7 +34,7 @@ interface ValidationResult {
  * spec.jsonを読み込み
  */
 function loadSpecJson(feature: string): SpecJson {
-  const specPath = join(process.cwd(), '.kiro', 'specs', feature, 'spec.json');
+  const specPath = join(process.cwd(), '.michi', 'specs', feature, 'spec.json');
 
   if (!existsSync(specPath)) {
     throw new Error(`spec.json not found: ${specPath}`);
@@ -67,7 +67,7 @@ function validateRequirements(feature: string): ValidationResult {
   }
   
   // 1. requirements.md存在チェック
-  const requirementsPath = join(process.cwd(), '.kiro', 'specs', feature, 'requirements.md');
+  const requirementsPath = join(process.cwd(), '.michi', 'specs', feature, 'requirements.md');
   if (!existsSync(requirementsPath)) {
     errors.push('❌ requirements.md が作成されていません');
   }
@@ -121,7 +121,7 @@ function validateDesign(feature: string): ValidationResult {
   }
   
   // 1. design.md存在チェック
-  const designPath = join(process.cwd(), '.kiro', 'specs', feature, 'design.md');
+  const designPath = join(process.cwd(), '.michi', 'specs', feature, 'design.md');
   if (!existsSync(designPath)) {
     errors.push('❌ design.md が作成されていません');
   }
@@ -175,7 +175,7 @@ function validateTasks(feature: string): ValidationResult {
   }
   
   // 1. tasks.md存在チェック
-  const tasksPath = join(process.cwd(), '.kiro', 'specs', feature, 'tasks.md');
+  const tasksPath = join(process.cwd(), '.michi', 'specs', feature, 'tasks.md');
   if (!existsSync(tasksPath)) {
     errors.push('❌ tasks.md が作成されていません');
   } else {

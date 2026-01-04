@@ -142,7 +142,7 @@ describe('ArchiveSpecUseCase', () => {
       mockRepository.delete = async () => {
         return err({
           type: 'WriteError',
-          path: '.kiro/specs/test-feature',
+          path: '.michi/specs/test-feature',
           cause: 'Permission denied',
         } as const);
       };

@@ -143,6 +143,6 @@ npm run markdown:convert <input.md> <output.html>
 
 ## 関連ドキュメント
 
-- [Onion Architecture設計書](../.kiro/specs/onion-architecture/design.md)
-- [プロジェクト構成](../.kiro/steering/structure.md)
-- [開発ワークフロー](../.kiro/steering/workflow.md)
+- [Onion Architecture設計書](../.michi/specs/onion-architecture/design.md)
+- [プロジェクト構成](../.michi/steering/structure.md)
+- [開発ワークフロー](../.michi/steering/workflow.md)

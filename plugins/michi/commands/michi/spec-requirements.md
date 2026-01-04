@@ -63,7 +63,7 @@ echo " Michi Requirements Generation Complete"
 echo "============================================"
 echo ""
 echo "### 生成された要件定義書"
-echo "\`.kiro/specs/$1/requirements.md\`"
+echo "\`.michi/specs/$1/requirements.md\`"
 echo ""
 echo "### 次のステップ"
 echo ""
@@ -93,7 +93,7 @@ echo ""
 ### 追加エラーシナリオ
 
 - **Steering Directory Empty**:
-  - `.kiro/steering/` ディレクトリが空の場合、警告を表示
+  - `.michi/steering/` ディレクトリが空の場合、警告を表示
   - 要件品質への影響を通知し、steering作成を推奨
 
 - **Language Undefined**:

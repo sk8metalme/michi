@@ -143,7 +143,7 @@ export class WorkflowOrchestrator {
       console.log('  Uploading test report to Confluence...');
 
       // テストレポートをファイルに保存
-      const reportDir = resolve(`.kiro/specs/${this.config.feature}`);
+      const reportDir = resolve(`.michi/specs/${this.config.feature}`);
       mkdirSync(reportDir, { recursive: true });
       const reportPath = resolve(reportDir, 'test-report.md');
       writeFileSync(reportPath, report, 'utf-8');
@@ -173,7 +173,7 @@ export class WorkflowOrchestrator {
     const releaseNotes = await createReleaseNotes(version);
 
     // リリースノートをファイルに保存
-    const releaseDir = resolve(`.kiro/specs/${this.config.feature}`);
+    const releaseDir = resolve(`.michi/specs/${this.config.feature}`);
     mkdirSync(releaseDir, { recursive: true });
     const releaseNotesPath = resolve(releaseDir, `release-notes-${version}.md`);
     writeFileSync(releaseNotesPath, releaseNotes, 'utf-8');

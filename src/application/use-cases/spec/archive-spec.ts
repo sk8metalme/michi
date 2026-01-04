@@ -61,7 +61,7 @@ export class ArchiveSpecUseCase {
     // Return result
     return ok({
       featureName,
-      archiveLocation: `.kiro/specs/.archive/${featureName.value}`,
+      archiveLocation: `.michi/specs/.archive/${featureName.value}`,
       archivedFiles: [
         'spec.json',
         'requirements.md',

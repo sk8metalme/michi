@@ -97,8 +97,8 @@ describe('init command', () => {
         skipConfig: true,
       });
 
-      // .kiro/project.json が作成されたことを確認
-      const projectJsonPath = join(testProjectRoot, '.kiro', 'project.json');
+      // .michi/project.json が作成されたことを確認
+      const projectJsonPath = join(testProjectRoot, '.michi', 'project.json');
       expect(existsSync(projectJsonPath)).toBe(true);
 
       const projectJson = JSON.parse(
@@ -134,8 +134,8 @@ describe('init command', () => {
         skipConfig: true,
       });
 
-      // .kiro/project.json が作成されたことを確認
-      const projectJsonPath = join(testProjectRoot, '.kiro', 'project.json');
+      // .michi/project.json が作成されたことを確認
+      const projectJsonPath = join(testProjectRoot, '.michi', 'project.json');
       expect(existsSync(projectJsonPath)).toBe(true);
 
       const projectJson = JSON.parse(
@@ -190,7 +190,7 @@ describe('init command', () => {
       });
 
       // 正常に初期化されたことを確認
-      const projectJsonPath = join(testProjectRoot, '.kiro', 'project.json');
+      const projectJsonPath = join(testProjectRoot, '.michi', 'project.json');
       expect(existsSync(projectJsonPath)).toBe(true);
     });
 
@@ -211,7 +211,7 @@ describe('init command', () => {
       });
 
       // 正常に初期化されたことを確認
-      const projectJsonPath = join(testProjectRoot, '.kiro', 'project.json');
+      const projectJsonPath = join(testProjectRoot, '.michi', 'project.json');
       expect(existsSync(projectJsonPath)).toBe(true);
     });
 
@@ -232,7 +232,7 @@ describe('init command', () => {
       });
 
       // 正常に初期化されたことを確認
-      const projectJsonPath = join(testProjectRoot, '.kiro', 'project.json');
+      const projectJsonPath = join(testProjectRoot, '.michi', 'project.json');
       expect(existsSync(projectJsonPath)).toBe(true);
     });
 
@@ -253,7 +253,7 @@ describe('init command', () => {
       });
 
       // 正常に初期化されたことを確認
-      const projectJsonPath = join(testProjectRoot, '.kiro', 'project.json');
+      const projectJsonPath = join(testProjectRoot, '.michi', 'project.json');
       expect(existsSync(projectJsonPath)).toBe(true);
     });
   });

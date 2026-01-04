@@ -73,8 +73,8 @@ export function registerInitCommands(program: Command): void {
             process.exit(1);
           }
 
-          const kiroDir = '.kiro';
-          const tasksPath = join(kiroDir, 'specs', feature, 'tasks.md');
+          const specDir = '.michi';
+          const tasksPath = join(specDir, 'specs', feature, 'tasks.md');
 
           if (!existsSync(tasksPath)) {
             console.error(`❌ tasks.md not found: ${tasksPath}`);

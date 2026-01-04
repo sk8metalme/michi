@@ -118,11 +118,11 @@ export async function syncTasksToJIRA(featureName: string): Promise<void> {
     client,
   );
 
-  const tasksPath = resolve(`.kiro/specs/${featureName}/tasks.md`);
+  const tasksPath = resolve(`.michi/specs/${featureName}/tasks.md`);
   const tasksContent = safeReadFileOrThrow(tasksPath);
 
   // spec.jsonを読み込んで既存のEpicキーを確認
-  const specPath = resolve(`.kiro/specs/${featureName}/spec.json`);
+  const specPath = resolve(`.michi/specs/${featureName}/spec.json`);
   let spec: SpecJson = {};
   try {
     spec = JSON.parse(safeReadFileOrThrow(specPath)) as SpecJson;
@@ -231,7 +231,7 @@ export async function syncTasksToJIRA(featureName: string): Promise<void> {
       const storyDetails = extractStoryDetails(tasksContent, storyTitle);
 
       // GitHubリンク
-      const githubUrl = `${projectMeta.repository}/tree/main/.kiro/specs/${featureName}/tasks.md`;
+      const githubUrl = `${projectMeta.repository}/tree/main/.michi/specs/${featureName}/tasks.md`;
 
       // リッチなADF形式で説明文を生成
       const richDescription = createRichADF(

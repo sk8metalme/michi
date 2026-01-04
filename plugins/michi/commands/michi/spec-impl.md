@@ -708,7 +708,7 @@ echo "=== タスク完了をマーク ==="
 
 # tasks.mdのチェックボックスを更新
 # - [ ] タスク名 → - [x] タスク名
-TASK_FILE=".kiro/specs/$1/tasks.md"
+TASK_FILE=".michi/specs/$1/tasks.md"
 
 if [ -f "$TASK_FILE" ]; then
     # 現在のタスク番号に対応する行を更新
@@ -758,7 +758,7 @@ if [ "$ARCHIVE_ACTION" = "A" ]; then
     if [ $? -eq 0 ]; then
         echo "✅ スペックをarchiveに移動しました"
         echo ""
-        echo "Archive先: .kiro/specs/.archive/$1/"
+        echo "Archive先: .michi/specs/.archive/$1/"
         echo "- spec.json"
         echo "- requirements.md"
         echo "- design.md"

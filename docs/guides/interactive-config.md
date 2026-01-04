@@ -16,7 +16,7 @@
 
 | コマンド | 作成ファイル | 説明 |
 |---------|-------------|------|
-| `michi init` | `.kiro/`, `.env`(テンプレート), `.michi/config.json` | プロジェクト全体の初期化 |
+| `michi init` | `.michi/`, `.env`(テンプレート), `.michi/config.json` | プロジェクト全体の初期化 |
 | `michi config:init` | すべての設定ファイル（`--all`オプション時） | 対話的に設定ファイルを作成 |
 | `michi config:init --global` | `~/.michi/config.json` | グローバル設定を対話的に作成 |
 | `michi config:init --global-env` | `~/.michi/.env` | グローバル.envを対話的に作成 |
@@ -26,7 +26,7 @@
 
 ### michi init と michi config:init の違い
 
-- **`michi init`**: プロジェクトの初期化（.kiroディレクトリ構造、プロジェクトメタデータ作成）
+- **`michi init`**: プロジェクトの初期化（.michiディレクトリ構造、プロジェクトメタデータ作成）
   - `.env`はテンプレートのみ（値の入力なし）
   - `.michi/config.json`はグローバル設定をコピー、またはデフォルト値を使用
 

@@ -24,7 +24,7 @@ argument-hint: <feature-name>
 
 #### テスト計画完了確認
 
-- [ ] `.kiro/specs/$1/test-specs/` ディレクトリが存在するか
+- [ ] `.michi/specs/$1/test-specs/` ディレクトリが存在するか
 - [ ] テスト仕様書が作成されているか（Phase 0.4 完了）
 - [ ] テストタイプが選択されているか（Phase 0.3 完了）
 
@@ -40,7 +40,7 @@ Phase 0.3-0.4 が未完了の場合は、タスク生成前に完了すること
    - テンプレート:
      - 単体テスト: `docs/user-guide/templates/test-specs/unit-test-spec-template.md`
      - 統合テスト: `docs/user-guide/templates/test-specs/integration-test-spec-template.md`
-   - 出力先: `.kiro/specs/$1/test-specs/`
+   - 出力先: `.michi/specs/$1/test-specs/`
 
 3. **完了後**: `/michi:spec-tasks $1` でタスク生成に進む
 

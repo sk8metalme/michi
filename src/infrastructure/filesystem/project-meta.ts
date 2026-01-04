@@ -19,10 +19,10 @@ export interface ProjectMetadata {
 }
 
 /**
- * .kiro/project.json を読み込む
+ * .michi/project.json を読み込む
  */
 export function loadProjectMeta(projectRoot: string = process.cwd()): ProjectMetadata {
-  const projectJsonPath = resolve(projectRoot, '.kiro/project.json');
+  const projectJsonPath = resolve(projectRoot, '.michi/project.json');
 
   if (!existsSync(projectJsonPath)) {
     throw new Error(`Project metadata not found: ${projectJsonPath}`);

@@ -99,7 +99,7 @@ export function copyProjectTemplates(
     const envConfig = getEnvironmentConfig(config.environment);
     const templateContext = createTemplateContext(
       config.langCode,
-      '.kiro',
+      '.michi',
       envConfig.rulesDir.startsWith('.')
         ? envConfig.rulesDir.substring(1, envConfig.rulesDir.indexOf('/', 1))
         : envConfig.rulesDir.split('/')[0],
@@ -165,9 +165,9 @@ export function copyProjectTemplates(
       }
 
       // Steeringテンプレート
-      const michiSteeringDir = join(templatesDir, '..', '.kiro', 'steering');
+      const michiSteeringDir = join(templatesDir, '..', '.michi', 'steering');
       if (existsSync(michiSteeringDir)) {
-        cpSync(michiSteeringDir, join(currentDir, '.kiro/steering'), {
+        cpSync(michiSteeringDir, join(currentDir, '.michi/steering'), {
           recursive: true,
         });
         console.log('   ✅ Steering templates copied');
@@ -177,14 +177,14 @@ export function copyProjectTemplates(
       const michiSpecTemplatesDir = join(
         templatesDir,
         '..',
-        '.kiro',
+        '.michi',
         'settings',
         'templates',
       );
       if (existsSync(michiSpecTemplatesDir)) {
         cpSync(
           michiSpecTemplatesDir,
-          join(currentDir, '.kiro/settings/templates'),
+          join(currentDir, '.michi/settings/templates'),
           { recursive: true },
         );
         console.log('   ✅ Spec templates copied');

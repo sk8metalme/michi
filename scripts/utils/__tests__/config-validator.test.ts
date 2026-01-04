@@ -477,8 +477,8 @@ describe('config-validator', () => {
       );
 
       // project.jsonを作成
-      const projectJsonPath = join(testProjectRoot, '.kiro/project.json');
-      mkdirSync(join(testProjectRoot, '.kiro'), { recursive: true });
+      const projectJsonPath = join(testProjectRoot, '.michi/project.json');
+      mkdirSync(join(testProjectRoot, '.michi'), { recursive: true });
       writeFileSync(
         projectJsonPath,
         JSON.stringify({
@@ -510,8 +510,8 @@ describe('config-validator', () => {
       );
 
       // project.jsonを作成（すべての必須フィールドを含める）
-      const projectJsonPath = join(testProjectRoot, '.kiro/project.json');
-      mkdirSync(join(testProjectRoot, '.kiro'), { recursive: true });
+      const projectJsonPath = join(testProjectRoot, '.michi/project.json');
+      mkdirSync(join(testProjectRoot, '.michi'), { recursive: true });
       writeFileSync(
         projectJsonPath,
         JSON.stringify({
@@ -562,8 +562,8 @@ describe('config-validator', () => {
       );
 
       // project.jsonを作成（すべての必須フィールドを含める）
-      const projectJsonPath = join(testProjectRoot, '.kiro/project.json');
-      mkdirSync(join(testProjectRoot, '.kiro'), { recursive: true });
+      const projectJsonPath = join(testProjectRoot, '.michi/project.json');
+      mkdirSync(join(testProjectRoot, '.michi'), { recursive: true });
       writeFileSync(
         projectJsonPath,
         JSON.stringify({
@@ -613,8 +613,8 @@ describe('config-validator', () => {
       );
 
       // project.jsonを作成（すべての必須フィールドを含める）
-      const projectJsonPath = join(testProjectRoot, '.kiro/project.json');
-      mkdirSync(join(testProjectRoot, '.kiro'), { recursive: true });
+      const projectJsonPath = join(testProjectRoot, '.michi/project.json');
+      mkdirSync(join(testProjectRoot, '.michi'), { recursive: true });
       writeFileSync(
         projectJsonPath,
         JSON.stringify({

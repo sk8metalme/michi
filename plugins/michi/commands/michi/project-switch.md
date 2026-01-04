@@ -32,11 +32,11 @@ description: Switch between projects (Michi-specific feature)
 
 1. Identify GitHub repository corresponding to project ID
 2. Clone locally (if not cloned) or checkout
-3. Load and display {{KIRO_DIR}}/project.json
+3. Load and display {{SPEC_DIR}}/project.json
 4. Display corresponding Confluence project page URL
 
 ## Language Handling
 
-- Read language from {{KIRO_DIR}}/project.json
+- Read language from {{SPEC_DIR}}/project.json
 - Generate all output in the specified language
 - Default to English if language field is missing

@@ -51,7 +51,7 @@ async function runRequirementsPhase(feature: string): Promise<PhaseRunResult> {
   // Step 1: requirements.md存在確認
   const requirementsPath = join(
     process.cwd(),
-    '.kiro',
+    '.michi',
     'specs',
     feature,
     'requirements.md',
@@ -138,7 +138,7 @@ async function runDesignPhase(feature: string): Promise<PhaseRunResult> {
   // Step 1: design.md存在確認
   const designPath = join(
     process.cwd(),
-    '.kiro',
+    '.michi',
     'specs',
     feature,
     'design.md',
@@ -232,7 +232,7 @@ async function checkTasksPrerequisites(
   console.log('✅ プリフライトチェック成功');
 
   // tasks.md存在確認
-  const tasksPath = join(process.cwd(), '.kiro', 'specs', feature, 'tasks.md');
+  const tasksPath = join(process.cwd(), '.michi', 'specs', feature, 'tasks.md');
   if (!existsSync(tasksPath)) {
     errors.push(
       'tasks.mdが存在しません。先に/michi:spec-tasks を実行してください',
@@ -396,7 +396,7 @@ async function runTasksPhase(feature: string): Promise<PhaseRunResult> {
 
   const errors: string[] = [];
   let jiraCreated = false;
-  const tasksPath = join(process.cwd(), '.kiro', 'specs', feature, 'tasks.md');
+  const tasksPath = join(process.cwd(), '.michi', 'specs', feature, 'tasks.md');
 
   // 前提条件チェック
   const prereqCheck = await checkTasksPrerequisites(feature);
@@ -705,7 +705,7 @@ async function updateEnvironmentSpecJson(
   answers: { language: string; ciTool: string; needsDocker: boolean },
   errors: string[]
 ) {
-  const specPath = join(process.cwd(), '.kiro', 'specs', feature, 'spec.json');
+  const specPath = join(process.cwd(), '.michi', 'specs', feature, 'spec.json');
   if (!existsSync(specPath)) {
     return;
   }
@@ -853,7 +853,7 @@ async function runPhaseAPhase(feature: string): Promise<PhaseRunResult> {
 function loadPhaseBTestTypes(feature: string): string[] {
   const selectionPath = join(
     process.cwd(),
-    '.kiro',
+    '.michi',
     'specs',
     feature,
     'test-type-selection.json',
@@ -949,7 +949,7 @@ function displayPhaseBChecklist(
   // 生成されたファイルのサマリー
   const testExecutionDir = join(
     process.cwd(),
-    '.kiro',
+    '.michi',
     'specs',
     feature,
     'test-execution',
@@ -968,28 +968,28 @@ function displayPhaseBChecklist(
 
   if (phaseBTypes.includes('performance')) {
     console.log('  [ ] 性能テスト実行');
-    console.log(`      📁 .kiro/specs/${feature}/test-execution/performance/`);
+    console.log(`      📁 .michi/specs/${feature}/test-execution/performance/`);
     console.log('      📖 詳細はディレクトリ内のREADME/計画書を参照');
   }
 
   if (phaseBTypes.includes('security')) {
     console.log('  [ ] セキュリティテスト実行');
-    console.log(`      📁 .kiro/specs/${feature}/test-execution/security/`);
+    console.log(`      📁 .michi/specs/${feature}/test-execution/security/`);
     console.log('      📖 詳細はディレクトリ内のREADME/計画書を参照');
   }
 
   if (phaseBTypes.includes('integration')) {
     console.log('  [ ] 統合テスト実行');
-    console.log(`      📁 .kiro/specs/${feature}/test-execution/integration/`);
+    console.log(`      📁 .michi/specs/${feature}/test-execution/integration/`);
   }
 
   if (phaseBTypes.includes('e2e')) {
     console.log('  [ ] E2Eテスト実行');
-    console.log(`      📁 .kiro/specs/${feature}/test-execution/e2e/`);
+    console.log(`      📁 .michi/specs/${feature}/test-execution/e2e/`);
   }
 
   console.log('\n参考ドキュメント:');
-  console.log(`  - .kiro/specs/${feature}/test-specs/ (テスト仕様書)`);
+  console.log(`  - .michi/specs/${feature}/test-specs/ (テスト仕様書)`);
   console.log('  - docs/user-guide/testing/test-execution-flow.md');
 
   console.log('\n次のステップ:');

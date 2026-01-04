@@ -135,7 +135,7 @@ describe('GenerateRequirementsUseCase', () => {
       mockRepository.save = async () => {
         return err({
           type: 'WriteError',
-          path: '.kiro/specs/test-feature/spec.json',
+          path: '.michi/specs/test-feature/spec.json',
           cause: 'Permission denied',
         } as const);
       };

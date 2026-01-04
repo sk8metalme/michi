@@ -27,8 +27,8 @@ Multi-Repoプロジェクト **$1** の技術設計書を生成します。
    - 登録リポジトリ一覧
 2. `docs/michi/$1/overview/requirements.md` から要件読み込み
    - 要件定義書が存在しない場合は、先に `/michi-multi-repo:spec-requirements $1` の実行を促す
-3. `.kiro/settings/rules/design-principles.md` から設計原則取得（存在する場合）
-4. `.kiro/settings/templates/specs/design.md` から構造参照（存在する場合）
+3. `.michi/settings/rules/design-principles.md` から設計原則取得（存在する場合）
+4. `.michi/settings/templates/specs/design.md` から構造参照（存在する場合）
 
 ### Step 2: Discovery & Analysis
 

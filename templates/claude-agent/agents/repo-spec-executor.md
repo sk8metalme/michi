@@ -94,7 +94,7 @@ michi init
 
 ### 生成されたファイル
 
-1. `.kiro/specs/user-authentication/design.md` (320行)
+1. `.michi/specs/user-authentication/design.md` (320行)
    - システムコンテキスト図
    - コンポーネント設計
    - API定義: POST /api/v1/auth/login

@@ -69,11 +69,11 @@ Detect the following patterns:
 
 ### 3.5. Michi-Specific Checks
 
-For documents in `.kiro/specs/` directory:
+For documents in `.michi/specs/` directory:
 - **@-reference integrity**: Verify `@.claude/rules/...` paths exist and are valid
 - **Placeholder detection**: Check for unreplaced placeholders like `{{PLACEHOLDER}}`
 - **Phase compliance**: For `design.md`, verify Test Plan section exists (Phase 0.3-0.4)
-- **Project context**: Validate {{PROJECT_ID}}, {{KIRO_DIR}}, {{AGENT_DIR}} usage
+- **Project context**: Validate {{PROJECT_ID}}, {{SPEC_DIR}}, {{AGENT_DIR}} usage
 
 ### 4. Required Section Verification
 
@@ -96,7 +96,7 @@ Output review results in the format defined in doc-review-rules.md:
 ## Project Context
 
 - Project ID: {{PROJECT_ID}}
-- Kiro directory: {{KIRO_DIR}}
+- Kiro directory: {{SPEC_DIR}}
 - Agent directory: {{AGENT_DIR}}
 
 ## Constraints
@@ -107,7 +107,7 @@ Output review results in the format defined in doc-review-rules.md:
 
 ## Usage Example
 
-When reviewing `.kiro/specs/{{FEATURE_NAME}}/requirements.md`:
+When reviewing `.michi/specs/{{FEATURE_NAME}}/requirements.md`:
 
 1. Read the file using Read tool
 2. Detect document type: Design Document (50-100 lines guideline)

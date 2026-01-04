@@ -19,7 +19,7 @@ This command integrates Phase 0.3 (Test Type Selection) and Phase 0.4 (Test Spec
 
 Before running this command, ensure:
 - Phase 0.2 (Design) has been completed
-- `.kiro/specs/{feature}/design.md` exists
+- `.michi/specs/{feature}/design.md` exists
 - `spec.json` shows `design.approved: true`
 
 ## Workflow
@@ -27,7 +27,7 @@ Before running this command, ensure:
 ### Phase 0.3: Test Type Selection
 
 1. **Read Design Document**
-   - Load `.kiro/specs/{feature}/design.md`
+   - Load `.michi/specs/{feature}/design.md`
    - Extract Testing Strategy section
    - Analyze project requirements to determine appropriate test types
 
@@ -56,7 +56,7 @@ Before running this command, ensure:
    Set `multiSelect: true` to allow multiple selections.
 
 4. **Save Selection**
-   Create `.kiro/specs/{feature}/test-type-selection.json`:
+   Create `.michi/specs/{feature}/test-type-selection.json`:
 
    ```json
    {
@@ -95,7 +95,7 @@ For each selected test type, create a test specification document:
    - Add coverage targets (95% for critical code, 80% minimum)
 
 4. **Save Test Specification**
-   Create `.kiro/specs/{feature}/test-specs/{test-type}-test-spec.md`:
+   Create `.michi/specs/{feature}/test-specs/{test-type}-test-spec.md`:
    - `unit-test-spec.md`
    - `integration-test-spec.md`
    - `e2e-test-spec.md`
@@ -122,7 +122,7 @@ For each selected test type, create a test specification document:
 After completion, the following structure will be created:
 
 ```
-.kiro/specs/{feature}/
+.michi/specs/{feature}/
 ├── spec.json (updated)
 ├── requirements.md
 ├── design.md

@@ -79,7 +79,7 @@ function scanCurrentState(): MigrationState {
   const projectRoot = process.cwd();
   const globalEnvPath = getGlobalEnvPath();
   const projectEnvPath = resolve(projectRoot, '.env');
-  const projectJsonPath = resolve(projectRoot, '.kiro', 'project.json');
+  const projectJsonPath = resolve(projectRoot, '.michi', 'project.json');
 
   // .env ファイルが存在しない場合はエラー
   if (!existsSync(projectEnvPath)) {
@@ -230,12 +230,12 @@ function createBackup(backupDirPath?: string): string {
     console.log(`  ✓ .michi/ -> ${backupDir}/.michi/`);
   }
 
-  // .kiro/project.json をバックアップ
-  const projectJsonPath = resolve(projectRoot, '.kiro', 'project.json');
+  // .michi/project.json をバックアップ
+  const projectJsonPath = resolve(projectRoot, '.michi', 'project.json');
   if (existsSync(projectJsonPath)) {
-    mkdirSync(join(backupDir, '.kiro'), { recursive: true });
-    cpSync(projectJsonPath, join(backupDir, '.kiro', 'project.json'));
-    console.log(`  ✓ .kiro/project.json -> ${backupDir}/.kiro/project.json`);
+    mkdirSync(join(backupDir, '.michi'), { recursive: true });
+    cpSync(projectJsonPath, join(backupDir, '.michi', 'project.json'));
+    console.log(`  ✓ .michi/project.json -> ${backupDir}/.michi/project.json`);
   }
 
   console.log('');
@@ -274,7 +274,7 @@ function executeMigration(state: MigrationState, changes: MigrationChanges): voi
   writeFileSync(state.projectEnvPath, projectEnvContent + '\n');
   console.log(`  ✓ .env 更新 (${changes.toKeepInProjectEnv.size}項目)`);
 
-  // .kiro/project.json を更新
+  // .michi/project.json を更新
   if (changes.toProjectJson.repository) {
     const projectJsonDir = dirname(state.projectJsonPath);
     mkdirSync(projectJsonDir, { recursive: true });
@@ -288,7 +288,7 @@ function executeMigration(state: MigrationState, changes: MigrationChanges): voi
     projectJson.repository = changes.toProjectJson.repository;
 
     writeFileSync(state.projectJsonPath, JSON.stringify(projectJson, null, 2) + '\n');
-    console.log('  ✓ .kiro/project.json 更新');
+    console.log('  ✓ .michi/project.json 更新');
   }
 
   console.log('');
@@ -324,13 +324,13 @@ function rollbackFromBackup(backupDir: string): void {
     console.log('  ✓ .michi/ 復元');
   }
 
-  // .kiro/project.json を復元
-  const backupProjectJsonPath = join(backupDir, '.kiro', 'project.json');
+  // .michi/project.json を復元
+  const backupProjectJsonPath = join(backupDir, '.michi', 'project.json');
   if (existsSync(backupProjectJsonPath)) {
-    const projectJsonDir = resolve(projectRoot, '.kiro');
+    const projectJsonDir = resolve(projectRoot, '.michi');
     mkdirSync(projectJsonDir, { recursive: true });
-    cpSync(backupProjectJsonPath, resolve(projectRoot, '.kiro', 'project.json'));
-    console.log('  ✓ .kiro/project.json 復元');
+    cpSync(backupProjectJsonPath, resolve(projectRoot, '.michi', 'project.json'));
+    console.log('  ✓ .michi/project.json 復元');
   }
 
   console.log('');
@@ -370,7 +370,7 @@ export async function migrate(options: MigrateOptions = {}): Promise<void> {
     console.log(`  ✓ プロジェクトディレクトリ: ${process.cwd()}`);
     console.log('  ✓ .env 検出');
     if (state.projectJsonExists) {
-      console.log('  ✓ .kiro/project.json 検出');
+      console.log('  ✓ .michi/project.json 検出');
     }
 
     // 2. 変更内容を分析

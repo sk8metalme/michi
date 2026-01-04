@@ -57,7 +57,7 @@ alwaysApply: false
 - `node_modules/**/*.md`
 - `.git/**/*.md`
 - `vendor/**/*.md`
-- `.kiro/settings/**/*.md` （テンプレートファイル）
+- `.michi/settings/**/*.md` （テンプレートファイル）
 
 ## 注意事項
 

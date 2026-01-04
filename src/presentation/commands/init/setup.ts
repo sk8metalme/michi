@@ -22,13 +22,13 @@ import { getGlobalConfigPath } from '../../../../scripts/utils/config-loader.js'
 import type { InitConfig } from './prompts.js';
 
 /**
- * .kiro ディレクトリ構造を作成
+ * .michi ディレクトリ構造を作成
  */
 export function createKiroDirectories(): void {
-  console.log('\n📁 Step 1: Creating .kiro directory structure...');
-  mkdirSync('.kiro/settings/templates', { recursive: true });
-  mkdirSync('.kiro/steering', { recursive: true });
-  mkdirSync('.kiro/specs', { recursive: true });
+  console.log('\n📁 Step 1: Creating .michi directory structure...');
+  mkdirSync('.michi/settings/templates', { recursive: true });
+  mkdirSync('.michi/steering', { recursive: true });
+  mkdirSync('.michi/specs', { recursive: true });
   console.log('   ✅ Directory structure created');
 }
 
@@ -93,7 +93,7 @@ export function createProjectMetadata(
   };
 
   writeFileSync(
-    '.kiro/project.json',
+    '.michi/project.json',
     JSON.stringify(projectJson, null, 2) + '\n',
     'utf-8',
   );

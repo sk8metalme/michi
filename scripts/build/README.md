@@ -7,7 +7,7 @@
 ## 配置するもの
 
 - **copy-static-assets.js**: 静的ファイルのコピー
-  - `.kiro/settings/` 配下のテンプレートファイル
+  - `.michi/settings/` 配下のテンプレートファイル
   - その他のビルド時に必要な静的アセット
 - **set-permissions.js**: 実行権限の設定
   - ビルド成果物の権限設定

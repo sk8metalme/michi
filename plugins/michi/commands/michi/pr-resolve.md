@@ -154,4 +154,4 @@ gh pr merge
 
 ## 言語設定
 
-出力言語は {{KIRO_DIR}}/project.json の設定に従います。
+出力言語は {{SPEC_DIR}}/project.json の設定に従います。

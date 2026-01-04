@@ -73,7 +73,7 @@ curl -u your-email@company.com:your-token \
 | `GITHUB_ORG` | オプション | - | GitHub組織名（例: `your-github-org`） |
 | `GITHUB_TOKEN` | オプション | - | GitHub Personal Access Token（[取得方法](https://github.com/settings/tokens)） |
 
-**注意**: `GITHUB_REPO` は非推奨です。リポジトリ情報は `.kiro/project.json` の `repository` フィールドで管理してください。
+**注意**: `GITHUB_REPO` は非推奨です。リポジトリ情報は `.michi/project.json` の `repository` フィールドで管理してください。
 
 ### Slack通知（オプション）
 

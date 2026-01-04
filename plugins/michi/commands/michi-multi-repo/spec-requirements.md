@@ -28,7 +28,7 @@ Multi-Repoプロジェクト **$1** の要件定義書を生成します。
 4. リポジトリ数が0の場合は警告を出し、基本構造のみ生成
 
 ### Step 2: コンテキスト収集
-1. **EARS形式ルール**: `.kiro/settings/rules/ears-format.md` を読み込み
+1. **EARS形式ルール**: `.michi/settings/rules/ears-format.md` を読み込み
    - EARS形式（Event-Action-Response-System）の構文を理解
 2. **既存要件テンプレート**: `templates/multi-repo/overview/requirements.md` を確認
 3. **各リポジトリの情報収集**:
@@ -187,7 +187,7 @@ graph TB
   ```
 
 - **EARS形式ルール未取得**:
-  - `.kiro/settings/rules/ears-format.md` が存在しない場合、基本的なEARS形式を使用
+  - `.michi/settings/rules/ears-format.md` が存在しない場合、基本的なEARS形式を使用
   - 警告メッセージを表示
 
 ### Fallback Strategy

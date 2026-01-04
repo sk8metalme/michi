@@ -9,7 +9,7 @@ import { SupportedLanguage, getDevGuidelines } from '../constants/languages.js';
 export interface TemplateContext {
   LANG_CODE: SupportedLanguage;
   DEV_GUIDELINES: string;
-  KIRO_DIR: string;
+  SPEC_DIR: string;
   AGENT_DIR: string;
   PROJECT_ID?: string;
   FEATURE_NAME?: string;
@@ -23,20 +23,20 @@ export interface TemplateContext {
 
 /**
  * Create template context for rendering
- * 
+ *
  * @param lang - Language code
- * @param kiroDir - .kiro directory name
+ * @param specDir - .michi directory name (spec directory)
  * @param agentDir - Agent directory name (e.g., .cursor, .claude)
  * @returns Template context object
  */
 export const createTemplateContext = (
   lang: SupportedLanguage,
-  kiroDir: string,
+  specDir: string,
   agentDir: string
 ): TemplateContext => ({
   LANG_CODE: lang,
   DEV_GUIDELINES: getDevGuidelines(lang),
-  KIRO_DIR: kiroDir,
+  SPEC_DIR: specDir,
   AGENT_DIR: agentDir,
 });
 
@@ -79,10 +79,10 @@ export const renderTemplate = (
  * 
  * @example
  * ```typescript
- * const template = '{"lang": "{{LANG_CODE}}", "dir": "{{KIRO_DIR}}"}';
- * const context = { LANG_CODE: "ja", KIRO_DIR: ".kiro" };
+ * const template = '{"lang": "{{LANG_CODE}}", "dir": "{{SPEC_DIR}}"}';
+ * const context = { LANG_CODE: "ja", SPEC_DIR: ".michi" };
  * const result = renderJsonTemplate(template, context);
- * // Result: { lang: "ja", dir: ".kiro" }
+ * // Result: { lang: "ja", dir: ".michi" }
  * ```
  */
 export const renderJsonTemplate = <T = unknown>(
@@ -102,7 +102,7 @@ export const renderJsonTemplate = <T = unknown>(
       'Failed to parse rendered JSON template',
       `Original error: ${errorMessage}`,
       `Rendered output (first 500 chars): ${rendered.substring(0, 500)}${rendered.length > 500 ? '...' : ''}`,
-      `Template context: LANG_CODE=${context.LANG_CODE}, KIRO_DIR=${context.KIRO_DIR}, AGENT_DIR=${context.AGENT_DIR}`
+      `Template context: LANG_CODE=${context.LANG_CODE}, SPEC_DIR=${context.SPEC_DIR}, AGENT_DIR=${context.AGENT_DIR}`
     ].join('\n');
     
     const detailedError = new Error(debugInfo);

@@ -28,13 +28,13 @@ System design and architecture documentation.
 
 ### Requirements Document
 
-- Location: {{KIRO_DIR}}/specs/{{FEATURE_NAME}}/requirements.md
+- Location: {{SPEC_DIR}}/specs/{{FEATURE_NAME}}/requirements.md
 - Content: Functional and non-functional requirements
 - Format: Structured markdown with acceptance criteria
 
 ### Design Document
 
-- Location: {{KIRO_DIR}}/specs/{{FEATURE_NAME}}/design.md
+- Location: {{SPEC_DIR}}/specs/{{FEATURE_NAME}}/design.md
 - Content: Architecture, interfaces, data models
 - Include: Error handling strategy, security considerations
 
@@ -68,12 +68,12 @@ System design and architecture documentation.
 ## Project Context
 
 - Project ID: {{PROJECT_ID}}
-- Kiro directory: {{KIRO_DIR}}
+- Kiro directory: {{SPEC_DIR}}
 - Agent directory: {{AGENT_DIR}}
 - Feature name: {{FEATURE_NAME}}
 
 ## Constraints
 
 - Do not implement code (delegate to developer)
-- All designs must be documented in {{KIRO_DIR}}/specs/
+- All designs must be documented in {{SPEC_DIR}}/specs/
 - Consider existing architecture patterns in the codebase

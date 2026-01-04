@@ -78,7 +78,7 @@ git branch --show-current
 
 ```bash
 # AIコマンドで requirements.md 作成後
-/kiro:spec-requirements <feature>
+/michi:spec-requirements <feature>
 
 # CLIツールで Confluence作成 + バリデーション
 npx @sk8metal/michi-cli phase:run <feature> requirements
@@ -92,7 +92,7 @@ npx @sk8metal/michi-cli phase:run <feature> requirements
 
 ```bash
 # AIコマンドで design.md 作成後
-/kiro:spec-design <feature>
+/michi:spec-design <feature>
 
 # CLIツールで Confluence作成 + バリデーション
 npx @sk8metal/michi-cli phase:run <feature> design

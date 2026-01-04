@@ -22,7 +22,7 @@ describe('spec-updater', () => {
     if (existsSync(testDir)) {
       rmSync(testDir, { recursive: true });
     }
-    mkdirSync(resolve(testDir, '.kiro/specs', testFeatureName), { recursive: true });
+    mkdirSync(resolve(testDir, '.michi/specs', testFeatureName), { recursive: true });
   });
 
   afterEach(() => {
@@ -45,7 +45,7 @@ describe('spec-updater', () => {
     });
 
     it('spec.jsonが存在する場合、その内容を返す', () => {
-      const specPath = resolve(testDir, '.kiro/specs', testFeatureName, 'spec.json');
+      const specPath = resolve(testDir, '.michi/specs', testFeatureName, 'spec.json');
       const testSpec: SpecJson = {
         featureName: testFeatureName,
         projectName: 'Test Project',
@@ -74,7 +74,7 @@ describe('spec-updater', () => {
 
       saveSpecJson(testFeatureName, spec, testDir);
 
-      const specPath = resolve(testDir, '.kiro/specs', testFeatureName, 'spec.json');
+      const specPath = resolve(testDir, '.michi/specs', testFeatureName, 'spec.json');
       expect(existsSync(specPath)).toBe(true);
 
       const saved = JSON.parse(readFileSync(specPath, 'utf-8'));

@@ -6,7 +6,7 @@ AI駆動開発を支援するコマンドセットです。
 
 | プレフィックス | 提供元 | 用途 |
 |---------------|--------|------|
-| `/kiro:*` | cc-sdd | 基本ワークフロー |
+| `/michi:*` | cc-sdd | 基本ワークフロー |
 | `/michi:*` | Michi | テスト計画、品質自動化 |
 | `/michi-multi-repo:*` | Michi | Multi-Repo管理 |
 
@@ -16,21 +16,21 @@ AI駆動開発を支援するコマンドセットです。
 
 | コマンド | 機能説明 | パラメータ |
 |---------|---------|----------|
-| `/kiro:spec-init` | 新規仕様を初期化 | `"プロジェクト説明"` |
-| `/kiro:spec-requirements` | 要件定義を作成 | `{feature}` |
-| `/kiro:spec-design` | 設計書を作成 | `{feature}` |
-| `/kiro:spec-tasks` | タスク分割とJIRA同期 | `{feature}` |
-| `/kiro:spec-impl` | TDD実装を実行 | `{feature} [tasks]` |
-| `/kiro:spec-archive` | 仕様をアーカイブ | `{feature}` |
-| `/kiro:spec-status` | 仕様の状態を表示 | `{feature}` |
+| `/michi:spec-init` | 新規仕様を初期化 | `"プロジェクト説明"` |
+| `/michi:spec-requirements` | 要件定義を作成 | `{feature}` |
+| `/michi:spec-design` | 設計書を作成 | `{feature}` |
+| `/michi:spec-tasks` | タスク分割とJIRA同期 | `{feature}` |
+| `/michi:spec-impl` | TDD実装を実行 | `{feature} [tasks]` |
+| `/michi:spec-archive` | 仕様をアーカイブ | `{feature}` |
+| `/michi:spec-status` | 仕様の状態を表示 | `{feature}` |
 
 ### 検証
 
 | コマンド | 機能説明 | パラメータ |
 |---------|---------|----------|
-| `/kiro:validate-gap` | 実装ギャップを分析 | `{feature}` |
-| `/kiro:validate-design` | 設計品質をレビュー | `{feature}` |
-| `/kiro:validate-impl` | 実装を検証 | `{feature}` |
+| `/michi:validate-gap` | 実装ギャップを分析 | `{feature}` |
+| `/michi:validate-design` | 設計品質をレビュー | `{feature}` |
+| `/michi:validate-impl` | 実装を検証 | `{feature}` |
 
 ## Michi拡張コマンド
 
@@ -72,7 +72,7 @@ AI駆動開発を支援するコマンドセットです。
 ### 通常プロジェクト
 
 ```
-/kiro:spec-init → /kiro:spec-requirements → /michi:spec-design
+/michi:spec-init → /michi:spec-requirements → /michi:spec-design
 → /michi:test-planning → /michi:spec-tasks → /michi:spec-impl
 → /michi:confluence-sync
 ```
