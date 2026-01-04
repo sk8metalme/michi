@@ -47,11 +47,13 @@ export function registerConfigCommands(program: Command): void {
         // プロジェクト設定 作成
         if (options.project || options.all) {
           const { setupWorkflowConfig } = await import('../init/setup.js');
+          // interactive: true のため、以下のプレースホルダー値は使用されず、
+          // 実際の値はユーザーにプロンプトされる
           const config = {
-            projectId: 'default',
-            projectName: 'Default Project',
+            projectId: '',
+            projectName: '',
             langCode: 'ja' as const,
-            jiraKey: 'PROJ',
+            jiraKey: '',
             interactive: true,
             skipWorkflowConfig: false,
             environment: 'claude' as const,

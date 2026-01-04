@@ -86,7 +86,9 @@ async function resolveEnvPath(targetPath: string): Promise<string> {
     // ディレクトリが存在しない場合は作成
     await fs.mkdir(michiDir, { recursive: true });
 
-    return path.join(michiDir, '.env');
+    // ファイル名部分を保持
+    const filename = path.basename(targetPath);
+    return path.join(michiDir, filename);
   }
 
   // 相対パスの場合は絶対パスに変換
