@@ -33,7 +33,6 @@ describe('migrate command', () => {
     // テスト用ディレクトリ構造を作成
     mkdirSync(testProjectRoot, { recursive: true });
     mkdirSync(join(testProjectRoot, '.michi'), { recursive: true });
-    mkdirSync(join(testProjectRoot, '.michi'), { recursive: true });
     mkdirSync(testHomeDir, { recursive: true });
     mkdirSync(join(testHomeDir, '.michi'), { recursive: true });
 

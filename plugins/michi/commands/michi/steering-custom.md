@@ -32,7 +32,7 @@ Custom steering作成時、ドメインに応じたテンプレートを推奨:
 
 ### インタラクティブ提案フロー
 
-```
+```bash
 $ /michi:steering-custom api
 
 📝 Creating custom steering: api
@@ -55,7 +55,7 @@ Would you like to use a template? [y/N]:
 
 ### 出力例
 
-```
+```text
 ✅ Custom steering created: .michi/steering/api-standards.md
 
 📚 Related templates available:

@@ -58,7 +58,7 @@ async function runRequirementsPhase(feature: string): Promise<PhaseRunResult> {
   );
   if (!existsSync(requirementsPath)) {
     errors.push(
-      'requirements.mdが存在しません。先に/kiro:spec-requirements を実行してください',
+      'requirements.mdが存在しません。先に/michi:spec-requirements を実行してください',
     );
     return {
       phase: 'requirements',
@@ -145,7 +145,7 @@ async function runDesignPhase(feature: string): Promise<PhaseRunResult> {
   );
   if (!existsSync(designPath)) {
     errors.push(
-      'design.mdが存在しません。先に/kiro:spec-design を実行してください',
+      'design.mdが存在しません。先に/michi:spec-design を実行してください',
     );
     return {
       phase: 'design',
@@ -383,7 +383,7 @@ function displayTasksPhaseSummary(
   if (validation.success && jiraCreated) {
     console.log('\n🎉 タスク分割フェーズが完了しました！');
     console.log('📢 開発チームに実装開始を通知してください');
-    console.log('🚀 次のステップ: /kiro:spec-impl <feature>');
+    console.log('🚀 次のステップ: /michi:spec-impl <feature>');
   }
 }
 
@@ -752,7 +752,7 @@ function displayEnvironmentSummary(
 
   console.log('\n📖 次のステップ:');
   console.log('   1. Phase 2: TDD実装へ進む');
-  console.log(`      /kiro:spec-impl ${feature}`);
+  console.log(`      /michi:spec-impl ${feature}`);
 
   console.log('\n' + '='.repeat(60));
   console.log('✅ Phase 1: 環境構築が完了しました');

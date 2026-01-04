@@ -41,7 +41,7 @@ Steering document作成前に、以下をチェック:
 
 ### Steering作成後の推奨アクション
 
-```
+```bash
 ✅ Steering document created
 
 📚 Next Steps:
@@ -59,7 +59,7 @@ Steering document作成前に、以下をチェック:
 
 連携が未設定の場合、セットアップガイドを提示:
 
-```
+```text
 ⚠️  JIRA/Confluence integration not configured
 
 To enable integration:

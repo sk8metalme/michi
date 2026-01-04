@@ -21,7 +21,7 @@ Reference the language field in {{SPEC_DIR}}/project.json.
 - Avoid duplicate management
 
 ### Data Flow
-```
+```text
 GitHub ({{SPEC_DIR}}/specs/)  ← Source of truth (editable)
     ↓ sync
 Confluence ← Display and approval (read-only)

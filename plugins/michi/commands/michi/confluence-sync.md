@@ -40,5 +40,5 @@ description: Sync specifications to Confluence (Michi-specific feature)
 ## Project Metadata
 
 - Project ID: {{PROJECT_ID}}
-- Kiro directory: {{SPEC_DIR}}
+- Spec directory: {{SPEC_DIR}}
 - Agent directory: {{AGENT_DIR}}
