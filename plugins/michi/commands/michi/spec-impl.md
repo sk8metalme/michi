@@ -212,7 +212,7 @@ fi
 echo "Frontend detected: $FRONTEND_DETECTED"
 ```
 
-**サブエージェント結果の集約**
+#### サブエージェント結果の集約
 
 ```bash
 # サブエージェント実行完了後、結果を変数に格納
@@ -336,19 +336,43 @@ if [ "$DETECTED_LANG" = "Node.js" ]; then
     [ ! -d ".husky" ] && INFRA_MISSING+=("husky")
     [ ! -f ".husky/pre-commit" ] && INFRA_MISSING+=("pre-commit hook")
 
-    if ! grep -q "lint-staged" package.json 2>/dev/null && ! ls .lintstagedrc* 2>/dev/null | grep -q .; then
-        INFRA_MISSING+=("lint-staged")
+    # lint-staged チェック（jq使用、フォールバックあり）
+    if command -v jq >/dev/null 2>&1 && [ -f "package.json" ]; then
+        if ! jq -e '.dependencies["lint-staged"] // .devDependencies["lint-staged"] // ."lint-staged"' package.json >/dev/null 2>&1 && \
+           ! ls .lintstagedrc* >/dev/null 2>&1; then
+            INFRA_MISSING+=("lint-staged")
+        fi
+    else
+        # jq が利用できない場合はgrep方式にフォールバック
+        if ! grep -q "lint-staged" package.json 2>/dev/null && ! ls .lintstagedrc* 2>/dev/null | grep -q .; then
+            INFRA_MISSING+=("lint-staged")
+        fi
     fi
 
-    if ! grep -q '"strict".*true' tsconfig.json 2>/dev/null; then
-        INFRA_MISSING+=("TypeScript strict")
+    # TypeScript strict チェック（jq使用、フォールバックあり）
+    if command -v jq >/dev/null 2>&1 && [ -f "tsconfig.json" ]; then
+        if ! jq -e '.compilerOptions.strict == true' tsconfig.json >/dev/null 2>&1; then
+            INFRA_MISSING+=("TypeScript strict")
+        fi
+    else
+        # jq が利用できない場合はgrep方式にフォールバック
+        if ! grep -q '"strict".*true' tsconfig.json 2>/dev/null; then
+            INFRA_MISSING+=("TypeScript strict")
+        fi
     fi
 
     [ "$CI_PLATFORM" = "none" ] && INFRA_MISSING+=("CI")
 
-    # 推奨チェック
-    if ! grep -q "tsarch" package.json 2>/dev/null; then
-        INFRA_RECOMMENDED_MISSING+=("tsarch")
+    # 推奨チェック（tsarch）
+    if command -v jq >/dev/null 2>&1 && [ -f "package.json" ]; then
+        if ! jq -e '.dependencies.tsarch // .devDependencies.tsarch' package.json >/dev/null 2>&1; then
+            INFRA_RECOMMENDED_MISSING+=("tsarch")
+        fi
+    else
+        # jq が利用できない場合はgrep方式にフォールバック
+        if ! grep -q "tsarch" package.json 2>/dev/null; then
+            INFRA_RECOMMENDED_MISSING+=("tsarch")
+        fi
     fi
 
     # DevContainer (任意)
@@ -404,9 +428,35 @@ if [ "$DETECTED_LANG" = "Python" ]; then
     INFRA_OPTIONAL_MISSING=()
     INFRA_RECOMMENDED_MISSING=()
 
-    # 必須チェック
-    if ! grep -q "ruff\|black\|flake8" pyproject.toml 2>/dev/null && \
-       [ ! -f "setup.cfg" ] && [ ! -f ".flake8" ]; then
+    # 必須チェック（lint/format tools）
+    HAS_LINT_TOOL=false
+    if [ -f "pyproject.toml" ] && command -v python3 >/dev/null 2>&1; then
+        # Python one-linerでpyproject.tomlを解析
+        if python3 -c "
+try:
+    try:
+        import tomllib
+    except ImportError:
+        import tomli as tomllib
+    with open('pyproject.toml', 'rb') as f:
+        data = tomllib.load(f)
+    tools = data.get('tool', {})
+    if 'ruff' in tools or 'black' in tools or 'flake8' in tools:
+        exit(0)
+    exit(1)
+except Exception:
+    exit(1)
+" 2>/dev/null; then
+            HAS_LINT_TOOL=true
+        fi
+    else
+        # Python3が利用できない場合はgrep方式にフォールバック
+        if grep -q "ruff\|black\|flake8" pyproject.toml 2>/dev/null; then
+            HAS_LINT_TOOL=true
+        fi
+    fi
+
+    if [ "$HAS_LINT_TOOL" = false ] && [ ! -f "setup.cfg" ] && [ ! -f ".flake8" ]; then
         INFRA_MISSING+=("lint/format (ruff/black)")
     fi
 
@@ -417,14 +467,61 @@ if [ "$DETECTED_LANG" = "Python" ]; then
         INFRA_OPTIONAL_MISSING+=("pre-commit")
     fi
 
-    # 推奨チェック
-    if ! grep -q "mypy" pyproject.toml 2>/dev/null && \
-       [ ! -f "mypy.ini" ] && [ ! -f ".mypy.ini" ]; then
+    # 推奨チェック（mypy）
+    HAS_MYPY=false
+    if [ -f "pyproject.toml" ] && command -v python3 >/dev/null 2>&1; then
+        if python3 -c "
+try:
+    try:
+        import tomllib
+    except ImportError:
+        import tomli as tomllib
+    with open('pyproject.toml', 'rb') as f:
+        data = tomllib.load(f)
+    if 'mypy' in data.get('tool', {}):
+        exit(0)
+    exit(1)
+except Exception:
+    exit(1)
+" 2>/dev/null; then
+            HAS_MYPY=true
+        fi
+    else
+        if grep -q "mypy" pyproject.toml 2>/dev/null; then
+            HAS_MYPY=true
+        fi
+    fi
+
+    if [ "$HAS_MYPY" = false ] && [ ! -f "mypy.ini" ] && [ ! -f ".mypy.ini" ]; then
         INFRA_RECOMMENDED_MISSING+=("mypy strict")
     fi
 
-    if ! grep -q "importlinter" pyproject.toml 2>/dev/null && \
-       [ ! -f ".importlinter" ]; then
+    # 推奨チェック（import-linter）
+    HAS_IMPORTLINTER=false
+    if [ -f "pyproject.toml" ] && command -v python3 >/dev/null 2>&1; then
+        if python3 -c "
+try:
+    try:
+        import tomllib
+    except ImportError:
+        import tomli as tomllib
+    with open('pyproject.toml', 'rb') as f:
+        data = tomllib.load(f)
+    if 'importlinter' in data.get('tool', {}):
+        exit(0)
+    exit(1)
+except Exception:
+    exit(1)
+" 2>/dev/null; then
+            HAS_IMPORTLINTER=true
+        fi
+    else
+        if grep -q "importlinter" pyproject.toml 2>/dev/null; then
+            HAS_IMPORTLINTER=true
+        fi
+    fi
+
+    if [ "$HAS_IMPORTLINTER" = false ] && [ ! -f ".importlinter" ]; then
         INFRA_RECOMMENDED_MISSING+=("import-linter")
     fi
 
