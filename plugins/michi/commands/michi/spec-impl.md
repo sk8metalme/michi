@@ -1,4 +1,4 @@
-/---
+---
 name: /michi:spec-impl
 description: Execute spec tasks using TDD methodology with quality automation (Michi version)
 allowed-tools: Task, Bash, Read, Write, Edit, MultiEdit, Grep, Glob, LS, WebFetch, WebSearch
@@ -18,15 +18,15 @@ argument-hint: <feature-name> [task-numbers] [--mutation] [--skip-license] [--sk
 
 ## Michi Extension: Quality Automation & Parallel Execution
 
-このコマンドは cc-sdd 標準の `/kiro:spec-impl` を拡張し、以下のMichi固有機能を追加します：
+このコマンドは cc-sdd 標準の `/kiro:spec-impl` を拡張し、以下のMichi固有機能を追加します:
 
 ### 追加機能
-1. **事前品質監査（Phase 1）**: サブエージェント並行実行でライセンス・バージョンリスクを早期検出
-2. **自動修正ループ（Phase 2）**: type-check、lint、test を自動修正（最大5回）
-3. **事後品質レビュー（Phase 3）**: コードレビュー、デザインレビュー（Frontend時）
-4. **最終品質ゲート（Phase 4）**: カバレッジ95%、Mutation Testing（オプション）
-5. **タスク完了マーク（Phase 4.5）**: tasks.mdのチェックボックス更新
-6. **タスク完了後の処理（Phase 5）**: スペックのarchive移動を確認・実行
+1. **事前品質監査(Phase 1)**: サブエージェント並行実行でライセンス・バージョンリスクを早期検出
+2. **自動修正ループ(Phase 2)**: type-check、lint、test を自動修正(最大5回)
+3. **事後品質レビュー(Phase 3)**: コードレビュー、デザインレビュー(Frontend時)
+4. **最終品質ゲート(Phase 4)**: カバレッジ95%以上、Mutation Testing(オプション)
+5. **タスク完了マーク(Phase 4.5)**: tasks.mdのチェックボックス更新
+6. **タスク完了後の処理(Phase 5)**: スペックのarchive移動を確認・実行
 
 ### コマンドシグネチャ
 
@@ -34,14 +34,14 @@ argument-hint: <feature-name> [task-numbers] [--mutation] [--skip-license] [--sk
 /michi:spec-impl <feature-name> [task-numbers] [options]
 
 Arguments:
-  feature-name    機能名（必須）
-  task-numbers    タスク番号（オプション、例: "1.1" or "1,2,3"）
+  feature-name    機能名(必須)
+  task-numbers    タスク番号(オプション、例: "1.1" or "1,2,3")
 
 Options:
-  --mutation        Mutation Testing を実行（Phase 4）
+  --mutation        Mutation Testing を実行(Phase 4)
   --skip-license    ライセンスチェックをスキップ
   --skip-version    バージョンチェックをスキップ
-  --skip-design     デザインレビューをスキップ（Frontend検出時）
+  --skip-design     デザインレビューをスキップ(Frontend検出時)
 ```
 
 ---
@@ -49,36 +49,36 @@ Options:
 ## 実行フロー
 
 ```plaintext
-Phase 0: コンテキストロード（kiro:spec-impl継承）
+Phase 0: コンテキストロード(kiro:spec-impl継承)
     ↓
-Phase 1: 事前品質監査（Michi拡張）
-    ├─ oss-license-checker（並行）
-    ├─ stable-version-auditor（並行）
-    └─ Frontend検出判定（並行）
+Phase 1: 事前品質監査(Michi拡張)
+    ├─ oss-license-checker(並行)
+    ├─ stable-version-auditor(並行)
+    └─ Frontend検出判定(並行)
     ↓
-Phase 2: TDD実装サイクル（kiro:spec-impl継承 + 自動修正ループ拡張）
-    RED → GREEN → REFACTOR → VERIFY（最大5回）
+Phase 2: TDD実装サイクル(kiro:spec-impl継承 + 自動修正ループ拡張)
+    RED → GREEN → REFACTOR → VERIFY(最大5回)
     ↓
-Phase 3: 事後品質レビュー（Michi拡張）
-    ├─ コードレビュー（常に）
-    └─ デザインレビュー（Frontend時のみ）
+Phase 3: 事後品質レビュー(Michi拡張)
+    ├─ コードレビュー(常に)
+    └─ デザインレビュー(Frontend時のみ)
     ↓
-Phase 4: 最終検証（Michi拡張）
-    type-check + lint + test + coverage 95% + Mutation Testing（オプション）
+Phase 4: 最終検証(Michi拡張)
+    type-check + lint + test + coverage 95% + Mutation Testing(オプション)
     ↓
-Phase 4.4: PRサイズチェック（Michi拡張）
-    500行超過時 → ユーザー確認 → PR作成
-    ↓
-Phase 4.5: タスク完了マーク（Michi拡張）
+Phase 4.5: タスク完了マーク(Michi拡張)
     tasks.md のチェックボックス更新
     ↓
-Phase 5: タスク完了後の処理（Michi拡張）
+Phase 4.6: Progress Check Guidance(Michi拡張)
+    /kiro:spec-status の自動案内表示
+    ↓
+Phase 5: タスク完了後の処理(Michi拡張)
     Archive確認 → ユーザー選択 → Archive実行 or スキップ
 ```
 
 ---
 
-## Phase 1: 事前品質監査（Michi拡張）
+## Phase 1: 事前品質監査(Michi拡張)
 
 ### 目的
 実装前にライセンス・バージョンリスクを早期検出し、Critical問題を解決する。
@@ -124,9 +124,9 @@ DESIGN_REVIEW_CRITICAL=0
 **重要**: 以下の3つのタスクは独立しているため、並行実行する。単一メッセージで複数のTaskツール呼び出しを行う。
 
 ```markdown
-## サブエージェント並行起動（Phase 1）
+## サブエージェント並行起動(Phase 1)
 
-Phase 1では以下の3つのサブエージェントを並行起動する：
+Phase 1では以下の3つのサブエージェントを並行起動する:
 
 ### 1. oss-license-checker
 ```yaml
@@ -136,10 +136,10 @@ Task tool:
     プロジェクトの依存パッケージライセンスを監査してください。
 
     **監査対象**:
-    - package.json / package-lock.json（Node.js）
-    - requirements.txt / pyproject.toml（Python）
-    - build.gradle / pom.xml（Java）
-    - composer.json（PHP）
+    - package.json / package-lock.json(Node.js)
+    - requirements.txt / pyproject.toml(Python)
+    - build.gradle / pom.xml(Java)
+    - composer.json(PHP)
 
     **検出すべきライセンス**:
     - 🔴 Critical: GPL, AGPL, SSPL → 即時停止
@@ -148,7 +148,7 @@ Task tool:
     **出力形式**:
     - Critical件数: X件
     - Warning件数: Y件
-    - 代替パッケージ提案（Critical時）
+    - 代替パッケージ提案(Critical時)
 ```
 
 ### 2. stable-version-auditor
@@ -159,9 +159,9 @@ Task tool:
     プロジェクトの技術スタックバージョンを監査してください。
 
     **監査対象**:
-    - Node.js version（package.json, .nvmrc, Dockerfile）
-    - Python version（pyproject.toml, .python-version）
-    - Java version（pom.xml, build.gradle）
+    - Node.js version(package.json, .nvmrc, Dockerfile)
+    - Python version(pyproject.toml, .python-version)
+    - Java version(pom.xml, build.gradle)
 
     **検出すべきリスク**:
     - 🔴 Critical: EOL済み → 即時停止
@@ -171,7 +171,7 @@ Task tool:
     **出力形式**:
     - Critical件数: X件
     - Warning件数: Y件
-    - アップグレードパス提案（Critical時）
+    - アップグレードパス提案(Critical時)
 ```
 
 ### 3. Frontend検出
@@ -235,7 +235,7 @@ if [ "$TOTAL_CRITICAL" -gt 0 ]; then
     echo "🔴 Critical issues detected: $TOTAL_CRITICAL"
     echo ""
     echo "以下の対応が必要です:"
-    echo "1. 禁止ライセンス（GPL/AGPL/SSPL）を使用しているパッケージを代替"
+    echo "1. 禁止ライセンス(GPL/AGPL/SSPL)を使用しているパッケージを代替"
     echo "2. EOL済みバージョンをアップグレード"
     echo ""
     echo "次のアクション:"
@@ -251,13 +251,13 @@ if [ "$TOTAL_CRITICAL" -gt 0 ]; then
         exit 1
     fi
 else
-    echo "✅ Phase 1: 事前品質監査 完了（Critical: 0, Warning: $TOTAL_WARNING）"
+    echo "✅ Phase 1: 事前品質監査 完了(Critical: 0, Warning: $TOTAL_WARNING)"
 fi
 ```
 
 ---
 
-## Phase 2: TDD実装サイクル（自動修正ループ拡張）
+## Phase 2: TDD実装サイクル(自動修正ループ拡張)
 
 ### 目的
 kiro:spec-implの基本TDDサイクルに自動修正ループを追加する。
@@ -266,7 +266,7 @@ kiro:spec-implの基本TDDサイクルに自動修正ループを追加する。
 
 ```markdown
 - 次の小さな機能のテストを書く
-- テストは失敗する（まだコードが存在しない）
+- テストは失敗する(まだコードが存在しない)
 - 説明的なテスト名を使用する
 ```
 
@@ -287,7 +287,7 @@ kiro:spec-implの基本TDDサイクルに自動修正ループを追加する。
 - リファクタリング後もすべてのテストが通過することを確認する
 ```
 
-### Step 2.4: VERIFY - 品質チェック（自動修正ループ）
+### Step 2.4: VERIFY - 品質チェック(自動修正ループ)
 
 ```bash
 # 各タスク実装後、品質チェックを実行
@@ -295,7 +295,7 @@ ITERATION=0
 MAX_ITERATIONS=5
 
 while [ $ITERATION -lt $MAX_ITERATIONS ]; do
-    echo "=== 品質チェック（試行 $((ITERATION + 1))/$MAX_ITERATIONS）==="
+    echo "=== 品質チェック(試行 $((ITERATION + 1))/$MAX_ITERATIONS) ==="
 
     # Type Check
     if ! npm run type-check 2>&1 | tee /tmp/type-check.log; then
@@ -352,7 +352,7 @@ done
 
 # 最大試行回数に達した場合
 if [ $ITERATION -eq $MAX_ITERATIONS ]; then
-    echo "❌ 自動修正ループが最大試行回数（$MAX_ITERATIONS）に達しました"
+    echo "❌ 自動修正ループが最大試行回数($MAX_ITERATIONS)に達しました"
     echo ""
     echo "以下の問題が残っています:"
     [ "$TYPE_CHECK_FAILED" = true ] && echo "- Type check失敗"
@@ -376,12 +376,12 @@ fi
 
 ---
 
-## Phase 3: 事後品質レビュー（Michi拡張）
+## Phase 3: 事後品質レビュー(Michi拡張)
 
 ### 目的
-実装完了後、コードレビューとデザインレビュー（Frontend時）を実行する。
+実装完了後、コードレビューとデザインレビュー(Frontend時)を実行する。
 
-### Step 3.1: コードレビュー（常に実行）
+### Step 3.1: コードレビュー(常に実行)
 
 ```markdown
 ## コードレビュー実行
@@ -410,7 +410,7 @@ Task tool:
     - 修正推奨箇所の詳細リスト
 ```
 
-### Step 3.2: デザインレビュー（Frontend検出時のみ）
+### Step 3.2: デザインレビュー(Frontend検出時のみ)
 
 ```bash
 # Frontend検出結果に基づいて実行
@@ -424,13 +424,13 @@ Task tool:
   prompt: |
     Frontend実装をレビューしてください。
 
-    **レビュー対象URL**: http://localhost:3000（開発サーバーが起動している前提）
+    **レビュー対象URL**: http://localhost:3000(開発サーバーが起動している前提)
 
     **レビュー観点**:
-    - アクセシビリティ（WCAG 2.1）
-    - レスポンシブデザイン（375px, 768px, 1280px）
+    - アクセシビリティ(WCAG 2.1)
+    - レスポンシブデザイン(375px, 768px, 1280px)
     - UXパターン
-    - パフォーマンス（Core Web Vitals）
+    - パフォーマンス(Core Web Vitals)
 
     **実行手順**:
     1. Playwright MCPでページアクセス
@@ -448,7 +448,7 @@ else
 fi
 ```
 
-### Step 3.3: レビューループ（最大5回）
+### Step 3.3: レビューループ(最大5回)
 
 ```bash
 # レビュー結果に基づいて自動修正
@@ -456,12 +456,12 @@ REVIEW_ITERATION=0
 MAX_REVIEW_ITERATIONS=5
 
 while [ $REVIEW_ITERATION -lt $MAX_REVIEW_ITERATIONS ]; do
-    echo "=== レビュー修正（試行 $((REVIEW_ITERATION + 1))/$MAX_REVIEW_ITERATIONS）==="
+    echo "=== レビュー修正(試行 $((REVIEW_ITERATION + 1))/$MAX_REVIEW_ITERATIONS) ==="
 
     # コードレビュー結果
     CODE_REVIEW_CRITICAL=$(cat /tmp/code-review.json | jq '.critical_count')
 
-    # デザインレビュー結果（Frontend時のみ）
+    # デザインレビュー結果(Frontend時のみ)
     if [ "$FRONTEND_DETECTED" = true ]; then
         DESIGN_REVIEW_CRITICAL=$(cat /tmp/design-review.json | jq '.critical_count')
     else
@@ -470,7 +470,7 @@ while [ $REVIEW_ITERATION -lt $MAX_REVIEW_ITERATIONS ]; do
 
     # Critical問題がなければループ終了
     if [ "$CODE_REVIEW_CRITICAL" -eq 0 ] && [ "$DESIGN_REVIEW_CRITICAL" -eq 0 ]; then
-        echo "✅ レビュー完了（Critical: 0）"
+        echo "✅ レビュー完了(Critical: 0)"
         break
     fi
 
@@ -482,7 +482,7 @@ done
 
 # 最大試行回数に達した場合
 if [ $REVIEW_ITERATION -eq $MAX_REVIEW_ITERATIONS ]; then
-    echo "❌ レビュー修正ループが最大試行回数（$MAX_REVIEW_ITERATIONS）に達しました"
+    echo "❌ レビュー修正ループが最大試行回数($MAX_REVIEW_ITERATIONS)に達しました"
     echo ""
     echo "次のアクション:"
     echo "A) 手動で修正を続ける"
@@ -501,10 +501,10 @@ fi
 
 ---
 
-## Phase 4: 最終検証（Michi拡張）
+## Phase 4: 最終検証(Michi拡張)
 
 ### 目的
-全品質基準を最終確認する。カバレッジ95%以上、Mutation Testing（オプション）を実施。
+全品質基準を最終確認する。カバレッジ95%以上、Mutation Testing(オプション)を実施。
 
 ### Step 4.1: 品質チェック最終実行
 
@@ -606,7 +606,7 @@ case "$LANGUAGE" in
         ;;
 esac
 
-# カバレッジ判定（95%以上）
+# カバレッジ判定(95%以上)
 if (( $(echo "$COVERAGE < 95" | bc -l) )); then
     echo "❌ Coverage failed: ${COVERAGE}% (required: 95%)"
     exit 1
@@ -615,7 +615,7 @@ else
 fi
 ```
 
-### Step 4.2: Mutation Testing（オプション）
+### Step 4.2: Mutation Testing(オプション)
 
 ```bash
 if [ "$MUTATION" = true ]; then
@@ -652,7 +652,7 @@ if [ "$MUTATION" = true ]; then
             ;;
     esac
 
-    # Mutation Score判定（80%以上）
+    # Mutation Score判定(80%以上)
     if (( $(echo "$MUTATION_SCORE < 80" | bc -l) )); then
         echo "❌ Mutation Testing failed: ${MUTATION_SCORE}% (required: 80%)"
         exit 1
@@ -695,61 +695,7 @@ echo "======================================"
 
 ---
 
-## Phase 4.4: PRサイズチェック（Michi拡張）
-
-### 目的
-レビュアビリティを確保するため、PRサイズを監視し、500行を超えた場合にPR分割を提案する。
-
-### Step 4.4.1: PRサイズ評価
-
-**重要**: このステップは品質チェック完了後、タスク完了マーク前に実行する。
-
-```markdown
-Task tool:
-  subagent_type: pr-size-monitor
-  prompt: |
-    現在の変更量を確認し、PRサイズを評価してください。
-
-    **機能名**: $1
-
-    **閾値**: 500行（追加+削除、除外ファイル除く）
-
-    **除外ファイル**:
-    - ロックファイル: package-lock.json, yarn.lock, pnpm-lock.yaml,
-      composer.lock, Gemfile.lock, poetry.lock, Cargo.lock, go.sum
-    - 自動生成: dist/*, build/*, coverage/*, .next/*, *.min.js, *.min.css
-
-    **実行手順**:
-    1. git diff --stat でベースブランチとの差分を取得
-    2. 除外ファイルを除いた行数を計算
-    3. 500行超過時:
-       - 現在の変更量を報告
-       - AskUserQuestionでPR作成を確認
-       - 同意があれば自動でPR作成（commit, push, gh pr create）
-       - 新しいブランチで残りの作業を継続
-    4. 500行未満: ✅ OK、Phase 4.5へ進行
-```
-
-**サブエージェント呼び出しの流れ**:
-
-```plaintext
-Phase 4.4 実行
-    ↓
-pr-size-monitor 起動
-    ↓
-変更量計測（500行超過？）
-    ├─ NO（500行未満）: ✅ OK → Phase 4.5へ
-    └─ YES（500行以上）:
-        ↓
-        AskUserQuestion（ユーザー確認）
-        ├─ A) PR作成する → commit → push → gh pr create → 新ブランチ提案
-        ├─ B) 作業続行 → 警告表示 → Phase 4.5へ
-        └─ C) 分割戦略提案 → 分割案表示 → 再度ユーザー確認
-```
-
----
-
-## Phase 4.5: タスク完了マーク（Michi拡張）
+## Phase 4.5: タスク完了マーク(Michi拡張)
 
 ### 目的
 各タスク実装完了後、tasks.mdのチェックボックスを更新してタスクの進捗を記録する。
@@ -780,7 +726,7 @@ fi
 
 ---
 
-## Phase 5: タスク完了後の処理（Michi拡張）
+## Phase 5: タスク完了後の処理(Michi拡張)
 
 ### 目的
 すべてのタスクが完了した場合、スペックをarchiveに移動する。
@@ -796,7 +742,7 @@ echo ""
 echo "すべてのタスクが完了しました。"
 echo ""
 echo "次のアクション:"
-echo "A) スペックをarchiveに移動する（推奨）"
+echo "A) スペックをarchiveに移動する(推奨)"
 echo "B) 追加のタスクを実行する"
 echo "C) 何もしない"
 echo ""
@@ -834,7 +780,41 @@ else
 fi
 ```
 
-### Step 5.2: Archive後の推奨アクション（参考情報）
+---
+
+## Phase 4.6: Progress Check Guidance(Michi拡張)
+
+### 目的
+タスク完了後、仕様全体の進捗状況を確認するコマンドを自動案内する。
+
+### 自動表示内容
+
+タスク完了マーク後、以下のガイダンスを自動表示する:
+
+```bash
+echo ""
+echo "========================================"
+echo " 📊 Progress Check - 進捗確認"
+echo "========================================"
+echo ""
+echo "タスク完了後、仕様全体の進捗状況を確認できます："
+echo ""
+echo "▶ /kiro:spec-status $1"
+echo ""
+echo "【確認できる内容】"
+echo "  - Requirements / Design / Tasks の完了率"
+echo "  - 完了タスク数 / 全タスク数"
+echo "  - 次に実行すべきアクション"
+echo "  - ブロッカーや不足要素"
+echo ""
+echo "========================================"
+```
+
+**注意**: このガイダンスはユーザー入力を待たずに自動表示し、Phase 5の選択フローに進む。
+
+---
+
+### Step 5.2: Archive後の推奨アクション(参考情報)
 
 ```markdown
 スペックをarchiveに移動した後の推奨アクション:
@@ -845,14 +825,14 @@ fi
 
 2. **PR作成**
    - 実装ブランチをmainにマージするPRを作成
-   - Phase Aテスト（unit, lint, build）を実行
+   - Phase Aテスト(unit, lint, build)を実行
 
 3. **リリース準備** (Phase B)
    - 統合テスト、E2Eテスト、パフォーマンステスト、セキュリティテストを実行
    - `/michi:confluence-sync` でリリース手順書を作成
 
 4. **次の機能開発**
-   - `/kiro:spec-init "description"` で新しいスペックを作成
+   - `/michi:spec-init "description"` で新しいスペックを作成
 ```
 
 ---
@@ -871,19 +851,19 @@ fi
 
 - ❌ ユーザー確認なしでのパッケージ変更
 - ❌ ユーザー確認なしでのバージョン変更
-- ❌ テストの仕様変更（実装に合わせてテストを変更しない）
+- ❌ テストの仕様変更(実装に合わせてテストを変更しない)
 - ❌ Critical問題を無視して処理を続行
 
 ---
 
 ## 参考資料
 
-### Web調査結果（ベストプラクティス）
+### Web調査結果(ベストプラクティス)
 - [TDD Best Practices 2025](https://www.nopaccelerate.com/test-driven-development-guide-2025/) - AI活用TDD
 - [Parallel Testing Guide](https://www.accelq.com/blog/parallel-testing/) - 並行実行のベストプラクティス
 - [AI Agent Orchestration](https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/ai-agent-design-patterns) - 並行実行パターン
 
 ### 関連コマンド
-- `/kiro:spec-impl` - ベースコマンド（TDD実装）
-- `/michi:spec-design` - 設計書生成（Phase 0.3-0.4ガイダンス付き）
-- `/michi:validate-design` - 設計レビュー（テスト計画確認付き）
+- `/kiro:spec-impl` - ベースコマンド(TDD実装)
+- `/michi:spec-design` - 設計書生成(Phase 0.3-0.4ガイダンス付き)
+- `/michi:validate-design` - 設計レビュー(テスト計画確認付き)

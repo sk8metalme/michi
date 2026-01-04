@@ -75,7 +75,7 @@ export class InitSpecUseCase {
     return ok({
       featureName,
       createdFiles: ['spec.json', 'requirements.md'],
-      nextCommand: `/kiro:spec-requirements ${featureName.value}`,
+      nextCommand: `/michi:spec-requirements ${featureName.value}`,
     });
   }
 
