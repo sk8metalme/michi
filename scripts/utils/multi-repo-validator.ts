@@ -159,13 +159,13 @@ export function validateRepositoryUrl(url: string): Result<boolean, string> {
 
 /**
  * Michi導入状況をチェック
- * .kiro/project.json の存在でMichi導入済みと判定
+ * .michi/project.json の存在でMichi導入済みと判定
  *
  * @param localPath - 子リポジトリのlocalPath
  * @returns Michi導入済みかどうか
  */
 export function hasMichiSetup(localPath: string): boolean {
-  const projectJsonPath = path.join(localPath, '.kiro', 'project.json');
+  const projectJsonPath = path.join(localPath, '.michi', 'project.json');
   return fs.existsSync(projectJsonPath);
 }
 
@@ -330,7 +330,7 @@ export function validateLocalPath(
   if (!hasMichiSetupResult) {
     michiSetupCommand = getMichiSetupCommand(localPath);
     warnings.push(
-      `Repository '${repository.name}' does not have Michi setup (.kiro/project.json not found)`,
+      `Repository '${repository.name}' does not have Michi setup (.michi/project.json not found)`,
     );
   }
 

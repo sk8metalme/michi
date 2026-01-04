@@ -24,7 +24,7 @@ export function analyzeDockerRequirement(feature: string, projectRoot: string = 
   let score = 0;
   
   // design.mdを解析
-  const designPath = join(projectRoot, '.kiro', 'specs', feature, 'design.md');
+  const designPath = join(projectRoot, '.michi', 'specs', feature, 'design.md');
   if (existsSync(designPath)) {
     const design = safeReadFileOrThrow(designPath, 'utf-8');
     
@@ -88,7 +88,7 @@ export function analyzeDockerRequirement(feature: string, projectRoot: string = 
   }
   
   // test-type-selection.jsonを解析
-  const testSelectionPath = join(projectRoot, '.kiro', 'specs', feature, 'test-type-selection.json');
+  const testSelectionPath = join(projectRoot, '.michi', 'specs', feature, 'test-type-selection.json');
   if (existsSync(testSelectionPath)) {
     try {
       const testSelection = JSON.parse(safeReadFileOrThrow(testSelectionPath, 'utf-8'));
@@ -117,7 +117,7 @@ export function analyzeDockerRequirement(feature: string, projectRoot: string = 
   }
   
   // requirements.mdを解析
-  const requirementsPath = join(projectRoot, '.kiro', 'specs', feature, 'requirements.md');
+  const requirementsPath = join(projectRoot, '.michi', 'specs', feature, 'requirements.md');
   if (existsSync(requirementsPath)) {
     const requirements = safeReadFileOrThrow(requirementsPath, 'utf-8');
     

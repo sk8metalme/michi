@@ -1,6 +1,6 @@
 /**
  * 仕様書アーカイブユーティリティ
- * 完了した仕様書を .kiro/specs/archive/ に移動する
+ * 完了した仕様書を .michi/specs/archive/ に移動する
  */
 
 import { existsSync, renameSync, mkdirSync, readdirSync, writeFileSync } from 'fs';
@@ -67,7 +67,7 @@ export function canArchiveSpec(
     };
   }
 
-  const specDir = resolve(projectRoot, `.kiro/specs/${featureName}`);
+  const specDir = resolve(projectRoot, `.michi/specs/${featureName}`);
 
   if (!existsSync(specDir)) {
     return { canArchive: false, reason: 'Spec not found' };
@@ -137,8 +137,8 @@ export function archiveSpec(
     return { success: false, feature: featureName, error: check.reason };
   }
 
-  const sourceDir = resolve(projectRoot, `.kiro/specs/${featureName}`);
-  const archiveDir = resolve(projectRoot, '.kiro/specs/archive');
+  const sourceDir = resolve(projectRoot, `.michi/specs/${featureName}`);
+  const archiveDir = resolve(projectRoot, '.michi/specs/archive');
   const targetDir = resolve(archiveDir, featureName);
 
   // archive ディレクトリ作成
@@ -178,7 +178,7 @@ export function listSpecs(
   projectRoot: string = process.cwd()
 ): SpecInfo[] {
   const specs: SpecInfo[] = [];
-  const specsDir = resolve(projectRoot, '.kiro/specs');
+  const specsDir = resolve(projectRoot, '.michi/specs');
 
   if (!existsSync(specsDir)) {
     return specs;

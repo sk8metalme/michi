@@ -145,17 +145,17 @@ npx cc-sdd@latest --claude --lang ja
 ```text
 ✔ Claude Code detected
 ✔ Setting up cc-sdd for Claude...
-✔ Created .kiro/ directory structure
+✔ Created .michi/ directory structure
 ✔ Installed kiro commands
 ✔ Setup complete!
 
 Next steps:
   1. Start Claude Code
-  2. Type /kiro:spec-init "<feature-name>: <description>"
+  2. Type /michi:spec-init "<feature-name>: <description>"
 ```
 </details>
 
-- [ ] **チェック**: cc-sddセットアップ完了、`.kiro/` ディレクトリ作成確認
+- [ ] **チェック**: cc-sddセットアップ完了、`.michi/` ディレクトリ作成確認
 
 ### 2.2 Michiプラグインインストール
 
@@ -315,7 +315,7 @@ michi config:check-security # セキュリティチェック
 
 **コマンド**:
 ```text
-/kiro:spec-init "test-feature: テスト用の新機能実装"
+/michi:spec-init "test-feature: テスト用の新機能実装"
 ```
 
 <details>
@@ -324,17 +324,17 @@ michi config:check-security # セキュリティチェック
 ```text
 📋 仕様初期化: test-feature
 
-✅ ディレクトリ作成: .kiro/specs/test-feature/
+✅ ディレクトリ作成: .michi/specs/test-feature/
 ✅ spec.json作成
 ✅ requirements.mdテンプレート作成
 
 次のステップ:
-  /kiro:spec-requirements test-feature
+  /michi:spec-requirements test-feature
 ```
 </details>
 
 **確認事項**:
-- [ ] `.kiro/specs/test-feature/` ディレクトリ作成確認
+- [ ] `.michi/specs/test-feature/` ディレクトリ作成確認
 - [ ] `spec.json` 生成確認（language: ja, phase: requirements-pending）
 - [ ] `requirements.md` テンプレート確認
 
@@ -342,7 +342,7 @@ michi config:check-security # セキュリティチェック
 
 **コマンド**:
 ```text
-/kiro:spec-requirements test-feature
+/michi:spec-requirements test-feature
 ```
 
 <details>
@@ -400,7 +400,7 @@ michi config:check-security # セキュリティチェック
   - テスト計画: 42テストケース
 
 次のステップ:
-  /kiro:validate-design test-feature  # オプション
+  /michi:validate-design test-feature  # オプション
   /michi:spec-tasks test-feature
 ```
 </details>
@@ -415,7 +415,7 @@ michi config:check-security # セキュリティチェック
 
 **コマンド**:
 ```text
-/kiro:validate-design test-feature
+/michi:validate-design test-feature
 ```
 
 <details>
@@ -641,7 +641,7 @@ michi phase:run test-feature environment-setup
   - 全テストパス: 124/124
 
 次のステップ:
-  /kiro:validate-impl test-feature  # オプション
+  /michi:validate-impl test-feature  # オプション
   git add . && git commit -m "feat: test-feature implementation"
 ```
 </details>
@@ -657,7 +657,7 @@ michi phase:run test-feature environment-setup
 
 **コマンド**:
 ```text
-/kiro:validate-impl test-feature
+/michi:validate-impl test-feature
 ```
 
 <details>
@@ -919,7 +919,7 @@ npm notice
 
 **コマンド**:
 ```text
-/kiro:spec-archive test-feature
+/michi:spec-archive test-feature
 ```
 
 <details>
@@ -928,9 +928,9 @@ npm notice
 ```text
 📦 仕様アーカイブ実行中...
 
-✅ アーカイブ作成: .kiro/specs/archived/test-feature-20260101/
+✅ アーカイブ作成: .michi/specs/archived/test-feature-20260101/
 ✅ メタデータ更新: archived_at: 2026-01-01T12:00:00Z
-✅ 元ディレクトリ削除: .kiro/specs/test-feature/
+✅ 元ディレクトリ削除: .michi/specs/test-feature/
 
 ✅ アーカイブ完了
 ```
@@ -938,7 +938,7 @@ npm notice
 
 **確認事項**:
 - [ ] 仕様アーカイブ確認
-- [ ] `.kiro/specs/archived/` 移動確認
+- [ ] `.michi/specs/archived/` 移動確認
 
 ---
 
@@ -957,7 +957,7 @@ npm notice
 ```text
 🚀 Multi-Repoプロジェクト初期化中...
 
-✅ 親プロジェクト作成: .kiro/multi-repo/multi-repo-test/
+✅ 親プロジェクト作成: .michi/multi-repo/multi-repo-test/
 ✅ metadata.json作成
 ✅ overview/ディレクトリ作成
 ✅ steering/ディレクトリ作成
@@ -975,7 +975,7 @@ npm notice
 
 **確認事項**:
 - [ ] 親プロジェクト作成確認
-- [ ] メタデータ設定確認（.kiro/multi-repo/multi-repo-test/metadata.json）
+- [ ] メタデータ設定確認（.michi/multi-repo/multi-repo-test/metadata.json）
 
 ### 4.2 リポジトリ追加
 
@@ -1531,8 +1531,8 @@ Info:
 
 **コマンド**:
 ```text
-/kiro:steering
-/kiro:steering-custom
+/michi:steering
+/michi:steering-custom
 ```
 
 <details>
@@ -1541,12 +1541,12 @@ Info:
 ```text
 📝 Steeringドキュメント管理
 
-/kiro:steering:
-  ✅ .kiro/steering/product.md 作成
-  ✅ .kiro/steering/tech.md 作成
-  ✅ .kiro/steering/structure.md 作成
+/michi:steering:
+  ✅ .michi/steering/product.md 作成
+  ✅ .michi/steering/tech.md 作成
+  ✅ .michi/steering/structure.md 作成
 
-/kiro:steering-custom:
+/michi:steering-custom:
   選択したカスタムSteering:
     ✅ api-standards.md
     ✅ security.md
@@ -1557,7 +1557,7 @@ Info:
 </details>
 
 **確認事項**:
-- [ ] ステアリングドキュメント作成確認（.kiro/steering/）
+- [ ] ステアリングドキュメント作成確認（.michi/steering/）
 - [ ] カスタムステアリング作成確認
 
 ### 7.2 ドキュメントレビュー
@@ -1601,7 +1601,7 @@ Info:
 
 **コマンド**:
 ```text
-/kiro:spec-status test-feature
+/michi:spec-status test-feature
 ```
 
 <details>
@@ -1750,7 +1750,7 @@ michi migrate --rollback /path/to/backup
 
 1. **タスクステータス確認**:
    ```text
-   /kiro:spec-status <feature>
+   /michi:spec-status <feature>
    ```
 
 2. **部分再実装**（特定タスクのみ）:
@@ -1776,7 +1776,7 @@ michi migrate --rollback /path/to/backup
 **対処手順**:
 
 1. **チェックポイント確認**:
-   - `.kiro/multi-repo/<project>/checkpoints/` を確認
+   - `.michi/multi-repo/<project>/checkpoints/` を確認
 
 2. **個別リポジトリで修正**:
    - 失敗したリポジトリをクローン

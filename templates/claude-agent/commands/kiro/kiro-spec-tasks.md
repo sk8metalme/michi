@@ -5,7 +5,7 @@ description: Generate tasks.md from design specification in Michi workflow forma
 
 # Generate Tasks from Design Specification
 
-**Important**: Generate output in the language specified in `{{KIRO_DIR}}/project.json`.
+**Important**: Generate output in the language specified in `{{SPEC_DIR}}/project.json`.
 
 ## Overview
 
@@ -21,13 +21,13 @@ This command generates a detailed task breakdown (`tasks.md`) from the design sp
 
 ## Input Files
 
-1. `{{KIRO_DIR}}/specs/{{FEATURE_NAME}}/design.md` - Design specification
-2. `{{KIRO_DIR}}/specs/{{FEATURE_NAME}}/requirements.md` - Requirements specification
-3. `{{KIRO_DIR}}/project.json` - Project metadata
+1. `{{SPEC_DIR}}/specs/{{FEATURE_NAME}}/design.md` - Design specification
+2. `{{SPEC_DIR}}/specs/{{FEATURE_NAME}}/requirements.md` - Requirements specification
+3. `{{SPEC_DIR}}/project.json` - Project metadata
 
 ## Output File
 
-`{{KIRO_DIR}}/specs/{{FEATURE_NAME}}/tasks.md`
+`{{SPEC_DIR}}/specs/{{FEATURE_NAME}}/tasks.md`
 
 ## Required Format: Michi Workflow Structure
 
@@ -114,7 +114,7 @@ Each story within a phase MUST use this format:
 - **Effort**: 0.5 person-days
 - **Description**: Create feature requirements document
 - **Deliverables**:
-  - `.kiro/specs/{{FEATURE_NAME}}/requirements.md`
+  - `.michi/specs/{{FEATURE_NAME}}/requirements.md`
   - Confluence page (Requirements)
 - **Acceptance Criteria**:
   - [ ] Functional requirements defined
@@ -138,7 +138,7 @@ Each story within a phase MUST use this format:
 - **Effort**: 0.5-1.0 person-days
 - **Description**: Architecture design, API design, class design
 - **Deliverables**:
-  - `.kiro/specs/{{FEATURE_NAME}}/design.md`
+  - `.michi/specs/{{FEATURE_NAME}}/design.md`
   - Confluence page (Design Document)
 - **Acceptance Criteria**:
   - [ ] System architecture diagram created
@@ -334,11 +334,11 @@ Each story is automatically assigned the following labels:
 
 ## Execution Steps
 
-1. Read `{{KIRO_DIR}}/specs/{{FEATURE_NAME}}/design.md`
-2. Read `{{KIRO_DIR}}/specs/{{FEATURE_NAME}}/requirements.md`
+1. Read `{{SPEC_DIR}}/specs/{{FEATURE_NAME}}/design.md`
+2. Read `{{SPEC_DIR}}/specs/{{FEATURE_NAME}}/requirements.md`
 3. Analyze design components and create Story breakdown
 4. Generate `tasks.md` following the Michi Workflow Format above
-5. Save to `{{KIRO_DIR}}/specs/{{FEATURE_NAME}}/tasks.md`
+5. Save to `{{SPEC_DIR}}/specs/{{FEATURE_NAME}}/tasks.md`
 
 ## Validation Checklist
 

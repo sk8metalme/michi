@@ -24,8 +24,8 @@ description: Sync specifications to Confluence (Michi-specific feature)
 
 ## Execution Steps
 
-1. Read specifications from {{KIRO_DIR}}/specs/{{FEATURE_NAME}}/
-2. Load project metadata from {{KIRO_DIR}}/project.json
+1. Read specifications from {{SPEC_DIR}}/specs/{{FEATURE_NAME}}/
+2. Load project metadata from {{SPEC_DIR}}/project.json
 3. Sync requirements.md to Confluence
 4. Sync design.md to Confluence
 5. Create/update Confluence pages with proper labels
@@ -33,12 +33,12 @@ description: Sync specifications to Confluence (Michi-specific feature)
 
 ## Language Handling
 
-- Read language from {{KIRO_DIR}}/project.json
+- Read language from {{SPEC_DIR}}/project.json
 - Generate all output in the specified language
 - Use Confluence labels from project.json for page organization
 
 ## Project Metadata
 
 - Project ID: {{PROJECT_ID}}
-- Kiro directory: {{KIRO_DIR}}
+- Spec directory: {{SPEC_DIR}}
 - Agent directory: {{AGENT_DIR}}

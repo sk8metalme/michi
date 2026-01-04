@@ -83,7 +83,7 @@ export interface SpecJson {
  * spec.json を読み込む
  */
 export function loadSpecJson(featureName: string, projectRoot: string = process.cwd()): SpecJson {
-  const specPath = resolve(projectRoot, `.kiro/specs/${featureName}/spec.json`);
+  const specPath = resolve(projectRoot, `.michi/specs/${featureName}/spec.json`);
 
   if (!existsSync(specPath)) {
     // 新規作成する場合は最低限の構造を返す
@@ -121,7 +121,7 @@ export function loadSpecJson(featureName: string, projectRoot: string = process.
  * @param projectRoot プロジェクトルート（デフォルト: process.cwd()）
  */
 export function saveSpecJson(featureName: string, spec: SpecJson, projectRoot: string = process.cwd()): void {
-  const specDir = resolve(projectRoot, `.kiro/specs/${featureName}`);
+  const specDir = resolve(projectRoot, `.michi/specs/${featureName}`);
   const specPath = resolve(specDir, 'spec.json');
 
   // ディレクトリが存在しない場合は作成

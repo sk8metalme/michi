@@ -190,7 +190,7 @@ function validateConfigPath(configPath: string, projectRoot: string): boolean {
 function resolveConfigPath(projectRoot: string): string {
   const michiConfigPath = resolve(projectRoot, '.michi/config.json');
   const legacyConfigPath = resolve(projectRoot, '.kiro/config.json');
-  
+
   // legacyパスが存在する場合は警告（移行推奨）
   if (existsSync(legacyConfigPath) && !existsSync(michiConfigPath)) {
     console.warn(
@@ -199,7 +199,7 @@ function resolveConfigPath(projectRoot: string): string {
       '   The legacy path will not be supported in future versions.\n'
     );
   }
-  
+
   return michiConfigPath;
 }
 
@@ -306,10 +306,10 @@ function loadProjectEnv(projectRoot: string): Record<string, string> {
 
 /**
  * プロジェクトメタデータを読み込み
- * .kiro/project.json からプロジェクト情報を読み込む
+ * .michi/project.json からプロジェクト情報を読み込む
  */
 function loadProjectMetadata(projectRoot: string): Partial<AppConfig> | null {
-  const projectJsonPath = resolve(projectRoot, '.kiro/project.json');
+  const projectJsonPath = resolve(projectRoot, '.michi/project.json');
 
   if (!existsSync(projectJsonPath)) {
     return null;
@@ -392,7 +392,7 @@ function applyEnvVarsToConfig(
  * 1. デフォルト設定
  * 2. グローバル.env（~/.michi/.env）
  * 3. グローバル設定（~/.michi/config.json）
- * 4. プロジェクトメタデータ（.kiro/project.json）
+ * 4. プロジェクトメタデータ（.michi/project.json）
  * 5. プロジェクト設定（.michi/config.json）
  * 6. プロジェクト.env（.env）- 最高優先度
  */
@@ -451,7 +451,7 @@ export function getConfig(projectRoot: string = process.cwd()): AppConfig {
   const projectConfigPath = resolveConfigPath(projectRoot);
   const globalConfigPath = getGlobalConfigPath();
   const globalEnvPath = getGlobalEnvPath();
-  const projectMetaPath = resolve(projectRoot, '.kiro/project.json');
+  const projectMetaPath = resolve(projectRoot, '.michi/project.json');
   const projectEnvPath = resolve(projectRoot, '.env');
   const currentFileUrl = import.meta.url;
   const currentFilePath = fileURLToPath(currentFileUrl);

@@ -299,6 +299,6 @@ export type ConfigSource =
   | 'default'        // default-config.json
   | 'global-env'     // ~/.michi/.env
   | 'global-config'  // ~/.michi/config.json
-  | 'project-meta'   // .kiro/project.json
+  | 'project-meta'   // .michi/project.json
   | 'project-config' // .michi/config.json
   | 'project-env';   // .env

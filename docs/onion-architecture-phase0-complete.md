@@ -88,4 +88,4 @@ Duration: 4.63s
 Phase 0の全タスクが完了し、コードベース簡素化の基盤が整いました。
 次のフェーズでオニオンアーキテクチャの層構造を構築します。
 
-詳細な検証レポートは `.kiro/specs/onion-architecture/phase0-verification.md` を参照してください。
+詳細な検証レポートは `.michi/specs/onion-architecture/phase0-verification.md` を参照してください。

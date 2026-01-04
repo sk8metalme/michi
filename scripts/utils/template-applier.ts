@@ -44,7 +44,7 @@ export interface TemplateData {
 export function loadTestSpecTemplate(testType: string, projectRoot: string = process.cwd()): string {
   const templatePath = join(
     projectRoot,
-    '.kiro',
+    '.michi',
     'settings',
     'templates',
     'test-specs',

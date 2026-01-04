@@ -25,7 +25,7 @@ Placeholders are replaced with project-specific values during setup.
 
 - {{LANG_CODE}}: Language code (ja, en, etc.)
 - {{DEV_GUIDELINES}}: Development guidelines
-- {{KIRO_DIR}}: Kiro directory (default: .kiro)
+- {{SPEC_DIR}}: Kiro directory (default: .michi)
 - {{AGENT_DIR}}: Agent directory (default: .claude)
 - {{PROJECT_ID}}: Project ID
 - {{FEATURE_NAME}}: Feature name

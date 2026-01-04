@@ -143,6 +143,10 @@ describe('config-loader', () => {
         rmSync(legacyDir, { recursive: true, force: true });
       }
 
+      // .michiディレクトリを作成
+      const michiDir = join(testProjectRoot, '.michi');
+      mkdirSync(michiDir, { recursive: true });
+
       const configPath = join(testProjectRoot, '.michi/config.json');
       writeFileSync(configPath, JSON.stringify({
         confluence: {
@@ -209,7 +213,7 @@ describe('config-loader', () => {
         rmSync(michiDir, { recursive: true, force: true });
       }
 
-      // legacyパスにファイルを作成
+      // legacyパス（.kiro）にファイルを作成
       mkdirSync(join(testProjectRoot, '.kiro'), { recursive: true });
       const legacyConfigPath = join(testProjectRoot, '.kiro/config.json');
       writeFileSync(legacyConfigPath, JSON.stringify({
@@ -230,13 +234,14 @@ describe('config-loader', () => {
 
       consoleWarnSpy.mockRestore();
 
-      // 次のテストのために.michiディレクトリを再作成
+      // 次のテストのために.michiディレクトリを作成
       mkdirSync(michiDir, { recursive: true });
     });
 
     it('legacyパスと新規パスの両方が存在する場合は警告を表示しない', () => {
       // 両方のパスにファイルを作成
       mkdirSync(join(testProjectRoot, '.kiro'), { recursive: true });
+      mkdirSync(join(testProjectRoot, '.michi'), { recursive: true });
       const legacyConfigPath = join(testProjectRoot, '.kiro/config.json');
       const michiConfigPath = join(testProjectRoot, '.michi/config.json');
       writeFileSync(legacyConfigPath, JSON.stringify({}));
@@ -297,9 +302,9 @@ describe('config-loader', () => {
       it('project.jsonからプロジェクトメタデータを読み込む', () => {
         clearConfigCache();
 
-        // .kiro/project.json を作成
-        const projectJsonPath = join(testProjectRoot, '.kiro', 'project.json');
-        mkdirSync(join(testProjectRoot, '.kiro'), { recursive: true });
+        // .michi/project.json を作成
+        const projectJsonPath = join(testProjectRoot, '.michi', 'project.json');
+        mkdirSync(join(testProjectRoot, '.michi'), { recursive: true });
         writeFileSync(projectJsonPath, JSON.stringify({
           projectId: 'test-project',
           projectName: 'Test Project',
@@ -316,8 +321,8 @@ describe('config-loader', () => {
       it('project.jsonが存在しない場合でもエラーにならない', () => {
         clearConfigCache();
 
-        // .kiro/project.json を削除
-        const projectJsonPath = join(testProjectRoot, '.kiro', 'project.json');
+        // .michi/project.json を削除
+        const projectJsonPath = join(testProjectRoot, '.michi', 'project.json');
         if (existsSync(projectJsonPath)) {
           unlinkSync(projectJsonPath);
         }
@@ -374,8 +379,8 @@ describe('config-loader', () => {
         clearConfigCache();
 
         // 最初の設定
-        const projectJsonPath = join(testProjectRoot, '.kiro', 'project.json');
-        mkdirSync(join(testProjectRoot, '.kiro'), { recursive: true });
+        const projectJsonPath = join(testProjectRoot, '.michi', 'project.json');
+        mkdirSync(join(testProjectRoot, '.michi'), { recursive: true });
         writeFileSync(projectJsonPath, JSON.stringify({
           projectId: 'initial-id',
           projectName: 'Initial Name'

@@ -214,7 +214,7 @@ export async function getOrCreateEpic(
     );
   }
 
-  const epicDescription = `機能: ${featureName}\nGitHub: ${projectMeta.repository}/tree/main/.kiro/specs/${featureName}`;
+  const epicDescription = `機能: ${featureName}\nGitHub: ${projectMeta.repository}/tree/main/.michi/specs/${featureName}`;
 
   const epicPayload = {
     fields: {

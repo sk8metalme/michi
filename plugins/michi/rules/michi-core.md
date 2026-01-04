@@ -11,18 +11,18 @@ description: Core principles for GitHub SSoT and multi-project management
 ## Language
 All generated documents should be in: **{{LANG_CODE}}**
 
-Reference the language field in {{KIRO_DIR}}/project.json.
+Reference the language field in {{SPEC_DIR}}/project.json.
 
 ## Single Source of Truth (SSoT)
 
 ### GitHub as SSoT
-- **All specifications are managed in GitHub** ({{KIRO_DIR}}/specs/)
+- **All specifications are managed in GitHub** ({{SPEC_DIR}}/specs/)
 - Confluence is **reference and approval only** (editing is GitHub only)
 - Avoid duplicate management
 
 ### Data Flow
-```
-GitHub ({{KIRO_DIR}}/specs/)  ← Source of truth (editable)
+```text
+GitHub ({{SPEC_DIR}}/specs/)  ← Source of truth (editable)
     ↓ sync
 Confluence ← Display and approval (read-only)
 ```
@@ -30,7 +30,7 @@ Confluence ← Display and approval (read-only)
 ## Multi-Project Management
 
 ### Project Identification
-- All operations reference {{KIRO_DIR}}/project.json
+- All operations reference {{SPEC_DIR}}/project.json
 - Dynamically use project ID, JIRA key, Confluence labels
 - Project ID: {{PROJECT_ID}}
 
@@ -42,7 +42,7 @@ Confluence ← Display and approval (read-only)
 
 #### JIRA Epic/Story
 - Format: `[{JIRA_KEY}] {title}`
-- Use project metadata from {{KIRO_DIR}}/project.json
+- Use project metadata from {{SPEC_DIR}}/project.json
 
 ## Agent Directory
 - Agent configuration: {{AGENT_DIR}}
@@ -51,4 +51,4 @@ Confluence ← Display and approval (read-only)
 
 ## Feature Development
 - Feature name: {{FEATURE_NAME}}
-- Spec location: {{KIRO_DIR}}/specs/{{FEATURE_NAME}}/
+- Spec location: {{SPEC_DIR}}/specs/{{FEATURE_NAME}}/

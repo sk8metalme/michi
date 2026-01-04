@@ -32,7 +32,6 @@ describe('migrate command', () => {
 
     // テスト用ディレクトリ構造を作成
     mkdirSync(testProjectRoot, { recursive: true });
-    mkdirSync(join(testProjectRoot, '.kiro'), { recursive: true });
     mkdirSync(join(testProjectRoot, '.michi'), { recursive: true });
     mkdirSync(testHomeDir, { recursive: true });
     mkdirSync(join(testHomeDir, '.michi'), { recursive: true });
@@ -91,7 +90,7 @@ GITHUB_REPO=test-org/test-repo
       writeFileSync(join(testProjectRoot, '.env'), envContent);
 
       // project.json を作成
-      writeFileSync(join(testProjectRoot, '.kiro', 'project.json'), JSON.stringify({
+      writeFileSync(join(testProjectRoot, '.michi', 'project.json'), JSON.stringify({
         projectId: 'test-project',
         projectName: 'Test Project'
       }, null, 2));
@@ -125,7 +124,7 @@ GITHUB_REPO=test-org/test-repo
       expect(projectEnvContent).not.toContain('GITHUB_TOKEN');
 
       // project.json に repository が追加されたことを確認
-      const projectJson = JSON.parse(readFileSync(join(testProjectRoot, '.kiro', 'project.json'), 'utf-8'));
+      const projectJson = JSON.parse(readFileSync(join(testProjectRoot, '.michi', 'project.json'), 'utf-8'));
       expect(projectJson.repository).toBe('https://github.com/test-org/test-repo.git');
 
       // GITHUB_REPO が削除されたことを確認
@@ -233,7 +232,7 @@ GITHUB_REPO=test-org/test-repo
       writeFileSync(join(testProjectRoot, '.env'), 'GITHUB_REPO=myorg/myrepo\nJIRA_PROJECT_KEYS=TEST');
 
       // project.json を作成
-      writeFileSync(join(testProjectRoot, '.kiro', 'project.json'), JSON.stringify({
+      writeFileSync(join(testProjectRoot, '.michi', 'project.json'), JSON.stringify({
         projectId: 'test-project',
         projectName: 'Test Project'
       }, null, 2));
@@ -242,7 +241,7 @@ GITHUB_REPO=test-org/test-repo
       await migrate({ force: true });
 
       // project.json に repository が追加されたことを確認
-      const projectJson = JSON.parse(readFileSync(join(testProjectRoot, '.kiro', 'project.json'), 'utf-8'));
+      const projectJson = JSON.parse(readFileSync(join(testProjectRoot, '.michi', 'project.json'), 'utf-8'));
       expect(projectJson.repository).toBe('https://github.com/myorg/myrepo.git');
 
       // .env から GITHUB_REPO が削除されたことを確認

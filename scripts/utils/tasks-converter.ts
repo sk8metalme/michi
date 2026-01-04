@@ -297,7 +297,7 @@ export function convertToMichiFormat(
   );
   lines.push(`- **${language === 'ja' ? '成果物' : 'Deliverables'}**:`);
   lines.push(
-    `  - \`.kiro/specs/${projectName.toLowerCase().replace(/\s+/g, '-')}/requirements.md\``,
+    `  - \`.michi/specs/${projectName.toLowerCase().replace(/\s+/g, '-')}/requirements.md\``,
   );
   lines.push(
     `- **${language === 'ja' ? '受け入れ基準' : 'Acceptance Criteria'}**:`,
@@ -335,7 +335,7 @@ export function convertToMichiFormat(
   );
   lines.push(`- **${language === 'ja' ? '成果物' : 'Deliverables'}**:`);
   lines.push(
-    `  - \`.kiro/specs/${projectName.toLowerCase().replace(/\s+/g, '-')}/design.md\``,
+    `  - \`.michi/specs/${projectName.toLowerCase().replace(/\s+/g, '-')}/design.md\``,
   );
   lines.push(
     `- **${language === 'ja' ? '受け入れ基準' : 'Acceptance Criteria'}**:`,

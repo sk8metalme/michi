@@ -64,7 +64,7 @@ michi/
 │   ├── cursor/         # Cursor IDE用
 │   ├── claude/         # Claude Code用
 │   └── claude-agent/   # Claude Agent用
-├── .kiro/              # AI-DLC設定（cc-sdd標準）
+├── .michi/              # AI-DLC設定（cc-sdd標準）
 │   ├── project.json    # プロジェクトメタデータ
 │   ├── settings/       # テンプレート
 │   ├── specs/          # 機能仕様書（GitHub SSoT）

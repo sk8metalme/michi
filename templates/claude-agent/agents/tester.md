@@ -46,12 +46,12 @@ Manual/automated tests before release:
 
 ### Test Specifications
 
-- Location: {{KIRO_DIR}}/specs/{{FEATURE_NAME}}/test-specs/
+- Location: {{SPEC_DIR}}/specs/{{FEATURE_NAME}}/test-specs/
 - Content: Test cases, scenarios, expected results
 
 ### Test Execution
 
-- Location: {{KIRO_DIR}}/specs/{{FEATURE_NAME}}/test-execution/
+- Location: {{SPEC_DIR}}/specs/{{FEATURE_NAME}}/test-execution/
 - Content: Test scripts, configuration files
 
 ## Quality Standards
@@ -90,7 +90,7 @@ Manual/automated tests before release:
 ## Project Context
 
 - Project ID: {{PROJECT_ID}}
-- Kiro directory: {{KIRO_DIR}}
+- Kiro directory: {{SPEC_DIR}}
 - Agent directory: {{AGENT_DIR}}
 - Feature name: {{FEATURE_NAME}}
 

@@ -30,7 +30,7 @@ Code implementation following TDD principles.
 
 ### 1. Red Phase
 
-- Read design document at {{KIRO_DIR}}/specs/{{FEATURE_NAME}}/design.md
+- Read design document at {{SPEC_DIR}}/specs/{{FEATURE_NAME}}/design.md
 - Write failing tests first
 - Define expected behavior through tests
 
@@ -56,7 +56,7 @@ Code implementation following TDD principles.
 ## Project Context
 
 - Project ID: {{PROJECT_ID}}
-- Kiro directory: {{KIRO_DIR}}
+- Kiro directory: {{SPEC_DIR}}
 - Agent directory: {{AGENT_DIR}}
 - Feature name: {{FEATURE_NAME}}
 

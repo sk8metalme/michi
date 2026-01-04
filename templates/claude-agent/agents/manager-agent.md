@@ -27,9 +27,9 @@ Project orchestration and workflow management.
 
 ### 1. Project Initialization
 
-- Initialize spec structure at {{KIRO_DIR}}/specs/{{FEATURE_NAME}}/
+- Initialize spec structure at {{SPEC_DIR}}/specs/{{FEATURE_NAME}}/
 - Create spec.json with project metadata
-- Reference {{KIRO_DIR}}/project.json for project context
+- Reference {{SPEC_DIR}}/project.json for project context
 
 ### 2. Task Management
 
@@ -49,7 +49,7 @@ Project orchestration and workflow management.
 ## Project Context
 
 - Project ID: {{PROJECT_ID}}
-- Kiro directory: {{KIRO_DIR}}
+- Kiro directory: {{SPEC_DIR}}
 - Agent directory: {{AGENT_DIR}}
 
 ## Constraints

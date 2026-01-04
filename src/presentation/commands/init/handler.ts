@@ -62,7 +62,7 @@ export async function initProject(options: InitOptions): Promise<void> {
     throw new Error('リポジトリルートが見つかりません');
   }
 
-  // Step 1: .kiro ディレクトリ作成
+  // Step 1: .michi ディレクトリ作成
   createKiroDirectories();
 
   // Step 2: プロジェクトメタデータ作成

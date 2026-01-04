@@ -132,7 +132,7 @@ describe('multi-project-estimate pagination', () => {
     // 実際の呼び出しでは以下のようなパラメータが使われる:
     // { org: 'test-org', per_page: 100 }
     // { owner: 'org', repo: 'name', path: 'projects', per_page: 100 }
-    // { owner: 'org', repo: 'name', path: 'projects/x/.kiro/specs', per_page: 100 }
+    // { owner: 'org', repo: 'name', path: 'projects/x/.michi/specs', per_page: 100 }
   });
 
   it('エラー発生時にスキップして処理を継続する', async () => {

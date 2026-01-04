@@ -500,8 +500,8 @@ npm run michi
 ## 関連ドキュメント
 
 - [アーキテクチャガイド](architecture.md) - 4層構造の詳細説明
-- [プロジェクト構成](.kiro/steering/structure.md) - 全体構成
-- [開発ワークフロー](.kiro/steering/workflow.md) - 開発フロー
+- [プロジェクト構成](architecture.md#ディレクトリ構造) - 全体構成
+- [開発ワークフロー](guides/workflow.md) - 開発フロー
 
 ## バージョン履歴
 

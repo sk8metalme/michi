@@ -99,10 +99,10 @@ export async function syncToConfluence(
     console.log('📝 Config source: default config');
   }
 
-  const markdownPath = resolve(`.kiro/specs/${featureName}/${docType}.md`);
+  const markdownPath = resolve(`.michi/specs/${featureName}/${docType}.md`);
   const markdown = safeReadFileOrThrow(markdownPath);
 
-  const githubUrl = `${projectMeta.repository}/blob/main/.kiro/specs/${featureName}/${docType}.md`;
+  const githubUrl = `${projectMeta.repository}/blob/main/.michi/specs/${featureName}/${docType}.md`;
 
   const specJson = loadSpecJson(featureName);
 

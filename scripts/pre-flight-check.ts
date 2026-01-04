@@ -76,10 +76,10 @@ function checkProjectJson(): { errors: string[], warnings: string[] } {
   const errors: string[] = [];
   const warnings: string[] = [];
   
-  const projectJsonPath = join(process.cwd(), '.kiro', 'project.json');
+  const projectJsonPath = join(process.cwd(), '.michi', 'project.json');
   
   if (!existsSync(projectJsonPath)) {
-    errors.push('❌ .kiro/project.json が存在しません');
+    errors.push('❌ .michi/project.json が存在しません');
     errors.push('   → このディレクトリはMichiプロジェクトではありません');
     errors.push('   → セットアップ: npm run setup-existing（michi-practice1の場合）');
     errors.push('   → または、Michiプロジェクトのディレクトリに移動してください');
@@ -190,7 +190,7 @@ async function checkJiraProject(projectKey: string): Promise<{ errors: string[],
       errors.push(`❌ JIRAプロジェクトが存在しません: ${projectKey}`);
       errors.push(`   → JIRAプロジェクト作成: ${url}/jira/projects/create`);
       errors.push(`   → プロジェクト一覧: ${url}/jira/settings/projects`);
-      errors.push('   → または、.kiro/project.jsonのjiraProjectKeyを修正してください');
+      errors.push('   → または、.michi/project.jsonのjiraProjectKeyを修正してください');
       errors.push(`      現在の設定: "${projectKey}" → 実際に存在するキーに変更`);
     } else if (isAxiosError && error.response?.status === 401) {
       errors.push('❌ JIRA認証エラー（.envの認証情報を確認）');
@@ -250,7 +250,7 @@ export async function runPreFlightCheck(phase: 'confluence' | 'jira' | 'all'): P
   // 4. JIRAプロジェクトチェック（API呼び出し）
   if (phase === 'jira' || phase === 'all') {
     console.log('\n📋 Step 4: JIRAプロジェクト存在チェック');
-    const projectJsonPath = join(process.cwd(), '.kiro', 'project.json');
+    const projectJsonPath = join(process.cwd(), '.michi', 'project.json');
 
     const readResult = safeReadJsonFile<ProjectMeta>(projectJsonPath);
     if (!readResult.success) {

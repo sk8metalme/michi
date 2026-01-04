@@ -129,10 +129,10 @@ describe('ProjectAnalyzer', () => {
   });
 
   describe('getProjectMetadata', () => {
-    it('should load project metadata from .kiro/project.json', () => {
-      // Setup: create .kiro/project.json
-      const kiroDir = join(testDir, '.kiro');
-      mkdirSync(kiroDir);
+    it('should load project metadata from .michi/project.json', () => {
+      // Setup: create .michi/project.json
+      const specDir = join(testDir, '.michi');
+      mkdirSync(specDir);
       const projectJson = {
         projectId: 'test-project',
         projectName: 'Test Project',
@@ -143,7 +143,7 @@ describe('ProjectAnalyzer', () => {
         stakeholders: ['pm1'],
         repository: 'https://github.com/test/repo'
       };
-      writeFileSync(join(kiroDir, 'project.json'), JSON.stringify(projectJson));
+      writeFileSync(join(specDir, 'project.json'), JSON.stringify(projectJson));
 
       // Execute
       const result = analyzer.getProjectMetadata(testDir);
@@ -157,7 +157,7 @@ describe('ProjectAnalyzer', () => {
       }
     });
 
-    it('should return error if .kiro/project.json does not exist', () => {
+    it('should return error if .michi/project.json does not exist', () => {
       // Execute
       const result = analyzer.getProjectMetadata(testDir);
 
@@ -169,10 +169,10 @@ describe('ProjectAnalyzer', () => {
     });
 
     it('should return error if project.json has invalid JSON', () => {
-      // Setup: create .kiro/project.json with invalid JSON
-      const kiroDir = join(testDir, '.kiro');
-      mkdirSync(kiroDir);
-      writeFileSync(join(kiroDir, 'project.json'), '{ invalid json }');
+      // Setup: create .michi/project.json with invalid JSON
+      const specDir = join(testDir, '.michi');
+      mkdirSync(specDir);
+      writeFileSync(join(specDir, 'project.json'), '{ invalid json }');
 
       // Execute
       const result = analyzer.getProjectMetadata(testDir);
@@ -186,15 +186,15 @@ describe('ProjectAnalyzer', () => {
 
     it('should reject path traversal attacks in projectId (..)', () => {
       // Setup: malicious projectId
-      const kiroDir = join(testDir, '.kiro');
-      mkdirSync(kiroDir);
+      const specDir = join(testDir, '.michi');
+      mkdirSync(specDir);
       const projectJson = {
         projectId: '../tmp/evil',
         projectName: 'Evil Project',
         jiraProjectKey: 'EVIL',
         confluenceLabels: ['test']
       };
-      writeFileSync(join(kiroDir, 'project.json'), JSON.stringify(projectJson));
+      writeFileSync(join(specDir, 'project.json'), JSON.stringify(projectJson));
 
       // Execute
       const result = analyzer.getProjectMetadata(testDir);
@@ -208,15 +208,15 @@ describe('ProjectAnalyzer', () => {
 
     it('should reject path traversal attacks in projectId (/)', () => {
       // Setup: malicious projectId
-      const kiroDir = join(testDir, '.kiro');
-      mkdirSync(kiroDir);
+      const specDir = join(testDir, '.michi');
+      mkdirSync(specDir);
       const projectJson = {
         projectId: 'foo/bar',
         projectName: 'Evil Project',
         jiraProjectKey: 'EVIL',
         confluenceLabels: ['test']
       };
-      writeFileSync(join(kiroDir, 'project.json'), JSON.stringify(projectJson));
+      writeFileSync(join(specDir, 'project.json'), JSON.stringify(projectJson));
 
       // Execute
       const result = analyzer.getProjectMetadata(testDir);
@@ -230,15 +230,15 @@ describe('ProjectAnalyzer', () => {
 
     it('should reject path traversal attacks in projectId (\\)', () => {
       // Setup: malicious projectId
-      const kiroDir = join(testDir, '.kiro');
-      mkdirSync(kiroDir);
+      const specDir = join(testDir, '.michi');
+      mkdirSync(specDir);
       const projectJson = {
         projectId: 'foo\\bar',
         projectName: 'Evil Project',
         jiraProjectKey: 'EVIL',
         confluenceLabels: ['test']
       };
-      writeFileSync(join(kiroDir, 'project.json'), JSON.stringify(projectJson));
+      writeFileSync(join(specDir, 'project.json'), JSON.stringify(projectJson));
 
       // Execute
       const result = analyzer.getProjectMetadata(testDir);
@@ -252,15 +252,15 @@ describe('ProjectAnalyzer', () => {
 
     it('should reject empty projectId', () => {
       // Setup: empty projectId
-      const kiroDir = join(testDir, '.kiro');
-      mkdirSync(kiroDir);
+      const specDir = join(testDir, '.michi');
+      mkdirSync(specDir);
       const projectJson = {
         projectId: '   ',
         projectName: 'Test Project',
         jiraProjectKey: 'TEST',
         confluenceLabels: ['test']
       };
-      writeFileSync(join(kiroDir, 'project.json'), JSON.stringify(projectJson));
+      writeFileSync(join(specDir, 'project.json'), JSON.stringify(projectJson));
 
       // Execute
       const result = analyzer.getProjectMetadata(testDir);
@@ -274,15 +274,15 @@ describe('ProjectAnalyzer', () => {
 
     it('should reject projectId with invalid characters', () => {
       // Setup: invalid characters in projectId
-      const kiroDir = join(testDir, '.kiro');
-      mkdirSync(kiroDir);
+      const specDir = join(testDir, '.michi');
+      mkdirSync(specDir);
       const projectJson = {
         projectId: 'test@project!',
         projectName: 'Test Project',
         jiraProjectKey: 'TEST',
         confluenceLabels: ['test']
       };
-      writeFileSync(join(kiroDir, 'project.json'), JSON.stringify(projectJson));
+      writeFileSync(join(specDir, 'project.json'), JSON.stringify(projectJson));
 
       // Execute
       const result = analyzer.getProjectMetadata(testDir);
@@ -296,8 +296,8 @@ describe('ProjectAnalyzer', () => {
 
     it('should accept valid projectId with alphanumeric, hyphens, and underscores', () => {
       // Setup: valid projectId
-      const kiroDir = join(testDir, '.kiro');
-      mkdirSync(kiroDir);
+      const specDir = join(testDir, '.michi');
+      mkdirSync(specDir);
       const projectJson = {
         projectId: 'Valid-Project_123',
         projectName: 'Test Project',
@@ -308,7 +308,7 @@ describe('ProjectAnalyzer', () => {
         stakeholders: [],
         repository: ''
       };
-      writeFileSync(join(kiroDir, 'project.json'), JSON.stringify(projectJson));
+      writeFileSync(join(specDir, 'project.json'), JSON.stringify(projectJson));
 
       // Execute
       const result = analyzer.getProjectMetadata(testDir);

@@ -355,13 +355,13 @@ describe('hasMichiSetup', () => {
   });
 
   describe('Michi導入済みの場合', () => {
-    it('.kiro/project.json が存在する場合はtrueを返す', () => {
-      // .kiro ディレクトリを作成
-      const kiroDir = path.join(tempDir, '.kiro');
-      fs.mkdirSync(kiroDir);
+    it('.michi/project.json が存在する場合はtrueを返す', () => {
+      // .michi ディレクトリを作成
+      const specDir = path.join(tempDir, '.michi');
+      fs.mkdirSync(specDir);
 
       // project.json を作成
-      const projectJson = path.join(kiroDir, 'project.json');
+      const projectJson = path.join(specDir, 'project.json');
       fs.writeFileSync(projectJson, '{}');
 
       const result = hasMichiSetup(tempDir);
@@ -370,17 +370,17 @@ describe('hasMichiSetup', () => {
   });
 
   describe('Michi未導入の場合', () => {
-    it('.kiro/project.json が存在しない場合はfalseを返す', () => {
-      // .kiro ディレクトリのみ作成（project.jsonなし）
-      const kiroDir = path.join(tempDir, '.kiro');
-      fs.mkdirSync(kiroDir);
+    it('.michi/project.json が存在しない場合はfalseを返す', () => {
+      // .michi ディレクトリのみ作成（project.jsonなし）
+      const specDir = path.join(tempDir, '.michi');
+      fs.mkdirSync(specDir);
 
       const result = hasMichiSetup(tempDir);
       expect(result).toBe(false);
     });
 
-    it('.kiro ディレクトリ自体が存在しない場合はfalseを返す', () => {
-      // .kiro ディレクトリを作成しない
+    it('.michi ディレクトリ自体が存在しない場合はfalseを返す', () => {
+      // .michi ディレクトリを作成しない
       const result = hasMichiSetup(tempDir);
       expect(result).toBe(false);
     });
@@ -455,10 +455,10 @@ describe('validateLocalPath - Michi導入チェック', () => {
     // .git ディレクトリを作成（Gitリポジトリとして認識させる）
     fs.mkdirSync(path.join(tempDir, '.git'));
 
-    // .kiro/project.json を作成（Michi導入済み）
-    const kiroDir = path.join(tempDir, '.kiro');
-    fs.mkdirSync(kiroDir);
-    fs.writeFileSync(path.join(kiroDir, 'project.json'), '{}');
+    // .michi/project.json を作成（Michi導入済み）
+    const specDir = path.join(tempDir, '.michi');
+    fs.mkdirSync(specDir);
+    fs.writeFileSync(path.join(specDir, 'project.json'), '{}');
 
     const result = validateLocalPath(repository);
     expect(result.hasMichiSetup).toBe(true);
@@ -469,13 +469,13 @@ describe('validateLocalPath - Michi導入チェック', () => {
     // .git ディレクトリを作成（Gitリポジトリとして認識させる）
     fs.mkdirSync(path.join(tempDir, '.git'));
 
-    // .kiro/project.json は作成しない（Michi未導入）
+    // .michi/project.json は作成しない（Michi未導入）
 
     const result = validateLocalPath(repository);
     expect(result.hasMichiSetup).toBe(false);
     expect(result.michiSetupCommand).not.toBeNull();
     expect(result.warnings).toContain(
-      `Repository 'test-repo' does not have Michi setup (.kiro/project.json not found)`,
+      `Repository 'test-repo' does not have Michi setup (.michi/project.json not found)`,
     );
   });
 

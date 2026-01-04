@@ -210,7 +210,7 @@ async function getOrCreateParentPage(
   // 親ページを作成
   const parentContent = createConfluencePage({
     title: parentTitle,
-    githubUrl: `${projectMeta.repository}/tree/main/.kiro/specs/${featureName}`,
+    githubUrl: `${projectMeta.repository}/tree/main/.michi/specs/${featureName}`,
     content: `<p>機能: <strong>${featureName}</strong></p><p>このページの下に、要件定義・設計・タスク分割のページが配置されます。</p>`,
     approvers: projectMeta.stakeholders,
     projectName: projectMeta.projectName

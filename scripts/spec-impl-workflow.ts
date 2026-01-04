@@ -265,13 +265,13 @@ ${jiraLink}
       throw new Error('Missing GitHub credentials. Required: GITHUB_TOKEN');
     }
 
-    // .kiro/project.json から repository 情報を取得
+    // .michi/project.json から repository 情報を取得
     let repo: string;
     try {
       repo = getRepositoryInfo();
     } catch (error) {
       throw new Error(
-        `Failed to get repository info from .kiro/project.json: ${error instanceof Error ? error.message : error}`,
+        `Failed to get repository info from .michi/project.json: ${error instanceof Error ? error.message : error}`,
       );
     }
 
@@ -408,13 +408,13 @@ export async function onSpecImplEnd(
     throw new Error('Missing GitHub credentials. Required: GITHUB_TOKEN');
   }
 
-  // .kiro/project.json から repository 情報を取得
+  // .michi/project.json から repository 情報を取得
   let repo: string;
   try {
     repo = getRepositoryInfo();
   } catch (error) {
     throw new Error(
-      `Failed to get repository info from .kiro/project.json: ${error instanceof Error ? error.message : error}`,
+      `Failed to get repository info from .michi/project.json: ${error instanceof Error ? error.message : error}`,
     );
   }
 

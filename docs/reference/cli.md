@@ -112,8 +112,8 @@ michi init \
 
 #### 実行内容
 
-1. `.kiro/` ディレクトリ構造作成
-2. プロジェクトメタデータ作成（`.kiro/project.json`）
+1. `.michi/` ディレクトリ構造作成
+2. プロジェクトメタデータ作成（`.michi/project.json`）
 3. `.env` テンプレート作成
 4. テンプレート・ルールのコピー
 5. ワークフロー設定（`.michi/config.json`）
@@ -194,7 +194,7 @@ michi jira:sync <feature>
 
 | 引数 | 説明 |
 |------|------|
-| `<feature>` | 機能名（`.kiro/specs/<feature>/tasks.md` を使用） |
+| `<feature>` | 機能名（`.michi/specs/<feature>/tasks.md` を使用） |
 
 #### 使用例
 
@@ -202,7 +202,7 @@ michi jira:sync <feature>
 michi jira:sync user-authentication
 ```
 
-`.kiro/specs/user-authentication/tasks.md` の内容をJIRAに同期します。
+`.michi/specs/user-authentication/tasks.md` の内容をJIRAに同期します。
 
 ---
 

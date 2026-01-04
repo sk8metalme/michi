@@ -221,9 +221,9 @@
 
 **症状**:
 ```
-❌ requirements.mdが存在しません。先に/kiro:spec-requirements を実行してください
-❌ design.mdが存在しません。先に/kiro:spec-design を実行してください
-❌ tasks.mdが存在しません。先に/kiro:spec-tasks を実行してください
+❌ requirements.mdが存在しません。先に/michi:spec-requirements を実行してください
+❌ design.mdが存在しません。先に/michi:spec-design を実行してください
+❌ tasks.mdが存在しません。先に/michi:spec-tasks を実行してください
 ```
 
 **原因**:
@@ -240,7 +240,7 @@
 2. 各Phaseを順番に実行
    ```bash
    # Phase 0.1: 要件定義
-   /kiro:spec-requirements calculator-app
+   /michi:spec-requirements calculator-app
 
    # Phase 0.2: 設計
    /michi:spec-design calculator-app
@@ -251,7 +251,7 @@
 
 3. ファイルの存在確認
    ```bash
-   ls -la .kiro/specs/calculator-app/
+   ls -la .michi/specs/calculator-app/
    ```
 
 ## tasks.mdフォーマットエラー
@@ -287,7 +287,7 @@ tasks.mdはMichiワークフロー形式ではなくAI-DLC形式です。
 
 3. 変換結果を確認
    ```bash
-   cat .kiro/specs/calculator-app/tasks.md
+   cat .michi/specs/calculator-app/tasks.md
    ```
 
 ### フォーマット検証失敗

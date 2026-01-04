@@ -95,11 +95,11 @@ Claude Code内で以下を実行：
 
 ```
 cc-sdd 標準フェーズ:
-  Phase 0.0: 仕様初期化 (/kiro:spec-init)
-  Phase 0.1: 要件定義 (/kiro:spec-requirements)
-  Phase 0.2: 設計 (/kiro:spec-design)
-  Phase 0.5: タスク分割 (/kiro:spec-tasks)
-  Phase 2: TDD実装 (/kiro:spec-impl)
+  Phase 0.0: 仕様初期化 (/michi:spec-init)
+  Phase 0.1: 要件定義 (/michi:spec-requirements)
+  Phase 0.2: 設計 (/michi:spec-design)
+  Phase 0.5: タスク分割 (/michi:spec-tasks)
+  Phase 2: TDD実装 (/michi:spec-impl)
 
 Michi 固有拡張:
   Phase 0.3-0.4: テスト計画 (/michi:test-planning)
@@ -113,8 +113,8 @@ Michi 固有拡張:
 
 ## 推奨ワークフロー
 
-1. `/kiro:spec-init "description"` - 仕様の初期化
-2. `/kiro:spec-requirements {feature}` - 要件定義
+1. `/michi:spec-init "description"` - 仕様の初期化
+2. `/michi:spec-requirements {feature}` - 要件定義
 3. `/michi:spec-design {feature}` - 設計（Phase 0.3-0.4ガイダンス付き）
 4. `/michi:test-planning {feature}` - テスト計画（Phase 0.3-0.4）
 5. `/michi:spec-tasks {feature}` - タスク分割（JIRA同期確認付き）

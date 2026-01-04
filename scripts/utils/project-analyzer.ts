@@ -143,13 +143,13 @@ export class ProjectAnalyzer {
   }
 
   /**
-   * Get project metadata from .kiro/project.json
+   * Get project metadata from .michi/project.json
    *
    * @param projectRoot - Project root directory (default: process.cwd())
    * @returns Result<ProjectMetadata, ProjectError> - Project metadata or error
    */
   getProjectMetadata(projectRoot: string = process.cwd()): Result<ProjectMetadata, ProjectError> {
-    const projectJsonPath = resolve(projectRoot, '.kiro/project.json');
+    const projectJsonPath = resolve(projectRoot, '.michi/project.json');
 
     if (!existsSync(projectJsonPath)) {
       return failure([{

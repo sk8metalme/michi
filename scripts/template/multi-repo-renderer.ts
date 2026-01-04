@@ -108,7 +108,7 @@ export const renderMultiRepoTemplate = (
   const templateContext: TemplateContext = {
     LANG_CODE: 'ja', // Default language
     DEV_GUIDELINES: '', // Not used for Multi-Repo templates
-    KIRO_DIR: '.kiro',
+    SPEC_DIR: '.michi',
     AGENT_DIR: '.claude',
     PROJECT_NAME: context.PROJECT_NAME,
     JIRA_KEY: context.JIRA_KEY,

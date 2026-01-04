@@ -207,11 +207,11 @@ async function aggregateEstimates(): Promise<void> {
               'type' in projectEntry && projectEntry.type === 'dir' &&
               'name' in projectEntry) {
             try {
-              // projects/{project-id}/.kiro/specs/ ディレクトリを取得（pagination対応）
+              // projects/{project-id}/.michi/specs/ ディレクトリを取得（pagination対応）
               const specs = await octokit.paginate('GET /repos/{owner}/{repo}/contents/{path}', {
                 owner: org,
                 repo: repo.name,
-                path: `projects/${(projectEntry as { name: string }).name}/.kiro/specs`,
+                path: `projects/${(projectEntry as { name: string }).name}/.michi/specs`,
                 per_page: 100
               });
               
@@ -228,7 +228,7 @@ async function aggregateEstimates(): Promise<void> {
                       const { data: designFile } = await octokit.repos.getContent({
                         owner: org,
                         repo: repo.name,
-                        path: `projects/${projectName}/.kiro/specs/${specName}/design.md`
+                        path: `projects/${projectName}/.michi/specs/${specName}/design.md`
                       });
 
                       if ('content' in designFile) {
@@ -252,7 +252,7 @@ async function aggregateEstimates(): Promise<void> {
                 }
               }
             } catch {
-              // プロジェクトディレクトリに.kiro/specsがない場合はスキップ
+              // プロジェクトディレクトリに.michi/specsがない場合はスキップ
               continue;
             }
           }

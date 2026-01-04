@@ -14,18 +14,18 @@ This command implements the specifications defined in `tasks.md` following TDD (
 
 - `$ARGUMENTS`: Feature name (e.g., "user-auth")
 
-**Note:** JIRA ticket keys are automatically detected from `.kiro/specs/{feature}/spec.json`. No need to specify them manually.
+**Note:** JIRA ticket keys are automatically detected from `.michi/specs/{feature}/spec.json`. No need to specify them manually.
 
 ## Pre-requisites
 
-1. `.kiro/specs/{feature}/tasks.md` must exist
-2. `.kiro/specs/{feature}/spec.json` must contain JIRA info (run `michi jira:sync` first)
+1. `.michi/specs/{feature}/tasks.md` must exist
+2. `.michi/specs/{feature}/spec.json` must contain JIRA info (run `michi jira:sync` first)
 3. Environment variables must be configured:
    - `ATLASSIAN_URL`: JIRA instance URL
    - `ATLASSIAN_EMAIL`: JIRA user email
    - `ATLASSIAN_API_TOKEN`: JIRA API token
    - `GITHUB_TOKEN`: GitHub API token
-   - ~~`GITHUB_REPO`: GitHub repository (owner/repo format)~~ **Deprecated (v0.5.0+)**: Repository info is now automatically loaded from `.kiro/project.json`
+   - ~~`GITHUB_REPO`: GitHub repository (owner/repo format)~~ **Deprecated (v0.5.0+)**: Repository info is now automatically loaded from `.michi/project.json`
 
 ## Execution Flow
 
@@ -43,7 +43,7 @@ Extract:
 
 ### 2. JIRA Info Detection (Automatic)
 
-Read JIRA information from `.kiro/specs/$FEATURE_NAME/spec.json`:
+Read JIRA information from `.michi/specs/$FEATURE_NAME/spec.json`:
 
 ```json
 {
@@ -72,7 +72,7 @@ This is handled internally. The workflow will:
 
 ### 4. Implementation Phase (TDD)
 
-Read the tasks from `.kiro/specs/$FEATURE_NAME/tasks.md` and implement each Story following TDD:
+Read the tasks from `.michi/specs/$FEATURE_NAME/tasks.md` and implement each Story following TDD:
 
 For each Story in tasks.md:
 
