@@ -212,6 +212,249 @@ fi
 echo "Frontend detected: $FRONTEND_DETECTED"
 ```
 
+#### Step 1.2.5: 品質インフラチェック(多言語対応版)
+
+> **優先度**: このチェックは、base command（kiro版）の品質インフラチェックより**優先**されます。
+> 言語検出と言語別チェックを実行し、base commandのNode.js固有チェックは上書きされます。
+
+実装前に、プロジェクトの言語を検出し、言語別の品質インフラ設定をチェックします。
+
+##### Step 1: CI設定の確認
+
+```bash
+# CI設定を確認
+CI_PLATFORM="none"
+
+if [ -d ".github/workflows" ]; then
+    CI_PLATFORM="GitHub Actions"
+elif [ -f "screwdriver.yaml" ]; then
+    CI_PLATFORM="Screwdriver"
+fi
+
+echo "📋 CI Platform: $CI_PLATFORM"
+```
+
+##### Step 2: 言語検出
+
+```bash
+# 言語検出
+DETECTED_LANG="unknown"
+
+if [ -f "package.json" ]; then
+    DETECTED_LANG="Node.js"
+elif [ -f "pom.xml" ] || ls build.gradle* 2>/dev/null | grep -q .; then
+    DETECTED_LANG="Java"
+elif [ -f "pyproject.toml" ] || [ -f "requirements.txt" ]; then
+    DETECTED_LANG="Python"
+elif [ -f "composer.json" ]; then
+    DETECTED_LANG="PHP"
+fi
+
+echo "🔍 Detected Language: $DETECTED_LANG"
+```
+
+##### Step 3: 言語別チェック実行
+
+###### Node.js の場合
+
+```bash
+if [ "$DETECTED_LANG" = "Node.js" ]; then
+    INFRA_MISSING=()
+    INFRA_RECOMMENDED_MISSING=()
+
+    # 必須チェック
+    [ ! -d ".husky" ] && INFRA_MISSING+=("husky")
+    [ ! -f ".husky/pre-commit" ] && INFRA_MISSING+=("pre-commit hook")
+
+    if ! grep -q "lint-staged" package.json 2>/dev/null && ! ls .lintstagedrc* 2>/dev/null | grep -q .; then
+        INFRA_MISSING+=("lint-staged")
+    fi
+
+    if ! grep -q '"strict".*true' tsconfig.json 2>/dev/null; then
+        INFRA_MISSING+=("TypeScript strict")
+    fi
+
+    [ "$CI_PLATFORM" = "none" ] && INFRA_MISSING+=("CI")
+
+    # 推奨チェック
+    if ! grep -q "ts-arch-kit" package.json 2>/dev/null; then
+        INFRA_RECOMMENDED_MISSING+=("ts-arch-kit")
+    fi
+
+    # DevContainer (任意)
+    DEVCONTAINER_MISSING=false
+    [ ! -d ".devcontainer" ] && DEVCONTAINER_MISSING=true
+fi
+```
+
+###### Java の場合
+
+```bash
+if [ "$DETECTED_LANG" = "Java" ]; then
+    INFRA_MISSING=()
+    INFRA_OPTIONAL_MISSING=()
+    INFRA_RECOMMENDED_MISSING=()
+
+    # 必須チェック
+    if [ ! -f "checkstyle.xml" ] && [ ! -f "pmd.xml" ] && [ ! -d "config/checkstyle" ]; then
+        INFRA_MISSING+=("Checkstyle/PMD")
+    fi
+
+    if ! grep -q "nullaway\|error_prone" pom.xml 2>/dev/null && \
+       ! grep -q "nullaway\|errorprone" build.gradle* 2>/dev/null; then
+        INFRA_MISSING+=("NullAway")
+    fi
+
+    [ "$CI_PLATFORM" = "none" ] && INFRA_MISSING+=("CI")
+
+    # オプションチェック（pre-commit）
+    if [ ! -f ".pre-commit-config.yaml" ] && \
+       ! grep -q "spotless" pom.xml 2>/dev/null && \
+       ! grep -q "spotless" build.gradle* 2>/dev/null; then
+        INFRA_OPTIONAL_MISSING+=("pre-commit/Spotless")
+    fi
+
+    # 推奨チェック（ArchUnit）
+    if ! grep -q "archunit" pom.xml 2>/dev/null && \
+       ! grep -q "archunit" build.gradle* 2>/dev/null; then
+        INFRA_RECOMMENDED_MISSING+=("ArchUnit")
+    fi
+
+    # DevContainer (任意)
+    DEVCONTAINER_MISSING=false
+    [ ! -d ".devcontainer" ] && DEVCONTAINER_MISSING=true
+fi
+```
+
+###### Python の場合
+
+```bash
+if [ "$DETECTED_LANG" = "Python" ]; then
+    INFRA_MISSING=()
+    INFRA_OPTIONAL_MISSING=()
+    INFRA_RECOMMENDED_MISSING=()
+
+    # 必須チェック
+    if ! grep -q "ruff\|black\|flake8" pyproject.toml 2>/dev/null && \
+       [ ! -f "setup.cfg" ] && [ ! -f ".flake8" ]; then
+        INFRA_MISSING+=("lint/format (ruff/black)")
+    fi
+
+    [ "$CI_PLATFORM" = "none" ] && INFRA_MISSING+=("CI")
+
+    # オプションチェック（pre-commit）
+    if [ ! -f ".pre-commit-config.yaml" ]; then
+        INFRA_OPTIONAL_MISSING+=("pre-commit")
+    fi
+
+    # 推奨チェック
+    if ! grep -q "mypy" pyproject.toml 2>/dev/null && \
+       [ ! -f "mypy.ini" ] && [ ! -f ".mypy.ini" ]; then
+        INFRA_RECOMMENDED_MISSING+=("mypy strict")
+    fi
+
+    if ! grep -q "importlinter" pyproject.toml 2>/dev/null && \
+       [ ! -f ".importlinter" ]; then
+        INFRA_RECOMMENDED_MISSING+=("import-linter")
+    fi
+
+    # DevContainer (任意)
+    DEVCONTAINER_MISSING=false
+    [ ! -d ".devcontainer" ] && DEVCONTAINER_MISSING=true
+fi
+```
+
+###### PHP の場合
+
+```bash
+if [ "$DETECTED_LANG" = "PHP" ]; then
+    INFRA_MISSING=()
+    INFRA_OPTIONAL_MISSING=()
+    INFRA_RECOMMENDED_MISSING=()
+
+    # 必須チェック
+    if [ ! -f "phpstan.neon" ] && [ ! -f "phpcs.xml" ] && \
+       ! grep -q "phpstan\|php-cs-fixer" composer.json 2>/dev/null; then
+        INFRA_MISSING+=("PHPStan")
+    fi
+
+    [ "$CI_PLATFORM" = "none" ] && INFRA_MISSING+=("CI")
+
+    # オプションチェック（pre-commit）
+    if [ ! -f "grumphp.yml" ] && [ ! -f "captainhook.json" ] && \
+       [ ! -f ".pre-commit-config.yaml" ]; then
+        INFRA_OPTIONAL_MISSING+=("pre-commit/GrumPHP")
+    fi
+
+    # 推奨チェック
+    if [ ! -f "deptrac.yaml" ] && ! grep -q "deptrac" composer.json 2>/dev/null; then
+        INFRA_RECOMMENDED_MISSING+=("deptrac")
+    fi
+
+    # DevContainer (任意)
+    DEVCONTAINER_MISSING=false
+    [ ! -d ".devcontainer" ] && DEVCONTAINER_MISSING=true
+fi
+```
+
+##### Step 4: 結果表示
+
+```bash
+echo "📋 Quality Infrastructure Check ($DETECTED_LANG detected)"
+
+# 必須項目
+if [ ${#INFRA_MISSING[@]} -eq 0 ]; then
+    echo "✅ All required infrastructure configured"
+else
+    echo "⚠️ Missing required infrastructure:"
+    for item in "${INFRA_MISSING[@]}"; do
+        echo "   - $item (REQUIRED)"
+    done
+fi
+
+# オプション項目（情報表示のみ）
+if [ ${#INFRA_OPTIONAL_MISSING[@]} -gt 0 ]; then
+    echo "ℹ️ Optional infrastructure (not required):"
+    for item in "${INFRA_OPTIONAL_MISSING[@]}"; do
+        echo "   - $item (optional)"
+    done
+fi
+
+# 推奨項目（情報表示のみ）
+if [ ${#INFRA_RECOMMENDED_MISSING[@]} -gt 0 ]; then
+    echo "ℹ️ Recommended infrastructure:"
+    for item in "${INFRA_RECOMMENDED_MISSING[@]}"; do
+        echo "   - $item (recommended)"
+    done
+fi
+
+# DevContainer（任意）
+if [ "$DEVCONTAINER_MISSING" = true ]; then
+    echo "ℹ️ DevContainer: Not configured (optional)"
+else
+    echo "✅ DevContainer: Configured"
+fi
+
+# 最終メッセージ
+if [ ${#INFRA_MISSING[@]} -gt 0 ]; then
+    echo ""
+    echo "⚠️ Warning: Some required quality infrastructure is not configured"
+    echo "   Recommendation: Set up quality infrastructure before implementation"
+    echo "   → See tasks.md for setup instructions (auto-added by spec-tasks)"
+    echo "   → Processing continues"
+else
+    echo ""
+    echo "✅ Quality infrastructure check passed"
+fi
+```
+
+**Important**:
+- 必須項目（✅）の不足 → ⚠️ 警告（処理は継続）
+- オプション項目（ℹ️）の不足 → 情報表示のみ
+- 推奨項目（ℹ️）の不足 → 情報表示のみ
+- tasks.md に品質インフラセットアップタスクがあれば、そちらを参照してください
+- DevContainerは任意のため、未設定でも問題ありません
+
 
 #### Step 1.3: 結果集約とゲート判定
 

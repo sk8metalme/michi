@@ -14,6 +14,152 @@ argument-hint: <feature-name> [-y]
 
 {{DEV_GUIDELINES}}
 
+## Michi Extension: Quality Infrastructure Check
+
+> **優先度**: このMichi Extensionの指示は、base command（kiro版）の品質インフラチェックより**優先**されます。
+> Michi Extensionで言語検出と言語別チェックを実行し、base commandのNode.js固有チェックは上書きされます。
+
+設計作成時に、プロジェクトの言語を検出し、言語別の品質インフラ設定状況をチェックします。
+
+### Step 1: CI設定の確認とプラットフォーム選択
+
+#### 既存CI設定をチェック
+- `.github/workflows/` が存在する場合 → GitHub Actions採用
+- `screwdriver.yaml` が存在する場合 → Screwdriver採用
+- 両方なし → Step 1.5でユーザーに選択を促す
+
+#### Step 1.5: CI未設定の場合のプラットフォーム選択
+
+CIが未設定の場合、以下の選択肢を提示：
+
+```
+CIプラットフォームを選択してください:
+A) GitHub Actions（推奨）
+B) Screwdriver
+C) 後で設定する
+```
+
+### Step 2: 言語検出とユーザー確認
+
+#### 2-1. プロジェクトルートのファイルをチェック
+
+- `package.json` あり → Node.js
+- `pom.xml` または `build.gradle*` あり → Java
+- `pyproject.toml` または `requirements.txt` あり → Python
+- `composer.json` あり → PHP
+
+#### 2-2. 検出結果をユーザーに確認（オプション）
+
+複数言語が検出された場合や確認が必要な場合：
+```
+検出された言語: {{LANG}}。正しいですか？ (Y/n)
+```
+
+- 複数言語検出時は主要言語を選択させる
+- 誤検出の場合は手動で指定可能
+
+### Step 3: 言語別チェック項目
+
+#### Node.js / TypeScript
+
+| 項目 | チェック方法 | 必須 |
+|------|------------|------|
+| husky | `.husky/` ディレクトリ | ✅ |
+| pre-commit hook | `.husky/pre-commit` ファイル | ✅ |
+| lint-staged | `package.json` の lint-staged キーまたは `.lintstagedrc*` | ✅ |
+| TypeScript strict | `tsconfig.json` の strict: true | ✅ |
+| ts-arch-kit | `package.json` の ts-arch-kit | ℹ️（推奨） |
+| CI | `.github/workflows/` または `screwdriver.yaml` | ✅ |
+| DevContainer | `.devcontainer/` | ℹ️（任意） |
+
+#### Java
+
+| 項目 | チェック方法 | 必須 |
+|------|------------|------|
+| pre-commit | `.pre-commit-config.yaml` または Spotless in `pom.xml`/`build.gradle*` | ℹ️（任意） |
+| Checkstyle/PMD | `checkstyle.xml`, `pmd.xml`, または `config/checkstyle/` | ✅ |
+| NullAway | `pom.xml` または `build.gradle*` に nullaway/error_prone | ⚠️（必須） |
+| ArchUnit | `pom.xml` または `build.gradle*` に archunit | ℹ️（推奨） |
+| CI | `.github/workflows/` または `screwdriver.yaml` | ✅ |
+| DevContainer | `.devcontainer/` | ℹ️（任意） |
+
+#### Python
+
+| 項目 | チェック方法 | 必須 |
+|------|------------|------|
+| pre-commit | `.pre-commit-config.yaml` | ℹ️（任意） |
+| lint/format | `pyproject.toml` に ruff/black/flake8、または `setup.cfg`, `.flake8` | ✅ |
+| mypy strict | `pyproject.toml` に mypy、または `mypy.ini`, `.mypy.ini` | ℹ️（推奨） |
+| import-linter | `pyproject.toml` に importlinter、または `.importlinter` | ℹ️（推奨） |
+| CI | `.github/workflows/` または `screwdriver.yaml` | ✅ |
+| DevContainer | `.devcontainer/` | ℹ️（任意） |
+
+#### PHP
+
+| 項目 | チェック方法 | 必須 |
+|------|------------|------|
+| pre-commit | `grumphp.yml`, `captainhook.json`, または `.pre-commit-config.yaml` | ℹ️（任意） |
+| PHPStan/php-cs-fixer | `phpstan.neon`, `phpcs.xml`, または `composer.json` | ✅ |
+| deptrac | `deptrac.yaml` または `composer.json` に deptrac | ℹ️（推奨） |
+| CI | `.github/workflows/` または `screwdriver.yaml` | ✅ |
+| DevContainer | `.devcontainer/` | ℹ️（任意） |
+
+### Step 4: 結果表示フォーマット
+
+#### Node.js の例
+```text
+📋 Quality Infrastructure Check (Node.js detected)
+├─ ✅ husky: Configured
+├─ ✅ lint-staged: Configured
+├─ ✅ TypeScript strict: Configured
+├─ ℹ️ ts-arch-kit: Not configured (optional - recommended)
+├─ ✅ CI: GitHub Actions configured
+└─ ℹ️ DevContainer: Not configured (optional)
+```
+
+#### Java の例
+```text
+📋 Quality Infrastructure Check (Java detected)
+├─ ℹ️ pre-commit: Not configured (optional)
+├─ ✅ Checkstyle: Configured
+├─ ⚠️ NullAway: Not configured (REQUIRED for null safety)
+├─ ℹ️ ArchUnit: Not configured (optional - recommended)
+├─ ✅ CI: Screwdriver configured
+└─ ℹ️ DevContainer: Not configured (optional)
+```
+
+#### Python の例
+```text
+📋 Quality Infrastructure Check (Python detected)
+├─ ℹ️ pre-commit: Not configured (optional)
+├─ ✅ lint/format: Configured (ruff in pyproject.toml)
+├─ ℹ️ mypy strict: Not configured (recommended)
+├─ ℹ️ import-linter: Not configured (optional - recommended)
+├─ ✅ CI: GitHub Actions configured
+└─ ℹ️ DevContainer: Not configured (optional)
+```
+
+#### PHP の例
+```text
+📋 Quality Infrastructure Check (PHP detected)
+├─ ℹ️ pre-commit: Not configured (optional)
+├─ ✅ PHPStan: Configured (level=max)
+├─ ℹ️ deptrac: Not configured (optional - recommended)
+├─ ✅ CI: GitHub Actions configured
+└─ ℹ️ DevContainer: Not configured (optional)
+```
+
+### Step 5: 不足時の動作
+
+1. **警告メッセージを表示**
+   - ✅必須項目の不足 → ⚠️ 警告
+   - ℹ️推奨項目の不足 → ℹ️ 情報表示（警告ではない）
+
+2. **設計書の「前提条件」セクションに品質インフラ要件を追記**
+   - 言語別の必須項目と推奨項目をリスト化
+
+3. **処理は継続**（中断しない）
+
 ## Michi Extension: Next Phase Guidance
 
 設計ドキュメント生成完了後、以下のフローを案内:
