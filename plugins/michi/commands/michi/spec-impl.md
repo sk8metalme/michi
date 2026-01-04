@@ -212,10 +212,42 @@ fi
 echo "Frontend detected: $FRONTEND_DETECTED"
 ```
 
+**サブエージェント結果の集約**
+
+```bash
+# サブエージェント実行完了後、結果を変数に格納
+# oss-license-checker の結果
+OSS_LICENSE_CRITICAL=$(cat /tmp/oss-license-result.json 2>/dev/null | jq -r '.critical_count // 0')
+OSS_LICENSE_WARNING=$(cat /tmp/oss-license-result.json 2>/dev/null | jq -r '.warning_count // 0')
+
+# stable-version-auditor の結果
+VERSION_AUDIT_CRITICAL=$(cat /tmp/version-audit-result.json 2>/dev/null | jq -r '.critical_count // 0')
+VERSION_AUDIT_WARNING=$(cat /tmp/version-audit-result.json 2>/dev/null | jq -r '.warning_count // 0')
+
+# デフォルト値の設定（ファイルが存在しない場合）
+OSS_LICENSE_CRITICAL=${OSS_LICENSE_CRITICAL:-0}
+OSS_LICENSE_WARNING=${OSS_LICENSE_WARNING:-0}
+VERSION_AUDIT_CRITICAL=${VERSION_AUDIT_CRITICAL:-0}
+VERSION_AUDIT_WARNING=${VERSION_AUDIT_WARNING:-0}
+
+echo "📊 Subagent Results:"
+echo "  - OSS License: Critical=$OSS_LICENSE_CRITICAL, Warning=$OSS_LICENSE_WARNING"
+echo "  - Version Audit: Critical=$VERSION_AUDIT_CRITICAL, Warning=$VERSION_AUDIT_WARNING"
+```
+
 #### Step 1.2.5: 品質インフラチェック(多言語対応版)
 
-> **優先度**: このチェックは、base command（kiro版）の品質インフラチェックより**優先**されます。
-> 言語検出と言語別チェックを実行し、base commandのNode.js固有チェックは上書きされます。
+> **優先度制御の仕組み**: このMichi Extensionの品質インフラチェックは、base command（kiro版）のNode.js固有チェックより**優先**されます。
+>
+> **上書きメカニズム**:
+> 1. **Phase 1.2.5で多言語対応チェックを先に実行** - このセクションで言語検出と言語別チェックを完了します
+> 2. **Base Commandの実行を条件付きスキップ** - Michi版のチェックが完了済みの場合、base commandの品質インフラチェックステップは実行されません
+> 3. **結果の一元管理** - Michi版で収集した`INFRA_MISSING`配列などの変数を、base commandのフローでも参照可能にします
+>
+> **重複実行の防止**:
+> - Michi版でチェック済みフラグ(`MICHI_INFRA_CHECK_DONE=true`)を設定
+> - Base commandはこのフラグを確認し、trueの場合は品質インフラチェックをスキップ
+> - これにより、Node.js固有チェックとの二重実行を回避します
 
 実装前に、プロジェクトの言語を検出し、言語別の品質インフラ設定をチェックします。
 
@@ -234,26 +266,64 @@ fi
 echo "📋 CI Platform: $CI_PLATFORM"
 ```
 
-##### Step 2: 言語検出
+##### Step 2: 言語検出（複数言語プロジェクト対応）
 
 ```bash
-# 言語検出
-DETECTED_LANG="unknown"
+# 言語検出（複数言語が存在する場合は全て検出）
+DETECTED_LANGS=()
 
 if [ -f "package.json" ]; then
-    DETECTED_LANG="Node.js"
-elif [ -f "pom.xml" ] || ls build.gradle* 2>/dev/null | grep -q .; then
-    DETECTED_LANG="Java"
-elif [ -f "pyproject.toml" ] || [ -f "requirements.txt" ]; then
-    DETECTED_LANG="Python"
-elif [ -f "composer.json" ]; then
-    DETECTED_LANG="PHP"
+    DETECTED_LANGS+=("Node.js")
 fi
 
-echo "🔍 Detected Language: $DETECTED_LANG"
+if [ -f "pom.xml" ] || [ -f "build.gradle" ] || [ -f "build.gradle.kts" ]; then
+    DETECTED_LANGS+=("Java")
+fi
+
+if [ -f "pyproject.toml" ] || [ -f "requirements.txt" ]; then
+    DETECTED_LANGS+=("Python")
+fi
+
+if [ -f "composer.json" ]; then
+    DETECTED_LANGS+=("PHP")
+fi
+
+# 主要言語の判定（複数言語が検出された場合）
+if [ ${#DETECTED_LANGS[@]} -eq 0 ]; then
+    DETECTED_LANG="unknown"
+    echo "⚠️ No supported language detected"
+elif [ ${#DETECTED_LANGS[@]} -eq 1 ]; then
+    DETECTED_LANG="${DETECTED_LANGS[0]}"
+    echo "🔍 Detected Language: $DETECTED_LANG"
+else
+    # 複数言語検出時は優先度順に主要言語を決定
+    # 優先度: Node.js > Java > Python > PHP
+    echo "🔍 Multiple languages detected: ${DETECTED_LANGS[*]}"
+
+    # 優先度順にチェック
+    if [[ " ${DETECTED_LANGS[*]} " =~ " Node.js " ]]; then
+        DETECTED_LANG="Node.js"
+    elif [[ " ${DETECTED_LANGS[*]} " =~ " Java " ]]; then
+        DETECTED_LANG="Java"
+    elif [[ " ${DETECTED_LANGS[*]} " =~ " Python " ]]; then
+        DETECTED_LANG="Python"
+    elif [[ " ${DETECTED_LANGS[*]} " =~ " PHP " ]]; then
+        DETECTED_LANG="PHP"
+    fi
+
+    echo "  → Primary language (for infra check): $DETECTED_LANG"
+    echo "  → Note: All detected languages will be included in quality checks"
+fi
 ```
 
 ##### Step 3: 言語別チェック実行
+
+> **Note**: 各言語のチェックブロックは現在、同様のパターンを繰り返しています。
+> 将来的なリファクタリング案:
+> - 言語別チェック関数（`check_nodejs_infra()`, `check_java_infra()` 等）を抽出
+> - 共通の結果フォーマットを定義
+> - メイン処理で言語に応じて適切な関数を呼び出す
+> - これにより、新しい言語追加時の複雑性も軽減される
 
 ###### Node.js の場合
 
@@ -446,6 +516,10 @@ else
     echo ""
     echo "✅ Quality infrastructure check passed"
 fi
+
+# チェック済みフラグを設定（base commandとの重複実行を防ぐ）
+MICHI_INFRA_CHECK_DONE=true
+export MICHI_INFRA_CHECK_DONE
 ```
 
 **Important**:

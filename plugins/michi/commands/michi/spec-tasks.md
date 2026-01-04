@@ -32,11 +32,15 @@ argument-hint: <feature-name> [-y] [--sequential]
 
 ### Step 3: 言語別チェック項目
 
+```text
 （spec-design.md と同様のチェック項目表を参照）
+```
 
 ### Step 4: 結果表示フォーマット
 
+```text
 （spec-design.md と同様の出力フォーマットを参照）
+```
 
 ### Step 5: 不足時の動作
 
