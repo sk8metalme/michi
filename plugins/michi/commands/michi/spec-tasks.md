@@ -69,7 +69,7 @@ argument-hint: <feature-name> [-y] [--sequential]
 - [ ] CI の設定 (GitHub Actions or Screwdriver)
 
 **推奨**:
-- [ ] ts-arch-kit でアーキテクチャテスト追加
+- [ ] tsarch でアーキテクチャテスト追加
 
 ### セットアップ手順
 
@@ -98,17 +98,29 @@ package.jsonに以下を追加:
 }
 ```
 
-#### ts-arch-kit
+#### tsarch
 ```bash
-npm install --save-dev ts-arch-kit
+npm install --save-dev tsarch
 ```
 
-`vitest.config.ts`:
+`src/__tests__/arch/architecture.test.ts`:
 ```typescript
-export default defineConfig({
-  test: {
-    include: ['**/*.arch.test.ts']
-  }
+import { filesOfProject } from 'tsarch';
+
+describe('Architecture', () => {
+  it('should not have circular dependencies', async () => {
+    const files = await filesOfProject();
+    await expect(files).toHaveNoCycles();
+  });
+
+  it('domain should not depend on infrastructure', async () => {
+    const files = await filesOfProject();
+    await expect(
+      files.inFolder('domain')
+    ).toNot.dependOnFiles(
+      files.inFolder('infrastructure')
+    );
+  });
 });
 ```
 

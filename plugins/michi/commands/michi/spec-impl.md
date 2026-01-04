@@ -347,8 +347,8 @@ if [ "$DETECTED_LANG" = "Node.js" ]; then
     [ "$CI_PLATFORM" = "none" ] && INFRA_MISSING+=("CI")
 
     # 推奨チェック
-    if ! grep -q "ts-arch-kit" package.json 2>/dev/null; then
-        INFRA_RECOMMENDED_MISSING+=("ts-arch-kit")
+    if ! grep -q "tsarch" package.json 2>/dev/null; then
+        INFRA_RECOMMENDED_MISSING+=("tsarch")
     fi
 
     # DevContainer (任意)

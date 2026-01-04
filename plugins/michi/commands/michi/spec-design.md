@@ -68,7 +68,7 @@ C) 後で設定する
 | pre-commit hook | `.husky/pre-commit` ファイル | ✅ |
 | lint-staged | `package.json` の lint-staged キーまたは `.lintstagedrc*` | ✅ |
 | TypeScript strict | `tsconfig.json` の strict: true | ✅ |
-| ts-arch-kit | `package.json` の ts-arch-kit | ℹ️（推奨） |
+| tsarch | `package.json` の tsarch | ℹ️（推奨） |
 | CI | `.github/workflows/` または `screwdriver.yaml` | ✅ |
 | DevContainer | `.devcontainer/` | ℹ️（任意） |
 
@@ -112,7 +112,7 @@ C) 後で設定する
 ├─ ✅ husky: Configured
 ├─ ✅ lint-staged: Configured
 ├─ ✅ TypeScript strict: Configured
-├─ ℹ️ ts-arch-kit: Not configured (optional - recommended)
+├─ ℹ️ tsarch: Not configured (optional - recommended)
 ├─ ✅ CI: GitHub Actions configured
 └─ ℹ️ DevContainer: Not configured (optional)
 ```
