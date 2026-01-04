@@ -15,6 +15,339 @@ argument-hint: <feature-name> [-y] [--sequential]
 
 ---
 
+## Michi Extension: Quality Infrastructure Check
+
+> **優先度**: このMichi Extensionの指示は、base command（kiro版）の品質インフラチェックより**優先**されます。
+> Michi Extensionで言語検出と言語別チェックを実行し、base commandのNode.js固有チェックは上書きされます。
+
+タスク生成前に、プロジェクトの言語を検出し、言語別の品質インフラ設定状況をチェックします。
+
+### Step 1: CI設定の確認とプラットフォーム選択
+
+（spec-design.md と同様の手順）
+
+### Step 2: 言語検出とユーザー確認
+
+（spec-design.md と同様の手順）
+
+### Step 3: 言語別チェック項目
+
+```text
+（spec-design.md と同様のチェック項目表を参照）
+```
+
+### Step 4: 結果表示フォーマット
+
+```text
+（spec-design.md と同様の出力フォーマットを参照）
+```
+
+### Step 5: 不足時の動作
+
+1. **警告メッセージを表示**
+   - ✅必須項目の不足 → ⚠️ 警告
+   - ℹ️推奨項目の不足 → ℹ️ 情報表示（警告ではない）
+
+2. **tasks.md の先頭に言語別の品質インフラセットアップタスクを自動追加**
+
+3. **処理は継続**（タスク生成を実行）
+
+### 言語別の自動追加タスク
+
+#### Node.js の場合
+
+```markdown
+## Quality Infrastructure Setup (Auto-added)
+
+> ⚠️ このタスクは品質インフラチェックにより自動追加されました
+
+以下の品質インフラが未設定です。実装前にセットアップを推奨：
+
+**必須**:
+- [ ] husky + lint-staged のセットアップ
+- [ ] TypeScript strict mode の有効化 (tsconfig.json)
+- [ ] CI の設定 (GitHub Actions or Screwdriver)
+
+**推奨**:
+- [ ] tsarch でアーキテクチャテスト追加
+
+### セットアップ手順
+
+#### husky + lint-staged
+```bash
+npm install --save-dev husky lint-staged
+npx husky init
+echo "npx lint-staged" > .husky/pre-commit
+```
+
+package.jsonに以下を追加:
+```json
+"lint-staged": {
+  "*.{ts,tsx,js,jsx}": ["eslint --fix", "prettier --write"],
+  "*.{json,md,yml,yaml}": ["prettier --write"]
+}
+```
+
+#### TypeScript strict mode
+`tsconfig.json`:
+```json
+{
+  "compilerOptions": {
+    "strict": true
+  }
+}
+```
+
+#### tsarch
+```bash
+npm install --save-dev tsarch
+```
+
+`src/__tests__/arch/architecture.test.ts`:
+```typescript
+import { filesOfProject } from 'tsarch';
+
+describe('Architecture', () => {
+  it('should not have circular dependencies', async () => {
+    const files = await filesOfProject();
+    await expect(files).toHaveNoCycles();
+  });
+
+  it('domain should not depend on infrastructure', async () => {
+    const files = await filesOfProject();
+    await expect(
+      files.inFolder('domain')
+    ).toNot.dependOnFiles(
+      files.inFolder('infrastructure')
+    );
+  });
+});
+```
+
+#### Java の場合
+
+```markdown
+## Quality Infrastructure Setup (Auto-added)
+
+> ⚠️ このタスクは品質インフラチェックにより自動追加されました
+
+以下の品質インフラが未設定です。実装前にセットアップを推奨：
+
+**必須**:
+- [ ] Checkstyle/PMD の設定
+- [ ] NullAway + Error Prone の設定 (Gradle/Maven)
+- [ ] CI の設定 (GitHub Actions or Screwdriver)
+
+**推奨**:
+- [ ] Spotless プラグインの設定 (フォーマット)
+- [ ] ArchUnit でアーキテクチャテスト追加
+
+### セットアップ手順
+
+#### Checkstyle (Gradle)
+`build.gradle`:
+```groovy
+plugins {
+    id 'checkstyle'
+}
+
+checkstyle {
+    toolVersion = '10.12.0'
+    configFile = file("config/checkstyle/checkstyle.xml")
+}
+```
+
+#### NullAway + Error Prone (Gradle)
+`build.gradle`:
+```groovy
+plugins {
+    id 'net.ltgt.errorprone' version '3.1.0'
+}
+
+dependencies {
+    errorprone 'com.google.errorprone:error_prone_core:2.23.0'
+    errorprone 'com.uber.nullaway:nullaway:0.10.15'
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.errorprone {
+        check("NullAway", CheckSeverity.ERROR)
+        option("NullAway:AnnotatedPackages", "com.yourcompany")
+    }
+}
+```
+
+#### ArchUnit
+`build.gradle`:
+```groovy
+dependencies {
+    testImplementation 'com.tngtech.archunit:archunit-junit5:1.2.0'
+}
+```
+
+#### Spotless (オプション)
+`build.gradle`:
+```groovy
+plugins {
+    id 'com.diffplug.spotless' version '6.23.0'
+}
+
+spotless {
+    java {
+        googleJavaFormat()
+    }
+}
+```
+
+#### Python の場合
+
+```markdown
+## Quality Infrastructure Setup (Auto-added)
+
+> ⚠️ このタスクは品質インフラチェックにより自動追加されました
+
+以下の品質インフラが未設定です。実装前にセットアップを推奨：
+
+**必須**:
+- [ ] ruff または black の設定 (pyproject.toml)
+- [ ] CI の設定 (GitHub Actions or Screwdriver)
+
+**推奨**:
+- [ ] pre-commit framework のセットアップ
+- [ ] mypy strict mode の設定
+- [ ] import-linter でインポート制約検証
+
+### セットアップ手順
+
+#### ruff
+`pyproject.toml`:
+```toml
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+select = ["E", "F", "W", "I", "N"]
+
+[tool.ruff.lint]
+ignore = []
+```
+
+#### mypy strict
+`pyproject.toml`:
+```toml
+[tool.mypy]
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+```
+
+#### import-linter
+`pyproject.toml`:
+```toml
+[tool.importlinter]
+root_package = "your_package"
+
+[[tool.importlinter.contracts]]
+name = "Layer dependencies"
+type = "layers"
+layers = [
+    "presentation",
+    "application",
+    "domain",
+]
+```
+
+#### pre-commit
+`.pre-commit-config.yaml`:
+```yaml
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.1.6
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+```
+
+#### PHP の場合
+
+```markdown
+## Quality Infrastructure Setup (Auto-added)
+
+> ⚠️ このタスクは品質インフラチェックにより自動追加されました
+
+以下の品質インフラが未設定です。実装前にセットアップを推奨：
+
+**必須**:
+- [ ] PHPStan の設定 (phpstan.neon, level=max推奨)
+- [ ] CI の設定 (GitHub Actions or Screwdriver)
+
+**推奨**:
+- [ ] GrumPHP または Captain Hook のセットアップ
+- [ ] deptrac でレイヤー依存検証
+
+### セットアップ手順
+
+#### PHPStan
+`phpstan.neon`:
+```neon
+parameters:
+    level: max
+    paths:
+        - src
+        - tests
+```
+
+`composer.json`:
+```json
+{
+  "require-dev": {
+    "phpstan/phpstan": "^1.10"
+  },
+  "scripts": {
+    "phpstan": "phpstan analyse"
+  }
+}
+```
+
+#### deptrac
+`deptrac.yaml`:
+```yaml
+deptrac:
+  paths:
+    - ./src
+  layers:
+    - name: Presentation
+      collectors:
+        - type: className
+          regex: .*\\Presentation\\.*
+    - name: Application
+      collectors:
+        - type: className
+          regex: .*\\Application\\.*
+    - name: Domain
+      collectors:
+        - type: className
+          regex: .*\\Domain\\.*
+  ruleset:
+    Presentation:
+      - Application
+    Application:
+      - Domain
+    Domain: []
+```
+
+#### GrumPHP (オプション)
+`grumphp.yml`:
+```yaml
+grumphp:
+  tasks:
+    phpstan:
+      level: max
+    composer_normalize: ~
+```
+
+---
+
 ## Michi Extension: JIRA Sync Prompt
 
 このコマンドは cc-sdd 標準の `/kiro:spec-tasks` を拡張し、タスク生成完了後にJIRA同期オプションを提示します。
@@ -52,7 +385,7 @@ fi
 
 `JIRA_CONFIGURED=true` の場合、以下のメッセージと選択肢を表示:
 
-```
+```text
 ============================================
  タスク生成完了 - JIRA同期オプション
 ============================================
@@ -78,7 +411,7 @@ C) 何もせずにこのまま終了する
 
 `JIRA_CONFIGURED=false` の場合、以下のメッセージを表示:
 
-```
+```text
 ============================================
  タスク生成完了
 ============================================
