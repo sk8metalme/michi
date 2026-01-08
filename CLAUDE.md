@@ -293,3 +293,12 @@ npm run test:arch     # アーキテクチャテスト（必須）
 **Release（release.yml）**: 全テスト実行 → ビルド → npm publish → GitHub Release
 
 詳細は各ワークフローファイル（`.github/workflows/`）を参照。
+
+### Pluginバージョン管理
+
+プラグイン関連のファイル（plugins/）を修正した場合は、必ずバージョンを更新すること。
+
+**Semantic Versioning:**
+- **MAJOR** (x.0.0): 破壊的変更（既存機能の削除・変更）
+- **MINOR** (0.x.0): 後方互換の新機能追加
+- **PATCH** (0.0.x): バグ修正・ドキュメント修正
