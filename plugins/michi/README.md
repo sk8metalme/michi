@@ -66,20 +66,6 @@ Claude Code内で以下を実行：
 | `/michi-multi-repo:propagate-specs` | 各リポジトリへの仕様展開（並列実行） |
 | `/michi-multi-repo:impl-all` | 全リポジトリ実装（並列実行） |
 
-## 利用可能なエージェント (3個)
-
-| エージェント | 説明 |
-|------------|------|
-| `mermaid-validator` | Mermaid図の構文検証と修正提案 |
-| `pr-resolver` | PRマージ関連の問題解決（コンフリクト解消、レビュー対応） |
-| `pr-size-monitor` | PRサイズ監視と適切な粒度への分割提案 |
-
-## 利用可能なスキル (1個)
-
-| スキル | 説明 |
-|-------|------|
-| `mermaid-validator` | Mermaid図の検証をスキルとして実行 |
-
 ## ルール (6個)
 
 | ルール | 説明 |

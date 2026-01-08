@@ -100,22 +100,22 @@ Multi-Repoプロジェクト **$1** の技術設計書を生成します。
 
 #### 4.5.1 Mermaid図の構文検証
 
-`mermaid-validator` エージェントを使用してMermaid図を検証:
+architecture.mdにMermaid図が含まれる場合、構文検証を実行:
 
 ```
-IMPORTANT: architecture.mdにMermaid図が含まれる場合、mermaid-validatorエージェントを自動実行してください。
+IMPORTANT: architecture.mdにMermaid図が含まれる場合、以下の検証を実行してください。
 - 検出: Mermaid図を含むかどうかを確認
-- 検証: 構文エラーを検出
-- 修正: 自動修正可能なエラーを修正
+- 検証: 構文エラーを検出（```mermaid ブロックの整合性確認）
+- 修正: 自動修正可能なエラーを修正（不正な矢印記法、インデント等）
 - 報告: 修正内容をユーザーに通知
 ```
 
 **実行タイミング**: architecture.md保存直後
 
-**エージェント呼び出し**:
-```
-Task(subagent_type='mermaid-validator', prompt='docs/michi/$1/overview/architecture.md のMermaid図を検証し、構文エラーを自動修正してください')
-```
+**検証手順**:
+1. architecture.mdから```mermaidブロックを抽出
+2. 基本的な構文チェック（開始/終了タグの整合性、基本記法の確認）
+3. エラーがあれば修正提案をユーザーに提示
 
 #### 4.5.2 技術スタックバージョン監査
 
