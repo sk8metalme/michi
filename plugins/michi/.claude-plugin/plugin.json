@@ -1,0 +1,21 @@
+{
+  "name": "michi",
+  "version": "1.1.0",
+  "description": "Michi - AI-driven Spec-Driven Development workflow for Claude Code",
+  "author": {
+    "name": "yourorg"
+  },
+  "license": "MIT",
+  "repository": "https://github.com/yourorg/michi",
+  "homepage": "https://github.com/yourorg/michi",
+  "keywords": [
+    "claude-code",
+    "plugin",
+    "spec-driven-development",
+    "michi",
+    "tdd",
+    "workflow",
+    "confluence",
+    "jira"
+  ]
+}

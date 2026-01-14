@@ -1,0 +1,17 @@
+shared:
+  image: node:20
+
+jobs:
+  main:
+    requires: [~pr, ~commit, ~tag]
+    steps:
+      - install: npm ci
+      - lint: npm run lint
+      - test: npm test
+      - build: npm run build
+      - coverage: |
+          if [ -d "coverage" ]; then
+            echo "Coverage report generated"
+            # Optional: Upload to coverage service
+            # npm run coverage:upload
+          fi

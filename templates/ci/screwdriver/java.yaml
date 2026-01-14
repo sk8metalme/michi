@@ -1,0 +1,17 @@
+shared:
+  image: openjdk:17
+
+jobs:
+  main:
+    requires: [~pr, ~commit, ~tag]
+    steps:
+      - setup: chmod +x gradlew
+      - checkstyle: ./gradlew checkstyleMain checkstyleTest
+      - test: ./gradlew test
+      - build: ./gradlew build
+      - report: |
+          if [ -d "build/reports" ]; then
+            echo "Test reports generated"
+            # Optional: Archive reports
+            # tar -czf reports.tar.gz build/reports
+          fi

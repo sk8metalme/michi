@@ -1,0 +1,14 @@
+{
+  "name": "yourorg-michi",
+  "owner": {
+    "name": "yourorg"
+  },
+  "plugins": [
+    {
+      "name": "michi",
+      "source": "./plugins/michi",
+      "description": "Michi - AI-driven Spec-Driven Development workflow for Claude Code",
+      "version": "1.0.0"
+    }
+  ]
+}
