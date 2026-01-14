@@ -77,7 +77,7 @@ MichiはClaude Code向けの**Spec-Driven Development**フレームワークで�
 
 ## バージョン
 
-**v1.0.0** - TypeScript CLIからMarkdownプラグインへ完全移行
+**v1.0.0** - 初期バージョン
 
 ---
 
