@@ -76,11 +76,11 @@ docs/michi/YYYYMMDD-{name}/
    - テンプレート: `templates/multi-repo/spec/requirements.md`
    - 「概要」セクションにプロジェクト説明を記載
    - プレースホルダー置換
-   - 出力先: `docs/michi/YYYYMMDD-{name}/spec/requirements.md`
+   - 出力先: `docs/michi/YYYYMMDD-{name}/overview/requirements.md`
 
 3. **その他テンプレートファイルのレンダリング**:
-   - `templates/multi-repo/spec/architecture.md` → `docs/michi/YYYYMMDD-{name}/spec/architecture.md`
-   - `templates/multi-repo/spec/sequence.md` → `docs/michi/YYYYMMDD-{name}/spec/sequence.md`
+   - `templates/multi-repo/spec/architecture.md` → `docs/michi/YYYYMMDD-{name}/overview/architecture.md`
+   - `templates/multi-repo/spec/sequence.md` → `docs/michi/YYYYMMDD-{name}/overview/sequence.md`
    - `templates/multi-repo/test-plan/strategy.md` → `docs/michi/YYYYMMDD-{name}/test-plan/strategy.md`
 
 ## 重要な制約
@@ -117,8 +117,8 @@ docs/michi/YYYYMMDD-{name}/
 
 ### 作成されたファイル
 - `.michi/multi-repo/pj/YYYYMMDD-{name}/project.json` - メタデータ（phase: initialized）
-- `docs/michi/YYYYMMDD-{name}/spec/requirements.md` - 要件定義書（初期化済み）
-- `docs/michi/YYYYMMDD-{name}/spec/architecture.md` - 設計書（テンプレート）
+- `docs/michi/YYYYMMDD-{name}/overview/requirements.md` - 要件定義書（初期化済み）
+- `docs/michi/YYYYMMDD-{name}/overview/architecture.md` - 設計書（テンプレート）
 - `docs/michi/YYYYMMDD-{name}/test-plan/strategy.md` - テスト戦略（テンプレート）
 
 ### 次のステップ

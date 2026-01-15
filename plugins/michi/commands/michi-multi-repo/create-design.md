@@ -33,7 +33,7 @@ Multi-Repoプロジェクト **$1** の技術設計書を生成します。
 ### Step 1: コンテキスト読み込み
 1. `.michi/multi-repo/pj/YYYYMMDD-$1/project.json` からプロジェクト情報取得
    - 登録リポジトリ一覧
-2. `docs/michi/YYYYMMDD-$1/spec/requirements.md` から要件読み込み
+2. `docs/michi/YYYYMMDD-$1/overview/requirements.md` から要件読み込み
    - 要件定義書が存在しない場合は、先に `/michi-multi-repo:create-requirements $1` の実行を促す
 3. `{{MICHI_GLOBAL_DIR}}/settings/rules/design-principles.md` から設計原則取得（存在する場合）
 4. `{{MICHI_GLOBAL_DIR}}/settings/templates/specs/design.md` から構造参照（存在する場合）
@@ -99,7 +99,7 @@ Multi-Repoプロジェクト **$1** の技術設計書を生成します。
    - データ整合性の保証方法
 
 ### Step 4: ファイル保存
-- 出力先: `docs/michi/YYYYMMDD-$1/spec/architecture.md`
+- 出力先: `docs/michi/YYYYMMDD-$1/overview/architecture.md`
 - 既存ファイルがある場合は、上書き確認（`-y` フラグで自動承認）
 
 ### Step 4.5: 品質検証（PROACTIVE）
@@ -142,7 +142,7 @@ stable-version-auditorエージェントを自動実行してください。
 
 **エージェント呼び出し**:
 ```
-Task(subagent_type='stable-version-auditor', prompt='docs/michi/YYYYMMDD-$1/spec/architecture.md に記載された技術スタックのバージョンを監査し、EOLリスクを評価してください')
+Task(subagent_type='stable-version-auditor', prompt='docs/michi/YYYYMMDD-$1/overview/architecture.md に記載された技術スタックのバージョンを監査し、EOLリスクを評価してください')
 ```
 
 ### Step 5: メタデータ更新（project.json）
@@ -257,7 +257,7 @@ sequenceDiagram
 ## 出力説明
 以下の情報を出力してください：
 
-1. **生成された設計書のパス**: `docs/michi/{YYYYMMDD-project名}/spec/architecture.md`
+1. **生成された設計書のパス**: `docs/michi/{YYYYMMDD-project名}/overview/architecture.md`
 2. **分析したリポジトリの一覧**: コンポーネント名と技術スタックの要約
 3. **品質検証結果**:
    - Mermaid図の検証結果
@@ -285,7 +285,7 @@ sequenceDiagram
 ## 設計書生成完了
 
 ### 出力ファイル
-`docs/michi/{YYYYMMDD-project名}/spec/architecture.md`
+`docs/michi/{YYYYMMDD-project名}/overview/architecture.md`
 
 ### 分析したコンポーネント
 - **Frontend**: React + TypeScript（3リポジトリ依存）
@@ -314,7 +314,7 @@ sequenceDiagram
 - Python 3.9 → 3.11 - EOL 6ヶ月以内
 
 ### 次のステップ
-1. 設計書を確認: `docs/michi/{YYYYMMDD-project名}/spec/architecture.md`
+1. 設計書を確認: `docs/michi/{YYYYMMDD-project名}/overview/architecture.md`
 2. 技術スタック更新（必要に応じて）
 3. **テスト計画を作成**: `/michi-multi-repo:plan-tests {project}` でテスト戦略を策定
 4. 各リポジトリで実装を開始:
@@ -327,7 +327,7 @@ sequenceDiagram
 ### エラーシナリオ
 - **要件定義書未作成**:
   ```
-  エラー: 要件定義書が見つかりません: `docs/michi/{YYYYMMDD-project名}/spec/requirements.md`
+  エラー: 要件定義書が見つかりません: `docs/michi/{YYYYMMDD-project名}/overview/requirements.md`
 
   先に要件定義書を生成してください：
   /michi-multi-repo:create-requirements {project}
@@ -351,7 +351,7 @@ sequenceDiagram
 
 - **既存ファイル存在（`-y` フラグなし）**:
   ```
-  警告: 既存の設計書が存在します: `docs/michi/{YYYYMMDD-project名}/spec/architecture.md`
+  警告: 既存の設計書が存在します: `docs/michi/{YYYYMMDD-project名}/overview/architecture.md`
 
   上書きしてもよろしいですか？ (y/n)
   または `-y` フラグを使用して自動承認できます。
@@ -366,7 +366,7 @@ sequenceDiagram
 ### 次のフェーズ: テスト計画
 
 **設計書承認後**:
-1. 設計書を確認: `docs/michi/{YYYYMMDD-project名}/spec/architecture.md`
+1. 設計書を確認: `docs/michi/{YYYYMMDD-project名}/overview/architecture.md`
 2. **テスト計画を作成**: `/michi-multi-repo:plan-tests {project}` でテスト戦略を策定
 3. **各リポジトリで個別実装**:
    - リポジトリごとに `/michi:dev` で実装を開始

@@ -21,8 +21,8 @@ argument-hint: <project-name> [--focus api|data|event|deps|test|all]
 
 - **親プロジェクトパス**: Multi-Repoプロジェクトのルートディレクトリ
   - `.michi/multi-repo/pj/$1/project.json` - プロジェクトメタデータ（親プロジェクト内）
-  - `docs/michi/$1/spec/requirements.md` - 親プロジェクトの要件定義書
-  - `docs/michi/$1/spec/architecture.md` - 親プロジェクトの設計書
+  - `docs/michi/$1/overview/requirements.md` - 親プロジェクトの要件定義書
+  - `docs/michi/$1/overview/architecture.md` - 親プロジェクトの設計書
 
 - **子リポジトリパス**: 各リポジトリのlocalPathで指定されたディレクトリ
   - `{localPath}/.michi/pj/` - 各リポジトリのMichiメタデータ
@@ -62,8 +62,8 @@ Multi-Repoプロジェクト **$1** の全リポジトリを対象に、クロ�
 2. 各リポジトリの `localPath` を取得
 
 3. 親プロジェクトの仕様を読み込み
-   - `docs/michi/$1/spec/requirements.md`
-   - `docs/michi/$1/spec/architecture.md`
+   - `docs/michi/$1/overview/requirements.md`
+   - `docs/michi/$1/overview/architecture.md`
 
 ### Step 2: localPath 検証
 
@@ -238,7 +238,7 @@ BLOCK問題が検出されました。修正が必須です。
 
 - **親プロジェクト仕様未作成**:
   ```
-  エラー: 親プロジェクトの設計書が見つかりません: docs/michi/$1/spec/architecture.md
+  エラー: 親プロジェクトの設計書が見つかりません: docs/michi/$1/overview/architecture.md
 
   先に親プロジェクトの設計を作成してください:
   /michi-multi-repo:create-design $1
