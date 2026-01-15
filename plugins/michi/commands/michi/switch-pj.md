@@ -1,42 +1,42 @@
 ---
 name: /michi:switch-pj
-description: Switch between projects (Michi-specific feature)
+description: プロジェクト間の切り替え（Michi固有機能）
 ---
 
-# Project Switch Command
+# プロジェクト切り替えコマンド
 
 > **Michi 固有機能**: このコマンドは Michi 独自の機能です。base コマンドには含まれません。
 >
 > マルチプロジェクト環境で、異なるプロジェクト間を切り替えるための機能です。
 
-## Development Guidelines
+## 開発ガイドライン
 
 {{DEV_GUIDELINES}}
 
-## Usage
+## 使用方法
 
 ```
 /michi:switch-pj <project_id>
 ```
 
-**Parameters**:
-- `project_id`: Project ID (e.g., customer-a-service-1, michi)
+**パラメータ**:
+- `project_id`: プロジェクトID（例: customer-a-service-1, michi）
 
-**Examples**:
+**例**:
 ```
 /michi:switch-pj michi
 /michi:switch-pj customer-a-service-1
 ```
 
-## Execution Steps
+## 実行手順
 
-1. Identify GitHub repository corresponding to project ID
-2. Clone locally (if not cloned) or checkout
-3. Load and display {{SPEC_DIR}}/project.json
-4. Display corresponding Confluence project page URL
+1. プロジェクトIDに対応するGitHubリポジトリを特定
+2. ローカルにクローン（未クローンの場合）またはチェックアウト
+3. {{SPEC_DIR}}/project.json を読み込んで表示
+4. 対応するConfluenceプロジェクトページのURLを表示
 
-## Language Handling
+## 言語処理
 
-- Read language from {{SPEC_DIR}}/project.json
-- Generate all output in the specified language
-- Default to English if language field is missing
+- {{SPEC_DIR}}/project.json から言語を読み取り
+- 指定された言語ですべての出力を生成
+- 言語フィールドが欠落している場合は英語をデフォルトとする

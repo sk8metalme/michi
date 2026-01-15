@@ -1,87 +1,87 @@
 ---
 name: /michi:create-tasks
-description: Generate implementation tasks with JIRA sync option (Michi version)
+description: JIRA同期オプション付きで実装タスクを生成（Michiバージョン）
 allowed-tools: Read, Write, Edit, MultiEdit, Glob, Grep, Bash
 argument-hint: <feature-name> [-y] [--sequential]
 ---
 
-# Michi: Spec Tasks with JIRA Sync Option
+# Michi: JIRA同期オプション付き仕様タスク
 
 <background_information>
-- **Mission**: Generate detailed, actionable implementation tasks that translate technical design into executable work items
-- **Success Criteria**:
-  - All requirements mapped to specific tasks
-  - Tasks properly sized (1-3 hours each)
-  - Clear task progression with proper hierarchy
-  - Natural language descriptions focused on capabilities
-  - Quality infrastructure validated for project language
-  - JIRA sync option available when configured
+- **ミッション**: 技術設計を実行可能な作業項目に変換する、詳細で実行可能な実装タスクを生成する
+- **成功基準**:
+  - すべての要件が特定のタスクにマッピングされている
+  - タスクが適切にサイズ化されている（各1-3時間）
+  - 適切な階層を持つ明確なタスク進行
+  - 能力に焦点を当てた自然言語の説明
+  - プロジェクト言語の品質インフラが検証されている
+  - 設定時にJIRA同期オプションが利用可能
 </background_information>
 
-## Development Guidelines
+## 開発ガイドライン
 {{DEV_GUIDELINES}}
 
 ---
 
 <instructions>
-## Core Task
-Generate implementation tasks for feature **$1** based on approved requirements and design.
+## コアタスク
+承認された要件と設計に基づいて、機能 **$1** の実装タスクを生成します。
 
-## Execution Steps
+## 実行手順
 
-### Base Implementation
+### 基本実装
 
-#### Step 1: Load Context
+#### ステップ 1: コンテキストの読み込み
 
-**Read all necessary context**:
-- `{{MICHI_DIR}}/specs/$1/spec.json`, `requirements.md`, `design.md`
-- `{{MICHI_DIR}}/specs/$1/tasks.md` (if exists, for merge mode)
-- **Entire `{{REPO_ROOT_DIR}}/docs/master/` directory** for complete project memory
+**必要なすべてのコンテキストを読み取り**:
+- `{{MICHI_DIR}}/pj/$1/spec.json`, `requirements.md`, `design.md`
+- `{{MICHI_DIR}}/pj/$1/tasks.md`（存在する場合、マージモード用）
+- 完全なプロジェクトメモリのために**`{{REPO_ROOT_DIR}}/docs/master/` ディレクトリ全体**
 
-**Validate approvals**:
-- If `-y` flag provided ($2 == "-y"): Auto-approve requirements and design in spec.json
-- Otherwise: Verify both approved (stop if not, see Safety & Fallback)
-- Determine sequential mode based on presence of `--sequential`
+**承認の検証**:
+- `-y` フラグが提供された場合（$2 == "-y"）: spec.json で要件と設計を自動承認
+- それ以外: 両方が承認されていることを確認（そうでない場合は停止、安全性とフォールバックを参照）
+- `--sequential` の有無に基づいてシーケンシャルモードを決定
 
-#### Step 2: Generate Implementation Tasks
+#### ステップ 2: 実装タスクの生成
 
-**Load generation rules and template**:
-- Read `{{MICHI_DIR}}/settings/rules/tasks-generation.md` for principles
-- If `sequential` is **false**: Read `{{MICHI_DIR}}/settings/rules/tasks-parallel-analysis.md` for parallel judgement criteria
-- Read `{{MICHI_DIR}}/settings/templates/specs/tasks.md` for format (supports `(P)` markers)
+**生成ルールとテンプレートの読み込み**:
+- 原則のために `{{MICHI_DIR}}/settings/rules/tasks-generation.md` を読み取り
+- `sequential` が **false** の場合: 並列判定基準のために `{{MICHI_DIR}}/settings/rules/tasks-parallel-analysis.md` を読み取り
+- フォーマットのために `{{MICHI_DIR}}/settings/templates/specs/tasks.md` を読み取り（`(P)` マーカーをサポート）
 
-**Generate task list following all rules**:
-- Use language specified in spec.json
-- Map all requirements to tasks
-- When documenting requirement coverage, list numeric requirement IDs only (comma-separated) without descriptive suffixes, parentheses, translations, or free-form labels
-- Ensure all design components included
-- Verify task progression is logical and incremental
-- Collapse single-subtask structures by promoting them to major tasks and avoid duplicating details on container-only major tasks (use template patterns accordingly)
-- Apply `(P)` markers to tasks that satisfy parallel criteria (omit markers in sequential mode)
-- Mark optional test coverage subtasks with `- [ ]*` only when they strictly cover acceptance criteria already satisfied by core implementation and can be deferred post-MVP
-- If existing tasks.md found, merge with new content
+**すべてのルールに従ってタスクリストを生成**:
+- spec.json で指定された言語を使用
+- すべての要件をタスクにマッピング
+- 要件カバレッジを文書化する際、数値要件IDのみをリスト（カンマ区切り）、説明サフィックス、括弧、翻訳、または自由形式ラベルなし
+- すべての設計コンポーネントが含まれていることを確認
+- タスク進行が論理的で段階的であることを確認
+- 単一サブタスク構造を主要タスクに昇格させて折りたたみ、コンテナのみの主要タスクで詳細を複製しない（テンプレートパターンに従って適用）
+- 並列基準を満たすタスクに `(P)` マーカーを適用（シーケンシャルモードではマーカーを省略）
+- 厳密にコア実装によって既に満たされた受入基準をカバーし、MVP後に延期できるオプションのテストカバレッジサブタスクのみを `- [ ]*` でマーク
+- 既存の tasks.md が見つかった場合、新しいコンテンツとマージ
 
-#### Step 3: Finalize
+#### ステップ 3: 最終化
 
-**Write and update**:
-- Create/update `{{MICHI_DIR}}/specs/$1/tasks.md`
-- Update spec.json metadata:
-  - Set `phase: "tasks-generated"`
-  - Set `approvals.tasks.generated: true, approved: false`
-  - Set `approvals.requirements.approved: true`
-  - Set `approvals.design.approved: true`
-  - Update `updated_at` timestamp
+**書き込みと更新**:
+- `{{MICHI_DIR}}/pj/$1/tasks.md` を作成/更新
+- spec.json メタデータを更新:
+  - `phase: "tasks-generated"` を設定
+  - `approvals.tasks.generated: true, approved: false` を設定
+  - `approvals.requirements.approved: true` を設定
+  - `approvals.design.approved: true` を設定
+  - `updated_at` タイムスタンプを更新
 
-### Michi Extensions
+### Michi拡張機能
 
-#### Step 4: Quality Infrastructure Check
+#### ステップ 4: 品質インフラチェック
 
 > **優先度**: このMichi Extensionの指示は、base commandの品質インフラチェックより**優先**されます。
 > Michi Extensionで言語検出と言語別チェックを実行し、base commandのNode.js固有チェックは上書きされます。
 
 タスク生成前に、プロジェクトの言語を検出し、言語別の品質インフラ設定状況をチェックします。
 
-**Step 4.1: CI設定の確認とプラットフォーム選択**
+**ステップ 4.1: CI設定の確認とプラットフォーム選択**
 
 **既存CI設定をチェック**:
 - `.github/workflows/` が存在する場合 → GitHub Actions採用
@@ -97,7 +97,7 @@ B) Screwdriver
 C) 後で設定する
 ```
 
-**Step 4.2: 言語検出とユーザー確認**
+**ステップ 4.2: 言語検出とユーザー確認**
 
 **プロジェクトルートのファイルをチェック**:
 - `package.json` あり → Node.js
@@ -110,7 +110,7 @@ C) 後で設定する
 検出された言語: {{LANG}}。正しいですか？ (Y/n)
 ```
 
-**Step 4.3: 言語別チェック項目**
+**ステップ 4.3: 言語別チェック項目**
 
 **Node.js / TypeScript**:
 - husky + pre-commit hook (必須)
@@ -143,7 +143,7 @@ C) 後で設定する
 - CI (必須)
 - DevContainer (任意)
 
-**Step 4.4: 結果表示とタスク自動追加**
+**ステップ 4.4: 結果表示とタスク自動追加**
 
 1. **警告メッセージを表示**:
    - ✅必須項目の不足 → ⚠️ 警告
@@ -155,7 +155,7 @@ C) 後で設定する
 
 3. **処理は継続**（タスク生成を実行）
 
-#### Step 5: JIRA Sync Prompt
+#### ステップ 5: JIRA同期プロンプト
 
 タスク生成完了後、JIRA同期オプションを提示します。
 
@@ -209,7 +209,7 @@ B) 何もせずにこのまま終了する
 詳細はドキュメントを参照: docs/guides/atlassian-integration.md
 ```
 
-#### Step 6: Task Diff Size Guidelines
+#### ステップ 6: タスク差分サイズガイドライン
 
 タスク分割時に、各サブタスクの git diff サイズを考慮してください。
 
@@ -227,91 +227,91 @@ B) 何もせずにこのまま終了する
 2. 垂直分割（機能スライス別）: core機能 → validation → error handling → edge cases
 3. フェーズ分割（段階別）: 基本実装 → テスト追加 → 最適化
 
-## Critical Constraints
-- **Follow rules strictly**: All principles in tasks-generation.md are mandatory
-- **Natural Language**: Describe what to do, not code structure details
-- **Complete Coverage**: ALL requirements must map to tasks
-- **Maximum 2 Levels**: Major tasks and sub-tasks only (no deeper nesting)
-- **Sequential Numbering**: Major tasks increment (1, 2, 3...), never repeat
-- **Task Integration**: Every task must connect to the system (no orphaned work)
+## 重要な制約
+- **ルールを厳密に遵守**: tasks-generation.md のすべての原則は必須
+- **自然言語**: 何をするかを説明し、コード構造の詳細ではない
+- **完全なカバレッジ**: すべての要件をタスクにマッピングする必要がある
+- **最大2レベル**: 主要タスクとサブタスクのみ（より深いネストなし）
+- **シーケンシャル番号付け**: 主要タスクは増分（1, 2, 3...）、繰り返しなし
+- **タスク統合**: すべてのタスクはシステムに接続する必要がある（孤立した作業なし）
 </instructions>
 
-## Tool Guidance
-- **Read first**: Load all context, rules, and templates before generation
-- **Write last**: Generate tasks.md only after complete analysis and verification
-- Use **Bash** to check environment variables and CI configuration
+## ツールガイダンス
+- **最初に読み取り**: 生成前にすべてのコンテキスト、ルール、テンプレートを読み込む
+- **最後に書き込み**: 完全な分析と検証後にのみ tasks.md を生成
+- 環境変数とCI設定をチェックするために **Bash** を使用
 
-## Output Description
+## 出力説明
 
-Provide brief summary in the language specified in spec.json:
+spec.json で指定された言語で簡潔なサマリーを提供:
 
-### Base Output
+### 基本出力
 
-1. **Status**: Confirm tasks generated at `{{MICHI_DIR}}/specs/$1/tasks.md`
-2. **Task Summary**:
-   - Total: X major tasks, Y sub-tasks
-   - All Z requirements covered
-   - Average task size: 1-3 hours per sub-task
-3. **Quality Validation**:
-   - ✅ All requirements mapped to tasks
-   - ✅ Task dependencies verified
-   - ✅ Testing tasks included
-4. **Next Action**: Review tasks and proceed when ready
+1. **ステータス**: `{{MICHI_DIR}}/pj/$1/tasks.md` でタスクが生成されたことを確認
+2. **タスクサマリー**:
+   - 合計: X 主要タスク、Y サブタスク
+   - すべて Z 要件がカバーされている
+   - 平均タスクサイズ: サブタスクあたり1-3時間
+3. **品質検証**:
+   - ✅ すべての要件がタスクにマッピングされている
+   - ✅ タスク依存関係が検証されている
+   - ✅ テストタスクが含まれている
+4. **次のアクション**: タスクをレビューし、準備ができたら進む
 
-### Michi Extended Output
+### Michi拡張出力
 
-After base output, add:
+基本出力の後に追加:
 
-1. **Quality Infrastructure Check Results**: Language-specific infrastructure status
-2. **JIRA Sync Prompt**: Display appropriate next action based on JIRA configuration
-3. **Task Diff Size Guidance**: Reminder of 500-line diff size recommendation
+1. **品質インフラチェック結果**: 言語固有のインフラステータス
+2. **JIRA同期プロンプト**: JIRA設定に基づいて適切な次のアクションを表示
+3. **タスク差分サイズガイダンス**: 500行差分サイズ推奨のリマインダー
 
-**Format**: Concise (under 200 words)
+**形式**: 簡潔（200語以下）
 
-## Safety & Fallback
+## 安全性とフォールバック
 
-### Error Scenarios
+### エラーシナリオ
 
-**Requirements or Design Not Approved**:
-- **Stop Execution**: Cannot proceed without approved requirements and design
-- **User Message**: "Requirements and design must be approved before task generation"
-- **Suggested Action**: "Run `/michi:create-tasks $1 -y` to auto-approve both and proceed"
+**要件または設計が承認されていない**:
+- **実行停止**: 承認された要件と設計なしには進められない
+- **ユーザーメッセージ**: "タスク生成前に要件と設計を承認する必要があります"
+- **推奨アクション**: "両方を自動承認して進むには `/michi:create-tasks $1 -y` を実行"
 
-**Missing Requirements or Design**:
-- **Stop Execution**: Both documents must exist
-- **User Message**: "Missing requirements.md or design.md at `{{MICHI_DIR}}/specs/$1/`"
-- **Suggested Action**: "Complete requirements and design phases first"
+**要件または設計が欠落**:
+- **実行停止**: 両方のドキュメントが存在する必要がある
+- **ユーザーメッセージ**: "`{{MICHI_DIR}}/pj/$1/` に requirements.md または design.md が欠落しています"
+- **推奨アクション**: "最初に要件と設計フェーズを完了"
 
-**Incomplete Requirements Coverage**:
-- **Warning**: "Not all requirements mapped to tasks. Review coverage."
-- **User Action Required**: Confirm intentional gaps or regenerate tasks
+**不完全な要件カバレッジ**:
+- **警告**: "すべての要件がタスクにマッピングされていません。カバレッジをレビューしてください。"
+- **ユーザーアクション必要**: 意図的なギャップを確認するか、タスクを再生成
 
-**Template/Rules Missing**:
-- **User Message**: "Template or rules files missing in `{{MICHI_DIR}}/settings/`"
-- **Fallback**: Use inline basic structure with warning
-- **Suggested Action**: "Check repository setup or restore template files"
+**テンプレート/ルール欠落**:
+- **ユーザーメッセージ**: "`{{MICHI_DIR}}/settings/` にテンプレートまたはルールファイルが欠落しています"
+- **フォールバック**: 警告付きでインライン基本構造を使用
+- **推奨アクション**: "リポジトリセットアップを確認するか、テンプレートファイルを復元"
 
-**Missing Numeric Requirement IDs**:
-  - **Stop Execution**: All requirements in requirements.md MUST have numeric IDs. If any requirement lacks a numeric ID, stop and request that requirements.md be fixed before generating tasks.
+**数値要件ID欠落**:
+  - **実行停止**: requirements.md のすべての要件は数値IDを持つ必要があります。要件に数値IDがない場合、停止してタスク生成前に requirements.md を修正するよう要求。
 
-### Next Phase: Implementation
+### 次のフェーズ: 実装
 
-**Before Starting Implementation**:
-- **IMPORTANT**: Clear conversation history and free up context before running `/michi:dev`
-- This applies when starting first task OR switching between tasks
-- Fresh context ensures clean state and proper task focus
+**実装開始前**:
+- **重要**: `/michi:dev` を実行する前に会話履歴をクリアしてコンテキストを解放
+- これは最初のタスク開始時またはタスク間の切り替え時に適用
+- 新鮮なコンテキストはクリーンな状態と適切なタスクフォーカスを確保
 
-**If Tasks Approved**:
-- Execute specific task: `/michi:dev $1 1.1` (recommended: clear context between each task)
-- Execute multiple tasks: `/michi:dev $1 1.1,1.2` (use cautiously, clear context between tasks)
-- Without arguments: `/michi:dev $1` (executes all pending tasks - NOT recommended due to context bloat)
+**タスクが承認された場合**:
+- 特定のタスクを実行: `/michi:dev $1 1.1`（推奨: 各タスク間でコンテキストをクリア）
+- 複数のタスクを実行: `/michi:dev $1 1.1,1.2`（慎重に使用、タスク間でコンテキストをクリア）
+- 引数なし: `/michi:dev $1`（すべての保留中のタスクを実行 - コンテキスト肥大化のため推奨されません）
 
-**If Modifications Needed**:
-- Provide feedback and re-run `/michi:create-tasks $1`
-- Existing tasks used as reference (merge mode)
+**修正が必要な場合**:
+- フィードバックを提供し、`/michi:create-tasks $1` を再実行
+- 既存のタスクが参照として使用される（マージモード）
 
-**Note**: The implementation phase will guide you through executing tasks with appropriate context and validation.
+**注意**: 実装フェーズは、適切なコンテキストと検証でタスクを実行するようガイドします。
 
 ---
 
-**Michi Integration**: This command extends base task generation with quality infrastructure validation (language-specific checks), JIRA sync option, and task diff size guidelines for optimal task splitting.
+**Michi統合**: このコマンドは、品質インフラ検証（言語固有チェック）、JIRA同期オプション、最適なタスク分割のためのタスク差分サイズガイドラインで基本タスク生成を拡張します。

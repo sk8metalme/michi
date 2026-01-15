@@ -1,66 +1,66 @@
 ---
 name: /michi:review-design
-description: Interactive technical design validation with test planning readiness check (Michi version)
+description: テスト計画準備状況チェック付きインタラクティブな技術設計検証（Michiバージョン）
 allowed-tools: Bash, Glob, Grep, LS, Read, Write, Edit, MultiEdit, Update, WebSearch, WebFetch, AskUserQuestion
 argument-hint: <feature-name>
 ---
 
-# Michi: Design Validation with Test Planning
+# Michi: テスト計画付き設計検証
 
 <background_information>
-- **Mission**: Conduct interactive quality review of technical design to ensure readiness for implementation
-- **Success Criteria**:
-  - Critical issues identified (maximum 3 most important concerns)
-  - Balanced assessment with strengths recognized
-  - Clear GO/NO-GO decision with rationale
-  - Actionable feedback for improvements if needed
-  - Test planning readiness checked (Michi extension)
+- **ミッション**: 実装の準備が整っていることを確認するために、技術設計のインタラクティブな品質レビューを実施する
+- **成功基準**:
+  - クリティカルな問題を特定（最大3つの最も重要な懸念事項）
+  - 強みを認識したバランスの取れた評価
+  - 根拠を含む明確なGO/NO-GO決定
+  - 必要に応じて改善のためのアクション可能なフィードバック
+  - テスト計画準備状況を確認（Michi拡張）
 </background_information>
 
-## Development Guidelines
+## 開発ガイドライン
 
 {{DEV_GUIDELINES}}
 
 ---
 
 <instructions>
-## Core Task
-Interactive design quality review for feature **$1** based on approved requirements and design document.
+## コアタスク
+承認された要件と設計ドキュメントに基づいて、機能 **$1** のインタラクティブな設計品質レビューを実施します。
 
-## Execution Steps
+## 実行手順
 
-### Base Implementation
+### 基本実装
 
-1. **Load Context**:
-   - Read `{{MICHI_DIR}}/specs/$1/spec.json` for language and metadata
-   - Read `{{MICHI_DIR}}/specs/$1/requirements.md` for requirements
-   - Read `{{MICHI_DIR}}/specs/$1/design.md` for design document
-   - **Load ALL master docs context**: Read entire `{{REPO_ROOT_DIR}}/docs/master/` directory including:
-     - Default files: `structure.md`, `tech.md`, `product.md`
-     - All custom master docs files (regardless of mode settings)
-     - This provides complete project memory and context
+1. **コンテキストの読み込み**:
+   - 言語とメタデータのために `{{MICHI_DIR}}/pj/$1/spec.json` を読み取り
+   - 要件のために `{{MICHI_DIR}}/pj/$1/requirements.md` を読み取り
+   - 設計ドキュメントのために `{{MICHI_DIR}}/pj/$1/design.md` を読み取り
+   - **すべてのマスタードキュメントコンテキストを読み込み**: `{{REPO_ROOT_DIR}}/docs/master/` ディレクトリ全体を読み取り（以下を含む）:
+     - デフォルトファイル: `structure.md`, `tech.md`, `product.md`
+     - すべてのカスタムマスタードキュメントファイル（モード設定に関係なく）
+     - これにより完全なプロジェクトメモリとコンテキストを提供
 
-2. **Read Review Guidelines**:
-   - Read `{{MICHI_DIR}}/settings/rules/design-review.md` for review criteria and process
+2. **レビューガイドラインの読み取り**:
+   - レビュー基準とプロセスのために `{{MICHI_DIR}}/settings/rules/design-review.md` を読み取り
 
-3. **Execute Design Review**:
-   - Follow design-review.md process: Analysis → Critical Issues → Strengths → GO/NO-GO
-   - Limit to 3 most important concerns
-   - Engage interactively with user
-   - Use language specified in spec.json for output
+3. **設計レビューの実行**:
+   - design-review.md プロセスに従う: 分析 → クリティカルな問題 → 強み → GO/NO-GO
+   - 最も重要な懸念事項を3つに制限
+   - ユーザーとインタラクティブに関与
+   - 出力には spec.json で指定された言語を使用
 
-4. **Provide Decision and Next Steps**:
-   - Clear GO/NO-GO decision with rationale
-   - Guide user on proceeding based on decision
+4. **決定と次のステップの提供**:
+   - 根拠を含む明確なGO/NO-GO決定
+   - 決定に基づいて進め方をユーザーにガイド
 
-### Michi Extensions
+### Michi拡張機能
 
-5. **Test Planning Readiness Check**:
+5. **テスト計画準備状況チェック**:
 
    設計が承認された場合（GO Decision）、Phase 4（テスト計画）の完了状況を確認:
 
    **テスト計画完了確認**:
-   - `.michi/specs/$1/test-specs/` ディレクトリが存在するか
+   - `.michi/pj/$1/test-specs/` ディレクトリが存在するか
    - テスト仕様書が作成されているか（Phase 4.2 完了）
    - テストタイプが選択されているか（Phase 4.1 完了）
 
@@ -76,38 +76,38 @@ Interactive design quality review for feature **$1** based on approved requireme
       - テンプレート:
         - 単体テスト: `docs/user-guide/templates/test-specs/unit-test-spec-template.md`
         - 統合テスト: `docs/user-guide/templates/test-specs/integration-test-spec-template.md`
-      - 出力先: `.michi/specs/$1/test-specs/`
+      - 出力先: `.michi/pj/$1/test-specs/`
 
    3. **完了後**: `/michi:create-tasks $1` でタスク生成に進む
 
-## Important Constraints
-- **Quality assurance, not perfection seeking**: Accept acceptable risk
-- **Critical focus only**: Maximum 3 issues, only those significantly impacting success
-- **Interactive approach**: Engage in dialogue, not one-way evaluation
-- **Balanced assessment**: Recognize both strengths and weaknesses
-- **Actionable feedback**: All suggestions must be implementable
+## 重要な制約
+- **完璧主義ではなく品質保証**: 許容可能なリスクを受け入れる
+- **クリティカルな焦点のみ**: 最大3つの問題、成功に大きく影響するもののみ
+- **インタラクティブなアプローチ**: 一方的な評価ではなく、対話に関与
+- **バランスの取れた評価**: 強みと弱みの両方を認識
+- **アクション可能なフィードバック**: すべての提案は実装可能でなければならない
 </instructions>
 
-## Tool Guidance
-- **Read first**: Load all context (spec, master docs, rules) before review
-- **Grep if needed**: Search codebase for pattern validation or integration checks
-- **Interactive**: Engage with user throughout the review process
-- **Bash**: Check test-specs directory existence for test planning readiness
+## ツールガイダンス
+- **最初に読み取り**: レビュー前にすべてのコンテキスト（仕様、マスタードキュメント、ルール）を読み込む
+- **必要に応じてGrep**: パターン検証または統合チェックのためにコードベースを検索
+- **インタラクティブ**: レビュープロセス全体でユーザーと関与
+- **Bash**: テスト計画準備のために test-specs ディレクトリの存在を確認
 
-## Output Description
+## 出力説明
 
-Provide output in the language specified in spec.json with:
+spec.json で指定された言語で以下の出力を提供:
 
-### Base Output
+### 基本出力
 
-1. **Review Summary**: Brief overview (2-3 sentences) of design quality and readiness
-2. **Critical Issues**: Maximum 3, following design-review.md format
-3. **Design Strengths**: 1-2 positive aspects
-4. **Final Assessment**: GO/NO-GO decision with rationale and next steps
+1. **レビューサマリー**: 設計品質と準備状況の簡潔な概要（2-3文）
+2. **クリティカルな問題**: 最大3つ、design-review.md 形式に従う
+3. **設計の強み**: 1-2つのポジティブな側面
+4. **最終評価**: 根拠と次のステップを含むGO/NO-GO決定
 
-### Michi Extended Output
+### Michi拡張出力
 
-After base output (if GO decision), add test planning checklist:
+基本出力の後（GO決定の場合）、テスト計画チェックリストを追加:
 
 ```text
 === Test Planning Readiness ===
@@ -123,36 +123,36 @@ Phase 4 Status:
 → /michi:plan-tests $1  # Phase 4 統合実行
 ```
 
-**Format Requirements**:
-- Use Markdown headings for clarity
-- Follow design-review.md output format
-- Keep summary concise
+**形式要件**:
+- 明確にするためにMarkdownの見出しを使用
+- design-review.md の出力形式に従う
+- 要約を簡潔に保つ
 
-## Safety & Fallback
+## 安全性とフォールバック
 
-### Error Scenarios
-- **Missing Design**: If design.md doesn't exist, stop with message: "Run `/michi:create-design $1` first to generate design document"
-- **Design Not Generated**: If design phase not marked as generated in spec.json, warn but proceed with review
-- **Empty Master Docs Directory**: Warn user that project context is missing and may affect review quality
-- **Language Undefined**: Default to English (`en`) if spec.json doesn't specify language
+### エラーシナリオ
+- **設計欠落**: design.md が存在しない場合、メッセージとともに停止: "最初に `/michi:create-design $1` を実行して設計ドキュメントを生成してください"
+- **設計未生成**: spec.json で設計フェーズが生成済みとしてマークされていない場合、警告するがレビューを続行
+- **空のマスタードキュメントディレクトリ**: プロジェクトコンテキストが欠落しており、レビュー品質に影響する可能性があることをユーザーに警告
+- **言語未定義**: spec.json で言語が指定されていない場合、英語（`en`）をデフォルトとする
 
-### Next Phase: Task Generation
+### 次のフェーズ: タスク生成
 
-**If Design Passes Validation (GO Decision)**:
-- Review feedback and apply changes if needed
-- **Recommended**: Complete Phase 4 (Test Planning) before task generation
-- Run `/michi:create-tasks $1` to generate implementation tasks
-- Or `/michi:create-tasks $1 -y` to auto-approve and proceed directly
+**設計が検証を通過した場合（GO決定）**:
+- フィードバックをレビューし、必要に応じて変更を適用
+- **推奨**: タスク生成前にPhase 4（テスト計画）を完了
+- 実装タスクを生成するために `/michi:create-tasks $1` を実行
+- または自動承認して直接進むために `/michi:create-tasks $1 -y` を実行
 
-**If Design Needs Revision (NO-GO Decision)**:
-- Address critical issues identified
-- Re-run `/michi:create-design $1` with improvements
-- Re-validate with `/michi:review-design $1`
+**設計が改訂を必要とする場合（NO-GO決定）**:
+- 特定されたクリティカルな問題に対処
+- 改善を加えて `/michi:create-design $1` を再実行
+- `/michi:review-design $1` で再検証
 
-**Note**: Design validation is recommended but optional. Quality review helps catch issues early.
+**注意**: 設計検証は推奨されますがオプションです。品質レビューは問題の早期発見に役立ちます。
 
 ---
 
-**Michi Integration**: This command extends base design validation with test planning readiness check (Phase 4) to ensure comprehensive quality preparation before task generation.
+**Michi統合**: このコマンドは、タスク生成前の包括的な品質準備を確保するために、テスト計画準備状況チェック（Phase 4）で基本設計検証を拡張します。
 
 think

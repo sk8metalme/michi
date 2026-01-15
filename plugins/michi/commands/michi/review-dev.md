@@ -1,96 +1,96 @@
 ---
 name: /michi:review-dev
-description: Validate implementation against requirements, design, and tasks (Michi version with enhanced validation)
+description: 拡張検証付きで要件、設計、タスクに対する実装を検証（Michiバージョン）
 allowed-tools: Bash, Glob, Grep, LS, Read, Write, Edit
 argument-hint: <feature-name>
 ---
 
-# Michi: Implementation Validation with Quality Gates
+# Michi: 品質ゲート付き実装検証
 
 <background_information>
-- **Mission**: Verify that implementation aligns with approved requirements, design, and tasks
-- **Success Criteria**:
-  - All specified tasks marked as completed
-  - Tests exist and pass for implemented functionality
-  - Requirements traceability confirmed (EARS requirements covered)
-  - Design structure reflected in implementation
-  - No regressions in existing functionality
-  - Michi 5-phase quality gates passed
+- **ミッション**: 実装が承認された要件、設計、タスクに整合していることを検証する
+- **成功基準**:
+  - 指定されたすべてのタスクが完了としてマーク済み
+  - 実装された機能に対してテストが存在し、パスする
+  - 要件トレーサビリティが確認（EARS要件がカバー済み）
+  - 設計構造が実装に反映されている
+  - 既存機能に退行がない
+  - Michi 5フェーズ品質ゲートが通過
 </background_information>
 
-## Development Guidelines
+## 開発ガイドライン
 {{DEV_GUIDELINES}}
 
 ---
 
 <instructions>
-## Core Task
-Validate implementation for feature(s) and task(s) based on approved specifications.
+## コアタスク
+承認された仕様に基づいて、機能とタスクの実装を検証します。
 
-## Execution Steps
+## 実行手順
 
-### Base Implementation
+### 基本実装
 
-#### 1. Detect Validation Target
+#### 1. 検証対象の検出
 
-**If no arguments provided** (`$1` empty):
-- Parse conversation history for `/base:spec-impl <feature> [tasks]` commands
-- Extract feature names and task numbers from each execution
-- Aggregate all implemented tasks by feature
-- Report detected implementations (e.g., "user-auth: 1.1, 1.2, 1.3")
-- If no history found, scan `{{MICHI_DIR}}/specs/` for features with completed tasks `[x]`
+**引数が提供されていない場合** (`$1` が空):
+- 会話履歴から `/base:spec-impl <feature> [tasks]` コマンドを解析
+- 各実行から機能名とタスク番号を抽出
+- 実装されたすべてのタスクを機能別に集約
+- 検出された実装を報告（例: "user-auth: 1.1, 1.2, 1.3"）
+- 履歴が見つからない場合、完了タスク `[x]` を持つ機能のために `{{MICHI_DIR}}/pj/` をスキャン
 
-**If feature provided** (`$1` present, `$2` empty):
-- Use specified feature
-- Detect all completed tasks `[x]` in `{{MICHI_DIR}}/specs/$1/tasks.md`
+**機能が提供された場合** (`$1` が存在、`$2` が空):
+- 指定された機能を使用
+- `{{MICHI_DIR}}/pj/$1/tasks.md` のすべての完了タスク `[x]` を検出
 
-**If both feature and tasks provided** (`$1` and `$2` present):
-- Validate specified feature and tasks only (e.g., `user-auth 1.1,1.2`)
+**機能とタスクの両方が提供された場合** (`$1` と `$2` が存在):
+- 指定された機能とタスクのみを検証（例: `user-auth 1.1,1.2`）
 
-#### 2. Load Context
+#### 2. コンテキストの読み込み
 
-For each detected feature:
-- Read `{{MICHI_DIR}}/specs/<feature>/spec.json` for metadata
-- Read `{{MICHI_DIR}}/specs/<feature>/requirements.md` for requirements
-- Read `{{MICHI_DIR}}/specs/<feature>/design.md` for design structure
-- Read `{{MICHI_DIR}}/specs/<feature>/tasks.md` for task list
-- **Load ALL master docs context**: Read entire `{{REPO_ROOT_DIR}}/docs/master/` directory including:
-  - Default files: `structure.md`, `tech.md`, `product.md`
-  - All custom master docs files (regardless of mode settings)
+各検出された機能について:
+- メタデータのために `{{MICHI_DIR}}/pj/<feature>/spec.json` を読み取り
+- 要件のために `{{MICHI_DIR}}/pj/<feature>/requirements.md` を読み取り
+- 設計構造のために `{{MICHI_DIR}}/pj/<feature>/design.md` を読み取り
+- タスクリストのために `{{MICHI_DIR}}/pj/<feature>/tasks.md` を読み取り
+- **すべてのマスタードキュメントコンテキストを読み込み**: `{{REPO_ROOT_DIR}}/docs/master/` ディレクトリ全体を読み取り（以下を含む）:
+  - デフォルトファイル: `structure.md`, `tech.md`, `product.md`
+  - すべてのカスタムマスタードキュメントファイル（モード設定に関係なく）
 
-#### 3. Execute Validation
+#### 3. 検証の実行
 
-For each task, verify:
+各タスクについて、以下を確認:
 
-**Task Completion Check**:
-- Checkbox is `[x]` in tasks.md
-- If not completed, flag as "Task not marked complete"
+**タスク完了チェック**:
+- tasks.md でチェックボックスが `[x]` である
+- 完了していない場合、"タスクが完了としてマークされていません" とフラグ
 
-**Test Coverage Check**:
-- Tests exist for task-related functionality
-- Tests pass (no failures or errors)
-- Use Bash to run test commands (e.g., `npm test`, `pytest`)
-- If tests fail or don't exist, flag as "Test coverage issue"
+**テストカバレッジチェック**:
+- タスク関連機能に対するテストが存在する
+- テストがパスする（失敗やエラーなし）
+- Bash を使用してテストコマンドを実行（例: `npm test`, `pytest`）
+- テストが失敗または存在しない場合、"テストカバレッジ問題" とフラグ
 
-**Requirements Traceability**:
-- Identify EARS requirements related to the task
-- Use Grep to search implementation for evidence of requirement coverage
-- If requirement not traceable to code, flag as "Requirement not implemented"
+**要件トレーサビリティ**:
+- タスクに関連するEARS要件を特定
+- Grep を使用して要件カバレッジの証拠を実装から検索
+- 要件がコードに追跡できない場合、"要件が実装されていません" とフラグ
 
-**Design Alignment**:
-- Check if design.md structure is reflected in implementation
-- Verify key interfaces, components, and modules exist
-- Use Grep/LS to confirm file structure matches design
-- If misalignment found, flag as "Design deviation"
+**設計整合性**:
+- design.md の構造が実装に反映されているかチェック
+- 主要なインターフェース、コンポーネント、モジュールが存在することを確認
+- Grep/LS を使用してファイル構造が設計と一致することを確認
+- 不整合が見つかった場合、"設計からの逸脱" とフラグ
 
-**Regression Check**:
-- Run full test suite (if available)
-- Verify no existing tests are broken
-- If regressions detected, flag as "Regression detected"
+**退行チェック**:
+- 完全なテストスイートを実行（利用可能な場合）
+- 既存のテストが壊れていないことを確認
+- 退行が検出された場合、"退行が検出されました" とフラグ
 
-### Michi Extensions
+### Michi拡張機能
 
-#### 4. Quality Gates Validation
+#### 4. 品質ゲート検証
 
 Michi固有のPhase 6品質ゲートを検証:
 
@@ -126,118 +126,118 @@ Phase 6.8: Archive Preparation
 - 認証・認可の実装確認
 - セキュアコーディング原則の遵守
 
-#### 5. Generate Enhanced Report
+#### 5. 拡張レポートの生成
 
-Provide comprehensive validation report:
+包括的な検証レポートを提供:
 
 ```markdown
 # Implementation Validation Report: <feature>
 
-## Quality Gates Status
+## 品質ゲートステータス
 
-### ✅ Passed (7/10)
-- TDD: All tests passing (1022 tests)
-- Coverage: 96% (Target: 95%)
-- License Audit: All dependencies compliant
-- Code Review: PR #166 merged
-- Documentation: README updated
+### ✅ 合格 (7/10)
+- TDD: 全テスト合格 (1022 tests)
+- カバレッジ: 96% (目標: 95%)
+- ライセンス監査: 全依存関係が準拠
+- コードレビュー: PR #166 マージ済み
+- ドキュメント: README 更新済み
 
-### ⚠️  Warnings (2/10)
-- Performance: 3 slow queries detected
-- Security: Missing rate limiting on API endpoint
+### ⚠️  警告 (2/10)
+- パフォーマンス: 3つの低速クエリを検出
+- セキュリティ: APIエンドポイントでレート制限が欠落
 
-### ❌ Failed (1/10)
-- E2E Tests: 2 scenarios not implemented
+### ❌ 失敗 (1/10)
+- E2Eテスト: 2つのシナリオが未実装
 
-## Detailed Findings
+## 詳細な所見
 
-### Requirements Compliance
-| Requirement | Implemented | Tests | Notes |
-|-------------|-------------|-------|-------|
-| REQ-001     | ✅          | ✅    | Complete |
-| REQ-002     | ✅          | ⚠️    | Missing edge case tests |
-| REQ-003     | ❌          | ❌    | Not implemented |
+### 要件準拠
+| 要件 | 実装済み | テスト | 備考 |
+|-----|---------|-------|------|
+| REQ-001 | ✅ | ✅ | 完全 |
+| REQ-002 | ✅ | ⚠️ | エッジケーステスト欠落 |
+| REQ-003 | ❌ | ❌ | 未実装 |
 
-### Design Compliance
-- Architecture: ✅ Onion Architecture maintained
-- API Contracts: ✅ All endpoints match design
-- Database Schema: ⚠️ Missing index on users.email
+### 設計準拠
+- アーキテクチャ: ✅ Onion Architecture 維持
+- APIコントラクト: ✅ 全エンドポイントが設計と一致
+- データベーススキーマ: ⚠️ users.email にインデックス欠落
 
-### Task Completion
-- Completed: 23/24 tasks
-- Remaining: Task 6.4 (E2E tests)
+### タスク完了
+- 完了: 23/24 タスク
+- 残り: タスク 6.4 (E2E tests)
 
-## Recommendations
+## 推奨事項
 
-### Critical (Fix before merge)
-1. Implement REQ-003
-2. Add missing E2E test scenarios
+### クリティカル（マージ前に修正）
+1. REQ-003 を実装
+2. 欠落しているE2Eテストシナリオを追加
 
-### Important (Fix in follow-up PR)
-1. Add index on users.email
-2. Implement rate limiting
-3. Optimize slow queries
+### 重要（フォローアップPRで修正）
+1. users.email にインデックスを追加
+2. レート制限を実装
+3. 低速クエリを最適化
 
-### Optional
-1. Add edge case tests for REQ-002
+### オプション
+1. REQ-002 のエッジケーステストを追加
 ```
 
-## Important Constraints
-- **Conversation-aware**: Prioritize conversation history for auto-detection
-- **Non-blocking warnings**: Design deviations are warnings unless critical
-- **Test-first focus**: Test coverage is mandatory for GO decision
-- **Traceability required**: All requirements must be traceable to implementation
+## 重要な制約
+- **会話を認識**: 自動検出のために会話履歴を優先
+- **ノンブロッキング警告**: 設計からの逸脱はクリティカルでない限り警告
+- **テストファースト重視**: GO決定にはテストカバレッジが必須
+- **トレーサビリティ必須**: すべての要件は実装に追跡可能でなければならない
 </instructions>
 
-## Tool Guidance
-- **Conversation parsing**: Extract `/base:spec-impl` patterns from history
-- **Read context**: Load all specs and master docs before validation
-- **Bash for tests**: Execute test commands to verify pass status
-- **Grep for traceability**: Search codebase for requirement evidence
-- **LS/Glob for structure**: Verify file structure matches design
+## ツールガイダンス
+- **会話解析**: 履歴から `/base:spec-impl` パターンを抽出
+- **コンテキスト読み取り**: 検証前にすべての仕様とマスタードキュメントを読み込む
+- **テスト用Bash**: テストコマンドを実行してパスステータスを確認
+- **トレーサビリティ用Grep**: 要件の証拠をコードベースから検索
+- **構造用LS/Glob**: ファイル構造が設計と一致することを確認
 
-## Output Description
+## 出力説明
 
-Provide output in the language specified in spec.json with:
+spec.json で指定された言語で以下の出力を提供:
 
-### Base Output
+### 基本出力
 
-1. **Detected Target**: Features and tasks being validated (if auto-detected)
-2. **Validation Summary**: Brief overview per feature (pass/fail counts)
-3. **Issues**: List of validation failures with severity and location
-4. **Coverage Report**: Requirements/design/task coverage percentages
-5. **Decision**: GO (ready for next phase) / NO-GO (needs fixes)
+1. **検出された対象**: 検証されている機能とタスク（自動検出された場合）
+2. **検証サマリー**: 機能ごとの簡潔な概要（合格/失敗カウント）
+3. **問題**: 重要度と場所を含む検証失敗のリスト
+4. **カバレッジレポート**: 要件/設計/タスクのカバレッジパーセンテージ
+5. **決定**: GO（次のフェーズへの準備完了）/ NO-GO（修正が必要）
 
-### Michi Extended Output
+### Michi拡張出力
 
-After base output, add enhanced quality gates report with 5-phase status and recommendations.
+基本出力の後、5フェーズのステータスと推奨事項を含む拡張品質ゲートレポートを追加。
 
-**Format Requirements**:
-- Use Markdown headings and tables for clarity
-- Flag critical issues with ⚠️ or 🔴
-- Keep summary concise (under 400 words)
+**形式要件**:
+- 明確にするためにMarkdownの見出しと表を使用
+- クリティカルな問題を ⚠️ または 🔴 でフラグ
+- 要約を簡潔に保つ（400語以下）
 
-## Safety & Fallback
+## 安全性とフォールバック
 
-### Error Scenarios
-- **No Implementation Found**: If no `/base:spec-impl` in history and no `[x]` tasks, report "No implementations detected"
-- **Test Command Unknown**: If test framework unclear, warn and skip test validation (manual verification required)
-- **Missing Spec Files**: If spec.json/requirements.md/design.md missing, stop with error
-- **Language Undefined**: Default to English (`en`) if spec.json doesn't specify language
+### エラーシナリオ
+- **実装が見つからない**: 履歴に `/base:spec-impl` がなく、`[x]` タスクもない場合、"実装が検出されませんでした" と報告
+- **テストコマンド不明**: テストフレームワークが不明確な場合、警告してテスト検証をスキップ（手動検証が必要）
+- **仕様ファイル欠落**: spec.json/requirements.md/design.md が欠落している場合、エラーで停止
+- **言語未定義**: spec.json で言語が指定されていない場合、英語（`en`）をデフォルトとする
 
-### Next Steps Guidance
+### 次のステップガイダンス
 
-**If GO Decision**:
-- Implementation validated and ready
-- Proceed to deployment or next feature
+**GO決定の場合**:
+- 実装が検証され準備完了
+- デプロイまたは次の機能へ進む
 
-**If NO-GO Decision**:
-- Address critical issues listed
-- Re-run `/michi:dev <feature> [tasks]` for fixes
-- Re-validate with `/michi:review-dev [feature] [tasks]`
+**NO-GO決定の場合**:
+- リストされたクリティカルな問題に対処
+- 修正のために `/michi:dev <feature> [tasks]` を再実行
+- `/michi:review-dev [feature] [tasks]` で再検証
 
-**Note**: Validation is recommended after implementation to ensure spec alignment and quality.
+**注意**: 仕様整合性と品質を確保するために、実装後の検証が推奨されます。
 
 ---
 
-**Michi Integration**: This command extends base implementation validation with 5-phase quality gates, security checks, and automated remediation suggestions for comprehensive implementation quality assurance.
+**Michi統合**: このコマンドは、包括的な実装品質保証のために、5フェーズ品質ゲート、セキュリティチェック、自動化された修正提案で基本実装検証を拡張します。

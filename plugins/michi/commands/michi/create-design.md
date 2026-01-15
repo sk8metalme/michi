@@ -1,130 +1,130 @@
 ---
 name: /michi:create-design
-description: Create comprehensive technical design for a specification (Michi version with test planning flow)
+description: 仕様の包括的な技術設計を作成（テスト計画フロー付きMichiバージョン）
 allowed-tools: Bash, Glob, Grep, LS, Read, Write, Edit, MultiEdit, Update, WebSearch, WebFetch
 argument-hint: <feature-name> [-y]
 ---
 
-# Michi: Spec Design with Test Planning Flow
+# Michi: テスト計画フロー付き仕様設計
 
 <background_information>
-- **Mission**: Generate comprehensive technical design document that translates requirements (WHAT) into architectural design (HOW)
-- **Success Criteria**:
-  - All requirements mapped to technical components with clear interfaces
-  - Appropriate architecture discovery and research completed
-  - Design aligns with master docs context and existing patterns
-  - Visual diagrams included for complex architectures
-  - Quality infrastructure validated for the project language
+- **ミッション**: 要件（WHAT）を アーキテクチャ設計（HOW）に変換する包括的な技術設計ドキュメントを生成する
+- **成功基準**:
+  - すべての要件が明確なインターフェースを持つ技術コンポーネントにマッピングされている
+  - 適切なアーキテクチャ発見と調査が完了している
+  - 設計がマスタードキュメントコンテキストと既存パターンと整合している
+  - 複雑なアーキテクチャには視覚的な図が含まれている
+  - プロジェクト言語の品質インフラが検証されている
 </background_information>
 
-## Development Guidelines
+## 開発ガイドライン
 
 {{DEV_GUIDELINES}}
 
 ---
 
 <instructions>
-## Core Task
-Generate technical design document for feature **$1** based on approved requirements.
+## コアタスク
+承認された要件に基づいて、機能 **$1** の技術設計ドキュメントを生成します。
 
-## Execution Steps
+## 実行手順
 
-### Base Implementation
+### 基本実装
 
-#### Step 1: Load Context
+#### ステップ 1: コンテキストの読み込み
 
-**Read all necessary context**:
-- `{{MICHI_DIR}}/specs/$1/spec.json`, `requirements.md`, `design.md` (if exists)
-- **Entire `{{REPO_ROOT_DIR}}/docs/master/` directory** for complete project memory
-- `{{MICHI_DIR}}/settings/templates/specs/design.md` for document structure
-- `{{MICHI_DIR}}/settings/rules/design-principles.md` for design principles
-- `{{MICHI_DIR}}/settings/templates/specs/research.md` for discovery log structure
+**必要なすべてのコンテキストを読み取り**:
+- `{{MICHI_DIR}}/pj/$1/spec.json`, `requirements.md`, `design.md`（存在する場合）
+- 完全なプロジェクトメモリのために**`{{REPO_ROOT_DIR}}/docs/master/` ディレクトリ全体**
+- ドキュメント構造のために `{{MICHI_DIR}}/settings/templates/specs/design.md`
+- 設計原則のために `{{MICHI_DIR}}/settings/rules/design-principles.md`
+- 発見ログ構造のために `{{MICHI_DIR}}/settings/templates/specs/research.md`
 
-**Validate requirements approval**:
-- If `-y` flag provided ($2 == "-y"): Auto-approve requirements in spec.json
-- Otherwise: Verify approval status (stop if unapproved, see Safety & Fallback)
+**要件承認の検証**:
+- `-y` フラグが提供された場合（$2 == "-y"）: spec.json で要件を自動承認
+- それ以外: 承認ステータスを確認（未承認の場合は停止、安全性とフォールバックを参照）
 
-#### Step 2: Discovery & Analysis
+#### ステップ 2: 発見と分析
 
-**Critical: This phase ensures design is based on complete, accurate information.**
+**重要: このフェーズは、設計が完全で正確な情報に基づいていることを確保します。**
 
-1. **Classify Feature Type**:
-   - **New Feature** (greenfield) → Full discovery required
-   - **Extension** (existing system) → Integration-focused discovery
-   - **Simple Addition** (CRUD/UI) → Minimal or no discovery
-   - **Complex Integration** → Comprehensive analysis required
+1. **機能タイプの分類**:
+   - **新機能**（グリーンフィールド）→ 完全な発見が必要
+   - **拡張**（既存システム）→ 統合重視の発見
+   - **単純な追加**（CRUD/UI）→ 最小限または発見なし
+   - **複雑な統合**→ 包括的な分析が必要
 
-2. **Execute Appropriate Discovery Process**:
+2. **適切な発見プロセスの実行**:
 
-   **For Complex/New Features**:
-   - Read and execute `{{MICHI_DIR}}/settings/rules/design-discovery-full.md`
-   - Conduct thorough research using WebSearch/WebFetch:
-     - Latest architectural patterns and best practices
-     - External dependency verification (APIs, libraries, versions, compatibility)
-     - Official documentation, migration guides, known issues
-     - Performance benchmarks and security considerations
+   **複雑/新機能の場合**:
+   - `{{MICHI_DIR}}/settings/rules/design-discovery-full.md` を読み取り実行
+   - WebSearch/WebFetchを使用して徹底的な調査を実施:
+     - 最新のアーキテクチャパターンとベストプラクティス
+     - 外部依存関係の検証（API、ライブラリ、バージョン、互換性）
+     - 公式ドキュメント、移行ガイド、既知の問題
+     - パフォーマンスベンチマークとセキュリティ考慮事項
 
-   **For Extensions**:
-   - Read and execute `{{MICHI_DIR}}/settings/rules/design-discovery-light.md`
-   - Focus on integration points, existing patterns, compatibility
-   - Use Grep to analyze existing codebase patterns
+   **拡張の場合**:
+   - `{{MICHI_DIR}}/settings/rules/design-discovery-light.md` を読み取り実行
+   - 統合ポイント、既存パターン、互換性に焦点を当てる
+   - Grepを使用して既存のコードベースパターンを分析
 
-   **For Simple Additions**:
-   - Skip formal discovery, quick pattern check only
+   **単純な追加の場合**:
+   - 正式な発見をスキップし、クイックパターンチェックのみ
 
-3. **Retain Discovery Findings for Step 3**:
-- External API contracts and constraints
-- Technology decisions with rationale
-- Existing patterns to follow or extend
-- Integration points and dependencies
-- Identified risks and mitigation strategies
-- Potential architecture patterns and boundary options (note details in `research.md`)
-- Parallelization considerations for future tasks (capture dependencies in `research.md`)
+3. **ステップ3のための発見結果を保持**:
+- 外部APIコントラクトと制約
+- 根拠を含む技術決定
+- 従うまたは拡張する既存パターン
+- 統合ポイントと依存関係
+- 特定されたリスクと緩和戦略
+- 潜在的なアーキテクチャパターンと境界オプション（詳細を `research.md` に記録）
+- 将来のタスクの並列化考慮事項（依存関係を `research.md` に記録）
 
-4. **Persist Findings to Research Log**:
-- Create or update `{{MICHI_DIR}}/specs/$1/research.md` using the shared template
-- Summarize discovery scope and key findings (Summary section)
-- Record investigations in Research Log topics with sources and implications
-- Document architecture pattern evaluation, design decisions, and risks using the template sections
-- Use the language specified in spec.json when writing or updating `research.md`
+4. **調査ログへの結果の永続化**:
+- 共有テンプレートを使用して `{{MICHI_DIR}}/pj/$1/research.md` を作成または更新
+- 発見スコープと主要な発見をサマリーセクションに要約
+- ソースと影響を含む調査ログトピックに調査を記録
+- テンプレートセクションを使用してアーキテクチャパターン評価、設計決定、リスクを文書化
+- `research.md` を書き込みまたは更新する際は、spec.jsonで指定された言語を使用
 
-#### Step 3: Generate Design Document
+#### ステップ 3: 設計ドキュメントの生成
 
-1. **Load Design Template and Rules**:
-- Read `{{MICHI_DIR}}/settings/templates/specs/design.md` for structure
-- Read `{{MICHI_DIR}}/settings/rules/design-principles.md` for principles
+1. **設計テンプレートとルールの読み込み**:
+- 構造のために `{{MICHI_DIR}}/settings/templates/specs/design.md` を読み取り
+- 原則のために `{{MICHI_DIR}}/settings/rules/design-principles.md` を読み取り
 
-2. **Generate Design Document**:
-- **Follow specs/design.md template structure and generation instructions strictly**
-- **Integrate all discovery findings**: Use researched information (APIs, patterns, technologies) throughout component definitions, architecture decisions, and integration points
-- If existing design.md found in Step 1, use it as reference context (merge mode)
-- Apply design rules: Type Safety, Visual Communication, Formal Tone
-- Use language specified in spec.json
-- Ensure sections reflect updated headings ("Architecture Pattern & Boundary Map", "Technology Stack & Alignment", "Components & Interface Contracts") and reference supporting details from `research.md`
+2. **設計ドキュメントの生成**:
+- **specs/design.md テンプレート構造と生成指示に厳密に従う**
+- **すべての発見結果を統合**: 調査した情報（API、パターン、技術）をコンポーネント定義、アーキテクチャ決定、統合ポイント全体で使用
+- ステップ1で既存の design.md が見つかった場合、参照コンテキストとして使用（マージモード）
+- 設計ルールを適用: 型安全性、視覚的コミュニケーション、フォーマルトーン
+- spec.json で指定された言語を使用
+- セクションが更新された見出し（「Architecture Pattern & Boundary Map」、「Technology Stack & Alignment」、「Components & Interface Contracts」）を反映し、`research.md` からのサポート詳細を参照することを確認
 
-3. **Update Metadata** in spec.json:
-- Set `phase: "design-generated"`
-- Set `approvals.design.generated: true, approved: false`
-- Set `approvals.requirements.approved: true`
-- Update `updated_at` timestamp
+3. **spec.json でメタデータを更新**:
+- `phase: "design-generated"` を設定
+- `approvals.design.generated: true, approved: false` を設定
+- `approvals.requirements.approved: true` を設定
+- `updated_at` タイムスタンプを更新
 
-### Michi Extensions
+### Michi拡張機能
 
-#### Step 4: Quality Infrastructure Check
+#### ステップ 4: 品質インフラチェック
 
 > **優先度**: このMichi Extensionの指示は、base commandの品質インフラチェックより**優先**されます。
 > Michi Extensionで言語検出と言語別チェックを実行し、base commandのNode.js固有チェックは上書きされます。
 
 設計作成時に、プロジェクトの言語を検出し、言語別の品質インフラ設定状況をチェックします。
 
-**Step 4.1: CI設定の確認とプラットフォーム選択**
+**ステップ 4.1: CI設定の確認とプラットフォーム選択**
 
 **既存CI設定をチェック**:
 - `.github/workflows/` が存在する場合 → GitHub Actions採用
 - `screwdriver.yaml` が存在する場合 → Screwdriver採用
-- 両方なし → Step 4.1.5でユーザーに選択を促す
+- 両方なし → ステップ 4.1.5でユーザーに選択を促す
 
-**Step 4.1.5: CI未設定の場合のプラットフォーム選択**
+**ステップ 4.1.5: CI未設定の場合のプラットフォーム選択**
 
 CIが未設定の場合、以下の選択肢を提示：
 
@@ -135,7 +135,7 @@ B) Screwdriver
 C) 後で設定する
 ```
 
-**Step 4.2: 言語検出とユーザー確認**
+**ステップ 4.2: 言語検出とユーザー確認**
 
 **4.2.1. プロジェクトルートのファイルをチェック**:
 - `package.json` あり → Node.js
@@ -153,7 +153,7 @@ C) 後で設定する
 - 複数言語検出時は主要言語を選択させる
 - 誤検出の場合は手動で指定可能
 
-**Step 4.3: 言語別チェック項目**
+**ステップ 4.3: 言語別チェック項目**
 
 **Node.js / TypeScript**:
 
@@ -199,7 +199,7 @@ C) 後で設定する
 | CI | `.github/workflows/` または `screwdriver.yaml` | ✅ |
 | DevContainer | `.devcontainer/` | ℹ️（任意） |
 
-**Step 4.4: 結果表示フォーマット**
+**ステップ 4.4: 結果表示フォーマット**
 
 **Node.js の例**:
 ```text
@@ -244,7 +244,7 @@ C) 後で設定する
 └─ ℹ️ DevContainer: Not configured (optional)
 ```
 
-**Step 4.5: 不足時の動作**
+**ステップ 4.5: 不足時の動作**
 
 1. **警告メッセージを表示**:
    - ✅必須項目の不足 → ⚠️ 警告
@@ -255,7 +255,7 @@ C) 後で設定する
 
 3. **処理は継続**（中断しない）
 
-#### Step 5: Next Phase Guidance
+#### ステップ 5: 次フェーズガイダンス
 
 設計ドキュメント生成完了後、以下のフローを案内:
 
@@ -299,9 +299,9 @@ Phase 4.1で選択したテストタイプに基づいて、テスト仕様書�
 - パフォーマンステスト: `docs/user-guide/templates/test-specs/performance-test-spec-template.md`
 - セキュリティテスト: `docs/user-guide/templates/test-specs/security-test-spec-template.md`
 
-**出力先**: `.michi/specs/{feature}/test-specs/`
+**出力先**: `.michi/pj/{feature}/test-specs/`
 
-**After Test Planning: Task Generation**
+**テスト計画後: タスク生成**
 
 Phase 4 完了後、以下のステップに進んでください:
 
@@ -314,97 +314,95 @@ Phase 4 完了後、以下のステップに進んでください:
 
 **重要**: テスト計画（Phase 4）を完了してからタスク生成することで、実装タスクにテスト実装が適切に含まれます。
 
-## Critical Constraints
- - **Type Safety**:
-   - Enforce strong typing aligned with the project's technology stack.
-   - For statically typed languages, define explicit types/interfaces and avoid unsafe casts.
-   - For TypeScript, never use `any`; prefer precise types and generics.
-   - For dynamically typed languages, provide type hints/annotations where available (e.g., Python type hints) and validate inputs at boundaries.
-   - Document public interfaces and contracts clearly to ensure cross-component type safety.
-- **Latest Information**: Use WebSearch/WebFetch for external dependencies and best practices
-- **Master Docs Alignment**: Respect existing architecture patterns from master docs context
-- **Template Adherence**: Follow specs/design.md template structure and generation instructions strictly
-- **Design Focus**: Architecture and interfaces ONLY, no implementation code
-- **Requirements Traceability IDs**: Use numeric requirement IDs only (e.g. "1.1", "1.2", "3.1", "3.3") exactly as defined in requirements.md. Do not invent new IDs or use alphabetic labels.
+## 重要な制約
+ - **型安全性**:
+   - プロジェクトの技術スタックに整合した強い型付けを強制する。
+   - 静的型付け言語の場合、明示的な型/インターフェースを定義し、安全でないキャストを避ける。
+   - TypeScriptの場合、`any`を決して使用せず、正確な型とジェネリクスを優先する。
+   - 動的型付け言語の場合、利用可能な場合は型ヒント/アノテーションを提供し（例: Python型ヒント）、境界で入力を検証する。
+   - コンポーネント間の型安全性を確保するために、パブリックインターフェースとコントラクトを明確に文書化する。
+- **最新情報**: 外部依存関係とベストプラクティスのために WebSearch/WebFetch を使用
+- **マスタードキュメント整合**: マスタードキュメントコンテキストから既存のアーキテクチャパターンを尊重
+- **テンプレート遵守**: specs/design.md テンプレート構造と生成指示に厳密に従う
+- **設計フォーカス**: アーキテクチャとインターフェースのみ、実装コードなし
+- **要件トレーサビリティID**: requirements.md で定義されたとおりの数値要件IDのみを使用（例: "1.1", "1.2", "3.1", "3.3"）。新しいIDを発明したり、アルファベットラベルを使用したりしない。
 </instructions>
 
-## Tool Guidance
-- **Read first**: Load all context before taking action (specs, master docs, templates, rules)
-- **Research when uncertain**: Use WebSearch/WebFetch for external dependencies, APIs, and latest best practices
-- **Analyze existing code**: Use Grep to find patterns and integration points in codebase
-- **Write last**: Generate design.md only after all research and analysis complete
+## ツールガイダンス
+- **最初に読み取り**: アクションを実行する前にすべてのコンテキストを読み込む（仕様、マスタードキュメント、テンプレート、ルール）
+- **不確実な場合は調査**: 外部依存関係、API、最新のベストプラクティスのために WebSearch/WebFetch を使用
+- **既存コードを分析**: Grepを使用してコードベースのパターンと統合ポイントを見つける
+- **最後に書き込み**: すべての調査と分析が完了した後にのみ design.md を生成
 
-## Output Description
+## 出力説明
 
-**Command execution output** (separate from design.md content):
+**コマンド実行出力**（design.md コンテンツとは別）:
 
-Provide brief summary in the language specified in spec.json:
+spec.json で指定された言語で簡潔なサマリーを提供:
 
-### Base Output
+### 基本出力
 
-1. **Status**: Confirm design document generated at `{{MICHI_DIR}}/specs/$1/design.md`
-2. **Discovery Type**: Which discovery process was executed (full/light/minimal)
-3. **Key Findings**: 2-3 critical insights from `research.md` that shaped the design
-4. **Next Action**: Approval workflow guidance (see Safety & Fallback)
-5. **Research Log**: Confirm `research.md` updated with latest decisions
+1. **ステータス**: `{{MICHI_DIR}}/pj/$1/design.md` で設計ドキュメントが生成されたことを確認
+2. **発見タイプ**: 実行された発見プロセス（完全/軽量/最小限）
+3. **主要な発見**: 設計を形成した `research.md` からの2-3の重要な洞察
+4. **次のアクション**: 承認ワークフローガイダンス（安全性とフォールバックを参照）
+5. **調査ログ**: 最新の決定で `research.md` が更新されたことを確認
 
-### Michi Extended Output
+### Michi拡張出力
 
-After base output, display:
+基本出力の後に表示:
 
-1. **Quality Infrastructure Check Results**: Language-specific infrastructure status
-2. **Test Planning Flow Guidance**: Next phase instructions with `/michi:plan-tests` command
+1. **品質インフラチェック結果**: 言語固有のインフラステータス
+2. **テスト計画フローガイダンス**: `/michi:plan-tests` コマンドを含む次フェーズの指示
 
-**Format**: Concise Markdown (under 200 words) - this is the command output, NOT the design document itself
+**形式**: 簡潔なMarkdown（200語以下）- これはコマンド出力であり、設計ドキュメント自体ではありません
 
-**Note**: The actual design document follows `{{MICHI_DIR}}/settings/templates/specs/design.md` structure.
+**注意**: 実際の設計ドキュメントは `{{MICHI_DIR}}/settings/templates/specs/design.md` 構造に従います。
 
-## Safety & Fallback
+## 安全性とフォールバック
 
-### Error Scenarios
+### エラーシナリオ
 
-**Requirements Not Approved**:
-- **Stop Execution**: Cannot proceed without approved requirements
-- **User Message**: "Requirements not yet approved. Approval required before design generation."
-- **Suggested Action**: "Run `/michi:create-design $1 -y` to auto-approve requirements and proceed"
+**要件が承認されていない**:
+- **実行停止**: 承認された要件なしには進められない
+- **ユーザーメッセージ**: "要件がまだ承認されていません。設計生成前に承認が必要です。"
+- **推奨アクション**: "要件を自動承認して進むには `/michi:create-design $1 -y` を実行"
 
-**Missing Requirements**:
-- **Stop Execution**: Requirements document must exist
-- **User Message**: "No requirements.md found at `{{MICHI_DIR}}/specs/$1/requirements.md`"
-- **Suggested Action**: "Run `/michi:create-requirements $1` to generate requirements first"
+**要件欠落**:
+- **実行停止**: 要件ドキュメントが存在する必要がある
+- **ユーザーメッセージ**: "`{{MICHI_DIR}}/pj/$1/requirements.md` に requirements.md が見つかりません"
+- **推奨アクション**: "最初に要件を生成するために `/michi:create-requirements $1` を実行"
 
-**Template Missing**:
-- **User Message**: "Template file missing at `{{MICHI_DIR}}/settings/templates/specs/design.md`"
-- **Suggested Action**: "Check repository setup or restore template file"
-- **Fallback**: Use inline basic structure with warning
+**テンプレート欠落**:
+- **ユーザーメッセージ**: "`{{MICHI_DIR}}/settings/templates/specs/design.md` にテンプレートファイルが欠落しています"
+- **推奨アクション**: "リポジトリセットアップを確認するか、テンプレートファイルを復元"
+- **フォールバック**: 警告付きでインライン基本構造を使用
 
-**Master Docs Context Missing**:
-- **Warning**: "Master docs directory empty or missing - design may not align with project standards"
-- **Proceed**: Continue with generation but note limitation in output
+**マスタードキュメントコンテキスト欠落**:
+- **警告**: "マスタードキュメントディレクトリが空または欠落 - 設計がプロジェクト標準と整合しない可能性があります"
+- **続行**: 生成を続行するが、出力に制限を記録
 
-**Discovery Complexity Unclear**:
-- **Default**: Use full discovery process (`{{MICHI_DIR}}/settings/rules/design-discovery-full.md`)
-- **Rationale**: Better to over-research than miss critical context
+**発見の複雑さが不明確**:
+- **デフォルト**: 完全発見プロセス（`{{MICHI_DIR}}/settings/rules/design-discovery-full.md`）を使用
+- **根拠**: 重要なコンテキストを見逃すよりも、過剰に調査する方が良い
 
-**Invalid Requirement IDs**:
-  - **Stop Execution**: If requirements.md is missing numeric IDs or uses non-numeric headings (for example, "Requirement A"), stop and instruct the user to fix requirements.md before continuing.
+**無効な要件ID**:
+  - **実行停止**: requirements.md に数値IDが欠落しているか、非数値の見出し（例: "Requirement A"）を使用している場合、停止して続行する前に requirements.md を修正するようユーザーに指示。
 
-### Next Phase: Task Generation
+### 次のフェーズ: タスク生成
 
-**If Design Approved**:
-- Review generated design at `{{MICHI_DIR}}/specs/$1/design.md`
-- **Optional**: Run `/michi:review-design $1` for interactive quality review
-- **Required**: Run `/michi:plan-tests $1` for Phase 4 (Test Planning)
-- Then `/michi:create-tasks $1 -y` to generate implementation tasks
+**設計が承認された場合**:
+- `{{MICHI_DIR}}/pj/$1/design.md` で生成された設計をレビュー
+- **オプション**: インタラクティブな品質レビューのために `/michi:review-design $1` を実行
+- **必須**: Phase 4（テスト計画）のために `/michi:plan-tests $1` を実行
+- 次に実装タスクを生成するために `/michi:create-tasks $1 -y` を実行
 
-**If Modifications Needed**:
-- Provide feedback and re-run `/michi:create-design $1`
-- Existing design used as reference (merge mode)
+**修正が必要な場合**:
+- フィードバックを提供し、`/michi:create-design $1` を再実行
+- 既存の設計が参照として使用される（マージモード）
 
-**Note**: Design approval is mandatory before proceeding to task generation.
+**注意**: タスク生成に進む前に設計承認が必須です。
 
 ---
 
-**Michi Integration**: This command extends base spec design with quality infrastructure validation (language-specific checks), test planning flow guidance (Phase 4), and seamless navigation to Michi workflow.
-
-think hard
+**Michi統合**: このコマンドは、品質インフラ検証（言語固有チェック）、テスト計画フローガイダンス（Phase 4）、Michiワークフローへのシームレスなナビゲーションで基本仕様設計を拡張します。

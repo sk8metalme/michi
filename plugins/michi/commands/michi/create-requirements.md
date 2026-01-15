@@ -1,66 +1,66 @@
 ---
 name: /michi:create-requirements
-description: Generate comprehensive requirements with ultrathink enabled (Michi version)
+description: ultrathink有効で包括的な要件定義書を生成（Michiバージョン）
 allowed-tools: Bash, Glob, Grep, LS, Read, Write, Edit, MultiEdit, Update, WebSearch, WebFetch
 argument-hint: <feature-name>
 ---
 
-# Michi: Requirements Generation with Ultrathink
+# Michi: Ultrathin付き要件定義生成
 
 <background_information>
-- **Mission**: Generate comprehensive, testable requirements in EARS format based on the project description from spec initialization
-- **Success Criteria**:
-  - Create complete requirements document aligned with master docs context
-  - Follow the project's EARS patterns and constraints for all acceptance criteria
-  - Focus on core functionality without implementation details
-  - Update metadata to track generation status
+- **ミッション**: spec初期化時のプロジェクト説明に基づいて、EARS形式で包括的でテスト可能な要件定義を生成する
+- **成功基準**:
+  - マスタードキュメントコンテキストと整合した完全な要件定義書を作成
+  - すべての受入基準でプロジェクトのEARSパターンと制約に従う
+  - 実装詳細なしにコア機能に焦点を当てる
+  - 生成ステータスを追跡するためにメタデータを更新
 </background_information>
 
-## Development Guidelines
+## 開発ガイドライン
 {{DEV_GUIDELINES}}
 
 ---
 
 <instructions>
-## Core Task
-Generate complete requirements for feature **$1** based on the project description in requirements.md.
+## コアタスク
+requirements.md のプロジェクト説明に基づいて、機能 **$1** の完全な要件定義を生成します。
 
-## Execution Steps
+## 実行手順
 
-### Base Implementation
+### 基本実装
 
-1. **Load Context**:
-   - Read `{{MICHI_DIR}}/specs/$1/spec.json` for language and metadata
-   - Read `{{MICHI_DIR}}/specs/$1/requirements.md` for project description
-   - **Load ALL master docs context**: Read entire `{{REPO_ROOT_DIR}}/docs/master/` directory including:
-     - Default files: `structure.md`, `tech.md`, `product.md`
-     - All custom master docs files (regardless of mode settings)
-     - This provides complete project memory and context
+1. **コンテキストの読み込み**:
+   - 言語とメタデータのために `{{MICHI_DIR}}/pj/$1/spec.json` を読み取り
+   - プロジェクト説明のために `{{MICHI_DIR}}/pj/$1/requirements.md` を読み取り
+   - **すべてのマスタードキュメントコンテキストを読み込み**: `{{REPO_ROOT_DIR}}/docs/master/` ディレクトリ全体を読み取り（以下を含む）:
+     - デフォルトファイル: `structure.md`, `tech.md`, `product.md`
+     - すべてのカスタムマスタードキュメントファイル（モード設定に関係なく）
+     - これにより完全なプロジェクトメモリとコンテキストを提供
 
-2. **Read Guidelines**:
-   - Read `{{MICHI_DIR}}/settings/rules/ears-format.md` for EARS syntax rules
-   - Read `{{MICHI_DIR}}/settings/templates/specs/requirements.md` for document structure
+2. **ガイドラインの読み取り**:
+   - EARS構文ルールのために `{{MICHI_DIR}}/settings/rules/ears-format.md` を読み取り
+   - ドキュメント構造のために `{{MICHI_DIR}}/settings/templates/specs/requirements.md` を読み取り
 
-3. **Generate Requirements**:
-   - Create initial requirements based on project description
-   - Group related functionality into logical requirement areas
-   - Apply EARS format to all acceptance criteria
-   - Use language specified in spec.json
+3. **要件定義の生成**:
+   - プロジェクト説明に基づいて初期要件を作成
+   - 関連機能を論理的な要件領域にグループ化
+   - すべての受入基準にEARS形式を適用
+   - spec.json で指定された言語を使用
 
-4. **Update Metadata**:
-   - Set `phase: "requirements-generated"`
-   - Set `approvals.requirements.generated: true`
-   - Update `updated_at` timestamp
+4. **メタデータの更新**:
+   - `phase: "requirements-generated"` を設定
+   - `approvals.requirements.generated: true` を設定
+   - `updated_at` タイムスタンプを更新
 
-### Michi Extensions
+### Michi拡張機能
 
-5. **Ultrathink Automatic Enablement**:
-   - Requirements generation requires complex analysis
-   - Extended thinking (ultrathink) is enabled by default
-   - Provides deeper analysis and more comprehensive requirements
+5. **Ultrathink自動有効化**:
+   - 要件定義生成には複雑な分析が必要
+   - 拡張思考（ultrathink）がデフォルトで有効
+   - より深い分析とより包括的な要件定義を提供
 
-6. **JIRA/Confluence Integration Pre-check**:
-   - Check environment variables at execution start:
+6. **JIRA/Confluence統合事前チェック**:
+   - 実行開始時に環境変数をチェック:
      ```bash
      echo "=== Michi Requirements Generation ==="
      echo ""
@@ -77,34 +77,34 @@ Generate complete requirements for feature **$1** based on the project descripti
      fi
      echo ""
      ```
-   - Display readiness for Phase 9 (JIRA sync)
+   - Phase 9（JIRA同期）の準備状況を表示
 
-## Important Constraints
-- Focus on WHAT, not HOW (no implementation details)
-- Requirements must be testable and verifiable
-- Choose appropriate subject for EARS statements (system/service name for software)
-- Generate initial version first, then iterate with user feedback (no sequential questions upfront)
-- Requirement headings in requirements.md MUST include a leading numeric ID only (for example: "Requirement 1", "1.", "2 Feature ..."); do not use alphabetic IDs like "Requirement A".
+## 重要な制約
+- HOWではなくWHATに焦点を当てる（実装詳細なし）
+- 要件はテスト可能で検証可能でなければならない
+- EARS文に適切な主語を選択（ソフトウェアの場合はシステム/サービス名）
+- 最初に初期バージョンを生成し、その後ユーザーフィードバックで反復（事前に連続的な質問をしない）
+- requirements.md の要件見出しは先頭に数値IDのみを含む必要がある（例: "Requirement 1", "1.", "2 Feature ..."）。"Requirement A"のようなアルファベットIDは使用しない。
 </instructions>
 
-## Tool Guidance
-- **Read first**: Load all context (spec, master docs, rules, templates) before generation
-- **Write last**: Update requirements.md only after complete generation
-- Use **WebSearch/WebFetch** only if external domain knowledge needed
+## ツールガイダンス
+- **最初に読み取り**: 生成前にすべてのコンテキスト（仕様、マスタードキュメント、ルール、テンプレート）を読み込む
+- **最後に書き込み**: 完全な生成後にのみ requirements.md を更新
+- 外部ドメイン知識が必要な場合のみ **WebSearch/WebFetch** を使用
 
-## Output Description
+## 出力説明
 
-Provide output in the language specified in spec.json with:
+spec.json で指定された言語で以下の出力を提供:
 
-### Base Output
+### 基本出力
 
-1. **Generated Requirements Summary**: Brief overview of major requirement areas (3-5 bullets)
-2. **Document Status**: Confirm requirements.md updated and spec.json metadata updated
-3. **Next Steps**: Guide user on how to proceed (approve and continue, or modify)
+1. **生成された要件定義サマリー**: 主要な要件領域の簡潔な概要（3-5箇条書き）
+2. **ドキュメントステータス**: requirements.md が更新され、spec.json メタデータが更新されたことを確認
+3. **次のステップ**: 進め方をユーザーにガイド（承認して続行、または修正）
 
-### Michi Extended Output
+### Michi拡張出力
 
-After base output, add:
+基本出力の後に追加:
 
 ```bash
 echo ""
@@ -113,7 +113,7 @@ echo " Michi Requirements Generation Complete"
 echo "============================================"
 echo ""
 echo "### 生成された要件定義書"
-echo "\`.michi/specs/$1/requirements.md\`"
+echo "\`.michi/pj/$1/requirements.md\`"
 echo ""
 echo "### 次のステップ"
 echo ""
@@ -136,43 +136,43 @@ echo "ℹ️  Ultrathink: 有効（深い分析モード）"
 echo ""
 ```
 
-**Format Requirements**:
-- Use Markdown headings for clarity
-- Include file paths in code blocks
-- Keep summary concise (under 300 words)
+**形式要件**:
+- 明確にするためにMarkdownの見出しを使用
+- コードブロックにファイルパスを含める
+- 要約を簡潔に保つ（300語以下）
 
-## Safety & Fallback
+## 安全性とフォールバック
 
-### Error Scenarios
-- **Missing Project Description**: If requirements.md lacks project description, ask user for feature details
-- **Ambiguous Requirements**: Propose initial version and iterate with user rather than asking many upfront questions
-- **Template Missing**: If template files don't exist, use inline fallback structure with warning
-- **Language Undefined**: Default to English (`en`) if spec.json doesn't specify language
-- **Incomplete Requirements**: After generation, explicitly ask user if requirements cover all expected functionality
-- **Master Docs Directory Empty**: Warn user that project context is missing and may affect requirement quality (Michi: display warning and recommend master docs creation)
-- **Non-numeric Requirement Headings**: If existing headings do not include a leading numeric ID (for example, they use "Requirement A"), normalize them to numeric IDs and keep that mapping consistent (never mix numeric and alphabetic labels).
+### エラーシナリオ
+- **プロジェクト説明欠落**: requirements.md にプロジェクト説明がない場合、機能詳細をユーザーに尋ねる
+- **曖昧な要件**: 事前に多くの質問をするのではなく、初期バージョンを提案してユーザーと反復
+- **テンプレート欠落**: テンプレートファイルが存在しない場合、警告付きでインラインフォールバック構造を使用
+- **言語未定義**: spec.json で言語が指定されていない場合、英語（`en`）をデフォルトとする
+- **不完全な要件**: 生成後、要件がすべての期待される機能をカバーしているかをユーザーに明示的に尋ねる
+- **マスタードキュメントディレクトリが空**: プロジェクトコンテキストが欠落しており、要件品質に影響する可能性があることをユーザーに警告（Michi: 警告を表示し、マスタードキュメント作成を推奨）
+- **非数値の要件見出し**: 既存の見出しに先頭の数値IDが含まれていない場合（例: "Requirement A"を使用）、数値IDに正規化し、そのマッピングを一貫して保つ（数値とアルファベットのラベルを混在させない）
 
-### Additional Michi Scenarios
-- **Ultrathink Timeout**: For long-running processes, save intermediate results and allow resumption
-- **Large Projects**: Consider section-by-section generation
+### 追加のMichiシナリオ
+- **Ultrathin Timeout**: 長時間実行されるプロセスの場合、中間結果を保存して再開を許可
+- **大規模プロジェクト**: セクションごとの生成を検討
 
-### Next Phase: Design Generation
+### 次のフェーズ: 設計生成
 
-**If Requirements Approved**:
-- Review generated requirements at `{{MICHI_DIR}}/specs/$1/requirements.md`
-- **Optional Gap Analysis** (for existing codebases):
-  - Run `/base:validate-gap $1` to analyze implementation gap with current code
-  - Identifies existing components, integration points, and implementation strategy
-  - Recommended for brownfield projects; skip for greenfield
-- Then `/michi:create-design $1 -y` to proceed to design phase
+**要件定義が承認された場合**:
+- `{{MICHI_DIR}}/pj/$1/requirements.md` で生成された要件をレビュー
+- **オプションのGap分析**（既存コードベースの場合）:
+  - `/base:validate-gap $1` を実行して現在のコードとの実装ギャップを分析
+  - 既存のコンポーネント、統合ポイント、実装戦略を特定
+  - ブラウンフィールドプロジェクトに推奨。グリーンフィールドの場合はスキップ
+- 次に `/michi:create-design $1 -y` で設計フェーズに進む
 
-**If Modifications Needed**:
-- Provide feedback and re-run `/michi:create-requirements $1`
+**修正が必要な場合**:
+- フィードバックを提供し、`/michi:create-requirements $1` を再実行
 
-**Note**: Approval is mandatory before proceeding to design phase.
+**注意**: 設計フェーズに進む前に承認が必須です。
 
 ---
 
-**Michi Integration**: This command extends base requirements generation with ultrathink automatic enablement and JIRA/Confluence integration pre-check, providing deeper analysis and seamless navigation to Michi workflow.
+**Michi統合**: このコマンドは、ultrathink自動有効化とJIRA/Confluence統合事前チェックで基本要件定義生成を拡張し、より深い分析とMichiワークフローへのシームレスなナビゲーションを提供します。
 
 think hard

@@ -1,54 +1,54 @@
 ---
-title: Michi Core Principles
-description: Core principles for GitHub SSoT and multi-project management
+title: Michiコア原則
+description: GitHub SSoTとマルチプロジェクト管理のコア原則
 ---
 
-# Michi Core Principles
+# Michiコア原則
 
-## Development Guidelines
+## 開発ガイドライン
 {{DEV_GUIDELINES}}
 
-## Language
-All generated documents should be in: **{{LANG_CODE}}**
+## 言語
+生成されるすべてのドキュメントは以下の言語で記述する必要があります: **{{LANG_CODE}}**
 
-Reference the language field in {{SPEC_DIR}}/project.json.
+{{SPEC_DIR}}/project.json の language フィールドを参照してください。
 
-## Single Source of Truth (SSoT)
+## 単一の真実の源（SSoT）
 
-### GitHub as SSoT
-- **All specifications are managed in GitHub** ({{SPEC_DIR}}/specs/)
-- Confluence is **reference and approval only** (editing is GitHub only)
-- Avoid duplicate management
+### GitHubを真実の源とする
+- **すべての仕様はGitHubで管理** ({{SPEC_DIR}}/pj/)
+- Confluenceは**参照と承認のみ**（編集はGitHubのみ）
+- 重複管理を避ける
 
-### Data Flow
+### データフロー
 ```text
-GitHub ({{SPEC_DIR}}/specs/)  ← Source of truth (editable)
-    ↓ sync
-Confluence ← Display and approval (read-only)
+GitHub ({{SPEC_DIR}}/pj/)  ← 真実の源（編集可能）
+    ↓ 同期
+Confluence ← 表示と承認（読み取り専用）
 ```
 
-## Multi-Project Management
+## マルチプロジェクト管理
 
-### Project Identification
-- All operations reference {{SPEC_DIR}}/project.json
-- Dynamically use project ID, JIRA key, Confluence labels
-- Project ID: {{PROJECT_ID}}
+### プロジェクトの識別
+- すべての操作は {{SPEC_DIR}}/project.json を参照
+- プロジェクトID、JIRAキー、Confluenceラベルを動的に使用
+- プロジェクトID: {{PROJECT_ID}}
 
-### Naming Conventions
+### 命名規則
 
-#### Confluence Pages
-- Format: `[{projectName}] {document_type}`
-- Example: `[{{PROJECT_ID}}] Requirements`
+#### Confluenceページ
+- 形式: `[{projectName}] {document_type}`
+- 例: `[{{PROJECT_ID}}] Requirements`
 
 #### JIRA Epic/Story
-- Format: `[{JIRA_KEY}] {title}`
-- Use project metadata from {{SPEC_DIR}}/project.json
+- 形式: `[{JIRA_KEY}] {title}`
+- {{SPEC_DIR}}/project.json からプロジェクトメタデータを使用
 
-## Agent Directory
-- Agent configuration: {{AGENT_DIR}}
-- Rules location: {{AGENT_DIR}}/rules/
-- Commands location: {{AGENT_DIR}}/commands/
+## エージェントディレクトリ
+- エージェント設定: {{AGENT_DIR}}
+- ルール配置場所: {{AGENT_DIR}}/rules/
+- コマンド配置場所: {{AGENT_DIR}}/commands/
 
-## Feature Development
-- Feature name: {{FEATURE_NAME}}
-- Spec location: {{SPEC_DIR}}/specs/{{FEATURE_NAME}}/
+## 機能開発
+- 機能名: {{FEATURE_NAME}}
+- 仕様配置場所: {{SPEC_DIR}}/pj/{{FEATURE_NAME}}/

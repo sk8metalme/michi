@@ -1,143 +1,143 @@
 ---
 name: /michi:show-status
-description: Show specification status and progress (Michi version with enhanced summary)
+description: 拡張サマリー付き仕様ステータスと進捗を表示（Michiバージョン）
 allowed-tools: Bash, Read, Glob, Write, Edit, MultiEdit, Update
 argument-hint: <feature-name>
 ---
 
-# Michi: Spec Status with Progress Summary
+# Michi: 進捗サマリー付き仕様ステータス
 
 <background_information>
-- **Mission**: Display comprehensive status and progress for a specification
-- **Success Criteria**:
-  - Show current phase and completion status
-  - Identify next actions and blockers
-  - Provide clear visibility into progress
-  - Display quality metrics and external integration status
-  - Show timeline information
+- **ミッション**: 仕様の包括的なステータスと進捗を表示する
+- **成功基準**:
+  - 現在のフェーズと完了ステータスを表示
+  - 次のアクションとブロッカーを特定
+  - 進捗に関する明確な可視性を提供
+  - 品質メトリクスと外部統合ステータスを表示
+  - タイムライン情報を表示
 </background_information>
 
-## Development Guidelines
+## 開発ガイドライン
 {{DEV_GUIDELINES}}
 
 ---
 
 <instructions>
-## Core Task
-Generate status report for feature **$1** showing progress across all phases.
+## コアタスク
+機能 **$1** のすべてのフェーズにわたる進捗を示すステータスレポートを生成します。
 
-## Execution Steps
+## 実行手順
 
-### Base Implementation
+### 基本実装
 
-#### Step 1: Load Spec Context
-- Read `{{MICHI_DIR}}/specs/$1/spec.json` for metadata and phase status
-- Read existing files: `requirements.md`, `design.md`, `tasks.md` (if they exist)
-- Check `{{MICHI_DIR}}/specs/$1/` directory for available files
+#### ステップ1: 仕様コンテキストの読み込み
+- メタデータとフェーズステータスのために `{{MICHI_DIR}}/pj/$1/spec.json` を読み取り
+- 既存ファイルを読み取り: `requirements.md`, `design.md`, `tasks.md`（存在する場合）
+- `{{MICHI_DIR}}/pj/$1/` ディレクトリで利用可能なファイルをチェック
 
-#### Step 2: Analyze Status
+#### ステップ2: ステータスの分析
 
-**Parse each phase**:
-- **Requirements**: Count requirements and acceptance criteria
-- **Design**: Check for architecture, components, diagrams
-- **Tasks**: Count completed vs total tasks (parse `- [x]` vs `- [ ]`)
-- **Approvals**: Check approval status in spec.json
+**各フェーズを解析**:
+- **要件**: 要件と受入基準をカウント
+- **設計**: アーキテクチャ、コンポーネント、図の確認
+- **タスク**: 完了対総タスクをカウント（`- [x]` vs `- [ ]` を解析）
+- **承認**: spec.json で承認ステータスをチェック
 
-#### Step 3: Generate Report
+#### ステップ3: レポートの生成
 
-Create report in the language specified in spec.json covering:
-1. **Current Phase & Progress**: Where the spec is in the workflow
-2. **Completion Status**: Percentage complete for each phase
-3. **Task Breakdown**: If tasks exist, show completed/remaining counts
-4. **Next Actions**: What needs to be done next
-5. **Blockers**: Any issues preventing progress
+spec.json で指定された言語でレポートを作成し、以下をカバー:
+1. **現在のフェーズと進捗**: ワークフローのどこにいるか
+2. **完了ステータス**: 各フェーズの完了率
+3. **タスク内訳**: タスクが存在する場合、完了/残りのカウントを表示
+4. **次のアクション**: 次に何をする必要があるか
+5. **ブロッカー**: 進捗を妨げている問題
 
-### Michi Extensions
+### Michi拡張機能
 
-#### Step 4: Enhanced Progress Reporting
+#### ステップ4: 拡張進捗レポート
 
-Add the following extended information to the report:
+レポートに以下の拡張情報を追加:
 
-**Quality Metrics**:
-- Test Coverage: Target percentage from design.md (if specified)
-- Code Review: Status (pending/completed)
-- Technical Debt: Presence indicator
+**品質メトリクス**:
+- テストカバレッジ: design.md からのターゲット率（指定されている場合）
+- コードレビュー: ステータス（保留中/完了）
+- 技術的負債: 存在インジケーター
 
-**External Integration Status**:
-- **JIRA**: Check environment variables and display sync status
-  - Number of synced tickets and their statuses
-  - Last sync timestamp (from spec.json if available)
-- **Confluence**: Document sync status
-  - Last sync timestamp
+**外部統合ステータス**:
+- **JIRA**: 環境変数をチェックし同期ステータスを表示
+  - 同期されたチケットの数とそのステータス
+  - 最終同期タイムスタンプ（spec.json から利用可能な場合）
+- **Confluence**: ドキュメント同期ステータス
+  - 最終同期タイムスタンプ
 
-**Timeline Information**:
-- Each Phase completion dates (from spec.json timestamps)
-- Average work time (if similar spec statistics available)
-- Estimated remaining time
+**タイムライン情報**:
+- 各フェーズの完了日（spec.json のタイムスタンプから）
+- 平均作業時間（類似仕様の統計が利用可能な場合）
+- 推定残り時間
 
-## Critical Constraints
-- Use language from spec.json
-- Calculate accurate completion percentages
-- Identify specific next action commands
-- Check JIRA/Confluence environment variables for integration status
+## 重要な制約
+- spec.json の言語を使用
+- 正確な完了率を計算
+- 具体的な次のアクションコマンドを特定
+- 統合ステータスのためにJIRA/Confluence環境変数をチェック
 </instructions>
 
-## Tool Guidance
-- **Read**: Load spec.json first, then other spec files as needed
-- **Parse carefully**: Extract completion data from tasks.md checkboxes
-- Use **Glob** to check which spec files exist
-- Use **Bash** to check environment variables for external integrations
+## ツールガイダンス
+- **Read**: 最初に spec.json を読み込み、必要に応じて他の仕様ファイルを読み込む
+- **注意深く解析**: tasks.md のチェックボックスから完了データを抽出
+- **Glob** を使用してどの仕様ファイルが存在するかをチェック
+- **Bash** を使用して外部統合のための環境変数をチェック
 
-## Output Description
+## 出力説明
 
-Provide status report in the language specified in spec.json:
+spec.json で指定された言語でステータスレポートを提供:
 
-### Base Output
+### 基本出力
 
-**Report Structure**:
-1. **Feature Overview**: Name, phase, last updated
-2. **Phase Status**: Requirements, Design, Tasks with completion %
-3. **Task Progress**: If tasks exist, show X/Y completed
-4. **Next Action**: Specific command to run next
-5. **Issues**: Any blockers or missing elements
+**レポート構造**:
+1. **機能概要**: 名前、フェーズ、最終更新日
+2. **フェーズステータス**: 要件、設計、タスクと完了率
+3. **タスク進捗**: タスクが存在する場合、X/Y 完了を表示
+4. **次のアクション**: 次に実行する具体的なコマンド
+5. **問題**: ブロッカーまたは欠落要素
 
-### Michi Extended Output
+### Michi拡張出力
 
-After base output, add:
+基本出力の後に追加:
 
 ```text
 ========================================
  Spec Status: <feature>
 ========================================
 
-📊 Progress Overview
-  Phase:              implementation (50%)
-  Requirements:       ✅ Approved
-  Design:             ✅ Approved
-  Tasks:              12/24 completed
+📊 進捗概要
+  フェーズ:           実装 (50%)
+  要件:               ✅ 承認済み
+  設計:               ✅ 承認済み
+  タスク:             12/24 完了
 
-🔍 Quality Metrics
-  Test Coverage:      Target 95% (design.md)
-  Code Review:        Pending
+🔍 品質メトリクス
+  テストカバレッジ:   目標 95% (design.md)
+  コードレビュー:     保留中
 
-🔗 External Integration
-  JIRA:              3 tickets synced (2 done, 1 in-progress)
-  Confluence:         Synced 2 days ago
+🔗 外部統合
+  JIRA:              3 チケット同期済み (2 完了, 1 進行中)
+  Confluence:         2日前に同期
 
-⏱️  Timeline
-  Started:           2024-01-15
-  Last Updated:      2024-01-20
+⏱️  タイムライン
+  開始:              2024-01-15
+  最終更新:          2024-01-20
 
-📝 Next Actions
-  1. /michi:dev <feature>  - Continue implementation
-  2. Review PR #123 for Task 5.3
+📝 次のアクション
+  1. /michi:dev <feature>  - 実装を継続
+  2. タスク 5.3 の PR #123 をレビュー
 ```
 
-**Format**: Clear, scannable format with emojis (✅/⏳/❌) for status
+**形式**: ステータスのために絵文字（✅/⏳/❌）を使用した明確でスキャン可能な形式
 
-### Command Options
+### コマンドオプション
 
-The following command options can be suggested in the output:
+出力で提案できる以下のコマンドオプション:
 
 ```bash
 # すべてのspecのステータス一覧
@@ -150,26 +150,26 @@ The following command options can be suggested in the output:
 /michi:show-status <feature> --json
 ```
 
-## Safety & Fallback
+## 安全性とフォールバック
 
-### Error Scenarios
+### エラーシナリオ
 
-**Spec Not Found**:
-- **Message**: "No spec found for `$1`. Check available specs in `{{MICHI_DIR}}/specs/`"
-- **Action**: List available spec directories
+**仕様が見つからない**:
+- **メッセージ**: "$1 の仕様が見つかりません。`{{MICHI_DIR}}/pj/` で利用可能な仕様を確認してください"
+- **アクション**: 利用可能な仕様ディレクトリをリスト
 
-**Incomplete Spec**:
-- **Warning**: Identify which files are missing
-- **Suggested Action**: Point to next phase command
+**不完全な仕様**:
+- **警告**: どのファイルが欠落しているかを特定
+- **推奨アクション**: 次のフェーズコマンドを指示
 
-### List All Specs
+### すべての仕様をリスト
 
-To see all available specs:
-- Run with no argument or use wildcard
-- Shows all specs in `{{MICHI_DIR}}/specs/` with their status
+すべての利用可能な仕様を確認するには:
+- 引数なしで実行またはワイルドカードを使用
+- `{{MICHI_DIR}}/pj/` のすべての仕様をそのステータスとともに表示
 
 ---
 
-**Michi Integration**: This command extends base spec status with quality metrics, external integration status (JIRA/Confluence), and timeline information for comprehensive progress tracking.
+**Michi統合**: このコマンドは、包括的な進捗追跡のための品質メトリクス、外部統合ステータス（JIRA/Confluence）、タイムライン情報で基本仕様ステータスを拡張します。
 
 think

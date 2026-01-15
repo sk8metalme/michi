@@ -1,61 +1,61 @@
 ---
 name: /michi:analyze-gap
-description: Analyze implementation gap between requirements and existing codebase (Michi version with detailed report)
+description: 詳細レポート付きで要件と既存コードベース間の実装ギャップを分析（Michiバージョン）
 allowed-tools: Bash, Glob, Grep, LS, Read, Write, Edit
 argument-hint: <feature-name>
 ---
 
-# Michi: Gap Analysis with Detailed Report
+# Michi: 詳細レポート付きギャップ分析
 
 <background_information>
-- **Mission**: Analyze the gap between requirements and existing codebase to inform implementation strategy
-- **Success Criteria**:
-  - Comprehensive understanding of existing codebase patterns and components
-  - Clear identification of missing capabilities and integration challenges
-  - Multiple viable implementation approaches evaluated
-  - Technical research needs identified for design phase
-  - Structured report with actionable insights (Michi extension)
+- **ミッション**: 実装戦略を通知するために、要件と既存コードベース間のギャップを分析する
+- **成功基準**:
+  - 既存のコードベースパターンとコンポーネントの包括的な理解
+  - 欠落している機能と統合課題の明確な特定
+  - 複数の実行可能な実装アプローチの評価
+  - 設計フェーズのための技術調査ニーズの特定
+  - アクション可能な洞察を含む構造化されたレポート（Michi拡張）
 </background_information>
 
-## Development Guidelines
+## 開発ガイドライン
 {{DEV_GUIDELINES}}
 
 ---
 
 <instructions>
-## Core Task
-Analyze implementation gap for feature **$1** based on approved requirements and existing codebase.
+## コアタスク
+承認された要件と既存コードベースに基づいて、機能 **$1** の実装ギャップを分析します。
 
-## Execution Steps
+## 実行手順
 
-### Base Implementation
+### 基本実装
 
-1. **Load Context**:
-   - Read `{{MICHI_DIR}}/specs/$1/spec.json` for language and metadata
-   - Read `{{MICHI_DIR}}/specs/$1/requirements.md` for requirements
-   - **Load ALL master docs context**: Read entire `{{REPO_ROOT_DIR}}/docs/master/` directory including:
-     - Default files: `structure.md`, `tech.md`, `product.md`
-     - All custom master docs files (regardless of mode settings)
-     - This provides complete project memory and context
+1. **コンテキストの読み込み**:
+   - 言語とメタデータのために `{{MICHI_DIR}}/pj/$1/spec.json` を読み取り
+   - 要件のために `{{MICHI_DIR}}/pj/$1/requirements.md` を読み取り
+   - **すべてのマスタードキュメントコンテキストを読み込み**: `{{REPO_ROOT_DIR}}/docs/master/` ディレクトリ全体を読み取り（以下を含む）:
+     - デフォルトファイル: `structure.md`, `tech.md`, `product.md`
+     - すべてのカスタムマスタードキュメントファイル（モード設定に関係なく）
+     - これにより完全なプロジェクトメモリとコンテキストを提供
 
-2. **Read Analysis Guidelines**:
-   - Read `{{MICHI_DIR}}/settings/rules/gap-analysis.md` for comprehensive analysis framework
+2. **分析ガイドラインの読み取り**:
+   - 包括的な分析フレームワークのために `{{MICHI_DIR}}/settings/rules/gap-analysis.md` を読み取り
 
-3. **Execute Gap Analysis**:
-   - Follow gap-analysis.md framework for thorough investigation
-   - Analyze existing codebase using Grep and Read tools
-   - Use WebSearch/WebFetch for external dependency research if needed
-   - Evaluate multiple implementation approaches (extend/new/hybrid)
-   - Use language specified in spec.json for output
+3. **ギャップ分析の実行**:
+   - 徹底的な調査のために gap-analysis.md フレームワークに従う
+   - Grep と Read ツールを使用して既存のコードベースを分析
+   - 必要に応じて外部依存関係調査のために WebSearch/WebFetch を使用
+   - 複数の実装アプローチ（拡張/新規/ハイブリッド）を評価
+   - 出力には spec.json で指定された言語を使用
 
-4. **Generate Analysis Document**:
-   - Create comprehensive gap analysis following the output guidelines in gap-analysis.md
-   - Present multiple viable options with trade-offs
-   - Flag areas requiring further research
+4. **分析ドキュメントの生成**:
+   - gap-analysis.md の出力ガイドラインに従って包括的なギャップ分析を作成
+   - トレードオフを含む複数の実行可能なオプションを提示
+   - さらなる調査が必要な領域にフラグを立てる
 
-### Michi Extensions
+### Michi拡張機能
 
-5. **Enhanced Gap Analysis Report**:
+5. **拡張ギャップ分析レポート**:
 
    Gap分析結果を構造化されたレポートで出力:
 
@@ -81,48 +81,48 @@ Analyze implementation gap for feature **$1** based on approved requirements and
    ```markdown
    # Gap Analysis Report: <feature>
 
-   ## Executive Summary
-   - Total Requirements: 15
-   - Implemented: 3
-   - Partial: 5
-   - Not Implemented: 7
-   - Gap Score: 47%
+   ## 実行サマリー
+   - 総要件数: 15
+   - 実装済み: 3
+   - 部分実装: 5
+   - 未実装: 7
+   - ギャップスコア: 47%
 
-   ## Detailed Gaps
+   ## 詳細ギャップ
 
-   ### 1. Feature Gaps
-   | Requirement ID | Status | Implementation Location | Notes |
-   |----------------|--------|-------------------------|-------|
-   | REQ-001        | ✅ Done | src/auth/login.ts:45    | Complete |
-   | REQ-002        | ⚠️ Partial | src/auth/logout.ts:23 | Missing error handling |
-   | REQ-003        | ❌ Missing | -                      | Not implemented |
+   ### 1. 機能ギャップ
+   | 要件ID | ステータス | 実装場所 | 備考 |
+   |--------|-----------|---------|------|
+   | REQ-001 | ✅ 完了 | src/auth/login.ts:45 | 完全 |
+   | REQ-002 | ⚠️ 部分 | src/auth/logout.ts:23 | エラーハンドリング欠落 |
+   | REQ-003 | ❌ 欠落 | - | 未実装 |
 
-   ### 2. Architecture Gaps
-   - Missing: Database migration strategy
-   - Inconsistent: Error handling approach
-   - Technical Debt: Legacy code in auth module
+   ### 2. アーキテクチャギャップ
+   - 欠落: データベース移行戦略
+   - 不整合: エラーハンドリングアプローチ
+   - 技術的負債: auth モジュールのレガシーコード
 
-   ### 3. Test Coverage Gaps
-   - Unit Tests: 45% (Target: 95%)
-   - Integration Tests: Missing for auth flow
-   - E2E Tests: Not implemented
+   ### 3. テストカバレッジギャップ
+   - 単体テスト: 45%（目標: 95%）
+   - 統合テスト: auth フローで欠落
+   - E2Eテスト: 未実装
 
-   ## Recommendations
+   ## 推奨事項
 
-   ### Priority 1 (Critical)
-   1. Implement REQ-003, REQ-005
-   2. Add error handling to REQ-002
+   ### 優先度1（クリティカル）
+   1. REQ-003, REQ-005 を実装
+   2. REQ-002 にエラーハンドリングを追加
 
-   ### Priority 2 (Important)
-   1. Increase unit test coverage to 95%
-   2. Refactor legacy auth code
+   ### 優先度2（重要）
+   1. 単体テストカバレッジを95%に増加
+   2. レガシー auth コードをリファクタリング
 
-   ### Priority 3 (Nice to Have)
-   1. Add integration tests
-   2. Document architecture decisions
+   ### 優先度3（あると良い）
+   1. 統合テストを追加
+   2. アーキテクチャ決定を文書化
    ```
 
-6. **JIRA Integration Option**:
+6. **JIRA統合オプション**:
 
    Gap分析結果からJIRAチケットを自動作成（将来実装予定）:
 
@@ -131,60 +131,60 @@ Analyze implementation gap for feature **$1** based on approved requirements and
    /michi:analyze-gap <feature> --create-jira-tickets
    ```
 
-## Important Constraints
-- **Information over Decisions**: Provide analysis and options, not final implementation choices
-- **Multiple Options**: Present viable alternatives when applicable
-- **Thorough Investigation**: Use tools to deeply understand existing codebase
-- **Explicit Gaps**: Clearly flag areas needing research or investigation
+## 重要な制約
+- **決定より情報**: 最終的な実装選択ではなく、分析とオプションを提供
+- **複数のオプション**: 該当する場合、実行可能な代替案を提示
+- **徹底的な調査**: ツールを使用して既存のコードベースを深く理解
+- **明示的なギャップ**: 調査または検討が必要な領域を明確にフラグ付け
 </instructions>
 
-## Tool Guidance
-- **Read first**: Load all context (spec, master docs, rules) before analysis
-- **Grep extensively**: Search codebase for patterns, conventions, and integration points
-- **WebSearch/WebFetch**: Research external dependencies and best practices when needed
-- **Write last**: Generate analysis only after complete investigation
+## ツールガイダンス
+- **最初に読み取り**: 分析前にすべてのコンテキスト（仕様、マスタードキュメント、ルール）を読み込む
+- **広範なGrep**: パターン、規約、統合ポイントのためにコードベースを検索
+- **WebSearch/WebFetch**: 必要に応じて外部依存関係とベストプラクティスを調査
+- **最後に書き込み**: 完全な調査後にのみ分析を生成
 
-## Output Description
+## 出力説明
 
-Provide output in the language specified in spec.json with:
+spec.json で指定された言語で以下の出力を提供:
 
-### Base Output
+### 基本出力
 
-1. **Analysis Summary**: Brief overview (3-5 bullets) of scope, challenges, and recommendations
-2. **Document Status**: Confirm analysis approach used
-3. **Next Steps**: Guide user on proceeding to design phase
+1. **分析サマリー**: スコープ、課題、推奨事項の簡潔な概要（3-5箇条書き）
+2. **ドキュメントステータス**: 使用された分析アプローチを確認
+3. **次のステップ**: 設計フェーズへの進め方をガイド
 
-### Michi Extended Output
+### Michi拡張出力
 
-After base output, add:
-- Structured gap analysis report with gap score
-- Feature/Architecture/Test coverage gaps table
-- Prioritized recommendations
-- Optional JIRA integration command suggestion
+基本出力の後に追加:
+- ギャップスコアを含む構造化されたギャップ分析レポート
+- 機能/アーキテクチャ/テストカバレッジギャップ表
+- 優先順位付けされた推奨事項
+- オプションのJIRA統合コマンド提案
 
-**Format Requirements**:
-- Use Markdown headings for clarity
-- Keep summary concise (under 300 words)
-- Detailed analysis follows gap-analysis.md output guidelines
+**形式要件**:
+- 明確にするためにMarkdownの見出しを使用
+- 要約を簡潔に保つ（300語以下）
+- 詳細な分析は gap-analysis.md の出力ガイドラインに従う
 
-## Safety & Fallback
+## 安全性とフォールバック
 
-### Error Scenarios
-- **Missing Requirements**: If requirements.md doesn't exist, stop with message: "Run `/michi:create-requirements $1` first to generate requirements"
-- **Requirements Not Approved**: If requirements not approved, warn user but proceed (gap analysis can inform requirement revisions)
-- **Empty Master Docs Directory**: Warn user that project context is missing and may affect analysis quality
-- **Complex Integration Unclear**: Flag for comprehensive research in design phase rather than blocking
-- **Language Undefined**: Default to English (`en`) if spec.json doesn't specify language
+### エラーシナリオ
+- **要件欠落**: requirements.md が存在しない場合、メッセージとともに停止: "最初に `/michi:create-requirements $1` を実行して要件を生成してください"
+- **要件未承認**: 要件が承認されていない場合、ユーザーに警告するが続行（ギャップ分析は要件の改訂を通知できる）
+- **空のマスタードキュメントディレクトリ**: プロジェクトコンテキストが欠落しており、分析品質に影響する可能性があることをユーザーに警告
+- **複雑な統合が不明確**: ブロックするのではなく、設計フェーズでの包括的な調査にフラグを立てる
+- **言語未定義**: spec.json で言語が指定されていない場合、英語（`en`）をデフォルトとする
 
-### Next Phase: Design Generation
+### 次のフェーズ: 設計生成
 
-**If Gap Analysis Complete**:
-- Review gap analysis insights
-- Run `/michi:create-design $1` to create technical design document
-- Or `/michi:create-design $1 -y` to auto-approve requirements and proceed directly
+**ギャップ分析完了の場合**:
+- ギャップ分析の洞察をレビュー
+- 技術設計ドキュメントを作成するために `/michi:create-design $1` を実行
+- または要件を自動承認して直接進むために `/michi:create-design $1 -y` を実行
 
-**Note**: Gap analysis is optional but recommended for brownfield projects to inform design decisions.
+**注意**: ギャップ分析はオプションですが、設計決定を通知するためにブラウンフィールドプロジェクトに推奨されます。
 
 ---
 
-**Michi Integration**: This command extends base gap analysis with detailed structured reports, gap scoring, and optional JIRA integration for actionable implementation planning.
+**Michi統合**: このコマンドは、詳細な構造化されたレポート、ギャップスコアリング、アクション可能な実装計画のためのオプションのJIRA統合で基本ギャップ分析を拡張します。

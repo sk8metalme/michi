@@ -1,85 +1,85 @@
 ---
 name: /michi:archive-pj
-description: Archive a completed specification (Michi version with Confluence sync option)
+description: Confluence同期オプション付きで完了した仕様をアーカイブ（Michiバージョン）
 allowed-tools: Bash, Read, Glob, Write, Edit
 argument-hint: <feature-name> [--reason <reason>]
 ---
 
-# Michi: Spec Archive with Confluence Sync
+# Michi: Confluence同期付き仕様アーカイブ
 
 <background_information>
-- **Mission**: Archive completed specifications to {{MICHI_DIR}}/specs/.archive/
-- **Success Criteria**:
-  - Spec directory moved to archive
-  - Archive timestamp recorded
-  - Original spec accessible in archive
-  - Confluence sync option provided (if configured)
+- **ミッション**: 完了した仕様を {{MICHI_DIR}}/archive-pj/ にアーカイブする
+- **成功基準**:
+  - 仕様ディレクトリをアーカイブに移動
+  - アーカイブタイムスタンプを記録
+  - アーカイブ内の元の仕様にアクセス可能
+  - Confluence同期オプションを提供（設定されている場合）
 </background_information>
 
-## Development Guidelines
+## 開発ガイドライン
 {{DEV_GUIDELINES}}
 
 ---
 
 <instructions>
-## Core Task
-Archive specification **$1** to the archive directory.
+## コアタスク
+仕様 **$1** をアーカイブディレクトリにアーカイブします。
 
-## Execution Steps
+## 実行手順
 
-### Base Implementation
+### 基本実装
 
-1. **Verify Spec Exists**: Check `{{MICHI_DIR}}/specs/$1/` directory exists
-2. **Check Task Completion**: Verify all tasks marked as `[x]` in tasks.md (warn if uncompleted tasks exist)
-3. **Create Archive Directory**: Create `{{MICHI_DIR}}/specs/.archive/` if it doesn't exist
-4. **Generate Timestamp**: Get current timestamp in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ)
-5. **Move Spec**: Move `{{MICHI_DIR}}/specs/$1/` → `{{MICHI_DIR}}/specs/.archive/$1-{timestamp}/`
-6. **Update Metadata**: Record archive timestamp in moved spec.json
+1. **仕様の存在確認**: `{{MICHI_DIR}}/pj/$1/` ディレクトリが存在することを確認
+2. **タスク完了チェック**: tasks.md ですべてのタスクが `[x]` としてマークされていることを確認（未完了タスクが存在する場合は警告）
+3. **アーカイブディレクトリの作成**: `{{MICHI_DIR}}/archive-pj/` が存在しない場合は作成
+4. **タイムスタンプの生成**: ISO 8601形式（YYYY-MM-DDTHH:MM:SSZ）で現在のタイムスタンプを取得
+5. **仕様の移動**: `{{MICHI_DIR}}/pj/$1/` → `{{MICHI_DIR}}/archive-pj/$1-{timestamp}/`
+6. **メタデータの更新**: 移動した spec.json にアーカイブタイムスタンプを記録
 
-### Michi Extensions
+### Michi拡張機能
 
-7. **Confluence Sync Option**:
-   - Check environment variables: `ATLASSIAN_URL`, `ATLASSIAN_EMAIL`, `ATLASSIAN_API_TOKEN`
-   - If configured: Offer to sync archive status to Confluence
-   - Display Confluence sync command suggestion
+7. **Confluence同期オプション**:
+   - 環境変数をチェック: `ATLASSIAN_URL`, `ATLASSIAN_EMAIL`, `ATLASSIAN_API_TOKEN`
+   - 設定されている場合: アーカイブステータスをConfluenceに同期するオプションを提供
+   - Confluence同期コマンド提案を表示
 
-8. **Next Steps Guidance**:
-   - Suggest release note confirmation
-   - Guide to next feature development
-   - Overall progress check command
+8. **次のステップガイダンス**:
+   - リリースノート確認を提案
+   - 次の機能開発へのガイド
+   - 全体進捗確認コマンド
 
-## Important Constraints
-- **Task Completion Check**: Warn user if spec has uncompleted tasks (`- [ ]` in tasks.md)
-- **Preserve All Files**: Move entire directory including all artifacts (spec.json, requirements.md, design.md, tasks.md, research.md, etc.)
-- **Conflict Handling**: If archived spec with same name exists, append numeric suffix to avoid conflicts
-- **No Deletion**: Archive is move operation, not delete - all data preserved
+## 重要な制約
+- **タスク完了チェック**: 仕様に未完了タスク（tasks.md の `- [ ]`）がある場合、ユーザーに警告
+- **すべてのファイルを保持**: すべての成果物を含む全ディレクトリを移動（spec.json, requirements.md, design.md, tasks.md, research.md など）
+- **競合処理**: 同じ名前のアーカイブ済み仕様が存在する場合、競合を避けるために数字のサフィックスを追加
+- **削除なし**: アーカイブは移動操作であり、削除ではない - すべてのデータが保持される
 </instructions>
 
-## Tool Guidance
-- Use **Glob** to check if spec directory exists
-- Use **Read** to check tasks.md for uncompleted tasks
-- Use **Bash** to create archive directory and move spec directory
-- Use **Write** or **Edit** to update spec.json with archive metadata
-- Use **Bash** to check environment variables for Confluence integration
+## ツールガイダンス
+- **Glob** を使用して仕様ディレクトリが存在するかをチェック
+- **Read** を使用して tasks.md の未完了タスクをチェック
+- **Bash** を使用してアーカイブディレクトリを作成し、仕様ディレクトリを移動
+- **Write** または **Edit** を使用してアーカイブメタデータで spec.json を更新
+- **Bash** を使用してConfluence統合のための環境変数をチェック
 
-## Output Description
+## 出力説明
 
-Provide output in the language specified in spec.json with:
+spec.json で指定された言語で以下の出力を提供:
 
-### Base Output
+### 基本出力
 
-1. **Archive Status**: Confirm spec successfully archived
-2. **Archive Location**: Show full path to archived spec
-3. **Task Completion Status**: Report if all tasks were completed
-4. **Access Instructions**: How to view or restore archived spec
+1. **アーカイブステータス**: 仕様が正常にアーカイブされたことを確認
+2. **アーカイブの場所**: アーカイブされた仕様への完全なパスを表示
+3. **タスク完了ステータス**: すべてのタスクが完了したかを報告
+4. **アクセス手順**: アーカイブされた仕様を表示または復元する方法
 
-### Michi Extended Output
+### Michi拡張出力
 
-After base output, add:
+基本出力の後に追加:
 
 ```text
 ✅ Archived specification: <feature>
-📁 Archive path: .michi/specs/.archive/<feature>-{timestamp}/
+📁 Archive path: .michi/archive-pj/<feature>-{timestamp}/
 📝 Reason: <reason>
 
 📚 Optional: Sync archive status to Confluence
@@ -91,52 +91,52 @@ After base output, add:
 3. **全体進捗確認**: /michi:show-status --all でアーカイブ含む全spec進捗確認
 ```
 
-**Format Requirements**:
-- Use Markdown headings for clarity
-- Include full paths in code blocks
-- Keep summary concise (under 200 words)
+**形式要件**:
+- 明確にするためにMarkdownの見出しを使用
+- コードブロックに完全なパスを含める
+- 要約を簡潔に保つ（200語以下）
 
-## Safety & Fallback
+## 安全性とフォールバック
 
-### Error Scenarios
+### エラーシナリオ
 
-**Spec Not Found**:
-- **Stop Execution**: Cannot archive non-existent spec
-- **User Message**: "No spec found at `{{MICHI_DIR}}/specs/$1/`"
-- **Suggested Action**: "Check available specs with `ls {{MICHI_DIR}}/specs/`"
+**仕様が見つからない**:
+- **実行停止**: 存在しない仕様はアーカイブできない
+- **ユーザーメッセージ**: "`{{MICHI_DIR}}/pj/$1/` に仕様が見つかりません"
+- **推奨アクション**: "`ls {{MICHI_DIR}}/pj/` で利用可能なプロジェクトを確認してください"
 
-**Uncompleted Tasks**:
-- **Warning**: "Spec has uncompleted tasks. Archive anyway?"
-- **User Action**: Ask user to confirm or complete remaining tasks
-- **Proceed**: Only after user confirmation
+**未完了タスク**:
+- **警告**: "仕様に未完了タスクがあります。それでもアーカイブしますか？"
+- **ユーザーアクション**: ユーザーに確認を求めるか、残りのタスクを完了するよう求める
+- **続行**: ユーザー確認後のみ
 
-**Archive Directory Conflict**:
-- **Auto-resolve**: Append timestamp suffix to ensure unique archive name
-- **User Message**: "Archive name exists, using: $1-{timestamp}-2"
+**アーカイブディレクトリの競合**:
+- **自動解決**: 一意のアーカイブ名を確保するためにタイムスタンプサフィックスを追加
+- **ユーザーメッセージ**: "アーカイブ名が存在します。使用するもの: $1-{timestamp}-2"
 
-**Archive Directory Creation Failure**:
-- **Stop Execution**: Report error with specific path
-- **Suggested Action**: "Check directory permissions and disk space"
+**アーカイブディレクトリ作成失敗**:
+- **実行停止**: 具体的なパスとともにエラーを報告
+- **推奨アクション**: "ディレクトリの権限とディスク容量を確認してください"
 
-### Viewing Archived Specs
+### アーカイブされた仕様の表示
 
-To view archived specifications:
+アーカイブされた仕様を表示するには:
 ```bash
-ls {{MICHI_DIR}}/specs/.archive/
-cat {{MICHI_DIR}}/specs/.archive/{feature-name}-{timestamp}/spec.json
+ls {{MICHI_DIR}}/archive-pj/
+cat {{MICHI_DIR}}/archive-pj/{feature-name}-{timestamp}/spec.json
 ```
 
-### Restoring Archived Specs
+### アーカイブされた仕様の復元
 
-To restore from archive:
+アーカイブから復元するには:
 ```bash
-mv {{MICHI_DIR}}/specs/.archive/{feature-name}-{timestamp} {{MICHI_DIR}}/specs/{feature-name}
+mv {{MICHI_DIR}}/archive-pj/{feature-name}-{timestamp} {{MICHI_DIR}}/pj/{feature-name}
 ```
 
-**Note**: Archived specs are read-only by convention. If you need to continue work on an archived spec, restore it first.
+**注意**: アーカイブされた仕様は慣例として読み取り専用です。アーカイブされた仕様で作業を続行する必要がある場合は、最初に復元してください。
 
 ---
 
-**Michi Integration**: This command extends base spec archive with Confluence sync option and post-archive next steps guidance for seamless workflow continuation.
+**Michi統合**: このコマンドは、Confluence同期オプションとアーカイブ後の次のステップガイダンスで基本仕様アーカイブを拡張し、シームレスなワークフロー継続を実現します。
 
 think
