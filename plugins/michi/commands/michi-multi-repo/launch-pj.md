@@ -34,8 +34,9 @@ argument-hint: "<project-description>"
 ### Step 1: プロジェクト名の生成
 
 1. **feature-name形式に変換**:
+   - YYYYMMDDプレフィックスを生成: コマンド実行時の現在日付（例: 20260115）
    - プロジェクト説明から簡潔なプロジェクト名を生成
-   - 形式: 小文字英数字とハイフン（例: `my-microservices`, `ec-platform`）
+   - 形式: `YYYYMMDD-{kebab-case-name}`（例: `20260115-my-microservices`, `20260115-ec-platform`）
    - 日本語説明の場合は英語に変換
 
 2. **一意性チェック**:
@@ -160,6 +161,25 @@ docs/michi/YYYYMMDD-{name}/
   警告: プロジェクト名 'YYYYMMDD-{project-name}' は既に存在します。
   自動的に 'YYYYMMDD-{project-name-2}' として作成しました。
   ```
+
+### 既存プロジェクトの移行
+
+**重要**: v1.2.0では、ディレクトリ構造が変更されました（破壊的変更）。
+
+- **旧構造**: `.michi/specs/{feature}/`
+- **新構造**: `.michi/multi-repo/pj/YYYYMMDD-{name}/`
+
+既存プロジェクトがある場合:
+1. 旧ディレクトリが検出された場合、警告メッセージを表示
+2. 移行ガイド（`docs/migration-v1.2.0.md`など）へのリンクを提供
+3. 自動移行スクリプトの提供を検討
+
+例:
+```
+警告: 旧バージョンのプロジェクトディレクトリ (.michi/specs/) が検出されました。
+v1.2.0では新しいディレクトリ構造を使用します。
+移行ガイド: docs/migration-v1.2.0.md を参照してください。
+```
 
 ### フォールバック戦略
 - プロジェクト名生成が曖昧な場合: 2-3の候補を提示し、ユーザーに選択を求める
