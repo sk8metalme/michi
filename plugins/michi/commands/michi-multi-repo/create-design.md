@@ -154,89 +154,14 @@ Task(subagent_type='stable-version-auditor', prompt='docs/michi/YYYYMMDD-$1/over
 
 ## Multi-Repo固有セクション
 
-設計書に以下のセクションを必ず含めること：
+**テンプレート参照**: `templates/multi-repo/spec/architecture.md` を基に設計書を生成してください。
 
-```markdown
-## リポジトリ横断アーキテクチャ
+テンプレートには以下のMulti-Repo拡張セクションが含まれています：
+- リポジトリ横断アーキテクチャ（C4モデル図、サービス間通信、共有コンポーネント）
+- デプロイメントアーキテクチャ
+- データフロー図
 
-### C4モデル - システムコンテキスト図
-
-\`\`\`mermaid
-C4Context
-    title System Context Diagram
-
-    Person(user, "User", "エンドユーザー")
-    System(frontend, "Frontend Service", "Webアプリケーション")
-    System(backend, "Backend Service", "APIサーバー")
-    System_Ext(external_api, "External API", "外部サービス")
-
-    Rel(user, frontend, "Uses", "HTTPS")
-    Rel(frontend, backend, "API calls", "REST/HTTPS")
-    Rel(backend, external_api, "Integrates", "REST/HTTPS")
-\`\`\`
-
-### サービス間通信
-
-| 呼び出し元 | 呼び出し先 | 方式 | プロトコル | 用途 |
-|-----------|-----------|------|-----------|------|
-| Frontend | API Gateway | 同期 | REST/HTTPS | ユーザーリクエスト処理 |
-| API Gateway | Auth Service | 同期 | gRPC | 認証・認可 |
-| User Service | Notification Service | 非同期 | Kafka | ユーザー作成イベント通知 |
-
-### 共有コンポーネント
-
-**共通ライブラリ**:
-- `@org/shared-types`: TypeScript型定義（全コンポーネントで共有）
-- `@org/logger`: 統一ログライブラリ
-
-**共通インフラ**:
-- Elasticsearch: ログ集約
-- Prometheus + Grafana: メトリクス監視
-- Keycloak: 統合認証基盤
-
-### デプロイメントアーキテクチャ
-
-\`\`\`mermaid
-graph TB
-    subgraph "Production Kubernetes Cluster"
-        LB[Load Balancer]
-        FE1[Frontend Pod 1]
-        FE2[Frontend Pod 2]
-        BE1[Backend Pod 1]
-        BE2[Backend Pod 2]
-        DB[(PostgreSQL)]
-
-        LB --> FE1
-        LB --> FE2
-        FE1 --> BE1
-        FE2 --> BE2
-        BE1 --> DB
-        BE2 --> DB
-    end
-\`\`\`
-
-### データフロー
-
-\`\`\`mermaid
-sequenceDiagram
-    participant User
-    participant Frontend
-    participant API Gateway
-    participant Auth Service
-    participant User Service
-    participant Database
-
-    User->>Frontend: リクエスト
-    Frontend->>API Gateway: API呼び出し
-    API Gateway->>Auth Service: トークン検証
-    Auth Service-->>API Gateway: 検証成功
-    API Gateway->>User Service: ユーザー情報取得
-    User Service->>Database: クエリ実行
-    Database-->>User Service: データ返却
-    User Service-->>API Gateway: レスポンス
-    API Gateway-->>Frontend: レスポンス
-    Frontend-->>User: 表示
-\`\`\`
+詳細な構造とプレースホルダーはテンプレートファイルを参照してください。
 
 ## 重要な制約
 - 実装詳細ではなく、アーキテクチャ設計に焦点を当てる
@@ -280,46 +205,14 @@ sequenceDiagram
 
 **ユーザーへの出力メッセージ形式**:
 
-```markdown
-## 設計書生成完了
+生成完了後、以下の情報をユーザーに出力してください：
+- 出力ファイルパス: `docs/michi/{YYYYMMDD-project名}/overview/architecture.md`
+- 分析したコンポーネント一覧（コンポーネント名と技術スタックの概要）
+- アーキテクチャ概要（通信方式、データベース、デプロイ方法）
+- 品質検証結果（Mermaid図検証、技術スタックバージョン監査）
+- 次のステップ（設計書確認、テスト計画作成、実装開始）
 
-### 出力ファイル
-`docs/michi/{YYYYMMDD-project名}/overview/architecture.md`
-
-### 分析したコンポーネント
-- **Frontend**: React + TypeScript（3リポジトリ依存）
-- **Backend**: Node.js + Express（2リポジトリ依存）
-- **Auth Service**: Go + gRPC（独立）
-
-### アーキテクチャ概要
-- **通信方式**: REST API（同期）、Kafka（非同期イベント）
-- **データベース**: PostgreSQL（サービスごとにDB分離）
-- **デプロイ**: Kubernetes（Pod自動スケーリング）
-
-### 品質検証結果
-
-#### Mermaid図検証
-✅ 検証完了 - 構文エラーなし
-または
-⚠️ 2件の構文エラーを自動修正しました:
-- L15: C4モデルのタイトル記法エラー → 修正済み
-- L45: シーケンス図の矢印記法エラー → 修正済み
-
-#### 技術スタックバージョン監査
-✅ すべて最新LTS/安定版を使用
-または
-⚠️ バージョン更新を推奨:
-- Node.js 16.x → 20.x (LTS) - EOL: 2023-09-11（EOL済み）
-- Python 3.9 → 3.11 - EOL 6ヶ月以内
-
-### 次のステップ
-1. 設計書を確認: `docs/michi/{YYYYMMDD-project名}/overview/architecture.md`
-2. 技術スタック更新（必要に応じて）
-3. **テスト計画を作成**: `/michi-multi-repo:plan-tests {project}` でテスト戦略を策定
-4. 各リポジトリで実装を開始:
-   - `/michi:dev` で実装を開始
-   - または直接実装を開始
-```
+詳細なメッセージフォーマットは状況に応じて調整してください。
 
 ## 安全性とフォールバック
 

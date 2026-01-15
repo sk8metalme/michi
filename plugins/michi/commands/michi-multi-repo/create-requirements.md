@@ -118,47 +118,13 @@ Multi-Repoプロジェクト **$1** の要件定義書を生成します。
 
 ## Multi-Repo固有セクション
 
-**テンプレート参照**: 以下のセクションは `templates/multi-repo/spec/requirements.md` のMulti-Repo拡張部分に対応しています。
+**テンプレート参照**: `templates/multi-repo/spec/requirements.md` を基に要件定義書を生成してください。
 
-要件定義書に以下のセクションを必ず含めること：
+テンプレートには以下のMulti-Repo拡張セクションが含まれています：
+- コンポーネント構成（登録リポジトリ一覧、サービス間依存関係図）
+- インターフェース要件（API契約、イベント契約）
 
-```markdown
-## コンポーネント構成
-
-### 登録リポジトリ一覧
-
-| コンポーネント名 | リポジトリURL | ブランチ | 役割 | 技術スタック |
-|-----------|---------------|---------|------|-------------|
-| frontend | https://github.com/org/frontend | main | ユーザーインターフェース | React, TypeScript |
-| backend | https://github.com/org/backend | main | APIサーバー | Node.js, Express |
-
-### コンポーネント間依存関係
-
-\`\`\`mermaid
-graph TB
-    A[Frontend] -->|REST API| B[API Gateway]
-    B -->|HTTP| C[Auth Service]
-    B -->|HTTP| D[User Service]
-    C -->|gRPC| E[Database]
-    D -->|gRPC| E
-\`\`\`
-
-## インターフェース要件
-
-### API契約
-
-**Auth Service → User Service**
-- エンドポイント: `POST /api/v1/auth/verify`
-- プロトコル: HTTP/REST
-- データ形式: JSON
-
-### イベント契約
-
-**User Service → Notification Service**
-- イベント: `user.created`
-- プロトコル: Kafka
-- スキーマ: { userId, email, createdAt }
-```
+詳細な構造とプレースホルダーはテンプレートファイルを参照してください。
 
 ## 重要な制約
 - EARS形式を厳守（When/If/While/Where/The system shall）
@@ -197,25 +163,12 @@ graph TB
 
 **ユーザーへの出力メッセージ形式**:
 
-```markdown
-## 要件定義書生成完了
+生成完了後、以下の情報をユーザーに出力してください：
+- 出力ファイルパス: `docs/michi/{YYYYMMDD-project名}/overview/requirements.md`
+- 含まれるコンポーネント一覧（コンポーネント名と役割の概要）
+- 次のステップ（レビュー実施、設計書生成コマンドの案内）
 
-### 出力ファイル
-`docs/michi/{YYYYMMDD-project名}/overview/requirements.md`
-
-### 含まれるコンポーネント
-- **Frontend**: ユーザーインターフェース（React）
-- **Backend**: APIサーバー（Node.js）
-- **Database**: データ永続化（PostgreSQL）
-
-### 次のステップ
-1. 要件定義書を確認: `docs/michi/{YYYYMMDD-project名}/overview/requirements.md`
-2. **要件定義書のレビュー**:
-   - PRを作成し、ステークホルダーによるレビューを実施
-   - フィードバックを反映して要件定義書を更新
-   - 承認を得る
-3. 要件定義レビューが完了したら、`/michi-multi-repo:create-design {project}` で設計書を生成
-```
+詳細なメッセージフォーマットは状況に応じて調整してください。
 
 ## 安全性とフォールバック
 
