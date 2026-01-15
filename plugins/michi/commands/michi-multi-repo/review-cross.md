@@ -40,15 +40,15 @@ Multi-Repoプロジェクト **$1** の全リポジトリを対象に、クロ�
 
 ### Step 1: コンテキスト読み込み
 
-1. `.michi/config.json` からプロジェクト情報取得
-   - プロジェクト名
-   - 登録リポジトリ一覧
+1. `.michi/multi-repo/pj/$1/project.json` からプロジェクト情報取得
+   - `$1` は `YYYYMMDD-{name}` 形式のプロジェクト名
+   - 登録リポジトリ一覧（`repositories` 配列）
 
 2. 各リポジトリの `localPath` を取得
 
 3. 親プロジェクトの仕様を読み込み
-   - `docs/michi/$1/overview/requirements.md`
-   - `docs/michi/$1/overview/architecture.md`
+   - `docs/michi/$1/spec/requirements.md`
+   - `docs/michi/$1/spec/architecture.md`
 
 ### Step 2: localPath 検証
 
@@ -56,7 +56,7 @@ Multi-Repoプロジェクト **$1** の全リポジトリを対象に、クロ�
 - localPathが設定されているか
 - ディレクトリが存在するか
 - Gitリポジトリか (`.git/`ディレクトリ確認)
-- Michiがセットアップ済みか (`.michi/project.json`確認)
+- Michiがセットアップ済みか (`.michi/pj/`ディレクトリ確認)
 - 仕様ファイルが存在するか
 
 **検証失敗時の対応**:

@@ -22,9 +22,9 @@ Multi-Repoプロジェクト **$1** の技術設計書を生成します。
 ## 実行手順
 
 ### Step 1: コンテキスト読み込み
-1. `.michi/config.json` からプロジェクト情報取得
+1. `.michi/project.json` からプロジェクト情報取得
    - 登録リポジトリ一覧
-2. `docs/michi/$1/overview/requirements.md` から要件読み込み
+2. `docs/michi/YYYYMMDD-$1/spec/requirements.md` から要件読み込み
    - 要件定義書が存在しない場合は、先に `/michi-multi-repo:create-requirements $1` の実行を促す
 3. `.michi/settings/rules/design-principles.md` から設計原則取得（存在する場合）
 4. `.michi/settings/templates/specs/design.md` から構造参照（存在する場合）
@@ -90,7 +90,7 @@ Multi-Repoプロジェクト **$1** の技術設計書を生成します。
    - データ整合性の保証方法
 
 ### Step 4: ファイル保存
-- 出力先: `docs/michi/$1/overview/architecture.md`
+- 出力先: `docs/michi/YYYYMMDD-$1/spec/architecture.md`
 - 既存ファイルがある場合は、上書き確認（`-y` フラグで自動承認）
 
 ### Step 4.5: 品質検証（PROACTIVE）
@@ -133,15 +133,15 @@ stable-version-auditorエージェントを自動実行してください。
 
 **エージェント呼び出し**:
 ```
-Task(subagent_type='stable-version-auditor', prompt='docs/michi/$1/overview/architecture.md に記載された技術スタックのバージョンを監査し、EOLリスクを評価してください')
+Task(subagent_type='stable-version-auditor', prompt='docs/michi/YYYYMMDD-$1/spec/architecture.md に記載された技術スタックのバージョンを監査し、EOLリスクを評価してください')
 ```
 
-### Step 5: メタデータ更新（spec.json）
-- `docs/michi/$1/spec.json` を読み込み
+### Step 5: メタデータ更新（project.json）
+- `docs/michi/$1/project.json` を読み込み
 - phase を `"design-generated"` に更新
 - `approvals.design.generated` を `true` に更新
 - `updated_at` を現在のISO 8601タイムスタンプに更新
-- spec.json を保存
+- project.json を保存
 
 ## Multi-Repo固有セクション
 

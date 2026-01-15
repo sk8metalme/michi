@@ -9,9 +9,7 @@ description: GitHub SSoTとマルチプロジェクト管理のコア原則
 {{DEV_GUIDELINES}}
 
 ## 言語
-生成されるすべてのドキュメントは以下の言語で記述する必要があります: **{{LANG_CODE}}**
-
-{{SPEC_DIR}}/project.json の language フィールドを参照してください。
+生成されるすべてのドキュメントは**日本語**で記述する必要があります。
 
 ## 単一の真実の源（SSoT）
 

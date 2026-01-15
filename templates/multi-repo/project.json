@@ -2,7 +2,6 @@
   "project_name": "{{PROJECT_NAME}}",
   "created_at": "{{CREATED_AT}}",
   "updated_at": "{{CREATED_AT}}",
-  "language": "ja",
   "phase": "initialized",
   "approvals": {
     "requirements": {
@@ -14,5 +13,6 @@
       "approved": false
     }
   },
-  "ready_for_implementation": false
+  "ready_for_implementation": false,
+  "repositories": []
 }

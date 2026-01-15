@@ -20,7 +20,7 @@ argument-hint: <feature-name> [-y]
 このコマンドを実行する前に、以下を確認してください：
 - Phase 3（設計）が完了している
 - `.michi/pj/{feature}/design.md` が存在する
-- `spec.json` で `design.approved: true` になっている
+- `project.json` で `design.approved: true` になっている
 
 ## 実行手順
 
@@ -102,8 +102,8 @@ argument-hint: <feature-name> [-y]
    - `performance-test-spec.md`
    - `security-test-spec.md`
 
-5. **spec.json の更新**
-   `spec.json` のフェーズ情報を更新：
+5. **project.json の更新**
+   `project.json` のフェーズ情報を更新：
 
    ```json
    {
@@ -123,7 +123,7 @@ argument-hint: <feature-name> [-y]
 
 ```
 .michi/pj/{feature}/
-├── spec.json (更新)
+├── project.json (更新)
 ├── requirements.md
 ├── design.md
 ├── test-type-selection.json (NEW)

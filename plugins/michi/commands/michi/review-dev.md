@@ -50,7 +50,7 @@ argument-hint: <feature-name>
 #### 2. コンテキストの読み込み
 
 各検出された機能について:
-- メタデータのために `{{MICHI_DIR}}/pj/<feature>/spec.json` を読み取り
+- メタデータのために `{{MICHI_DIR}}/pj/<feature>/project.json` を読み取り
 - 要件のために `{{MICHI_DIR}}/pj/<feature>/requirements.md` を読み取り
 - 設計構造のために `{{MICHI_DIR}}/pj/<feature>/design.md` を読み取り
 - タスクリストのために `{{MICHI_DIR}}/pj/<feature>/tasks.md` を読み取り
@@ -198,7 +198,7 @@ Phase 6.8: Archive Preparation
 
 ## 出力説明
 
-spec.json で指定された言語で以下の出力を提供:
+project.json で指定された言語で以下の出力を提供:
 
 ### 基本出力
 
@@ -222,8 +222,8 @@ spec.json で指定された言語で以下の出力を提供:
 ### エラーシナリオ
 - **実装が見つからない**: 履歴に `/base:spec-impl` がなく、`[x]` タスクもない場合、"実装が検出されませんでした" と報告
 - **テストコマンド不明**: テストフレームワークが不明確な場合、警告してテスト検証をスキップ（手動検証が必要）
-- **仕様ファイル欠落**: spec.json/requirements.md/design.md が欠落している場合、エラーで停止
-- **言語未定義**: spec.json で言語が指定されていない場合、英語（`en`）をデフォルトとする
+- **仕様ファイル欠落**: project.json/requirements.md/design.md が欠落している場合、エラーで停止
+- **言語未定義**: project.json で言語が指定されていない場合、英語（`en`）をデフォルトとする
 
 ### 次のステップガイダンス
 

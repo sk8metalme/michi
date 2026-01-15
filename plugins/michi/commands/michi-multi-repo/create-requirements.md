@@ -22,7 +22,7 @@ Multi-Repoプロジェクト **$1** の要件定義書を生成します。
 ## 実行手順
 
 ### Step 1: プロジェクト情報の取得
-1. `.michi/config.json` を読み込み、プロジェクト `$1` の情報を取得
+1. `.michi/project.json` を読み込み、プロジェクト `$1` の情報を取得
 2. プロジェクトが登録されていない場合は、`michi multi-repo:init` の実行を促す
 3. 登録されたリポジトリ一覧を確認
 4. リポジトリ数が0の場合は警告を出し、基本構造のみ生成
@@ -86,26 +86,26 @@ Multi-Repoプロジェクト **$1** の要件定義書を生成します。
    - 保守性要件（モニタリング、ログ）
 
 ### Step 4: ファイル保存
-- 出力先: `docs/michi/$1/overview/requirements.md`
+- 出力先: `docs/michi/YYYYMMDD-$1/spec/requirements.md`
 - 既存ファイルがある場合は、上書き確認を実施
 - ファイル保存後、完了メッセージを表示
 
-### Step 5: メタデータ更新（spec.json）
+### Step 5: メタデータ更新（project.json）
 
-**spec.json の役割**:
+**project.json の役割**:
 - マルチリポジトリプロジェクト全体の進行状況を追跡するメタデータファイル
 - 各フェーズ（要件定義→設計→テスト計画→タスク分割→実装）の完了状態を管理
 - 承認ワークフローの状態を記録（generated/approved）
 - クロスリポジトリ整合性確認のための基準情報として利用
 
 **更新手順**:
-1. `docs/michi/$1/spec.json` を読み込み
+1. `docs/michi/$1/project.json` を読み込み
 2. `phase` を `"requirements-generated"` に更新（現在のフェーズを記録）
 3. `approvals.requirements.generated` を `true` に更新（要件定義書生成完了を記録）
 4. `updated_at` を現在のISO 8601タイムスタンプに更新（最終更新日時を記録）
-5. spec.json を保存
+5. project.json を保存
 
-**注意**: `spec.json` は `docs/michi/$1/` 直下に配置され、`overview/` ディレクトリ内のドキュメントとは別に管理されます。
+**注意**: `project.json` は `docs/michi/$1/` 直下に配置され、`overview/` ディレクトリ内のドキュメントとは別に管理されます。
 
 ## Multi-Repo固有セクション
 

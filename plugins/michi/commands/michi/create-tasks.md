@@ -33,12 +33,12 @@ argument-hint: <feature-name> [-y] [--sequential]
 #### ステップ 1: コンテキストの読み込み
 
 **必要なすべてのコンテキストを読み取り**:
-- `{{MICHI_DIR}}/pj/$1/spec.json`, `requirements.md`, `design.md`
+- `{{MICHI_DIR}}/pj/$1/project.json`, `requirements.md`, `design.md`
 - `{{MICHI_DIR}}/pj/$1/tasks.md`（存在する場合、マージモード用）
 - 完全なプロジェクトメモリのために**`{{REPO_ROOT_DIR}}/docs/master/` ディレクトリ全体**
 
 **承認の検証**:
-- `-y` フラグが提供された場合（$2 == "-y"）: spec.json で要件と設計を自動承認
+- `-y` フラグが提供された場合（$2 == "-y"）: project.json で要件と設計を自動承認
 - それ以外: 両方が承認されていることを確認（そうでない場合は停止、安全性とフォールバックを参照）
 - `--sequential` の有無に基づいてシーケンシャルモードを決定
 
@@ -50,7 +50,7 @@ argument-hint: <feature-name> [-y] [--sequential]
 - フォーマットのために `{{MICHI_DIR}}/settings/templates/specs/tasks.md` を読み取り（`(P)` マーカーをサポート）
 
 **すべてのルールに従ってタスクリストを生成**:
-- spec.json で指定された言語を使用
+- project.json で指定された言語を使用
 - すべての要件をタスクにマッピング
 - 要件カバレッジを文書化する際、数値要件IDのみをリスト（カンマ区切り）、説明サフィックス、括弧、翻訳、または自由形式ラベルなし
 - すべての設計コンポーネントが含まれていることを確認
@@ -64,7 +64,7 @@ argument-hint: <feature-name> [-y] [--sequential]
 
 **書き込みと更新**:
 - `{{MICHI_DIR}}/pj/$1/tasks.md` を作成/更新
-- spec.json メタデータを更新:
+- project.json メタデータを更新:
   - `phase: "tasks-generated"` を設定
   - `approvals.tasks.generated: true, approved: false` を設定
   - `approvals.requirements.approved: true` を設定
@@ -188,7 +188,7 @@ C) 後で設定する
 
 ## 出力説明
 
-spec.json で指定された言語で簡潔なサマリーを提供:
+project.json で指定された言語で簡潔なサマリーを提供:
 
 ### 基本出力
 

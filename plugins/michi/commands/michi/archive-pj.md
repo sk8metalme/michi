@@ -33,7 +33,7 @@ argument-hint: <feature-name> [--reason <reason>]
 3. **アーカイブディレクトリの作成**: `{{MICHI_DIR}}/archive-pj/` が存在しない場合は作成
 4. **タイムスタンプの生成**: ISO 8601形式（YYYY-MM-DDTHH:MM:SSZ）で現在のタイムスタンプを取得
 5. **仕様の移動**: `{{MICHI_DIR}}/pj/$1/` → `{{MICHI_DIR}}/archive-pj/$1-{timestamp}/`
-6. **メタデータの更新**: 移動した spec.json にアーカイブタイムスタンプを記録
+6. **メタデータの更新**: 移動した project.json にアーカイブタイムスタンプを記録
 
 ### Michi拡張機能
 
@@ -44,7 +44,7 @@ argument-hint: <feature-name> [--reason <reason>]
 
 ## 重要な制約
 - **タスク完了チェック**: 仕様に未完了タスク（tasks.md の `- [ ]`）がある場合、ユーザーに警告
-- **すべてのファイルを保持**: すべての成果物を含む全ディレクトリを移動（spec.json, requirements.md, design.md, tasks.md, research.md など）
+- **すべてのファイルを保持**: すべての成果物を含む全ディレクトリを移動（project.json, requirements.md, design.md, tasks.md, research.md など）
 - **競合処理**: 同じ名前のアーカイブ済み仕様が存在する場合、競合を避けるために数字のサフィックスを追加
 - **削除なし**: アーカイブは移動操作であり、削除ではない - すべてのデータが保持される
 </instructions>
@@ -53,11 +53,11 @@ argument-hint: <feature-name> [--reason <reason>]
 - **Glob** を使用して仕様ディレクトリが存在するかをチェック
 - **Read** を使用して tasks.md の未完了タスクをチェック
 - **Bash** を使用してアーカイブディレクトリを作成し、仕様ディレクトリを移動
-- **Write** または **Edit** を使用してアーカイブメタデータで spec.json を更新
+- **Write** または **Edit** を使用してアーカイブメタデータで project.json を更新
 
 ## 出力説明
 
-spec.json で指定された言語で以下の出力を提供:
+project.json で指定された言語で以下の出力を提供:
 
 ### 基本出力
 
@@ -113,7 +113,7 @@ spec.json で指定された言語で以下の出力を提供:
 アーカイブされた仕様を表示するには:
 ```bash
 ls {{MICHI_DIR}}/archive-pj/
-cat {{MICHI_DIR}}/archive-pj/{feature-name}-{timestamp}/spec.json
+cat {{MICHI_DIR}}/archive-pj/{feature-name}-{timestamp}/project.json
 ```
 
 ### アーカイブされた仕様の復元

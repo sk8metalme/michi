@@ -77,7 +77,7 @@ MichiはClaude Code向けの**Spec-Driven Development**フレームワークで�
 
 ## バージョン
 
-**v1.0.0** - 初期バージョン
+**v1.2.0** - 初期バージョン
 
 ---
 

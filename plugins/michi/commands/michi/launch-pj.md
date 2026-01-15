@@ -42,12 +42,11 @@ argument-hint: <project-description>
 3. **ディレクトリ作成**: `{{MICHI_DIR}}/pj/YYYYMMDD-{pj-name}/`
 
 4. **初期ファイルを生成**:
-   - 以下の構造で `spec.json` を作成:
+   - 以下の構造で `project.json` を作成:
      ```json
      {
        "name": "YYYYMMDD-{pj-name}",
        "description": "$ARGUMENTS",
-       "language": "ja",
        "created_at": "{ISO 8601 timestamp}",
        "updated_at": "{ISO 8601 timestamp}",
        "phase": "initialized",
@@ -86,12 +85,12 @@ argument-hint: <project-description>
 ## ツールガイダンス
 - **Bash** を使用してYYYYMMDD形式の現在日付を取得し、プロジェクト名を生成
 - **Glob** を使用して既存のプロジェクトディレクトリ（`{{MICHI_DIR}}/pj/`）をチェックし、名前の一意性を確認
-- **Write** を使用して spec.json と requirements.md をインラインで生成・作成
+- **Write** を使用して project.json と requirements.md をインラインで生成・作成
 - ファイル書き込み操作の前に検証を実行
 
 ## 出力説明
 
-`spec.json` で指定された言語で以下の構造で出力を提供します:
+`project.json` で指定された言語で以下の構造で出力を提供します:
 
 ### 基本出力
 
@@ -127,7 +126,7 @@ echo ""
 - Markdownの見出しを使用（##, ###）
 - コマンドをコードブロックで囲む
 - 全体の出力を簡潔に保つ（300語以下）
-- `spec.json.language` に従って明確で専門的な言語を使用
+- 日本語で明確で専門的な言語を使用
 
 ## 安全性とフォールバック
 

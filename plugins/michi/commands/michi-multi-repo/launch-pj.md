@@ -11,8 +11,7 @@ argument-hint: "<project-description>"
 - **Success Criteria**:
   - プロジェクト説明からfeature-name形式のプロジェクト名を生成
   - ディレクトリ構造を作成
-  - spec.jsonでメタデータ管理を開始
-  - `.michi/config.json` のmultiRepoProjectsに登録
+  - project.jsonでメタデータ管理を開始（repositories配列を含む）
   - 次のステップ（リポジトリ登録、要件定義）への明確な誘導
 </background_information>
 
@@ -40,66 +39,49 @@ argument-hint: "<project-description>"
    - 日本語説明の場合は英語に変換
 
 2. **一意性チェック**:
-   - `.michi/config.json` の `multiRepoProjects` を確認
-   - 重複する場合は数値サフィックスを追加（例: `my-project-2`）
+   - `.michi/multi-repo/pj/` 配下の既存ディレクトリを確認
+   - 重複する場合は数値サフィックスを追加（例: `20260115-my-project-2`）
 
 ### Step 3: ディレクトリ構造の作成
 
 以下のディレクトリとファイルを作成:
 
 ```
-docs/michi/{project-name}/
-├── spec.json                    # メタデータファイル（NEW）
-├── overview/
+.michi/multi-repo/pj/YYYYMMDD-{name}/
+└── project.json                 # メタデータファイル
+
+docs/michi/YYYYMMDD-{name}/
+├── spec/
 │   ├── requirements.md          # 要件定義書（プロジェクト説明を含む）
 │   ├── architecture.md          # アーキテクチャ設計書（テンプレート）
 │   └── sequence.md              # シーケンス図（テンプレート）
-├── tests/
-│   ├── scripts/                 # テストスクリプト配置用
-│   ├── results/                 # テスト結果保存用
-│   ├── unit/
-│   ├── integration/
-│   ├── e2e/
-│   └── performance/
-└── docs/
-    ├── ci-status.md             # CI結果サマリー（テンプレート）
-    └── release-notes.md         # リリースノート（テンプレート）
+└── test-plan/
+    ├── strategy.md              # テスト戦略
+    ├── unit/
+    ├── integration/
+    ├── e2e/
+    └── performance/
 ```
 
 ### Step 4: メタデータ初期化
 
-1. **spec.jsonの生成**:
-   - テンプレート: `templates/multi-repo/spec.json`
+1. **project.jsonの生成**:
+   - テンプレート: `templates/multi-repo/project.json`
    - プレースホルダー置換:
-     - `{{PROJECT_NAME}}` → 生成されたプロジェクト名
+     - `{{PROJECT_NAME}}` → `YYYYMMDD-{name}` 形式のプロジェクト名
      - `{{CREATED_AT}}` → 現在のISO 8601タイムスタンプ
-   - 出力先: `docs/michi/{project-name}/spec.json`
+   - 出力先: `.michi/multi-repo/pj/YYYYMMDD-{name}/project.json`
 
 2. **requirements.mdの初期化**:
-   - テンプレート: `templates/multi-repo/overview/requirements.md`
+   - テンプレート: `templates/multi-repo/spec/requirements.md`
    - 「概要」セクションにプロジェクト説明を記載
    - プレースホルダー置換
-   - 出力先: `docs/michi/{project-name}/overview/requirements.md`
+   - 出力先: `docs/michi/YYYYMMDD-{name}/spec/requirements.md`
 
 3. **その他テンプレートファイルのレンダリング**:
-   - `templates/multi-repo/overview/architecture.md` → `docs/michi/{project-name}/overview/architecture.md`
-   - `templates/multi-repo/overview/sequence.md` → `docs/michi/{project-name}/overview/sequence.md`
-   - `templates/multi-repo/tests/strategy.md` → `docs/michi/{project-name}/tests/strategy.md`
-   - `templates/multi-repo/docs/ci-status.md` → `docs/michi/{project-name}/docs/ci-status.md`
-   - `templates/multi-repo/docs/release-notes.md` → `docs/michi/{project-name}/docs/release-notes.md`
-
-### Step 5: .michi/config.json の更新
-
-1. **config.jsonの読み込み**: `.michi/config.json` を読み込む
-2. **multiRepoProjects に追加**:
-   ```json
-   {
-     "name": "{project-name}",
-     "createdAt": "{ISO 8601 timestamp}",
-     "repositories": []
-   }
-   ```
-3. **保存**: `.michi/config.json` を保存
+   - `templates/multi-repo/spec/architecture.md` → `docs/michi/YYYYMMDD-{name}/spec/architecture.md`
+   - `templates/multi-repo/spec/sequence.md` → `docs/michi/YYYYMMDD-{name}/spec/sequence.md`
+   - `templates/multi-repo/test-plan/strategy.md` → `docs/michi/YYYYMMDD-{name}/test-plan/strategy.md`
 
 ## 重要な制約
 - プロジェクト名は1-100文字、パストラバーサル文字（`/`, `\`, `..`）、制御文字は禁止
@@ -109,10 +91,9 @@ docs/michi/{project-name}/
 </instructions>
 
 ## ツールガイダンス
-- **Glob**: `.michi/config.json` 存在確認、プロジェクト名の一意性チェック
-- **Read**: テンプレートファイル読み込み、config.json 読み込み
-- **Write**: spec.json、requirements.md、config.json、その他テンプレート出力
-- **Edit**: config.json の multiRepoProjects 配列に追加（必要に応じて）
+- **Glob**: `.michi/multi-repo/pj/` 配下の既存ディレクトリ確認、プロジェクト名の一意性チェック
+- **Read**: テンプレートファイル読み込み
+- **Write**: project.json、requirements.md、その他テンプレート出力
 
 ## 出力説明
 日本語で以下の情報を出力してください:
@@ -135,10 +116,10 @@ docs/michi/{project-name}/
 {プロジェクト説明の要約}
 
 ### 作成されたファイル
-- `docs/michi/{project}/spec.json` - メタデータ（phase: initialized）
-- `docs/michi/{project}/overview/requirements.md` - 要件定義書（初期化済み）
-- `docs/michi/{project}/overview/architecture.md` - 設計書（テンプレート）
-- `.michi/config.json` - multiRepoProjects に登録
+- `.michi/multi-repo/pj/YYYYMMDD-{name}/project.json` - メタデータ（phase: initialized）
+- `docs/michi/YYYYMMDD-{name}/spec/requirements.md` - 要件定義書（初期化済み）
+- `docs/michi/YYYYMMDD-{name}/spec/architecture.md` - 設計書（テンプレート）
+- `docs/michi/YYYYMMDD-{name}/test-plan/strategy.md` - テスト戦略（テンプレート）
 
 ### 次のステップ
 
@@ -176,17 +157,8 @@ docs/michi/{project-name}/
 
 - **プロジェクト名重複**:
   ```
-  警告: プロジェクト名 '{project-name}' は既に存在します。
-  自動的に '{project-name-2}' として作成しました。
-  ```
-
-- **config.json が存在しない**:
-  ```
-  エラー: .michi/config.json が見つかりません。
-
-  Michiプロジェクトのルートディレクトリで実行してください。
-  または、次のコマンドで初期設定を行ってください:
-  michi init
+  警告: プロジェクト名 'YYYYMMDD-{project-name}' は既に存在します。
+  自動的に 'YYYYMMDD-{project-name-2}' として作成しました。
   ```
 
 ### フォールバック戦略

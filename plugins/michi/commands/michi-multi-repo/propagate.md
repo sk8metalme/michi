@@ -37,18 +37,19 @@ Multi-Repoプロジェクト **$1** の全リポジトリに対して、仕様�
 
 ### Step 1: コンテキスト読み込み
 
-1. `.michi/config.json` からプロジェクト情報取得
+1. `.michi/multi-repo/pj/$1/project.json` からプロジェクト情報取得
+   - `$1` は `YYYYMMDD-{name}` 形式のプロジェクト名
    ```bash
-   cat .michi/config.json | grep -A 20 '"name": "$1"'
+   cat .michi/multi-repo/pj/$1/project.json
    ```
 
-2. 登録リポジトリの一覧を取得
+2. 登録リポジトリの一覧を取得（`repositories` 配列）
 
 3. 各リポジトリの `localPath` を取得
 
 4. 親プロジェクトの仕様ファイルを確認
-   - `docs/michi/$1/overview/requirements.md` (OPERATION=design以降で必要)
-   - `docs/michi/$1/overview/architecture.md` (OPERATION=design以降で必要)
+   - `docs/michi/$1/spec/requirements.md` (OPERATION=design以降で必要)
+   - `docs/michi/$1/spec/architecture.md` (OPERATION=design以降で必要)
 
 ### Step 2: localPath 検証
 
@@ -57,7 +58,7 @@ Multi-Repoプロジェクト **$1** の全リポジトリに対して、仕様�
 - ✅ localPathが設定されているか
 - ✅ ディレクトリが存在するか
 - ✅ Gitリポジトリか (`.git/`ディレクトリ確認)
-- ✅ Michiがセットアップ済みか (`.michi/project.json`確認)
+- ✅ Michiがセットアップ済みか (`.michi/pj/`ディレクトリ確認)
 - ⚠️ 設定されたブランチと現在のブランチが一致するか
 - ⚠️ 未コミット変更がないか
 
@@ -216,7 +217,7 @@ C) キャンセル
 
 ## ツールガイダンス
 - **Task**: repo-spec-executorサブエージェント起動に使用
-- **Read**: config.json、親プロジェクト仕様の読み込み
+- **Read**: project.json、親プロジェクト仕様の読み込み
 - **Write**: チェックポイント保存
 - **Bash**: localPath検証、Git操作
 

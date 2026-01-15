@@ -35,7 +35,7 @@ Claude Code内で以下を実行：
 
 ## 利用可能なコマンド
 
-### Michiコマンド (14個)
+### Michiコマンド (13個)
 
 | コマンド | 説明 |
 |---------|------|
@@ -50,7 +50,7 @@ Claude Code内で以下を実行：
 | `/michi:review-dev` | 実装検証 + 品質ゲート |
 | `/michi:analyze-gap` | Gap分析 |
 | `/michi:plan-tests` | テスト計画（Phase 4統合実行） |
-| `削除済み` | PR関連の問題解決支援 |
+| `/michi:update-master-docs` | マスタードキュメント更新 |
 | `/michi:switch-pj` | プロジェクト切り替え |
 
 ### マルチリポジトリコマンド (6個)
@@ -64,7 +64,7 @@ Claude Code内で以下を実行：
 | `/michi-multi-repo:propagate` | 各リポジトリへの仕様展開（並列実行） |
 | `/michi-multi-repo:dev-all` | 全リポジトリ実装（並列実行） |
 
-## ルール (6個)
+## ルール (5個)
 
 | ルール | 説明 |
 |-------|------|

@@ -66,9 +66,10 @@ Multi-Repoプロジェクト **$1** の全リポジトリで `/michi:dev` を並
 
 ### Step 2: コンテキスト読み込み
 
-1. `.michi/config.json` からプロジェクト情報取得
+1. `.michi/multi-repo/pj/$1/project.json` からプロジェクト情報取得
+   - `$1` は `YYYYMMDD-{name}` 形式のプロジェクト名
 
-2. 登録リポジトリの一覧を取得
+2. 登録リポジトリの一覧を取得（`repositories` 配列）
 
 3. 各リポジトリの `localPath` を取得
 
@@ -82,7 +83,7 @@ Multi-Repoプロジェクト **$1** の全リポジトリで `/michi:dev` を並
 - ✅ localPathが設定されているか
 - ✅ ディレクトリが存在するか
 - ✅ Gitリポジトリか (`.git/`ディレクトリ確認)
-- ✅ Michiがセットアップ済みか (`.michi/project.json`確認)
+- ✅ Michiがセットアップ済みか (`.michi/pj/`ディレクトリ確認)
 - ⚠️ 設定されたブランチと現在のブランチが一致するか
 - ⚠️ 未コミット変更がないか
 
@@ -234,7 +235,7 @@ repo-spec-executorサブエージェントを使用して、以下のリポジ�
 
 ## ツールガイダンス
 - **Task**: repo-spec-executorサブエージェント起動に使用
-- **Read**: config.json、レビューレポート、タスクファイル読み込み
+- **Read**: project.json、レビューレポート、タスクファイル読み込み
 - **Write**: チェックポイント保存
 - **Bash**: Git操作、カバレッジ確認
 

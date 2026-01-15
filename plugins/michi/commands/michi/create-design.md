@@ -34,14 +34,14 @@ argument-hint: <feature-name> [-y]
 #### ステップ 1: コンテキストの読み込み
 
 **必要なすべてのコンテキストを読み取り**:
-- `{{MICHI_DIR}}/pj/$1/spec.json`, `requirements.md`, `design.md`（存在する場合）
+- `{{MICHI_DIR}}/pj/$1/project.json`, `requirements.md`, `design.md`（存在する場合）
 - 完全なプロジェクトメモリのために**`{{REPO_ROOT_DIR}}/docs/master/` ディレクトリ全体**
 - ドキュメント構造のために `{{MICHI_DIR}}/settings/templates/specs/design.md`
 - 設計原則のために `{{MICHI_DIR}}/settings/rules/design-principles.md`
 - 発見ログ構造のために `{{MICHI_DIR}}/settings/templates/specs/research.md`
 
 **要件承認の検証**:
-- `-y` フラグが提供された場合（$2 == "-y"）: spec.json で要件を自動承認
+- `-y` フラグが提供された場合（$2 == "-y"）: project.json で要件を自動承認
 - それ以外: 承認ステータスを確認（未承認の場合は停止、安全性とフォールバックを参照）
 
 #### ステップ 2: 発見と分析
@@ -86,7 +86,7 @@ argument-hint: <feature-name> [-y]
 - 発見スコープと主要な発見をサマリーセクションに要約
 - ソースと影響を含む調査ログトピックに調査を記録
 - テンプレートセクションを使用してアーキテクチャパターン評価、設計決定、リスクを文書化
-- `research.md` を書き込みまたは更新する際は、spec.jsonで指定された言語を使用
+- `research.md` を書き込みまたは更新する際は、project.jsonで指定された言語を使用
 
 #### ステップ 3: 設計ドキュメントの生成
 
@@ -99,10 +99,10 @@ argument-hint: <feature-name> [-y]
 - **すべての発見結果を統合**: 調査した情報（API、パターン、技術）をコンポーネント定義、アーキテクチャ決定、統合ポイント全体で使用
 - ステップ1で既存の design.md が見つかった場合、参照コンテキストとして使用（マージモード）
 - 設計ルールを適用: 型安全性、視覚的コミュニケーション、フォーマルトーン
-- spec.json で指定された言語を使用
+- project.json で指定された言語を使用
 - セクションが更新された見出し（「Architecture Pattern & Boundary Map」、「Technology Stack & Alignment」、「Components & Interface Contracts」）を反映し、`research.md` からのサポート詳細を参照することを確認
 
-3. **spec.json でメタデータを更新**:
+3. **project.json でメタデータを更新**:
 - `phase: "design-generated"` を設定
 - `approvals.design.generated: true, approved: false` を設定
 - `approvals.requirements.approved: true` を設定
@@ -338,7 +338,7 @@ Phase 4 完了後、以下のステップに進んでください:
 
 **コマンド実行出力**（design.md コンテンツとは別）:
 
-spec.json で指定された言語で簡潔なサマリーを提供:
+project.json で指定された言語で簡潔なサマリーを提供:
 
 ### 基本出力
 
