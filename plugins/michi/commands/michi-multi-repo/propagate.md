@@ -4,7 +4,7 @@ allowed-tools: Task, Bash, Read, Write, Glob, Grep, AskUserQuestion
 argument-hint: <project-name> [--operation init|requirements|design|all]
 ---
 
-# Multi-Repo Spec Propagation
+# Multi-Repo 仕様展開
 
 <background_information>
 - **Mission**: Multi-Repoプロジェクトの仕様を各リポジトリに展開
@@ -14,8 +14,23 @@ argument-hint: <project-name> [--operation init|requirements|design|all]
   - エラーハンドリングとチェックポイント保存
 </background_information>
 
+## パス解釈
+
+このコマンドでは、以下のパスが使用されます：
+
+- **親プロジェクトパス**: Multi-Repoプロジェクトのルートディレクトリ
+  - `.michi/multi-repo/pj/$1/project.json` - プロジェクトメタデータ（親プロジェクト内）
+  - `docs/michi/$1/overview/requirements.md` - 親プロジェクトの要件定義書
+  - `docs/michi/$1/overview/architecture.md` - 親プロジェクトの設計書
+
+- **子リポジトリパス**: 各リポジトリのlocalPathで指定されたディレクトリ
+  - `{localPath}/.michi/pj/` - 各リポジトリのMichiメタデータ
+  - `{localPath}/docs/michi/` - 各リポジトリの仕様書
+
+**重要**: サブエージェントは各リポジトリの`localPath`で作業し、親プロジェクトの仕様（`docs/michi/$1/overview/`）を参照して、リポジトリ固有の仕様を生成します。
+
 <instructions>
-## Core Task
+## コアタスク
 Multi-Repoプロジェクト **$1** の全リポジトリに対して、仕様コマンドを並行実行します。
 
 ## 引数解析
@@ -33,16 +48,17 @@ Multi-Repoプロジェクト **$1** の全リポジトリに対して、仕様�
   - `design`: /michi:create-design
   - `all`: /michi:launch-pj → /michi:create-requirements → /michi:create-design を順次実行
 
-## Execution Steps
+## 実行手順
 
 ### Step 1: コンテキスト読み込み
 
-1. `.michi/config.json` からプロジェクト情報取得
+1. `.michi/multi-repo/pj/$1/project.json` からプロジェクト情報取得
+   - `$1` は `YYYYMMDD-{name}` 形式のプロジェクト名
    ```bash
-   cat .michi/config.json | grep -A 20 '"name": "$1"'
+   cat .michi/multi-repo/pj/$1/project.json
    ```
 
-2. 登録リポジトリの一覧を取得
+2. 登録リポジトリの一覧を取得（`repositories` 配列）
 
 3. 各リポジトリの `localPath` を取得
 
@@ -57,7 +73,7 @@ Multi-Repoプロジェクト **$1** の全リポジトリに対して、仕様�
 - ✅ localPathが設定されているか
 - ✅ ディレクトリが存在するか
 - ✅ Gitリポジトリか (`.git/`ディレクトリ確認)
-- ✅ Michiがセットアップ済みか (`.michi/project.json`確認)
+- ✅ Michiがセットアップ済みか (`.michi/pj/`ディレクトリ確認)
 - ⚠️ 設定されたブランチと現在のブランチが一致するか
 - ⚠️ 未コミット変更がないか
 
@@ -206,7 +222,7 @@ C) キャンセル
    （失敗したリポジトリのみ処理されます）
 ```
 
-## Important Constraints
+## 重要な制約
 - 並行実行は最大3リポジトリ
 - 各リポジトリは独立して処理（依存関係なし）
 - localPath未設定のリポジトリはスキップ
@@ -214,13 +230,13 @@ C) キャンセル
 
 </instructions>
 
-## Tool Guidance
+## ツールガイダンス
 - **Task**: repo-spec-executorサブエージェント起動に使用
-- **Read**: config.json、親プロジェクト仕様の読み込み
+- **Read**: project.json、親プロジェクト仕様の読み込み
 - **Write**: チェックポイント保存
 - **Bash**: localPath検証、Git操作
 
-## Output Description
+## 出力説明
 
 日本語で以下の情報を出力してください:
 
@@ -229,16 +245,16 @@ C) キャンセル
 3. **各リポジトリの詳細結果**: 生成されたファイル、エラー内容
 4. **次のアクション**: 成功時/失敗時の推奨ステップ
 
-## Safety & Fallback
+## 安全性とフォールバック
 
-### Error Scenarios
+### エラーシナリオ
 
 - **プロジェクト未登録**:
   ```
   エラー: プロジェクト '$1' が見つかりません。
 
   次のコマンドでプロジェクトを初期化してください：
-  michi multi-repo:init $1 --jira {JIRA_KEY} --confluence-space {SPACE}
+  michi multi-repo:init $1
   ```
 
 - **リポジトリ未登録**:
@@ -277,7 +293,7 @@ C) キャンセル
   /michi-multi-repo:create-design $1
   ```
 
-### Fallback Strategy
+### フォールバック戦略
 - localPath未設定: 該当リポジトリをスキップし、他のリポジトリで処理続行
 - Michi未セットアップ: 該当リポジトリをスキップし、他のリポジトリで処理続行
 - サブエージェント失敗: チェックポイント保存し、リトライ可能にする

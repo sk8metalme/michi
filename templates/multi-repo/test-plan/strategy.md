@@ -3,8 +3,6 @@
 ## プロジェクト情報
 
 - **プロジェクト名**: {{PROJECT_NAME}}
-- **JIRAキー**: {{JIRA_KEY}}
-- **Confluenceスペース**: {{CONFLUENCE_SPACE}}
 - **作成日時**: {{CREATED_AT}}
 
 ## テスト戦略概要

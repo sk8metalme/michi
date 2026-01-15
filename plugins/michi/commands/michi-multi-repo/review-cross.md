@@ -4,7 +4,7 @@ allowed-tools: Task, Bash, Read, Write, Edit, Glob, Grep
 argument-hint: <project-name> [--focus api|data|event|deps|test|all]
 ---
 
-# Multi-Repo Cross-Repository Review
+# Multi-Repo クロスリポジトリレビュー
 
 <background_information>
 - **Mission**: 複数リポジトリにまたがる仕様の整合性を検証
@@ -15,8 +15,23 @@ argument-hint: <project-name> [--focus api|data|event|deps|test|all]
   - 修正が必要な箇所を明確に報告
 </background_information>
 
+## パス解釈
+
+このコマンドでは、以下のパスを読み取ります：
+
+- **親プロジェクトパス**: Multi-Repoプロジェクトのルートディレクトリ
+  - `.michi/multi-repo/pj/$1/project.json` - プロジェクトメタデータ（親プロジェクト内）
+  - `docs/michi/$1/overview/requirements.md` - 親プロジェクトの要件定義書
+  - `docs/michi/$1/overview/architecture.md` - 親プロジェクトの設計書
+
+- **子リポジトリパス**: 各リポジトリのlocalPathで指定されたディレクトリ
+  - `{localPath}/.michi/pj/` - 各リポジトリのMichiメタデータ
+  - `{localPath}/docs/michi/` - 各リポジトリの仕様書（requirements.md、architecture.md等）
+
+**重要**: このコマンドは読み取り専用で、親プロジェクトと全子リポジトリの仕様を比較して整合性を検証します。
+
 <instructions>
-## Core Task
+## コアタスク
 Multi-Repoプロジェクト **$1** の全リポジトリを対象に、クロスリポジトリレビューを実行します。
 
 ## 引数解析
@@ -36,13 +51,13 @@ Multi-Repoプロジェクト **$1** の全リポジトリを対象に、クロ�
   - `test`: テスト仕様整合性のみ
   - `all`: 全観点（デフォルト）
 
-## Execution Steps
+## 実行手順
 
 ### Step 1: コンテキスト読み込み
 
-1. `.michi/config.json` からプロジェクト情報取得
-   - プロジェクト名
-   - 登録リポジトリ一覧
+1. `.michi/multi-repo/pj/$1/project.json` からプロジェクト情報取得
+   - `$1` は `YYYYMMDD-{name}` 形式のプロジェクト名
+   - 登録リポジトリ一覧（`repositories` 配列）
 
 2. 各リポジトリの `localPath` を取得
 
@@ -56,7 +71,7 @@ Multi-Repoプロジェクト **$1** の全リポジトリを対象に、クロ�
 - localPathが設定されているか
 - ディレクトリが存在するか
 - Gitリポジトリか (`.git/`ディレクトリ確認)
-- Michiがセットアップ済みか (`.michi/project.json`確認)
+- Michiがセットアップ済みか (`.michi/pj/`ディレクトリ確認)
 - 仕様ファイルが存在するか
 
 **検証失敗時の対応**:
@@ -190,20 +205,20 @@ BLOCK問題が検出されました。修正が必須です。
 **注意**: BLOCK問題を未解決のまま実装を開始すると、サービス間通信が失敗する可能性があります。
 ```
 
-## Important Constraints
+## 重要な制約
 - 読み取り操作のみ（各リポジトリへの書き込みは行わない）
 - localPath未設定のリポジトリはスキップ（警告を出力）
 - 大規模リポジトリの場合は主要ファイルのみ分析
 
 </instructions>
 
-## Tool Guidance
+## ツールガイダンス
 - **Task**: cross-repo-reviewerサブエージェント起動に使用
 - **Read**: プロジェクト仕様、各リポジトリ仕様の読み込み
 - **Write**: レビューレポートの出力
 - **Glob/Grep**: 仕様ファイルの検索
 
-## Output Description
+## 出力説明
 
 日本語で以下の情報を出力してください:
 
@@ -212,9 +227,9 @@ BLOCK問題が検出されました。修正が必須です。
 3. **品質ゲート判定結果**: 合格/不合格と理由
 4. **次のアクション**: 修正が必要な場合の具体的な手順
 
-## Safety & Fallback
+## 安全性とフォールバック
 
-### Error Scenarios
+### エラーシナリオ
 
 - **プロジェクト未登録**:
   ```
@@ -254,7 +269,7 @@ BLOCK問題が検出されました。修正が必須です。
   /michi-multi-repo:propagate $1
   ```
 
-### Fallback Strategy
+### フォールバック戦略
 - localPath未設定: 該当リポジトリをスキップし、他のリポジトリでレビュー続行
 - Michi未セットアップ: 該当リポジトリをスキップし、他のリポジトリでレビュー続行
 - 仕様ファイル不存在: 警告を出力し、利用可能な情報でレビュー

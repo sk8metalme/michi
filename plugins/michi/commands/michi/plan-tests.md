@@ -1,46 +1,46 @@
 ---
 name: /michi:plan-tests
-description: Integrated test planning workflow for Phase 4 (Test type selection and test specification creation)
+description: Phase 4統合テスト計画ワークフロー（テストタイプ選択とテスト仕様書作成）
 allowed-tools: Bash, Glob, Grep, LS, Read, Write, Edit, MultiEdit, Update, AskUserQuestion
 argument-hint: <feature-name> [-y]
 ---
 
-# Michi: Test Planning (Phase 4)
+# Michi: テスト計画（Phase 4）
 
-## Development Guidelines
+## 開発ガイドライン
 
 {{DEV_GUIDELINES}}
 
-## Overview
+## 概要
 
-This command integrates Phase 4.1 (Test Type Selection) and Phase 4.2 (Test Specification Creation) into a single, guided workflow. The AI will help you select appropriate test types based on your design document and create comprehensive test specifications.
+このコマンドは、Phase 4.1（テストタイプ選択）とPhase 4.2（テスト仕様書作成）を単一のガイド付きワークフローに統合します。AIが設計ドキュメントに基づいて適切なテストタイプの選択と包括的なテスト仕様書の作成を支援します。
 
-## Prerequisites
+## 前提条件
 
-Before running this command, ensure:
-- Phase 3 (Design) has been completed
-- `.michi/specs/{feature}/design.md` exists
-- `spec.json` shows `design.approved: true`
+このコマンドを実行する前に、以下を確認してください：
+- Phase 3（設計）が完了している
+- `.michi/pj/{feature}/design.md` が存在する
+- `project.json` で `design.approved: true` になっている
 
-## Workflow
+## 実行手順
 
-### Phase 4.1: Test Type Selection
+### Phase 4.1: テストタイプの選択
 
-1. **Read Design Document**
-   - Load `.michi/specs/{feature}/design.md`
-   - Extract Testing Strategy section
-   - Analyze project requirements to determine appropriate test types
+1. **設計ドキュメントの読み込み**
+   - `.michi/pj/{feature}/design.md` を読み込む
+   - Testing Strategy セクションを抽出
+   - プロジェクト要件を分析して適切なテストタイプを決定
 
-2. **Recommend Test Types**
-   Based on the design analysis, recommend appropriate test types:
-   - **Unit Test** (単体テスト): Required for all features with business logic
-   - **Integration Test** (統合テスト): Required when multiple components interact
-   - **E2E Test**: Required for user-facing features
-   - **Performance Test** (パフォーマンステスト): Required for APIs or high-load features
-   - **Security Test** (セキュリティテスト): Required for authentication, authorization, or data handling features
+2. **テストタイプの推奨**
+   設計分析に基づいて、適切なテストタイプを推奨：
+   - **Unit Test** (単体テスト): ビジネスロジックを持つすべての機能に必須
+   - **Integration Test** (統合テスト): 複数のコンポーネントが相互作用する場合に必須
+   - **E2E Test**: ユーザー向け機能に必須
+   - **Performance Test** (パフォーマンステスト): APIまたは高負荷機能に必須
+   - **Security Test** (セキュリティテスト): 認証、認可、データ処理機能に必須
 
-3. **User Selection**
-   Use `AskUserQuestion` to let the user select which test types to implement:
+3. **ユーザー選択**
+   `AskUserQuestion` を使用して、実装するテストタイプをユーザーに選択させる：
 
    ```markdown
    Question: "どのテストタイプを実装しますか？（複数選択可）"
@@ -53,10 +53,10 @@ Before running this command, ensure:
    - Security Test (セキュリティテスト) - 推奨（認証・認可機能の場合）
    ```
 
-   Set `multiSelect: true` to allow multiple selections.
+   複数選択を許可するために `multiSelect: true` を設定。
 
-4. **Save Selection**
-   Create `.michi/specs/{feature}/test-type-selection.json`:
+4. **選択の保存**
+   `.michi/pj/{feature}/test-type-selection.json` を作成：
 
    ```json
    {
@@ -67,43 +67,43 @@ Before running this command, ensure:
    }
    ```
 
-### Phase 4.2: Test Specification Creation
+### Phase 4.2: テスト仕様書の作成
 
-For each selected test type, create a test specification document:
+選択された各テストタイプについて、テスト仕様書ドキュメントを作成：
 
-1. **Read Template**
-   Load the appropriate template from:
-   - Unit: `docs/user-guide/templates/test-specs/unit-test-spec-template.md`
-   - Integration: `docs/user-guide/templates/test-specs/integration-test-spec-template.md`
-   - E2E: `docs/user-guide/templates/test-specs/e2e-test-spec-template.md`
-   - Performance: `docs/user-guide/templates/test-specs/performance-test-spec-template.md`
-   - Security: `docs/user-guide/templates/test-specs/security-test-spec-template.md`
+1. **テンプレートの読み込み**
+   以下から適切なテンプレートを読み込む：
+   - Unit: `templates/test-specs/unit-test-spec-template.md`
+   - Integration: `templates/test-specs/integration-test-spec-template.md`
+   - E2E: `templates/test-specs/e2e-test-spec-template.md`
+   - Performance: `templates/test-specs/performance-test-spec-template.md`
+   - Security: `templates/test-specs/security-test-spec-template.md`
 
-2. **Extract Design Information**
-   From `design.md`, extract:
-   - Architecture diagrams
-   - Component interfaces
-   - API endpoints
-   - Data models
-   - Testing Strategy section
+2. **設計情報の抽出**
+   `design.md` から以下を抽出：
+   - アーキテクチャ図
+   - コンポーネントインターフェース
+   - APIエンドポイント
+   - データモデル
+   - Testing Strategy セクション
 
-3. **Generate Test Specification**
-   Use the template structure and design information to create a comprehensive test specification:
-   - Replace template placeholders with actual feature details
-   - Generate specific test cases based on requirements and design
-   - Include requirement traceability IDs
-   - Add coverage targets (95% for critical code, 80% minimum)
+3. **テスト仕様書の生成**
+   テンプレート構造と設計情報を使用して包括的なテスト仕様書を作成：
+   - テンプレートのプレースホルダーを実際の機能詳細で置き換える
+   - 要件と設計に基づいて具体的なテストケースを生成
+   - 要件トレーサビリティIDを含める
+   - カバレッジ目標を追加（クリティカルなコードは95%、最低80%）
 
-4. **Save Test Specification**
-   Create `.michi/specs/{feature}/test-specs/{test-type}-test-spec.md`:
+4. **テスト仕様書の保存**
+   `.michi/pj/{feature}/test-specs/{test-type}-test-spec.md` を作成：
    - `unit-test-spec.md`
    - `integration-test-spec.md`
    - `e2e-test-spec.md`
    - `performance-test-spec.md`
    - `security-test-spec.md`
 
-5. **Update spec.json**
-   Update phase information in `spec.json`:
+5. **project.json の更新**
+   `project.json` のフェーズ情報を更新：
 
    ```json
    {
@@ -117,13 +117,13 @@ For each selected test type, create a test specification document:
    }
    ```
 
-## Output Structure
+## 出力構造
 
-After completion, the following structure will be created:
+完了後、以下の構造が作成されます：
 
 ```
-.michi/specs/{feature}/
-├── spec.json (updated)
+.michi/pj/{feature}/
+├── project.json (更新)
 ├── requirements.md
 ├── design.md
 ├── test-type-selection.json (NEW)
@@ -131,43 +131,43 @@ After completion, the following structure will be created:
     ├── unit-test-spec.md
     ├── integration-test-spec.md
     ├── e2e-test-spec.md
-    ├── performance-test-spec.md (optional)
-    └── security-test-spec.md (optional)
+    ├── performance-test-spec.md (オプション)
+    └── security-test-spec.md (オプション)
 ```
 
-## Next Steps
+## 次のステップ
 
-After completing test planning, guide the user to the next phase:
+テスト計画完了後、次のフェーズへユーザーをガイド：
 
-### Recommended: Design Validation (Optional)
+### 推奨: 設計検証（オプション）
 
 ```bash
 /michi:review-design {feature-name}
 ```
 
-This command will:
-- Review the design quality
-- **Verify test planning completion** ✅
-- Check requirement traceability
+このコマンドは：
+- 設計品質をレビュー
+- **テスト計画完了を確認** ✅
+- 要件トレーサビリティをチェック
 
-### Or: Proceed to Task Generation
+### または: タスク生成に進む
 
 ```bash
 /michi:create-tasks {feature-name} [-y]
 ```
 
-This will generate implementation tasks based on requirements, design, and test specifications.
+要件、設計、テスト仕様書に基づいて実装タスクを生成します。
 
 ---
 
-**Important:** Test planning (Phase 4) ensures that test implementation is properly included in the task breakdown, leading to comprehensive TDD implementation.
+**重要:** テスト計画（Phase 4）により、タスク分割にテスト実装が適切に含まれ、包括的なTDD実装につながります。
 
-## Error Handling
+## エラーハンドリング
 
-- **Feature not found**: Display error and guide user to run `/michi:launch-pj` first
-- **Design not approved**: Display error and guide user to complete Phase 3 first
-- **Template read failure**: Use fallback structure and warn user
-- **User cancels selection**: Save partial progress and allow resumption
+- **機能が見つからない**: エラーを表示し、最初に `/michi:launch-pj` を実行するようユーザーをガイド
+- **設計が承認されていない**: エラーを表示し、最初に Phase 3 を完了するようユーザーをガイド
+- **テンプレート読み込み失敗**: フォールバック構造を使用し、ユーザーに警告
+- **ユーザーが選択をキャンセル**: 部分的な進捗を保存し、再開を許可
 
 ---
 

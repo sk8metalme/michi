@@ -4,33 +4,41 @@ allowed-tools: Bash, Glob, Grep, LS, Read, Write, Edit, MultiEdit, Update, WebSe
 argument-hint: <project-name> [-y]
 ---
 
-# Multi-Repo Design Generator
+# Multi-Repo 設計書生成
 
 <background_information>
 - **Mission**: Multi-Repoプロジェクトの包括的な技術設計書を生成
 - **Success Criteria**:
-  - 全サービスのアーキテクチャを統合
+  - 全コンポーネントのアーキテクチャを統合
   - サービス間通信の設計を明確化
-  - 各サービスの技術スタックを反映
+  - 各コンポーネントの技術スタックを反映
   - C4モデルに基づいた視覚的な設計図を含む
 </background_information>
 
+## 変数定義
+
+- `{{MICHI_DIR}}` = `.michi/` （プロジェクト内）
+  - プロジェクトメタデータ: `{{MICHI_DIR}}/multi-repo/pj/`
+- `{{MICHI_GLOBAL_DIR}}` = `~/.michi/` （グローバル）
+  - 共通設定: `{{MICHI_GLOBAL_DIR}}/settings/`
+  - ルール: `{{MICHI_GLOBAL_DIR}}/settings/rules/`
+  - テンプレート: `{{MICHI_GLOBAL_DIR}}/settings/templates/`
+
 <instructions>
-## Core Task
+## コアタスク
 Multi-Repoプロジェクト **$1** の技術設計書を生成します。
 
-## Execution Steps
+## 実行手順
 
 ### Step 1: コンテキスト読み込み
-1. `.michi/config.json` からプロジェクト情報取得
-   - プロジェクト名、JIRAキー、Confluenceスペース
+1. `.michi/multi-repo/pj/YYYYMMDD-$1/project.json` からプロジェクト情報取得
    - 登録リポジトリ一覧
-2. `docs/michi/$1/overview/requirements.md` から要件読み込み
+2. `docs/michi/YYYYMMDD-$1/overview/requirements.md` から要件読み込み
    - 要件定義書が存在しない場合は、先に `/michi-multi-repo:create-requirements $1` の実行を促す
-3. `.michi/settings/rules/design-principles.md` から設計原則取得（存在する場合）
-4. `.michi/settings/templates/specs/design.md` から構造参照（存在する場合）
+3. `{{MICHI_GLOBAL_DIR}}/settings/rules/design-principles.md` から設計原則取得（存在する場合）
+4. `{{MICHI_GLOBAL_DIR}}/settings/templates/specs/design.md` から構造参照（存在する場合）
 
-### Step 2: Discovery & Analysis
+### Step 2: 発見と分析
 
 **Multi-Repo固有の分析**:
 
@@ -60,16 +68,16 @@ Multi-Repoプロジェクト **$1** の技術設計書を生成します。
 
 1. **システム全体図**
    - C4モデル - システムコンテキスト図（Mermaid）
-   - 全サービスの配置とフロー
+   - 全コンポーネントの配置とフロー
    - 外部システムとの連携
 
-2. **サービス横断アーキテクチャ**
-   - マイクロサービス構成図（C4モデル推奨）
+2. **リポジトリ横断アーキテクチャ**
+   - マイクロコンポーネント構成図（C4モデル推奨）
    - サービス間API契約定義
    - イベントスキーマ定義
    - データフロー図
 
-3. **各サービスの設計**
+3. **各コンポーネントの設計**
    - コンポーネント図
    - インターフェース定義
    - データモデル
@@ -86,12 +94,12 @@ Multi-Repoプロジェクト **$1** の技術設計書を生成します。
    - スケーリング戦略
 
 6. **データモデル**
-   - サービス横断のデータフロー
+   - リポジトリ横断のデータフロー
    - データベーススキーマ（サービスごと）
    - データ整合性の保証方法
 
 ### Step 4: ファイル保存
-- 出力先: `docs/michi/$1/overview/architecture.md`
+- 出力先: `docs/michi/YYYYMMDD-$1/overview/architecture.md`
 - 既存ファイルがある場合は、上書き確認（`-y` フラグで自動承認）
 
 ### Step 4.5: 品質検証（PROACTIVE）
@@ -102,7 +110,7 @@ Multi-Repoプロジェクト **$1** の技術設計書を生成します。
 
 architecture.mdにMermaid図が含まれる場合、構文検証を実行:
 
-```
+```text
 IMPORTANT: architecture.mdにMermaid図が含まれる場合、以下の検証を実行してください。
 - 検出: Mermaid図を含むかどうかを確認
 - 検証: 構文エラーを検出（```mermaid ブロックの整合性確認）
@@ -121,7 +129,7 @@ IMPORTANT: architecture.mdにMermaid図が含まれる場合、以下の検証�
 
 `stable-version-auditor` エージェントを使用して技術スタックを監査:
 
-```
+```text
 IMPORTANT: architecture.mdに技術スタック（Node.js、Java、Python、PHP等）が記載されている場合、
 stable-version-auditorエージェントを自動実行してください。
 - 検出: バージョン指定を抽出
@@ -133,105 +141,29 @@ stable-version-auditorエージェントを自動実行してください。
 **実行タイミング**: architecture.md保存直後
 
 **エージェント呼び出し**:
-```
-Task(subagent_type='stable-version-auditor', prompt='docs/michi/$1/overview/architecture.md に記載された技術スタックのバージョンを監査し、EOLリスクを評価してください')
+```python
+Task(subagent_type='stable-version-auditor', prompt='docs/michi/YYYYMMDD-$1/overview/architecture.md に記載された技術スタックのバージョンを監査し、EOLリスクを評価してください')
 ```
 
-### Step 5: メタデータ更新（spec.json）
-- `docs/michi/$1/spec.json` を読み込み
+### Step 5: メタデータ更新（project.json）
+- `.michi/multi-repo/pj/YYYYMMDD-$1/project.json` を読み込み
 - phase を `"design-generated"` に更新
 - `approvals.design.generated` を `true` に更新
 - `updated_at` を現在のISO 8601タイムスタンプに更新
-- spec.json を保存
+- project.json を保存
 
 ## Multi-Repo固有セクション
 
-設計書に以下のセクションを必ず含めること：
+**テンプレート参照**: `templates/multi-repo/spec/architecture.md` を基に設計書を生成してください。
 
-```markdown
-## サービス横断アーキテクチャ
+テンプレートには以下のMulti-Repo拡張セクションが含まれています：
+- リポジトリ横断アーキテクチャ（C4モデル図、サービス間通信、共有コンポーネント）
+- デプロイメントアーキテクチャ
+- データフロー図
 
-### C4モデル - システムコンテキスト図
+詳細な構造とプレースホルダーはテンプレートファイルを参照してください。
 
-\`\`\`mermaid
-C4Context
-    title System Context Diagram
-
-    Person(user, "User", "エンドユーザー")
-    System(frontend, "Frontend Service", "Webアプリケーション")
-    System(backend, "Backend Service", "APIサーバー")
-    System_Ext(external_api, "External API", "外部サービス")
-
-    Rel(user, frontend, "Uses", "HTTPS")
-    Rel(frontend, backend, "API calls", "REST/HTTPS")
-    Rel(backend, external_api, "Integrates", "REST/HTTPS")
-\`\`\`
-
-### サービス間通信
-
-| 呼び出し元 | 呼び出し先 | 方式 | プロトコル | 用途 |
-|-----------|-----------|------|-----------|------|
-| Frontend | API Gateway | 同期 | REST/HTTPS | ユーザーリクエスト処理 |
-| API Gateway | Auth Service | 同期 | gRPC | 認証・認可 |
-| User Service | Notification Service | 非同期 | Kafka | ユーザー作成イベント通知 |
-
-### 共有コンポーネント
-
-**共通ライブラリ**:
-- `@org/shared-types`: TypeScript型定義（全サービスで共有）
-- `@org/logger`: 統一ログライブラリ
-
-**共通インフラ**:
-- Elasticsearch: ログ集約
-- Prometheus + Grafana: メトリクス監視
-- Keycloak: 統合認証基盤
-
-### デプロイメントアーキテクチャ
-
-\`\`\`mermaid
-graph TB
-    subgraph "Production Kubernetes Cluster"
-        LB[Load Balancer]
-        FE1[Frontend Pod 1]
-        FE2[Frontend Pod 2]
-        BE1[Backend Pod 1]
-        BE2[Backend Pod 2]
-        DB[(PostgreSQL)]
-
-        LB --> FE1
-        LB --> FE2
-        FE1 --> BE1
-        FE2 --> BE2
-        BE1 --> DB
-        BE2 --> DB
-    end
-\`\`\`
-
-### データフロー
-
-\`\`\`mermaid
-sequenceDiagram
-    participant User
-    participant Frontend
-    participant API Gateway
-    participant Auth Service
-    participant User Service
-    participant Database
-
-    User->>Frontend: リクエスト
-    Frontend->>API Gateway: API呼び出し
-    API Gateway->>Auth Service: トークン検証
-    Auth Service-->>API Gateway: 検証成功
-    API Gateway->>User Service: ユーザー情報取得
-    User Service->>Database: クエリ実行
-    Database-->>User Service: データ返却
-    User Service-->>API Gateway: レスポンス
-    API Gateway-->>Frontend: レスポンス
-    Frontend-->>User: 表示
-\`\`\`
-```
-
-## Important Constraints
+## 重要な制約
 - 実装詳細ではなく、アーキテクチャ設計に焦点を当てる
 - サービス間の境界とインターフェースを明確にする
 - 技術選定の理由を記述する
@@ -240,73 +172,54 @@ sequenceDiagram
 
 </instructions>
 
-## Tool Guidance
+## ツールガイダンス
 - **Read first**: プロジェクト設定、要件定義書、設計原則、テンプレートを読み込み
 - **Glob/Grep**: 各リポジトリの技術スタック調査（ローカルクローンがある場合）
 - **Write last**: 設計書を最後に保存
 - **WebSearch/WebFetch**: 最新の設計パターンやベストプラクティスが必要な場合のみ使用
 
-## Output Description
+## 出力説明
 以下の情報を出力してください：
 
-1. **生成された設計書のパス**: `docs/michi/{project}/overview/architecture.md`
-2. **分析したリポジトリの一覧**: サービス名と技術スタックの要約
+1. **生成された設計書のパス**: `docs/michi/{YYYYMMDD-project名}/overview/architecture.md`
+2. **分析したリポジトリの一覧**: コンポーネント名と技術スタックの要約
 3. **品質検証結果**:
    - Mermaid図の検証結果
    - 技術スタックバージョン監査結果
 4. **次のステップ**:
    - 設計書の確認
-   - Confluence同期
    - 各リポジトリでの個別実装
 
-**出力形式**:
-```markdown
-## 設計書生成完了
+**生成される設計書のテンプレート**:
 
-### 出力ファイル
-`docs/michi/{project}/overview/architecture.md`
+`templates/multi-repo/spec/architecture.md` に基づき、以下のセクションを含む設計書を生成：
 
-### 分析したサービス
-- **Frontend**: React + TypeScript（3リポジトリ依存）
-- **Backend**: Node.js + Express（2リポジトリ依存）
-- **Auth Service**: Go + gRPC（独立）
+- プロジェクト情報（名前、作成日時）
+- システム構成図（Mermaid C4モデル）
+- アーキテクチャパターン（マイクロコンポーネント構成）
+- リポジトリ横断設計（通信方式、共有コンポーネント）
+- 各コンポーネントの設計（コンポーネント図、インターフェース定義）
+- セキュリティ設計（認証・認可、暗号化）
+- デプロイメントアーキテクチャ（Kubernetes、ネットワーク）
+- データモデル（リポジトリ横断データフロー、スキーマ）
 
-### アーキテクチャ概要
-- **通信方式**: REST API（同期）、Kafka（非同期イベント）
-- **データベース**: PostgreSQL（サービスごとにDB分離）
-- **デプロイ**: Kubernetes（Pod自動スケーリング）
+**ユーザーへの出力メッセージ形式**:
 
-### 品質検証結果
+生成完了後、以下の情報をユーザーに出力してください：
+- 出力ファイルパス: `docs/michi/{YYYYMMDD-project名}/overview/architecture.md`
+- 分析したコンポーネント一覧（コンポーネント名と技術スタックの概要）
+- アーキテクチャ概要（通信方式、データベース、デプロイ方法）
+- 品質検証結果（Mermaid図検証、技術スタックバージョン監査）
+- 次のステップ（設計書確認、テスト計画作成、実装開始）
 
-#### Mermaid図検証
-✅ 検証完了 - 構文エラーなし
-または
-⚠️ 2件の構文エラーを自動修正しました:
-- L15: C4モデルのタイトル記法エラー → 修正済み
-- L45: シーケンス図の矢印記法エラー → 修正済み
+詳細なメッセージフォーマットは状況に応じて調整してください。
 
-#### 技術スタックバージョン監査
-✅ すべて最新LTS/安定版を使用
-または
-⚠️ バージョン更新を推奨:
-- Node.js 16.x → 20.x (LTS) - EOL: 2023-09-11（EOL済み）
-- Python 3.9 → 3.11 - EOL 6ヶ月以内
+## 安全性とフォールバック
 
-### 次のステップ
-1. 設計書を確認: `docs/michi/{project}/overview/architecture.md`
-2. 技術スタック更新（必要に応じて）
-3. Confluenceに同期: `michi multi-repo:confluence-sync {project} --doc-type architecture`
-4. 各リポジトリで実装を開始:
-   - `/michi:launch-pj` で個別仕様を作成
-   - または直接実装を開始
-```
-
-## Safety & Fallback
-
-### Error Scenarios
+### エラーシナリオ
 - **要件定義書未作成**:
   ```
-  エラー: 要件定義書が見つかりません: `docs/michi/{project}/overview/requirements.md`
+  エラー: 要件定義書が見つかりません: `docs/michi/{YYYYMMDD-project名}/overview/requirements.md`
 
   先に要件定義書を生成してください：
   /michi-multi-repo:create-requirements {project}
@@ -317,7 +230,7 @@ sequenceDiagram
   エラー: プロジェクト '{project}' が見つかりません。
 
   次のコマンドでプロジェクトを初期化してください：
-  michi multi-repo:init {project} --jira {JIRA_KEY} --confluence-space {SPACE}
+  /michi-multi-repo:launch-pj "{project}"
   ```
 
 - **リポジトリアクセス不可**:
@@ -330,30 +243,28 @@ sequenceDiagram
 
 - **既存ファイル存在（`-y` フラグなし）**:
   ```
-  警告: 既存の設計書が存在します: `docs/michi/{project}/overview/architecture.md`
+  警告: 既存の設計書が存在します: `docs/michi/{YYYYMMDD-project名}/overview/architecture.md`
 
   上書きしてもよろしいですか？ (y/n)
   または `-y` フラグを使用して自動承認できます。
   ```
 
-### Fallback Strategy
+### フォールバック戦略
 - **設計原則ファイル不在**: 基本的な設計原則（SOLID、DRY等）を適用
 - **技術スタック不明**: README や設定ファイルから推測、または "未指定" として記載
 - **依存関係不明**: 基本的なクライアント-サーバー構成を仮定
 - **テンプレート不在**: インラインで基本構造を使用
 
-### Next Phase: Implementation
+### 次のフェーズ: テスト計画
 
 **設計書承認後**:
-1. 設計書を確認: `docs/michi/{project}/overview/architecture.md`
-2. Confluenceに同期: `michi multi-repo:confluence-sync {project} --doc-type architecture`
+1. 設計書を確認: `docs/michi/{YYYYMMDD-project名}/overview/architecture.md`
+2. **テスト計画を作成**: `/michi-multi-repo:plan-tests {project}` でテスト戦略を策定
 3. **各リポジトリで個別実装**:
-   - リポジトリごとに `/michi:launch-pj` で仕様作成
-   - または直接実装を開始
+   - リポジトリごとに `/michi:dev` で実装を開始
+   - またはタスクを分割してから実装
 4. **CI/CD設定**: `michi multi-repo:ci-status {project}` でCI結果を監視
 
 **修正が必要な場合**:
 - フィードバックを提供し、`/michi-multi-repo:create-design $1` を再実行
 - `-y` フラグで自動上書き可能
-
-think hard

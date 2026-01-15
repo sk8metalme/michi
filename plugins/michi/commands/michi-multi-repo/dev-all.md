@@ -4,7 +4,7 @@ allowed-tools: Task, Bash, Read, Write, Glob, Grep
 argument-hint: <project-name> [--tasks <task-numbers>]
 ---
 
-# Multi-Repo Implementation (All Repositories)
+# Multi-Repo 全リポジトリ実装
 
 <background_information>
 - **Mission**: Multi-Repoプロジェクトの全リポジトリで実装を並行実行
@@ -16,7 +16,7 @@ argument-hint: <project-name> [--tasks <task-numbers>]
 </background_information>
 
 <instructions>
-## Core Task
+## コアタスク
 Multi-Repoプロジェクト **$1** の全リポジトリで `/michi:dev` を並行実行します。
 
 ## 引数解析
@@ -32,7 +32,7 @@ Multi-Repoプロジェクト **$1** の全リポジトリで `/michi:dev` を並
   - 例: `--tasks 1,2,3` → タスク1-3のみ実行
   - 省略時: 全タスクを実行
 
-## Execution Steps
+## 実行手順
 
 ### Step 1: 前提条件確認
 
@@ -66,14 +66,15 @@ Multi-Repoプロジェクト **$1** の全リポジトリで `/michi:dev` を並
 
 ### Step 2: コンテキスト読み込み
 
-1. `.michi/config.json` からプロジェクト情報取得
+1. `.michi/multi-repo/pj/$1/project.json` からプロジェクト情報取得
+   - `$1` は `YYYYMMDD-{name}` 形式のプロジェクト名
 
-2. 登録リポジトリの一覧を取得
+2. 登録リポジトリの一覧を取得（`repositories` 配列）
 
 3. 各リポジトリの `localPath` を取得
 
 4. 各リポジトリのタスクファイル確認
-   - `{localPath}/.michi/specs/{feature}/tasks.md`
+   - `{localPath}/.michi/pj/{feature}/tasks.md`
 
 ### Step 2.5: localPath 検証
 
@@ -82,7 +83,7 @@ Multi-Repoプロジェクト **$1** の全リポジトリで `/michi:dev` を並
 - ✅ localPathが設定されているか
 - ✅ ディレクトリが存在するか
 - ✅ Gitリポジトリか (`.git/`ディレクトリ確認)
-- ✅ Michiがセットアップ済みか (`.michi/project.json`確認)
+- ✅ Michiがセットアップ済みか (`.michi/pj/{feature}/`ディレクトリ確認)
 - ⚠️ 設定されたブランチと現在のブランチが一致するか
 - ⚠️ 未コミット変更がないか
 
@@ -201,8 +202,6 @@ repo-spec-executorサブエージェントを使用して、以下のリポジ�
    `michi multi-repo:ci-status $1`
 
 3. PRマージ後、リリース準備:
-   - Confluenceリリース手順書作成
-   - JIRAリリースチケット起票
 ```
 
 **一部失敗時**:
@@ -225,7 +224,7 @@ repo-spec-executorサブエージェントを使用して、以下のリポジ�
    （失敗したリポジトリのみ処理されます）
 ```
 
-## Important Constraints
+## 重要な制約
 - spec-review合格が前提（BLOCK問題がないこと）
 - 並行実行は最大3リポジトリ
 - TDDサイクル（RED-GREEN-REFACTOR）を遵守
@@ -234,13 +233,13 @@ repo-spec-executorサブエージェントを使用して、以下のリポジ�
 
 </instructions>
 
-## Tool Guidance
+## ツールガイダンス
 - **Task**: repo-spec-executorサブエージェント起動に使用
-- **Read**: config.json、レビューレポート、タスクファイル読み込み
+- **Read**: project.json、レビューレポート、タスクファイル読み込み
 - **Write**: チェックポイント保存
 - **Bash**: Git操作、カバレッジ確認
 
-## Output Description
+## 出力説明
 
 日本語で以下の情報を出力してください:
 
@@ -249,9 +248,9 @@ repo-spec-executorサブエージェントを使用して、以下のリポジ�
 3. **各リポジトリの詳細結果**: カバレッジ、Lint/Build結果、エラー内容
 4. **次のアクション**: 成功時/失敗時の推奨ステップ
 
-## Safety & Fallback
+## 安全性とフォールバック
 
-### Error Scenarios
+### エラーシナリオ
 
 - **品質ゲート不合格**:
   ```
@@ -262,7 +261,7 @@ repo-spec-executorサブエージェントを使用して、以下のリポジ�
 
 - **タスクファイル不存在**:
   ```
-  エラー: リポジトリ '{name}' にタスクファイルがありません: .michi/specs/{feature}/tasks.md
+  エラー: リポジトリ '{name}' にタスクファイルがありません: .michi/pj/{feature}/tasks.md
 
   タスクを生成してください:
   cd {localPath}
@@ -286,7 +285,7 @@ repo-spec-executorサブエージェントを使用して、以下のリポジ�
   セットアップ完了後、このコマンドを再実行してください。
   ```
 
-### Fallback Strategy
+### フォールバック戦略
 - localPath未設定: 該当リポジトリをスキップし、他のリポジトリで処理続行
 - Michi未セットアップ: 該当リポジトリをスキップし、他のリポジトリで処理続行
 - サブエージェント失敗: チェックポイント保存し、リトライ可能にする

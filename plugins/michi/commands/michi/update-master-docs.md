@@ -67,9 +67,34 @@ docs/master/
 
 ---
 
+## ステップ 0: Settings Provisioning Check
+
+**グローバル設定の確認と自動配置**:
+
+1. **バージョンチェック**:
+   - `{{MICHI_GLOBAL_DIR}}/settings/version.json` を読み取り
+   - プラグインバージョン（1.3.0）と比較
+   - 不一致または欠落の場合、Step 0.1 へ
+
+2. **必要ファイルの存在チェック**:
+   - このコマンドに必要なファイルを確認:
+     - `{{MICHI_GLOBAL_DIR}}/settings/templates/master-docs/` ディレクトリ
+     - `{{MICHI_GLOBAL_DIR}}/settings/rules/master-docs-principles.md`
+   - 欠落がある場合、Step 0.1 へ
+
+3. **Step 0.1: 自動プロビジョニング** (条件付き):
+   - 欠落ファイルのみをコピー
+   - バージョン不一致の場合、全ファイルを更新
+   - `version.json` を更新
+   - ユーザーに通知: "✅ Global settings updated to v1.3.0"
+
+4. **続行**: Bootstrapフロー または Syncフロー へ
+
+---
+
 ## Bootstrapフロー
 
-1. `{{MICHI_DIR}}/settings/templates/master-docs/` からテンプレートを読み込む
+1. `{{MICHI_GLOBAL_DIR}}/settings/templates/master-docs/` からテンプレートを読み込む
 2. コードベースを分析（JIT）:
    - `glob_file_search` でソースファイルを検索
    - `read_file` でREADME、package.json等を読み込む
@@ -81,7 +106,7 @@ docs/master/
    - Structure: 構成、命名、インポート
    - Sequence: 主要フローのシーケンス図
 4. Master Docsファイルを生成（テンプレートに従う）
-5. `{{MICHI_DIR}}/settings/rules/master-docs-principles.md` から原則を読み込む
+5. `{{MICHI_GLOBAL_DIR}}/settings/rules/master-docs-principles.md` から原則を読み込む
 6. レビュー用にサマリーを提示
 
 **フォーカス**: 決定を導くパターン。ファイルや依存関係のカタログではない。
@@ -105,7 +130,7 @@ docs/master/
 
 ## 粒度の原則
 
-`{{MICHI_DIR}}/settings/rules/master-docs-principles.md` より:
+`{{MICHI_GLOBAL_DIR}}/settings/rules/master-docs-principles.md` より:
 
 > 「新しいコードが既存のパターンに従っている場合、Master Docsを更新する必要はない。」
 
@@ -172,4 +197,4 @@ Source of Truthとしてレビュー・承認してください。
 - 「ゴールデンルール」: パターンに従う新しいコードはMaster Docs更新を必要としない
 - エージェント固有のツールディレクトリ（例: `.cursor/`, `.gemini/`, `.claude/`）のドキュメント化を避ける
 - `{{MICHI_DIR}}/settings/` の内容はMaster Docsファイルに記載しない（settingsはメタデータであり、プロジェクト知識ではない）
-- `{{MICHI_DIR}}/specs/` と `{{REPO_ROOT_DIR}}/docs/master/` への軽い参照は許容。他の `.michi/` ディレクトリは避ける
+- `{{MICHI_DIR}}/pj/` と `{{REPO_ROOT_DIR}}/docs/master/` への軽い参照は許容。他の `.michi/` ディレクトリは避ける

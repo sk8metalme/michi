@@ -1,0 +1,33 @@
+{
+  "version": "1.3.0",
+  "updated_at": "2026-01-15T00:00:00Z",
+  "files": {
+    "rules": [
+      "ears-format.md",
+      "design-principles.md",
+      "design-discovery-full.md",
+      "design-discovery-light.md",
+      "design-review.md",
+      "gap-analysis.md",
+      "tasks-generation.md",
+      "tasks-parallel-analysis.md",
+      "master-docs-principles.md"
+    ],
+    "templates/specs": [
+      "requirements.md",
+      "design.md",
+      "research.md",
+      "tasks.md"
+    ],
+    "templates/master-docs": [
+      "core/product.md",
+      "core/architecture.md",
+      "core/tech-stack.md",
+      "core/structure.md",
+      "core/sequence.md",
+      "development/api-design.md",
+      "development/data-model.md",
+      "README.md"
+    ]
+  }
+}

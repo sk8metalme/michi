@@ -1,54 +1,50 @@
 ---
-title: Michi Core Principles
-description: Core principles for GitHub SSoT and multi-project management
+title: Michiコア原則
+description: GitHub SSoTとマルチプロジェクト管理のコア原則
 ---
 
-# Michi Core Principles
+# Michiコア原則
 
-## Development Guidelines
+## 開発ガイドライン
 {{DEV_GUIDELINES}}
 
-## Language
-All generated documents should be in: **{{LANG_CODE}}**
+## 言語
+生成されるすべてのドキュメントは**日本語**で記述する必要があります。
 
-Reference the language field in {{SPEC_DIR}}/project.json.
+## 単一の真実の源（SSoT）
 
-## Single Source of Truth (SSoT)
+### GitHubを真実の源とする
+- **すべての仕様はGitHubで管理** ({{MICHI_DIR}}/pj/)
+- 重複管理を避ける
 
-### GitHub as SSoT
-- **All specifications are managed in GitHub** ({{SPEC_DIR}}/specs/)
-- Confluence is **reference and approval only** (editing is GitHub only)
-- Avoid duplicate management
+## マルチプロジェクト管理
 
-### Data Flow
-```text
-GitHub ({{SPEC_DIR}}/specs/)  ← Source of truth (editable)
-    ↓ sync
-Confluence ← Display and approval (read-only)
-```
+### プロジェクトの識別
+- すべての操作は {{MICHI_DIR}}/pj/{{FEATURE_NAME}}/project.json を参照
+- プロジェクトID: {{PROJECT_ID}}
 
-## Multi-Project Management
+## ディレクトリ構造
 
-### Project Identification
-- All operations reference {{SPEC_DIR}}/project.json
-- Dynamically use project ID, JIRA key, Confluence labels
-- Project ID: {{PROJECT_ID}}
+### プロジェクトディレクトリ
+- **{{MICHI_DIR}}**: プロジェクト内のMichiディレクトリ（`.michi/`）
+  - プロジェクトメタデータ配置: `{{MICHI_DIR}}/pj/`
+  - プロジェクト固有の設定
 
-### Naming Conventions
+### グローバル設定ディレクトリ
+- **{{MICHI_GLOBAL_DIR}}**: ユーザーのホームディレクトリ（`~/.michi/`）
+  - 全プロジェクト共通の設定: `{{MICHI_GLOBAL_DIR}}/settings/`
+  - ルール: `{{MICHI_GLOBAL_DIR}}/settings/rules/`
+  - テンプレート: `{{MICHI_GLOBAL_DIR}}/settings/templates/`
 
-#### Confluence Pages
-- Format: `[{projectName}] {document_type}`
-- Example: `[{{PROJECT_ID}}] Requirements`
+## エージェントディレクトリ
+- エージェント設定: {{AGENT_DIR}}
+- ルール配置場所: {{AGENT_DIR}}/rules/
+- コマンド配置場所: {{AGENT_DIR}}/commands/
 
-#### JIRA Epic/Story
-- Format: `[{JIRA_KEY}] {title}`
-- Use project metadata from {{SPEC_DIR}}/project.json
-
-## Agent Directory
-- Agent configuration: {{AGENT_DIR}}
-- Rules location: {{AGENT_DIR}}/rules/
-- Commands location: {{AGENT_DIR}}/commands/
-
-## Feature Development
-- Feature name: {{FEATURE_NAME}}
-- Spec location: {{SPEC_DIR}}/specs/{{FEATURE_NAME}}/
+## 機能開発
+- 機能名: {{FEATURE_NAME}}
+- メタデータ配置: {{MICHI_DIR}}/pj/{{FEATURE_NAME}}/project.json
+- 仕様書配置: docs/michi/{{FEATURE_NAME}}/spec/
+- タスク配置: docs/michi/{{FEATURE_NAME}}/tasks/
+- リサーチ配置: docs/michi/{{FEATURE_NAME}}/research/
+- テスト計画配置: docs/michi/{{FEATURE_NAME}}/test-plan/
