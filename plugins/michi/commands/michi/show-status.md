@@ -22,6 +22,19 @@ argument-hint: <feature-name>
 
 ---
 
+## 変数定義
+
+- `{{MICHI_DIR}}` = `.michi/` （プロジェクト内）
+  - プロジェクトメタデータ: `{{MICHI_DIR}}/pj/`
+- `{{MICHI_GLOBAL_DIR}}` = `~/.michi/` （グローバル）
+  - 共通設定: `{{MICHI_GLOBAL_DIR}}/settings/`
+
+**パス解釈の注意点:**
+- このコマンドで参照するのは主に `{{MICHI_DIR}}/pj/` のプロジェクトメタデータ
+- グローバル設定（`{{MICHI_GLOBAL_DIR}}/settings/`）は通常参照しない
+
+---
+
 <instructions>
 ## コアタスク
 機能 **$1** のすべてのフェーズにわたる進捗を示すステータスレポートを生成します。
@@ -32,8 +45,8 @@ argument-hint: <feature-name>
 
 #### ステップ1: 仕様コンテキストの読み込み
 - メタデータとフェーズステータスのために `{{MICHI_DIR}}/pj/$1/project.json` を読み取り
-- 既存ファイルを読み取り: `requirements.md`, `design.md`, `tasks.md`（存在する場合）
-- `{{MICHI_DIR}}/pj/$1/` ディレクトリで利用可能なファイルをチェック
+- 既存ファイルを読み取り: `docs/michi/$1/spec/requirements.md`, `docs/michi/$1/spec/design.md`, `docs/michi/$1/tasks/tasks.md`（存在する場合）
+- `docs/michi/$1/` ディレクトリで利用可能なファイルをチェック
 
 #### ステップ2: ステータスの分析
 

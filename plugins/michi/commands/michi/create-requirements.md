@@ -29,32 +29,57 @@ requirements.md のプロジェクト説明に基づいて、機能 **$1** の�
 
 ### 基本実装
 
-1. **コンテキストの読み込み**:
+#### ステップ 0: Settings Provisioning Check
+
+**グローバル設定の確認と自動配置**:
+
+1. **バージョンチェック**:
+   - `{{MICHI_GLOBAL_DIR}}/settings/version.json` を読み取り
+   - プラグインバージョン（1.3.0）と比較
+   - 不一致または欠落の場合、Step 0.1 へ
+
+2. **必要ファイルの存在チェック**:
+   - このコマンドに必要なファイルを確認:
+     - `{{MICHI_GLOBAL_DIR}}/settings/rules/ears-format.md`
+     - `{{MICHI_GLOBAL_DIR}}/settings/templates/specs/requirements.md`
+   - 欠落がある場合、Step 0.1 へ
+
+3. **Step 0.1: 自動プロビジョニング** (条件付き):
+   - 欠落ファイルのみをコピー
+   - バージョン不一致の場合、全ファイルを更新
+   - `version.json` を更新
+   - ユーザーに通知: "✅ Global settings updated to v1.3.0"
+
+4. **続行**: 元のStep 1へ
+
+#### ステップ 1: コンテキストの読み込み
+
+**必要なすべてのコンテキストを読み取り**:
    - 言語とメタデータのために `{{MICHI_DIR}}/pj/$1/project.json` を読み取り
-   - プロジェクト説明のために `{{MICHI_DIR}}/pj/$1/requirements.md` を読み取り
+   - プロジェクト説明のために `docs/michi/$1/spec/requirements.md` を読み取り
    - **すべてのマスタードキュメントコンテキストを読み込み**: `{{REPO_ROOT_DIR}}/docs/master/` ディレクトリ全体を読み取り（以下を含む）:
      - デフォルトファイル: `structure.md`, `tech.md`, `product.md`
      - すべてのカスタムマスタードキュメントファイル（モード設定に関係なく）
      - これにより完全なプロジェクトメモリとコンテキストを提供
 
-2. **ガイドラインの読み取り**:
-   - EARS構文ルールのために `{{MICHI_DIR}}/settings/rules/ears-format.md` を読み取り
-   - ドキュメント構造のために `{{MICHI_DIR}}/settings/templates/specs/requirements.md` を読み取り
+**ガイドラインの読み取り**:
+   - EARS構文ルールのために `{{MICHI_GLOBAL_DIR}}/settings/rules/ears-format.md` を読み取り
+   - ドキュメント構造のために `{{MICHI_GLOBAL_DIR}}/settings/templates/specs/requirements.md` を読み取り
 
-3. **要件定義の生成**:
+#### ステップ 2: 要件定義の生成
    - プロジェクト説明に基づいて初期要件を作成
    - 関連機能を論理的な要件領域にグループ化
    - すべての受入基準にEARS形式を適用
    - project.json で指定された言語を使用
 
-4. **メタデータの更新**:
+#### ステップ 3: メタデータの更新
    - `phase: "requirements-generated"` を設定
    - `approvals.requirements.generated: true` を設定
    - `updated_at` タイムスタンプを更新
 
 ### Michi拡張機能
 
-5. **Ultrathink自動有効化**:
+#### ステップ 4: Ultrathink自動有効化
    - 要件定義生成には複雑な分析が必要
    - 拡張思考（ultrathink）がデフォルトで有効
    - より深い分析とより包括的な要件定義を提供
@@ -93,7 +118,7 @@ echo " Michi Requirements Generation Complete"
 echo "============================================"
 echo ""
 echo "### 生成された要件定義書"
-echo "\`.michi/pj/$1/requirements.md\`"
+echo "\`docs/michi/$1/spec/requirements.md\`"
 echo ""
 echo "### 次のステップ"
 echo ""
@@ -133,7 +158,7 @@ echo ""
 ### 次のフェーズ: 設計生成
 
 **要件定義が承認された場合**:
-- `{{MICHI_DIR}}/pj/$1/requirements.md` で生成された要件をレビュー
+- `docs/michi/$1/spec/requirements.md` で生成された要件をレビュー
 - **オプションのGap分析**（既存コードベースの場合）:
   - `/base:validate-gap $1` を実行して現在のコードとの実装ギャップを分析
   - 既存のコンポーネント、統合ポイント、実装戦略を特定

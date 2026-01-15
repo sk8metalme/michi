@@ -15,6 +15,15 @@ argument-hint: <project-name> [-y]
   - C4モデルに基づいた視覚的な設計図を含む
 </background_information>
 
+## 変数定義
+
+- `{{MICHI_DIR}}` = `.michi/` （プロジェクト内）
+  - プロジェクトメタデータ: `{{MICHI_DIR}}/multi-repo/pj/`
+- `{{MICHI_GLOBAL_DIR}}` = `~/.michi/` （グローバル）
+  - 共通設定: `{{MICHI_GLOBAL_DIR}}/settings/`
+  - ルール: `{{MICHI_GLOBAL_DIR}}/settings/rules/`
+  - テンプレート: `{{MICHI_GLOBAL_DIR}}/settings/templates/`
+
 <instructions>
 ## コアタスク
 Multi-Repoプロジェクト **$1** の技術設計書を生成します。
@@ -22,12 +31,12 @@ Multi-Repoプロジェクト **$1** の技術設計書を生成します。
 ## 実行手順
 
 ### Step 1: コンテキスト読み込み
-1. `.michi/project.json` からプロジェクト情報取得
+1. `.michi/multi-repo/pj/YYYYMMDD-$1/project.json` からプロジェクト情報取得
    - 登録リポジトリ一覧
 2. `docs/michi/YYYYMMDD-$1/spec/requirements.md` から要件読み込み
    - 要件定義書が存在しない場合は、先に `/michi-multi-repo:create-requirements $1` の実行を促す
-3. `.michi/settings/rules/design-principles.md` から設計原則取得（存在する場合）
-4. `.michi/settings/templates/specs/design.md` から構造参照（存在する場合）
+3. `{{MICHI_GLOBAL_DIR}}/settings/rules/design-principles.md` から設計原則取得（存在する場合）
+4. `{{MICHI_GLOBAL_DIR}}/settings/templates/specs/design.md` から構造参照（存在する場合）
 
 ### Step 2: 発見と分析
 
@@ -137,7 +146,7 @@ Task(subagent_type='stable-version-auditor', prompt='docs/michi/YYYYMMDD-$1/spec
 ```
 
 ### Step 5: メタデータ更新（project.json）
-- `docs/michi/$1/project.json` を読み込み
+- `.michi/multi-repo/pj/YYYYMMDD-$1/project.json` を読み込み
 - phase を `"design-generated"` に更新
 - `approvals.design.generated` を `true` に更新
 - `updated_at` を現在のISO 8601タイムスタンプに更新
@@ -248,7 +257,7 @@ sequenceDiagram
 ## 出力説明
 以下の情報を出力してください：
 
-1. **生成された設計書のパス**: `docs/michi/{YYYYMMDD-project名}/overview/architecture.md`
+1. **生成された設計書のパス**: `docs/michi/{YYYYMMDD-project名}/spec/architecture.md`
 2. **分析したリポジトリの一覧**: コンポーネント名と技術スタックの要約
 3. **品質検証結果**:
    - Mermaid図の検証結果
@@ -259,7 +268,7 @@ sequenceDiagram
 
 **生成される設計書のテンプレート**:
 
-`templates/multi-repo/overview/architecture.md` に基づき、以下のセクションを含む設計書を生成：
+`templates/multi-repo/spec/architecture.md` に基づき、以下のセクションを含む設計書を生成：
 
 - プロジェクト情報（名前、作成日時）
 - システム構成図（Mermaid C4モデル）
@@ -276,7 +285,7 @@ sequenceDiagram
 ## 設計書生成完了
 
 ### 出力ファイル
-`docs/michi/{YYYYMMDD-project名}/overview/architecture.md`
+`docs/michi/{YYYYMMDD-project名}/spec/architecture.md`
 
 ### 分析したコンポーネント
 - **Frontend**: React + TypeScript（3リポジトリ依存）
@@ -305,7 +314,7 @@ sequenceDiagram
 - Python 3.9 → 3.11 - EOL 6ヶ月以内
 
 ### 次のステップ
-1. 設計書を確認: `docs/michi/{YYYYMMDD-project名}/overview/architecture.md`
+1. 設計書を確認: `docs/michi/{YYYYMMDD-project名}/spec/architecture.md`
 2. 技術スタック更新（必要に応じて）
 3. **テスト計画を作成**: `/michi-multi-repo:plan-tests {project}` でテスト戦略を策定
 4. 各リポジトリで実装を開始:
@@ -318,7 +327,7 @@ sequenceDiagram
 ### エラーシナリオ
 - **要件定義書未作成**:
   ```
-  エラー: 要件定義書が見つかりません: `docs/michi/{YYYYMMDD-project名}/overview/requirements.md`
+  エラー: 要件定義書が見つかりません: `docs/michi/{YYYYMMDD-project名}/spec/requirements.md`
 
   先に要件定義書を生成してください：
   /michi-multi-repo:create-requirements {project}
@@ -342,7 +351,7 @@ sequenceDiagram
 
 - **既存ファイル存在（`-y` フラグなし）**:
   ```
-  警告: 既存の設計書が存在します: `docs/michi/{YYYYMMDD-project名}/overview/architecture.md`
+  警告: 既存の設計書が存在します: `docs/michi/{YYYYMMDD-project名}/spec/architecture.md`
 
   上書きしてもよろしいですか？ (y/n)
   または `-y` フラグを使用して自動承認できます。
@@ -357,7 +366,7 @@ sequenceDiagram
 ### 次のフェーズ: テスト計画
 
 **設計書承認後**:
-1. 設計書を確認: `docs/michi/{YYYYMMDD-project名}/overview/architecture.md`
+1. 設計書を確認: `docs/michi/{YYYYMMDD-project名}/spec/architecture.md`
 2. **テスト計画を作成**: `/michi-multi-repo:plan-tests {project}` でテスト戦略を策定
 3. **各リポジトリで個別実装**:
    - リポジトリごとに `/michi:dev` で実装を開始

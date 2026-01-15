@@ -13,6 +13,21 @@ description: プロジェクト間の切り替え（Michi固有機能）
 
 {{DEV_GUIDELINES}}
 
+---
+
+## 変数定義
+
+- `{{MICHI_DIR}}` = `.michi/` （プロジェクト内）
+  - プロジェクトメタデータ: `{{MICHI_DIR}}/pj/`
+- `{{MICHI_GLOBAL_DIR}}` = `~/.michi/` （グローバル）
+  - 共通設定: `{{MICHI_GLOBAL_DIR}}/settings/`
+
+**パス解釈の注意点:**
+- このコマンドは `{{MICHI_DIR}}/pj/` のプロジェクトメタデータを読み込む
+- グローバル設定（`{{MICHI_GLOBAL_DIR}}/settings/`）は通常参照しない
+
+---
+
 ## 使用方法
 
 ```
@@ -32,7 +47,7 @@ description: プロジェクト間の切り替え（Michi固有機能）
 
 1. プロジェクトIDに対応するGitHubリポジトリを特定
 2. ローカルにクローン（未クローンの場合）またはチェックアウト
-3. {{SPEC_DIR}}/project.json を読み込んで表示
+3. {{MICHI_DIR}}/pj/$1/project.json を読み込んで表示
 
 ## 言語設定
 

@@ -15,6 +15,15 @@ argument-hint: <project-name>
   - コンポーネント構成図（Mermaid）を含む
 </background_information>
 
+## 変数定義
+
+- `{{MICHI_DIR}}` = `.michi/` （プロジェクト内）
+  - プロジェクトメタデータ: `{{MICHI_DIR}}/multi-repo/pj/`
+- `{{MICHI_GLOBAL_DIR}}` = `~/.michi/` （グローバル）
+  - 共通設定: `{{MICHI_GLOBAL_DIR}}/settings/`
+  - ルール: `{{MICHI_GLOBAL_DIR}}/settings/rules/`
+  - テンプレート: `{{MICHI_GLOBAL_DIR}}/settings/templates/`
+
 <instructions>
 ## コアタスク
 Multi-Repoプロジェクト **$1** の要件定義書を生成します。
@@ -22,15 +31,15 @@ Multi-Repoプロジェクト **$1** の要件定義書を生成します。
 ## 実行手順
 
 ### Step 1: プロジェクト情報の取得
-1. `.michi/project.json` を読み込み、プロジェクト `$1` の情報を取得
+1. `.michi/multi-repo/pj/YYYYMMDD-$1/project.json` を読み込み、プロジェクト `$1` の情報を取得
 2. プロジェクトが登録されていない場合は、`michi multi-repo:init` の実行を促す
 3. 登録されたリポジトリ一覧を確認
 4. リポジトリ数が0の場合は警告を出し、基本構造のみ生成
 
 ### Step 2: コンテキスト収集
-1. **EARS形式ルール**: `.michi/settings/rules/ears-format.md` を読み込み
+1. **EARS形式ルール**: `{{MICHI_GLOBAL_DIR}}/settings/rules/ears-format.md` を読み込み
    - EARS形式（Event-Action-Response-System）の構文を理解
-2. **既存要件テンプレート**: `templates/multi-repo/overview/requirements.md` を確認
+2. **既存要件テンプレート**: `templates/multi-repo/spec/requirements.md` を確認
 3. **各リポジトリの情報収集**:
    - リポジトリ名、URL、ブランチ
    - 技術スタック（package.json、build.gradle、composer.json等から推測）
@@ -99,17 +108,17 @@ Multi-Repoプロジェクト **$1** の要件定義書を生成します。
 - クロスリポジトリ整合性確認のための基準情報として利用
 
 **更新手順**:
-1. `docs/michi/$1/project.json` を読み込み
+1. `.michi/multi-repo/pj/YYYYMMDD-$1/project.json` を読み込み
 2. `phase` を `"requirements-generated"` に更新（現在のフェーズを記録）
 3. `approvals.requirements.generated` を `true` に更新（要件定義書生成完了を記録）
 4. `updated_at` を現在のISO 8601タイムスタンプに更新（最終更新日時を記録）
 5. project.json を保存
 
-**注意**: `project.json` は `docs/michi/$1/` 直下に配置され、`overview/` ディレクトリ内のドキュメントとは別に管理されます。
+**注意**: `project.json` は `.michi/multi-repo/pj/YYYYMMDD-$1/` に配置され、仕様書ドキュメント（`docs/michi/YYYYMMDD-$1/spec/`）とは別に管理されます。
 
 ## Multi-Repo固有セクション
 
-**テンプレート参照**: 以下のセクションは `templates/multi-repo/overview/requirements.md` のMulti-Repo拡張部分に対応しています。
+**テンプレート参照**: 以下のセクションは `templates/multi-repo/spec/requirements.md` のMulti-Repo拡張部分に対応しています。
 
 要件定義書に以下のセクションを必ず含めること：
 
@@ -167,14 +176,14 @@ graph TB
 ## 出力説明
 以下の情報を出力してください：
 
-1. **生成された要件定義書のパス**: `docs/michi/{YYYYMMDD-project名}/overview/requirements.md`
+1. **生成された要件定義書のパス**: `docs/michi/{YYYYMMDD-project名}/spec/requirements.md`
 2. **含まれるリポジトリ/コンポーネントの一覧**: コンポーネント名と役割の要約
 3. **次のステップ**:
    - `/michi-multi-repo:create-design $1` で設計書を生成
 
 **生成される要件定義書のテンプレート**:
 
-`templates/multi-repo/overview/requirements.md` に基づき、以下のセクションを含む要件定義書を生成：
+`templates/multi-repo/spec/requirements.md` に基づき、以下のセクションを含む要件定義書を生成：
 
 - プロジェクト情報（名前、作成日時）
 - 概要とビジネス価値
@@ -192,7 +201,7 @@ graph TB
 ## 要件定義書生成完了
 
 ### 出力ファイル
-`docs/michi/{YYYYMMDD-project名}/overview/requirements.md`
+`docs/michi/{YYYYMMDD-project名}/spec/requirements.md`
 
 ### 含まれるコンポーネント
 - **Frontend**: ユーザーインターフェース（React）
@@ -200,7 +209,7 @@ graph TB
 - **Database**: データ永続化（PostgreSQL）
 
 ### 次のステップ
-1. 要件定義書を確認: `docs/michi/{YYYYMMDD-project名}/overview/requirements.md`
+1. 要件定義書を確認: `docs/michi/{YYYYMMDD-project名}/spec/requirements.md`
 2. **要件定義書のレビュー**:
    - PRを作成し、ステークホルダーによるレビューを実施
    - フィードバックを反映して要件定義書を更新
@@ -231,13 +240,13 @@ graph TB
 
 - **既存ファイル存在**:
   ```
-  警告: 既存の要件定義書が存在します: `docs/michi/{YYYYMMDD-project名}/overview/requirements.md`
+  警告: 既存の要件定義書が存在します: `docs/michi/{YYYYMMDD-project名}/spec/requirements.md`
 
   上書きしてもよろしいですか？ (y/n)
   ```
 
 - **EARS形式ルール未取得**:
-  - `.michi/settings/rules/ears-format.md` が存在しない場合、基本的なEARS形式を使用
+  - `{{MICHI_GLOBAL_DIR}}/settings/rules/ears-format.md` が存在しない場合、基本的なEARS形式を使用
   - 警告メッセージを表示
 
 ### フォールバック戦略

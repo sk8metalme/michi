@@ -20,12 +20,38 @@ argument-hint: <project-description>
 
 ---
 
+## 変数定義
+
+- `{{MICHI_DIR}}` = `.michi/` （プロジェクト内）
+  - プロジェクトメタデータ: `{{MICHI_DIR}}/pj/`
+- `{{MICHI_GLOBAL_DIR}}` = `~/.michi/` （グローバル）
+  - 共通設定: `{{MICHI_GLOBAL_DIR}}/settings/`
+
+---
+
 <instructions>
 
 ## コアタスク
 プロジェクト説明（$ARGUMENTS）から一意の機能名を生成し、仕様構造を初期化します。
 
 ## 実行手順
+
+### Step 0: Settings Provisioning Check
+
+グローバル設定ディレクトリの存在確認と、必要に応じてプロビジョニングを実行します。
+
+1. **グローバル設定ディレクトリの確認**:
+   - `{{MICHI_GLOBAL_DIR}}/settings/` が存在するかチェック
+
+2. **設定ファイルの確認**:
+   - 必須ファイルの存在確認:
+     - `{{MICHI_GLOBAL_DIR}}/settings/rules/ears-format.md`
+     - `{{MICHI_GLOBAL_DIR}}/settings/rules/master-docs-principles.md`
+     - `{{MICHI_GLOBAL_DIR}}/settings/templates/` ディレクトリ
+
+3. **欠落時の対応**:
+   - グローバル設定が存在しない場合、警告を表示
+   - 初回セットアップの場合は、プラグインの `templates/` からコピーすることを推奨
 
 ### 基本実装
 
@@ -39,10 +65,20 @@ argument-hint: <project-description>
 
 2. **一意性チェック**: `{{MICHI_DIR}}/pj/` で既存ディレクトリと照合（重複する場合は数値サフィックスを追加、例: `20260115-user-auth-2`）
 
-3. **ディレクトリ作成**: `{{MICHI_DIR}}/pj/YYYYMMDD-{pj-name}/`
+3. **ディレクトリ作成**:
+   - メタデータディレクトリ: `{{MICHI_DIR}}/pj/YYYYMMDD-{pj-name}/`
+   - 仕様書ディレクトリ: `docs/michi/YYYYMMDD-{pj-name}/`
+   - サブディレクトリ:
+     - `docs/michi/YYYYMMDD-{pj-name}/spec/`
+     - `docs/michi/YYYYMMDD-{pj-name}/tasks/`
+     - `docs/michi/YYYYMMDD-{pj-name}/research/`
+     - `docs/michi/YYYYMMDD-{pj-name}/test-plan/unit/`
+     - `docs/michi/YYYYMMDD-{pj-name}/test-plan/integration/`
+     - `docs/michi/YYYYMMDD-{pj-name}/test-plan/e2e/`
+     - `docs/michi/YYYYMMDD-{pj-name}/test-plan/performance/`
 
 4. **初期ファイルを生成**:
-   - 以下の構造で `project.json` を作成:
+   - **project.json** (`{{MICHI_DIR}}/pj/YYYYMMDD-{pj-name}/project.json`):
      ```json
      {
        "name": "YYYYMMDD-{pj-name}",
@@ -57,7 +93,7 @@ argument-hint: <project-description>
        }
      }
      ```
-   - 基本構造で `requirements.md` を作成:
+   - **requirements.md** (`docs/michi/YYYYMMDD-{pj-name}/spec/requirements.md`):
      ```markdown
      # YYYYMMDD-{pj-name} - 要件定義
 
@@ -67,7 +103,24 @@ argument-hint: <project-description>
      ## 要件
      <!-- /michi:create-requirements で生成されます -->
      ```
-   - ファイルをプロジェクトディレクトリ（`{{MICHI_DIR}}/pj/YYYYMMDD-{pj-name}/`）に書き込み
+   - **architecture.md** (`docs/michi/YYYYMMDD-{pj-name}/spec/architecture.md`):
+     ```markdown
+     # YYYYMMDD-{pj-name} - アーキテクチャ設計
+
+     <!-- /michi:create-design で生成されます -->
+     ```
+   - **sequence.md** (`docs/michi/YYYYMMDD-{pj-name}/spec/sequence.md`):
+     ```markdown
+     # YYYYMMDD-{pj-name} - シーケンス図
+
+     <!-- /michi:create-design で生成されます -->
+     ```
+   - **strategy.md** (`docs/michi/YYYYMMDD-{pj-name}/test-plan/strategy.md`):
+     ```markdown
+     # YYYYMMDD-{pj-name} - テスト戦略
+
+     <!-- /michi:plan-tests で生成されます -->
+     ```
 
 ### Michi拡張機能
 
@@ -131,7 +184,7 @@ echo ""
 ## 安全性とフォールバック
 
 - **曖昧な機能名**: 機能名の生成が不明確な場合、2-3のオプションを提案しユーザーに選択を求める
-- **テンプレート欠落**: `{{MICHI_DIR}}/settings/templates/specs/` にテンプレートファイルが存在しない場合、具体的な欠落ファイルパスとともにエラーを報告し、リポジトリのセットアップを確認することを提案
+- **テンプレート欠落**: `{{MICHI_GLOBAL_DIR}}/settings/templates/` にテンプレートファイルが存在しない場合、具体的な欠落ファイルパスとともにエラーを報告し、プラグインのセットアップを確認することを提案
 - **ディレクトリ競合**: 機能名が既に存在する場合、数字のサフィックスを追加（例: `feature-name-2`）し、自動的な競合解決をユーザーに通知
 - **書き込み失敗**: 具体的なパスとともにエラーを報告し、権限またはディスク容量を確認することを提案
 

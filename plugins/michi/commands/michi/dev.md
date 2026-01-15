@@ -22,6 +22,22 @@ argument-hint: <feature-name> [task-numbers] [--mutation] [--skip-license] [--sk
 
 ---
 
+## 変数定義
+
+- `{{MICHI_DIR}}` = `.michi/` （プロジェクト内）
+  - プロジェクトメタデータ: `{{MICHI_DIR}}/pj/`
+- `{{MICHI_GLOBAL_DIR}}` = `~/.michi/` （グローバル）
+  - 共通設定: `{{MICHI_GLOBAL_DIR}}/settings/`
+- `{{REPO_ROOT_DIR}}` = プロジェクトのルートディレクトリ
+  - マスタードキュメント: `{{REPO_ROOT_DIR}}/docs/master/`
+
+**パス解釈の注意点:**
+- このコマンドは `{{MICHI_DIR}}/pj/` と `docs/michi/` の仕様を読み込む
+- マスタードキュメント（`{{REPO_ROOT_DIR}}/docs/master/`）も参照
+- グローバル設定（`{{MICHI_GLOBAL_DIR}}/settings/`）は通常参照しない
+
+---
+
 <instructions>
 ## コアタスク
 Michi品質自動化を伴うテスト駆動開発を使用して、機能 **$1** の実装タスクを実行します。
@@ -77,7 +93,8 @@ Phase 6.8: タスク完了後の処理(Michi拡張)
 ### Phase 6.1: コンテキストロード (基本実装)
 
 **必要なすべてのコンテキストを読み取り**:
-- `{{MICHI_DIR}}/pj/$1/project.json`, `requirements.md`, `design.md`, `tasks.md`
+- `{{MICHI_DIR}}/pj/$1/project.json`
+- `docs/michi/$1/spec/requirements.md`, `docs/michi/$1/spec/design.md`, `docs/michi/$1/tasks/tasks.md`
 - 完全なプロジェクトメモリのために**`{{REPO_ROOT_DIR}}/docs/master/` ディレクトリ全体**
 
 **承認の検証**:
@@ -677,7 +694,7 @@ fi
 ```bash
 echo "=== タスク完了をマーク ==="
 
-TASK_FILE="{{MICHI_DIR}}/pj/$1/tasks.md"
+TASK_FILE="docs/michi/$1/tasks/tasks.md"
 
 if [ -f "$TASK_FILE" ]; then
     # - [ ] タスク名 → - [x] タスク名

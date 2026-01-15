@@ -15,6 +15,21 @@ argument-hint: <project-name> [--focus api|data|event|deps|test|all]
   - 修正が必要な箇所を明確に報告
 </background_information>
 
+## パス解釈
+
+このコマンドでは、以下のパスを読み取ります：
+
+- **親プロジェクトパス**: Multi-Repoプロジェクトのルートディレクトリ
+  - `.michi/multi-repo/pj/$1/project.json` - プロジェクトメタデータ（親プロジェクト内）
+  - `docs/michi/$1/spec/requirements.md` - 親プロジェクトの要件定義書
+  - `docs/michi/$1/spec/architecture.md` - 親プロジェクトの設計書
+
+- **子リポジトリパス**: 各リポジトリのlocalPathで指定されたディレクトリ
+  - `{localPath}/.michi/pj/` - 各リポジトリのMichiメタデータ
+  - `{localPath}/docs/michi/` - 各リポジトリの仕様書（requirements.md、architecture.md等）
+
+**重要**: このコマンドは読み取り専用で、親プロジェクトと全子リポジトリの仕様を比較して整合性を検証します。
+
 <instructions>
 ## コアタスク
 Multi-Repoプロジェクト **$1** の全リポジトリを対象に、クロスリポジトリレビューを実行します。
@@ -223,7 +238,7 @@ BLOCK問題が検出されました。修正が必須です。
 
 - **親プロジェクト仕様未作成**:
   ```
-  エラー: 親プロジェクトの設計書が見つかりません: docs/michi/$1/overview/architecture.md
+  エラー: 親プロジェクトの設計書が見つかりません: docs/michi/$1/spec/architecture.md
 
   先に親プロジェクトの設計を作成してください:
   /michi-multi-repo:create-design $1

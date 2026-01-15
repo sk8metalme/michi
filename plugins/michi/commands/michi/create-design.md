@@ -31,14 +31,41 @@ argument-hint: <feature-name> [-y]
 
 ### 基本実装
 
+#### ステップ 0: Settings Provisioning Check
+
+**グローバル設定の確認と自動配置**:
+
+1. **バージョンチェック**:
+   - `{{MICHI_GLOBAL_DIR}}/settings/version.json` を読み取り
+   - プラグインバージョン（1.3.0）と比較
+   - 不一致または欠落の場合、Step 0.1 へ
+
+2. **必要ファイルの存在チェック**:
+   - このコマンドに必要なファイルを確認:
+     - `{{MICHI_GLOBAL_DIR}}/settings/templates/specs/design.md`
+     - `{{MICHI_GLOBAL_DIR}}/settings/rules/design-principles.md`
+     - `{{MICHI_GLOBAL_DIR}}/settings/templates/specs/research.md`
+     - `{{MICHI_GLOBAL_DIR}}/settings/rules/design-discovery-full.md`
+     - `{{MICHI_GLOBAL_DIR}}/settings/rules/design-discovery-light.md`
+   - 欠落がある場合、Step 0.1 へ
+
+3. **Step 0.1: 自動プロビジョニング** (条件付き):
+   - 欠落ファイルのみをコピー
+   - バージョン不一致の場合、全ファイルを更新
+   - `version.json` を更新
+   - ユーザーに通知: "✅ Global settings updated to v1.3.0"
+
+4. **続行**: 元のStep 1へ
+
 #### ステップ 1: コンテキストの読み込み
 
 **必要なすべてのコンテキストを読み取り**:
-- `{{MICHI_DIR}}/pj/$1/project.json`, `requirements.md`, `design.md`（存在する場合）
+- `{{MICHI_DIR}}/pj/$1/project.json`
+- `docs/michi/$1/spec/requirements.md`, `docs/michi/$1/spec/design.md`, `docs/michi/$1/spec/architecture.md`（存在する場合）
 - 完全なプロジェクトメモリのために**`{{REPO_ROOT_DIR}}/docs/master/` ディレクトリ全体**
-- ドキュメント構造のために `{{MICHI_DIR}}/settings/templates/specs/design.md`
-- 設計原則のために `{{MICHI_DIR}}/settings/rules/design-principles.md`
-- 発見ログ構造のために `{{MICHI_DIR}}/settings/templates/specs/research.md`
+- ドキュメント構造のために `{{MICHI_GLOBAL_DIR}}/settings/templates/specs/design.md`
+- 設計原則のために `{{MICHI_GLOBAL_DIR}}/settings/rules/design-principles.md`
+- 発見ログ構造のために `{{MICHI_GLOBAL_DIR}}/settings/templates/specs/research.md`
 
 **要件承認の検証**:
 - `-y` フラグが提供された場合（$2 == "-y"）: project.json で要件を自動承認
@@ -57,7 +84,7 @@ argument-hint: <feature-name> [-y]
 2. **適切な発見プロセスの実行**:
 
    **複雑/新機能の場合**:
-   - `{{MICHI_DIR}}/settings/rules/design-discovery-full.md` を読み取り実行
+   - `{{MICHI_GLOBAL_DIR}}/settings/rules/design-discovery-full.md` を読み取り実行
    - WebSearch/WebFetchを使用して徹底的な調査を実施:
      - 最新のアーキテクチャパターンとベストプラクティス
      - 外部依存関係の検証（API、ライブラリ、バージョン、互換性）
@@ -65,7 +92,7 @@ argument-hint: <feature-name> [-y]
      - パフォーマンスベンチマークとセキュリティ考慮事項
 
    **拡張の場合**:
-   - `{{MICHI_DIR}}/settings/rules/design-discovery-light.md` を読み取り実行
+   - `{{MICHI_GLOBAL_DIR}}/settings/rules/design-discovery-light.md` を読み取り実行
    - 統合ポイント、既存パターン、互換性に焦点を当てる
    - Grepを使用して既存のコードベースパターンを分析
 
@@ -82,7 +109,7 @@ argument-hint: <feature-name> [-y]
 - 将来のタスクの並列化考慮事項（依存関係を `research.md` に記録）
 
 4. **調査ログへの結果の永続化**:
-- 共有テンプレートを使用して `{{MICHI_DIR}}/pj/$1/research.md` を作成または更新
+- 共有テンプレートを使用して `docs/michi/$1/research/research.md` を作成または更新
 - 発見スコープと主要な発見をサマリーセクションに要約
 - ソースと影響を含む調査ログトピックに調査を記録
 - テンプレートセクションを使用してアーキテクチャパターン評価、設計決定、リスクを文書化
@@ -91,8 +118,8 @@ argument-hint: <feature-name> [-y]
 #### ステップ 3: 設計ドキュメントの生成
 
 1. **設計テンプレートとルールの読み込み**:
-- 構造のために `{{MICHI_DIR}}/settings/templates/specs/design.md` を読み取り
-- 原則のために `{{MICHI_DIR}}/settings/rules/design-principles.md` を読み取り
+- 構造のために `{{MICHI_GLOBAL_DIR}}/settings/templates/specs/design.md` を読み取り
+- 原則のために `{{MICHI_GLOBAL_DIR}}/settings/rules/design-principles.md` を読み取り
 
 2. **設計ドキュメントの生成**:
 - **specs/design.md テンプレート構造と生成指示に厳密に従う**
@@ -342,7 +369,7 @@ project.json で指定された言語で簡潔なサマリーを提供:
 
 ### 基本出力
 
-1. **ステータス**: `{{MICHI_DIR}}/pj/$1/design.md` で設計ドキュメントが生成されたことを確認
+1. **ステータス**: `docs/michi/$1/spec/design.md` および `docs/michi/$1/spec/architecture.md` で設計ドキュメントが生成されたことを確認
 2. **発見タイプ**: 実行された発見プロセス（完全/軽量/最小限）
 3. **主要な発見**: 設計を形成した `research.md` からの2-3の重要な洞察
 4. **次のアクション**: 承認ワークフローガイダンス（安全性とフォールバックを参照）
@@ -374,7 +401,7 @@ project.json で指定された言語で簡潔なサマリーを提供:
 - **推奨アクション**: "最初に要件を生成するために `/michi:create-requirements $1` を実行"
 
 **テンプレート欠落**:
-- **ユーザーメッセージ**: "`{{MICHI_DIR}}/settings/templates/specs/design.md` にテンプレートファイルが欠落しています"
+- **ユーザーメッセージ**: "`{{MICHI_GLOBAL_DIR}}/settings/templates/specs/design.md` にテンプレートファイルが欠落しています"
 - **推奨アクション**: "リポジトリセットアップを確認するか、テンプレートファイルを復元"
 - **フォールバック**: 警告付きでインライン基本構造を使用
 
@@ -383,7 +410,7 @@ project.json で指定された言語で簡潔なサマリーを提供:
 - **続行**: 生成を続行するが、出力に制限を記録
 
 **発見の複雑さが不明確**:
-- **デフォルト**: 完全発見プロセス（`{{MICHI_DIR}}/settings/rules/design-discovery-full.md`）を使用
+- **デフォルト**: 完全発見プロセス（`{{MICHI_GLOBAL_DIR}}/settings/rules/design-discovery-full.md`）を使用
 - **根拠**: 重要なコンテキストを見逃すよりも、過剰に調査する方が良い
 
 **無効な要件ID**:

@@ -30,11 +30,36 @@ argument-hint: <feature-name> [-y] [--sequential]
 
 ### 基本実装
 
+#### ステップ 0: Settings Provisioning Check
+
+**グローバル設定の確認と自動配置**:
+
+1. **バージョンチェック**:
+   - `{{MICHI_GLOBAL_DIR}}/settings/version.json` を読み取り
+   - プラグインバージョン（1.3.0）と比較
+   - 不一致または欠落の場合、Step 0.1 へ
+
+2. **必要ファイルの存在チェック**:
+   - このコマンドに必要なファイルを確認:
+     - `{{MICHI_GLOBAL_DIR}}/settings/rules/tasks-generation.md`
+     - `{{MICHI_GLOBAL_DIR}}/settings/rules/tasks-parallel-analysis.md`
+     - `{{MICHI_GLOBAL_DIR}}/settings/templates/specs/tasks.md`
+   - 欠落がある場合、Step 0.1 へ
+
+3. **Step 0.1: 自動プロビジョニング** (条件付き):
+   - 欠落ファイルのみをコピー
+   - バージョン不一致の場合、全ファイルを更新
+   - `version.json` を更新
+   - ユーザーに通知: "✅ Global settings updated to v1.3.0"
+
+4. **続行**: 元のStep 1へ
+
 #### ステップ 1: コンテキストの読み込み
 
 **必要なすべてのコンテキストを読み取り**:
-- `{{MICHI_DIR}}/pj/$1/project.json`, `requirements.md`, `design.md`
-- `{{MICHI_DIR}}/pj/$1/tasks.md`（存在する場合、マージモード用）
+- `{{MICHI_DIR}}/pj/$1/project.json`
+- `docs/michi/$1/spec/requirements.md`, `docs/michi/$1/spec/design.md`
+- `docs/michi/$1/tasks/tasks.md`（存在する場合、マージモード用）
 - 完全なプロジェクトメモリのために**`{{REPO_ROOT_DIR}}/docs/master/` ディレクトリ全体**
 
 **承認の検証**:
@@ -45,9 +70,9 @@ argument-hint: <feature-name> [-y] [--sequential]
 #### ステップ 2: 実装タスクの生成
 
 **生成ルールとテンプレートの読み込み**:
-- 原則のために `{{MICHI_DIR}}/settings/rules/tasks-generation.md` を読み取り
-- `sequential` が **false** の場合: 並列判定基準のために `{{MICHI_DIR}}/settings/rules/tasks-parallel-analysis.md` を読み取り
-- フォーマットのために `{{MICHI_DIR}}/settings/templates/specs/tasks.md` を読み取り（`(P)` マーカーをサポート）
+- 原則のために `{{MICHI_GLOBAL_DIR}}/settings/rules/tasks-generation.md` を読み取り
+- `sequential` が **false** の場合: 並列判定基準のために `{{MICHI_GLOBAL_DIR}}/settings/rules/tasks-parallel-analysis.md` を読み取り
+- フォーマットのために `{{MICHI_GLOBAL_DIR}}/settings/templates/specs/tasks.md` を読み取り（`(P)` マーカーをサポート）
 
 **すべてのルールに従ってタスクリストを生成**:
 - project.json で指定された言語を使用
@@ -63,7 +88,7 @@ argument-hint: <feature-name> [-y] [--sequential]
 #### ステップ 3: 最終化
 
 **書き込みと更新**:
-- `{{MICHI_DIR}}/pj/$1/tasks.md` を作成/更新
+- `docs/michi/$1/tasks/tasks.md` を作成/更新
 - project.json メタデータを更新:
   - `phase: "tasks-generated"` を設定
   - `approvals.tasks.generated: true, approved: false` を設定
@@ -192,7 +217,7 @@ project.json で指定された言語で簡潔なサマリーを提供:
 
 ### 基本出力
 
-1. **ステータス**: `{{MICHI_DIR}}/pj/$1/tasks.md` でタスクが生成されたことを確認
+1. **ステータス**: `docs/michi/$1/tasks/tasks.md` でタスクが生成されたことを確認
 2. **タスクサマリー**:
    - 合計: X 主要タスク、Y サブタスク
    - すべて Z 要件がカバーされている
@@ -223,7 +248,7 @@ project.json で指定された言語で簡潔なサマリーを提供:
 
 **要件または設計が欠落**:
 - **実行停止**: 両方のドキュメントが存在する必要がある
-- **ユーザーメッセージ**: "`{{MICHI_DIR}}/pj/$1/` に requirements.md または design.md が欠落しています"
+- **ユーザーメッセージ**: "`docs/michi/$1/spec/` に requirements.md または design.md が欠落しています"
 - **推奨アクション**: "最初に要件と設計フェーズを完了"
 
 **不完全な要件カバレッジ**:
@@ -231,7 +256,7 @@ project.json で指定された言語で簡潔なサマリーを提供:
 - **ユーザーアクション必要**: 意図的なギャップを確認するか、タスクを再生成
 
 **テンプレート/ルール欠落**:
-- **ユーザーメッセージ**: "`{{MICHI_DIR}}/settings/` にテンプレートまたはルールファイルが欠落しています"
+- **ユーザーメッセージ**: "`{{MICHI_GLOBAL_DIR}}/settings/` にテンプレートまたはルールファイルが欠落しています"
 - **フォールバック**: 警告付きでインライン基本構造を使用
 - **推奨アクション**: "リポジトリセットアップを確認するか、テンプレートファイルを復元"
 

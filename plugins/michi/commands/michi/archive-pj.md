@@ -20,6 +20,20 @@ argument-hint: <feature-name> [--reason <reason>]
 
 ---
 
+## 変数定義
+
+- `{{MICHI_DIR}}` = `.michi/` （プロジェクト内）
+  - プロジェクトメタデータ: `{{MICHI_DIR}}/pj/`
+  - アーカイブ: `{{MICHI_DIR}}/archive-pj/`
+- `{{MICHI_GLOBAL_DIR}}` = `~/.michi/` （グローバル）
+  - 共通設定: `{{MICHI_GLOBAL_DIR}}/settings/`
+
+**パス解釈の注意点:**
+- このコマンドは `{{MICHI_DIR}}/pj/` から `{{MICHI_DIR}}/archive-pj/` への移動を実行
+- グローバル設定（`{{MICHI_GLOBAL_DIR}}/settings/`）は参照しない
+
+---
+
 <instructions>
 ## コアタスク
 仕様 **$1** をアーカイブディレクトリにアーカイブします。
@@ -28,11 +42,13 @@ argument-hint: <feature-name> [--reason <reason>]
 
 ### 基本実装
 
-1. **仕様の存在確認**: `{{MICHI_DIR}}/pj/$1/` ディレクトリが存在することを確認
-2. **タスク完了チェック**: tasks.md ですべてのタスクが `[x]` としてマークされていることを確認（未完了タスクが存在する場合は警告）
-3. **アーカイブディレクトリの作成**: `{{MICHI_DIR}}/archive-pj/` が存在しない場合は作成
+1. **仕様の存在確認**: `{{MICHI_DIR}}/pj/$1/` と `docs/michi/$1/` ディレクトリが存在することを確認
+2. **タスク完了チェック**: `docs/michi/$1/tasks/tasks.md` ですべてのタスクが `[x]` としてマークされていることを確認（未完了タスクが存在する場合は警告）
+3. **アーカイブディレクトリの作成**: `{{MICHI_DIR}}/archive-pj/` と `docs/michi-archive/` が存在しない場合は作成
 4. **タイムスタンプの生成**: ISO 8601形式（YYYY-MM-DDTHH:MM:SSZ）で現在のタイムスタンプを取得
-5. **仕様の移動**: `{{MICHI_DIR}}/pj/$1/` → `{{MICHI_DIR}}/archive-pj/$1-{timestamp}/`
+5. **仕様の移動**:
+   - メタデータ: `{{MICHI_DIR}}/pj/$1/` → `{{MICHI_DIR}}/archive-pj/$1-{timestamp}/`
+   - 仕様書: `docs/michi/$1/` → `docs/michi-archive/$1-{timestamp}/`
 6. **メタデータの更新**: 移動した project.json にアーカイブタイムスタンプを記録
 
 ### Michi拡張機能

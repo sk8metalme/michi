@@ -23,6 +23,22 @@ argument-hint: <feature-name>
 
 ---
 
+## 変数定義
+
+- `{{MICHI_DIR}}` = `.michi/` （プロジェクト内）
+  - プロジェクトメタデータ: `{{MICHI_DIR}}/pj/`
+- `{{MICHI_GLOBAL_DIR}}` = `~/.michi/` （グローバル）
+  - 共通設定: `{{MICHI_GLOBAL_DIR}}/settings/`
+- `{{REPO_ROOT_DIR}}` = プロジェクトのルートディレクトリ
+  - マスタードキュメント: `{{REPO_ROOT_DIR}}/docs/master/`
+
+**パス解釈の注意点:**
+- このコマンドは `{{MICHI_DIR}}/pj/` と `docs/michi/` の仕様を読み込んで検証
+- マスタードキュメント（`{{REPO_ROOT_DIR}}/docs/master/`）も参照
+- グローバル設定（`{{MICHI_GLOBAL_DIR}}/settings/`）は通常参照しない
+
+---
+
 <instructions>
 ## コアタスク
 承認された仕様に基づいて、機能とタスクの実装を検証します。
@@ -42,7 +58,7 @@ argument-hint: <feature-name>
 
 **機能が提供された場合** (`$1` が存在、`$2` が空):
 - 指定された機能を使用
-- `{{MICHI_DIR}}/pj/$1/tasks.md` のすべての完了タスク `[x]` を検出
+- `docs/michi/$1/tasks/tasks.md` のすべての完了タスク `[x]` を検出
 
 **機能とタスクの両方が提供された場合** (`$1` と `$2` が存在):
 - 指定された機能とタスクのみを検証（例: `user-auth 1.1,1.2`）
@@ -51,9 +67,9 @@ argument-hint: <feature-name>
 
 各検出された機能について:
 - メタデータのために `{{MICHI_DIR}}/pj/<feature>/project.json` を読み取り
-- 要件のために `{{MICHI_DIR}}/pj/<feature>/requirements.md` を読み取り
-- 設計構造のために `{{MICHI_DIR}}/pj/<feature>/design.md` を読み取り
-- タスクリストのために `{{MICHI_DIR}}/pj/<feature>/tasks.md` を読み取り
+- 要件のために `docs/michi/<feature>/spec/requirements.md` を読み取り
+- 設計構造のために `docs/michi/<feature>/spec/design.md` を読み取り
+- タスクリストのために `docs/michi/<feature>/tasks/tasks.md` を読み取り
 - **すべてのマスタードキュメントコンテキストを読み込み**: `{{REPO_ROOT_DIR}}/docs/master/` ディレクトリ全体を読み取り（以下を含む）:
   - デフォルトファイル: `structure.md`, `tech.md`, `product.md`
   - すべてのカスタムマスタードキュメントファイル（モード設定に関係なく）

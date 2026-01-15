@@ -30,16 +30,40 @@ argument-hint: <feature-name>
 
 ### 基本実装
 
+#### ステップ 0: Settings Provisioning Check
+
+**グローバル設定の確認と自動配置**:
+
+1. **バージョンチェック**:
+   - `{{MICHI_GLOBAL_DIR}}/settings/version.json` を読み取り
+   - プラグインバージョン（1.3.0）と比較
+   - 不一致または欠落の場合、Step 0.1 へ
+
+2. **必要ファイルの存在チェック**:
+   - このコマンドに必要なファイルを確認:
+     - `{{MICHI_GLOBAL_DIR}}/settings/rules/gap-analysis.md`
+   - 欠落がある場合、Step 0.1 へ
+
+3. **Step 0.1: 自動プロビジョニング** (条件付き):
+   - 欠落ファイルのみをコピー
+   - バージョン不一致の場合、全ファイルを更新
+   - `version.json` を更新
+   - ユーザーに通知: "✅ Global settings updated to v1.3.0"
+
+4. **続行**: 元のStep 1へ
+
+#### ステップ 1: コンテキストの読み込み
+
 1. **コンテキストの読み込み**:
    - 言語とメタデータのために `{{MICHI_DIR}}/pj/$1/project.json` を読み取り
-   - 要件のために `{{MICHI_DIR}}/pj/$1/requirements.md` を読み取り
+   - 要件のために `docs/michi/$1/spec/requirements.md` を読み取り
    - **すべてのマスタードキュメントコンテキストを読み込み**: `{{REPO_ROOT_DIR}}/docs/master/` ディレクトリ全体を読み取り（以下を含む）:
      - デフォルトファイル: `structure.md`, `tech.md`, `product.md`
      - すべてのカスタムマスタードキュメントファイル（モード設定に関係なく）
      - これにより完全なプロジェクトメモリとコンテキストを提供
 
 2. **分析ガイドラインの読み取り**:
-   - 包括的な分析フレームワークのために `{{MICHI_DIR}}/settings/rules/gap-analysis.md` を読み取り
+   - 包括的な分析フレームワークのために `{{MICHI_GLOBAL_DIR}}/settings/rules/gap-analysis.md` を読み取り
 
 3. **ギャップ分析の実行**:
    - 徹底的な調査のために gap-analysis.md フレームワークに従う

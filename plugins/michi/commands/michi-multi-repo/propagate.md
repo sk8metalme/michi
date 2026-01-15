@@ -14,6 +14,21 @@ argument-hint: <project-name> [--operation init|requirements|design|all]
   - エラーハンドリングとチェックポイント保存
 </background_information>
 
+## パス解釈
+
+このコマンドでは、以下のパスが使用されます：
+
+- **親プロジェクトパス**: Multi-Repoプロジェクトのルートディレクトリ
+  - `.michi/multi-repo/pj/$1/project.json` - プロジェクトメタデータ（親プロジェクト内）
+  - `docs/michi/$1/spec/requirements.md` - 親プロジェクトの要件定義書
+  - `docs/michi/$1/spec/architecture.md` - 親プロジェクトの設計書
+
+- **子リポジトリパス**: 各リポジトリのlocalPathで指定されたディレクトリ
+  - `{localPath}/.michi/pj/` - 各リポジトリのMichiメタデータ
+  - `{localPath}/docs/michi/` - 各リポジトリの仕様書
+
+**重要**: サブエージェントは各リポジトリの`localPath`で作業し、親プロジェクトの仕様（`docs/michi/$1/spec/`）を参照して、リポジトリ固有の仕様を生成します。
+
 <instructions>
 ## コアタスク
 Multi-Repoプロジェクト **$1** の全リポジトリに対して、仕様コマンドを並行実行します。
@@ -120,8 +135,8 @@ C) キャンセル
 **Repository**: {repo.name}
 - 作業ディレクトリ: {repo.localPath}
 - 親プロジェクト参照:
-  - requirements.md: {親プロジェクトパス}/docs/michi/$1/overview/requirements.md
-  - architecture.md: {親プロジェクトパス}/docs/michi/$1/overview/architecture.md
+  - requirements.md: {親プロジェクトパス}/docs/michi/$1/spec/requirements.md
+  - architecture.md: {親プロジェクトパス}/docs/michi/$1/spec/architecture.md
 
 実行コマンド（順次）:
 1. `/michi:launch-pj "{project description}"`
@@ -272,7 +287,7 @@ C) キャンセル
 
 - **親プロジェクト仕様未作成（OPERATION=design以降）**:
   ```
-  エラー: 親プロジェクトの設計書が見つかりません: docs/michi/$1/overview/architecture.md
+  エラー: 親プロジェクトの設計書が見つかりません: docs/michi/$1/spec/architecture.md
 
   先に親プロジェクトの設計を作成してください:
   /michi-multi-repo:create-design $1
