@@ -42,7 +42,7 @@ argument-hint: "<project-description>"
    - `.michi/multi-repo/pj/` 配下の既存ディレクトリを確認
    - 重複する場合は数値サフィックスを追加（例: `20260115-my-project-2`）
 
-### Step 3: ディレクトリ構造の作成
+### Step 2: ディレクトリ構造の作成
 
 以下のディレクトリとファイルを作成:
 
@@ -63,7 +63,7 @@ docs/michi/YYYYMMDD-{name}/
     └── performance/
 ```
 
-### Step 4: メタデータ初期化
+### Step 3: メタデータ初期化
 
 1. **project.jsonの生成**:
    - テンプレート: `templates/multi-repo/project.json`
