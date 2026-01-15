@@ -124,7 +124,7 @@ argument-hint: <project-description>
 
 ### Michi拡張機能
 
-4. **次のステップナビゲーション**:
+1. **次のステップナビゲーション**:
    - ユーザーを `/michi:create-requirements` にガイド（`/base:spec-requirements` ではない）
    - Michiワークフロー概要を表示
 

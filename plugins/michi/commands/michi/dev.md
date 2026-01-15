@@ -756,7 +756,7 @@ if [ "$ARCHIVE_ACTION" = "A" ]; then
     if [ true ]; then
         echo "✅ アーカイブコマンドの案内を表示しました"
         echo ""
-        echo "Archive先: {{MICHI_DIR}}/archive-pj/$1/"
+        echo "Archive先: {{MICHI_DIR}}/archive-pj/$1-{timestamp}/"
     else
         echo "❌ スペックのarchive移動に失敗しました"
     fi
