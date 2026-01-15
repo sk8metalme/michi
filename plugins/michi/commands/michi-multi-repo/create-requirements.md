@@ -95,7 +95,7 @@ Multi-Repoプロジェクト **$1** の要件定義書を生成します。
    - 保守性要件（モニタリング、ログ）
 
 ### Step 4: ファイル保存
-- 出力先: `docs/michi/YYYYMMDD-$1/overview/requirements.md`
+- 出力先: `docs/michi/YYYYMMDD-$1/spec/requirements.md`
 - 既存ファイルがある場合は、上書き確認を実施
 - ファイル保存後、完了メッセージを表示
 
@@ -114,7 +114,7 @@ Multi-Repoプロジェクト **$1** の要件定義書を生成します。
 4. `updated_at` を現在のISO 8601タイムスタンプに更新（最終更新日時を記録）
 5. project.json を保存
 
-**注意**: `project.json` は `.michi/multi-repo/pj/YYYYMMDD-$1/` に配置され、仕様書ドキュメント（`docs/michi/YYYYMMDD-$1/overview/`）とは別に管理されます。
+**注意**: `project.json` は `.michi/multi-repo/pj/YYYYMMDD-$1/` に配置され、仕様書ドキュメント（`docs/michi/YYYYMMDD-$1/spec/`）とは別に管理されます。
 
 ## Multi-Repo固有セクション
 
@@ -142,7 +142,7 @@ Multi-Repoプロジェクト **$1** の要件定義書を生成します。
 ## 出力説明
 以下の情報を出力してください：
 
-1. **生成された要件定義書のパス**: `docs/michi/{YYYYMMDD-project名}/overview/requirements.md`
+1. **生成された要件定義書のパス**: `docs/michi/{YYYYMMDD-project名}/spec/requirements.md`
 2. **含まれるリポジトリ/コンポーネントの一覧**: コンポーネント名と役割の要約
 3. **次のステップ**: 要件定義のレビュー
 4. **要件定義レビューが完了したら**: `/michi-multi-repo:create-design $1` で設計書を生成
@@ -164,7 +164,7 @@ Multi-Repoプロジェクト **$1** の要件定義書を生成します。
 **ユーザーへの出力メッセージ形式**:
 
 生成完了後、以下の情報をユーザーに出力してください：
-- 出力ファイルパス: `docs/michi/{YYYYMMDD-project名}/overview/requirements.md`
+- 出力ファイルパス: `docs/michi/{YYYYMMDD-project名}/spec/requirements.md`
 - 含まれるコンポーネント一覧（コンポーネント名と役割の概要）
 - 次のステップ（レビュー実施、設計書生成コマンドの案内）
 
@@ -193,7 +193,7 @@ Multi-Repoプロジェクト **$1** の要件定義書を生成します。
 
 - **既存ファイル存在**:
   ```
-  警告: 既存の要件定義書が存在します: `docs/michi/{YYYYMMDD-project名}/overview/requirements.md`
+  警告: 既存の要件定義書が存在します: `docs/michi/{YYYYMMDD-project名}/spec/requirements.md`
 
   上書きしてもよろしいですか？ (y/n)
   ```
