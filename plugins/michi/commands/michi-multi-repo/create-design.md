@@ -338,7 +338,7 @@ sequenceDiagram
   エラー: プロジェクト '{project}' が見つかりません。
 
   次のコマンドでプロジェクトを初期化してください：
-  michi multi-repo:init {project}
+  /michi-multi-repo:launch-pj "{project}"
   ```
 
 - **リポジトリアクセス不可**:
