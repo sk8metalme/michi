@@ -41,14 +41,34 @@ argument-hint: <project-description>
 
 3. **ディレクトリ作成**: `{{MICHI_DIR}}/pj/YYYYMMDD-{pj-name}/`
 
-4. **テンプレートを使用してファイルを初期化**:
-   - `{{MICHI_DIR}}/settings/templates/specs/init.json` を読み取り
-   - `{{MICHI_DIR}}/settings/templates/specs/requirements-init.md` を読み取り
-   - プレースホルダーを置換:
-     - `{{FEATURE_NAME}}` → 生成されたプロジェクト名（YYYYMMDD-{pj-name}）
-     - `{{TIMESTAMP}}` → 現在のISO 8601タイムスタンプ
-     - `{{PROJECT_DESCRIPTION}}` → $ARGUMENTS
-   - `spec.json` と `requirements.md` をプロジェクトディレクトリに書き込み
+4. **初期ファイルを生成**:
+   - 以下の構造で `spec.json` を作成:
+     ```json
+     {
+       "name": "YYYYMMDD-{pj-name}",
+       "description": "$ARGUMENTS",
+       "language": "ja",
+       "created_at": "{ISO 8601 timestamp}",
+       "updated_at": "{ISO 8601 timestamp}",
+       "phase": "initialized",
+       "approvals": {
+         "requirements": { "approved": false, "generated": false },
+         "design": { "approved": false, "generated": false },
+         "tasks": { "approved": false, "generated": false }
+       }
+     }
+     ```
+   - 基本構造で `requirements.md` を作成:
+     ```markdown
+     # YYYYMMDD-{pj-name} - 要件定義
+
+     ## プロジェクト概要
+     $ARGUMENTS
+
+     ## 要件
+     <!-- /michi:create-requirements で生成されます -->
+     ```
+   - ファイルをプロジェクトディレクトリ（`{{MICHI_DIR}}/pj/YYYYMMDD-{pj-name}/`）に書き込み
 
 ### Michi拡張機能
 
@@ -66,8 +86,7 @@ argument-hint: <project-description>
 ## ツールガイダンス
 - **Bash** を使用してYYYYMMDD形式の現在日付を取得し、プロジェクト名を生成
 - **Glob** を使用して既存のプロジェクトディレクトリ（`{{MICHI_DIR}}/pj/`）をチェックし、名前の一意性を確認
-- **Read** を使用してテンプレートを取得: `init.json` と `requirements-init.md`
-- **Write** を使用してプレースホルダー置換後に spec.json と requirements.md を作成
+- **Write** を使用して spec.json と requirements.md をインラインで生成・作成
 - ファイル書き込み操作の前に検証を実行
 
 ## 出力説明
