@@ -35,7 +35,7 @@ requirements.md のプロジェクト説明に基づいて、機能 **$1** の�
 
 1. **バージョンチェック**:
    - `{{MICHI_GLOBAL_DIR}}/settings/version.json` を読み取り
-   - プラグインバージョン（1.3.0）と比較
+   - プラグインバージョン（{{PLUGIN_VERSION}}）と比較
    - 不一致または欠落の場合、Step 0.1 へ
 
 2. **必要ファイルの存在チェック**:
@@ -48,7 +48,7 @@ requirements.md のプロジェクト説明に基づいて、機能 **$1** の�
    - 欠落ファイルのみをコピー
    - バージョン不一致の場合、全ファイルを更新
    - `version.json` を更新
-   - ユーザーに通知: "✅ Global settings updated to v1.3.0"
+   - ユーザーに通知: "✅ Global settings updated to v{{PLUGIN_VERSION}}"
 
 4. **続行**: 元のStep 1へ
 
