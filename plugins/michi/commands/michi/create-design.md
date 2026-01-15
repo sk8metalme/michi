@@ -384,7 +384,7 @@ project.json で指定された言語で簡潔なサマリーを提供:
 
 **形式**: 簡潔なMarkdown（200語以下）- これはコマンド出力であり、設計ドキュメント自体ではありません
 
-**注意**: 実際の設計ドキュメントは `{{MICHI_DIR}}/settings/templates/specs/design.md` 構造に従います。
+**注意**: 実際の設計ドキュメントは `{{MICHI_GLOBAL_DIR}}/settings/templates/specs/design.md` 構造に従います。
 
 ## 安全性とフォールバック
 

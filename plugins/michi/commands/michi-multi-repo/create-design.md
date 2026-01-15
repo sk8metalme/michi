@@ -260,9 +260,10 @@ Task(subagent_type='stable-version-auditor', prompt='docs/michi/YYYYMMDD-$1/over
 **設計書承認後**:
 1. 設計書を確認: `docs/michi/{YYYYMMDD-project名}/overview/architecture.md`
 2. **テスト計画を作成**: `/michi-multi-repo:plan-tests {project}` でテスト戦略を策定
-3. **各リポジトリで個別実装**:
-   - リポジトリごとに `/michi:dev` で実装を開始
-   - またはタスクを分割してから実装
+3. **全リポジトリで並行実装（推奨）**:
+   - `/michi-multi-repo:dev-all {project}` で全リポジトリの実装を統一フローで並行管理
+   - 品質ゲート合格後、各リポジトリでTDD実装を自動実行
+   - 注: 個別リポジトリで `/michi:dev` を直接実行するのは、ローカルでの単独実装時のみ
 4. **CI/CD設定**: `michi multi-repo:ci-status {project}` でCI結果を監視
 
 **修正が必要な場合**:

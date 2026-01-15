@@ -60,7 +60,7 @@
 - コアファイル（product.md, architecture.md, tech-stack.md, structure.md, sequence.md）が存在しない
 
 **実行手順**:
-1. `{{MICHI_DIR}}/settings/templates/master-docs/` からテンプレートを読み込む
+1. `{{MICHI_GLOBAL_DIR}}/settings/templates/master-docs/` からテンプレートを読み込む
 2. コードベースを分析（JIT - Just In Time）:
    - `glob_file_search` でソースファイルを検索
    - `read_file` でREADME、package.json等を読み込む
@@ -104,7 +104,7 @@
 **含めてはいけないもの**:
 - **セキュリティ情報**: キー、パスワード、シークレット
 - **エージェント固有ディレクトリ**: `.cursor/`, `.gemini/`, `.claude/`
-- **Michi設定の詳細**: `{{MICHI_DIR}}/settings/` の内容（メタデータであり、プロジェクト知識ではない）
+- **Michi設定の詳細**: `{{MICHI_GLOBAL_DIR}}/settings/` の内容（メタデータであり、プロジェクト知識ではない）
 - **プロジェクト仕様の詳細**: `{{MICHI_DIR}}/pj/` の個別仕様（軽い参照は許容）
 - **網羅的なファイルリスト**: すべてのファイルのリスト化
 

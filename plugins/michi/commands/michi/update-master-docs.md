@@ -196,5 +196,5 @@ Source of Truthとしてレビュー・承認してください。
 - カタログではなくパターンにフォーカス
 - 「ゴールデンルール」: パターンに従う新しいコードはMaster Docs更新を必要としない
 - エージェント固有のツールディレクトリ（例: `.cursor/`, `.gemini/`, `.claude/`）のドキュメント化を避ける
-- `{{MICHI_DIR}}/settings/` の内容はMaster Docsファイルに記載しない（settingsはメタデータであり、プロジェクト知識ではない）
+- `{{MICHI_GLOBAL_DIR}}/settings/` の内容はMaster Docsファイルに記載しない（settingsはメタデータであり、プロジェクト知識ではない）
 - `{{MICHI_DIR}}/pj/` と `{{REPO_ROOT_DIR}}/docs/master/` への軽い参照は許容。他の `.michi/` ディレクトリは避ける

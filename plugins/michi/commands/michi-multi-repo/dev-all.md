@@ -73,7 +73,12 @@ Multi-Repoプロジェクト **$1** の全リポジトリで `/michi:dev` を並
 
 3. 各リポジトリの `localPath` を取得
 
-4. 各リポジトリのタスクファイル確認
+4. プロジェクト名から `{feature}` 名を抽出
+   - `$1` から `YYYYMMDD-` プレフィックスを除去した部分が `{feature}`
+   - 例: `$1` が `20250115-user-auth` の場合、`{feature}` は `user-auth`
+   - 注: `project.json` には `feature` フィールドが含まれていないため、プロジェクト名から導出する
+
+5. 各リポジトリのタスクファイル確認
    - `{localPath}/.michi/pj/{feature}/tasks.md`
 
 ### Step 2.5: localPath 検証
