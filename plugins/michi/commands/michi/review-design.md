@@ -74,8 +74,8 @@ argument-hint: <feature-name>
 
    2. **Phase 4.2: テスト仕様書の作成**
       - テンプレート:
-        - 単体テスト: `docs/user-guide/templates/test-specs/unit-test-spec-template.md`
-        - 統合テスト: `docs/user-guide/templates/test-specs/integration-test-spec-template.md`
+        - 単体テスト: `templates/test-specs/unit-test-spec-template.md`
+        - 統合テスト: `templates/test-specs/integration-test-spec-template.md`
       - 出力先: `.michi/pj/$1/test-specs/`
 
    3. **完了後**: `/michi:create-tasks $1` でタスク生成に進む

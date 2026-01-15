@@ -293,11 +293,11 @@ Phase 4.1で選択したテストタイプに基づいて、テスト仕様書�
 `/michi:plan-tests` を使用した場合、Phase 4.2も自動的に実行されます。
 
 **テンプレート**:
-- 単体テスト: `docs/user-guide/templates/test-specs/unit-test-spec-template.md`
-- 統合テスト: `docs/user-guide/templates/test-specs/integration-test-spec-template.md`
-- E2Eテスト: `docs/user-guide/templates/test-specs/e2e-test-spec-template.md`
-- パフォーマンステスト: `docs/user-guide/templates/test-specs/performance-test-spec-template.md`
-- セキュリティテスト: `docs/user-guide/templates/test-specs/security-test-spec-template.md`
+- 単体テスト: `templates/test-specs/unit-test-spec-template.md`
+- 統合テスト: `templates/test-specs/integration-test-spec-template.md`
+- E2Eテスト: `templates/test-specs/e2e-test-spec-template.md`
+- パフォーマンステスト: `templates/test-specs/performance-test-spec-template.md`
+- セキュリティテスト: `templates/test-specs/security-test-spec-template.md`
 
 **出力先**: `.michi/pj/{feature}/test-specs/`
 

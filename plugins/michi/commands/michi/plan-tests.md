@@ -73,11 +73,11 @@ argument-hint: <feature-name> [-y]
 
 1. **テンプレートの読み込み**
    以下から適切なテンプレートを読み込む：
-   - Unit: `docs/user-guide/templates/test-specs/unit-test-spec-template.md`
-   - Integration: `docs/user-guide/templates/test-specs/integration-test-spec-template.md`
-   - E2E: `docs/user-guide/templates/test-specs/e2e-test-spec-template.md`
-   - Performance: `docs/user-guide/templates/test-specs/performance-test-spec-template.md`
-   - Security: `docs/user-guide/templates/test-specs/security-test-spec-template.md`
+   - Unit: `templates/test-specs/unit-test-spec-template.md`
+   - Integration: `templates/test-specs/integration-test-spec-template.md`
+   - E2E: `templates/test-specs/e2e-test-spec-template.md`
+   - Performance: `templates/test-specs/performance-test-spec-template.md`
+   - Security: `templates/test-specs/security-test-spec-template.md`
 
 2. **設計情報の抽出**
    `design.md` から以下を抽出：
