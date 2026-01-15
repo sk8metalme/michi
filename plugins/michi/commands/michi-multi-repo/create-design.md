@@ -248,7 +248,7 @@ sequenceDiagram
 ## 出力説明
 以下の情報を出力してください：
 
-1. **生成された設計書のパス**: `docs/michi/{project}/overview/architecture.md`
+1. **生成された設計書のパス**: `docs/michi/{YYYYMMDD-project名}/overview/architecture.md`
 2. **分析したリポジトリの一覧**: サービス名と技術スタックの要約
 3. **品質検証結果**:
    - Mermaid図の検証結果
@@ -257,12 +257,26 @@ sequenceDiagram
    - 設計書の確認
    - 各リポジトリでの個別実装
 
-**出力形式**:
+**生成される設計書のテンプレート**:
+
+`templates/multi-repo/overview/architecture.md` に基づき、以下のセクションを含む設計書を生成：
+
+- プロジェクト情報（名前、作成日時）
+- システム構成図（Mermaid C4モデル）
+- アーキテクチャパターン（マイクロサービス構成）
+- サービス横断設計（通信方式、共有コンポーネント）
+- 各サービスの設計（コンポーネント図、インターフェース定義）
+- セキュリティ設計（認証・認可、暗号化）
+- デプロイメントアーキテクチャ（Kubernetes、ネットワーク）
+- データモデル（サービス横断データフロー、スキーマ）
+
+**ユーザーへの出力メッセージ形式**:
+
 ```markdown
 ## 設計書生成完了
 
 ### 出力ファイル
-`docs/michi/{project}/overview/architecture.md`
+`docs/michi/{YYYYMMDD-project名}/overview/architecture.md`
 
 ### 分析したサービス
 - **Frontend**: React + TypeScript（3リポジトリ依存）
@@ -291,10 +305,11 @@ sequenceDiagram
 - Python 3.9 → 3.11 - EOL 6ヶ月以内
 
 ### 次のステップ
-1. 設計書を確認: `docs/michi/{project}/overview/architecture.md`
+1. 設計書を確認: `docs/michi/{YYYYMMDD-project名}/overview/architecture.md`
 2. 技術スタック更新（必要に応じて）
+3. **テスト計画を作成**: `/michi-multi-repo:plan-tests {project}` でテスト戦略を策定
 4. 各リポジトリで実装を開始:
-   - `/michi:launch-pj` で個別仕様を作成
+   - `/michi:dev` で実装を開始
    - または直接実装を開始
 ```
 
@@ -303,7 +318,7 @@ sequenceDiagram
 ### エラーシナリオ
 - **要件定義書未作成**:
   ```
-  エラー: 要件定義書が見つかりません: `docs/michi/{project}/overview/requirements.md`
+  エラー: 要件定義書が見つかりません: `docs/michi/{YYYYMMDD-project名}/overview/requirements.md`
 
   先に要件定義書を生成してください：
   /michi-multi-repo:create-requirements {project}
@@ -327,7 +342,7 @@ sequenceDiagram
 
 - **既存ファイル存在（`-y` フラグなし）**:
   ```
-  警告: 既存の設計書が存在します: `docs/michi/{project}/overview/architecture.md`
+  警告: 既存の設計書が存在します: `docs/michi/{YYYYMMDD-project名}/overview/architecture.md`
 
   上書きしてもよろしいですか？ (y/n)
   または `-y` フラグを使用して自動承認できます。
@@ -339,17 +354,16 @@ sequenceDiagram
 - **依存関係不明**: 基本的なクライアント-サーバー構成を仮定
 - **テンプレート不在**: インラインで基本構造を使用
 
-### 次のフェーズ: 実装
+### 次のフェーズ: テスト計画
 
 **設計書承認後**:
-1. 設計書を確認: `docs/michi/{project}/overview/architecture.md`
+1. 設計書を確認: `docs/michi/{YYYYMMDD-project名}/overview/architecture.md`
+2. **テスト計画を作成**: `/michi-multi-repo:plan-tests {project}` でテスト戦略を策定
 3. **各リポジトリで個別実装**:
-   - リポジトリごとに `/michi:launch-pj` で仕様作成
-   - または直接実装を開始
+   - リポジトリごとに `/michi:dev` で実装を開始
+   - またはタスクを分割してから実装
 4. **CI/CD設定**: `michi multi-repo:ci-status {project}` でCI結果を監視
 
 **修正が必要な場合**:
 - フィードバックを提供し、`/michi-multi-repo:create-design $1` を再実行
 - `-y` フラグで自動上書き可能
-
-think hard
