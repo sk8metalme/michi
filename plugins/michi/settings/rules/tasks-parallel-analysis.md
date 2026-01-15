@@ -117,7 +117,7 @@
 **付与タイミング**:
 - タスク生成時に判定
 - `--sequential` フラグが**指定されていない**場合のみ
-- テンプレート `{{MICHI_DIR}}/settings/templates/specs/tasks.md` のフォーマットをサポート
+- テンプレート `{{MICHI_GLOBAL_DIR}}/settings/templates/specs/tasks.md` のフォーマットをサポート
 
 **付与位置**:
 - 主要タスクレベル: `## 1.2 データモデル実装 (P)`
@@ -132,7 +132,7 @@
 ### 5. 分析手順
 
 **ステップ1: ルールファイルの読み込み**:
-- `{{MICHI_DIR}}/settings/rules/tasks-parallel-analysis.md` を読み取り
+- `{{MICHI_GLOBAL_DIR}}/settings/rules/tasks-parallel-analysis.md` を読み取り
 - 並列判定基準を理解
 
 **ステップ2: タスク依存関係の分析**:

@@ -137,6 +137,6 @@ Master Docsは定期的に更新します：
 
 ## 参照
 
-- **Michiコマンド**: [/michi:update-master-docs](../../.michi/settings/rules/master-docs-principles.md)
-- **更新原則**: [master-docs-principles.md](../../.michi/settings/rules/master-docs-principles.md)
-- **テンプレート**: [templates/master-docs/](../../.michi/settings/templates/master-docs/)
+- **Michiコマンド**: [/michi:update-master-docs](../../rules/master-docs-principles.md)
+- **更新原則**: [master-docs-principles.md](../../rules/master-docs-principles.md)
+- **テンプレート**: [templates/master-docs/](./)
