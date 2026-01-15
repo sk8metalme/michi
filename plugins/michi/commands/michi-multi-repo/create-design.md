@@ -110,7 +110,7 @@ Multi-Repoプロジェクト **$1** の技術設計書を生成します。
 
 architecture.mdにMermaid図が含まれる場合、構文検証を実行:
 
-```
+```text
 IMPORTANT: architecture.mdにMermaid図が含まれる場合、以下の検証を実行してください。
 - 検出: Mermaid図を含むかどうかを確認
 - 検証: 構文エラーを検出（```mermaid ブロックの整合性確認）
@@ -129,7 +129,7 @@ IMPORTANT: architecture.mdにMermaid図が含まれる場合、以下の検証�
 
 `stable-version-auditor` エージェントを使用して技術スタックを監査:
 
-```
+```text
 IMPORTANT: architecture.mdに技術スタック（Node.js、Java、Python、PHP等）が記載されている場合、
 stable-version-auditorエージェントを自動実行してください。
 - 検出: バージョン指定を抽出
@@ -141,7 +141,7 @@ stable-version-auditorエージェントを自動実行してください。
 **実行タイミング**: architecture.md保存直後
 
 **エージェント呼び出し**:
-```
+```python
 Task(subagent_type='stable-version-auditor', prompt='docs/michi/YYYYMMDD-$1/overview/architecture.md に記載された技術スタックのバージョンを監査し、EOLリスクを評価してください')
 ```
 
@@ -237,7 +237,6 @@ sequenceDiagram
     API Gateway-->>Frontend: レスポンス
     Frontend-->>User: 表示
 \`\`\`
-```
 
 ## 重要な制約
 - 実装詳細ではなく、アーキテクチャ設計に焦点を当てる
