@@ -17,32 +17,13 @@ description: GitHub SSoTとマルチプロジェクト管理のコア原則
 
 ### GitHubを真実の源とする
 - **すべての仕様はGitHubで管理** ({{SPEC_DIR}}/pj/)
-- Confluenceは**参照と承認のみ**（編集はGitHubのみ）
 - 重複管理を避ける
-
-### データフロー
-```text
-GitHub ({{SPEC_DIR}}/pj/)  ← 真実の源（編集可能）
-    ↓ 同期
-Confluence ← 表示と承認（読み取り専用）
-```
 
 ## マルチプロジェクト管理
 
 ### プロジェクトの識別
 - すべての操作は {{SPEC_DIR}}/project.json を参照
-- プロジェクトID、JIRAキー、Confluenceラベルを動的に使用
 - プロジェクトID: {{PROJECT_ID}}
-
-### 命名規則
-
-#### Confluenceページ
-- 形式: `[{projectName}] {document_type}`
-- 例: `[{{PROJECT_ID}}] Requirements`
-
-#### JIRA Epic/Story
-- 形式: `[{JIRA_KEY}] {title}`
-- {{SPEC_DIR}}/project.json からプロジェクトメタデータを使用
 
 ## エージェントディレクトリ
 - エージェント設定: {{AGENT_DIR}}

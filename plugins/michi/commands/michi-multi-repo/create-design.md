@@ -4,7 +4,7 @@ allowed-tools: Bash, Glob, Grep, LS, Read, Write, Edit, MultiEdit, Update, WebSe
 argument-hint: <project-name> [-y]
 ---
 
-# Multi-Repo Design Generator
+# Multi-Repo 設計書生成
 
 <background_information>
 - **Mission**: Multi-Repoプロジェクトの包括的な技術設計書を生成
@@ -16,21 +16,20 @@ argument-hint: <project-name> [-y]
 </background_information>
 
 <instructions>
-## Core Task
+## コアタスク
 Multi-Repoプロジェクト **$1** の技術設計書を生成します。
 
-## Execution Steps
+## 実行手順
 
 ### Step 1: コンテキスト読み込み
 1. `.michi/config.json` からプロジェクト情報取得
-   - プロジェクト名、JIRAキー、Confluenceスペース
    - 登録リポジトリ一覧
 2. `docs/michi/$1/overview/requirements.md` から要件読み込み
    - 要件定義書が存在しない場合は、先に `/michi-multi-repo:create-requirements $1` の実行を促す
 3. `.michi/settings/rules/design-principles.md` から設計原則取得（存在する場合）
 4. `.michi/settings/templates/specs/design.md` から構造参照（存在する場合）
 
-### Step 2: Discovery & Analysis
+### Step 2: 発見と分析
 
 **Multi-Repo固有の分析**:
 
@@ -231,7 +230,7 @@ sequenceDiagram
 \`\`\`
 ```
 
-## Important Constraints
+## 重要な制約
 - 実装詳細ではなく、アーキテクチャ設計に焦点を当てる
 - サービス間の境界とインターフェースを明確にする
 - 技術選定の理由を記述する
@@ -240,13 +239,13 @@ sequenceDiagram
 
 </instructions>
 
-## Tool Guidance
+## ツールガイダンス
 - **Read first**: プロジェクト設定、要件定義書、設計原則、テンプレートを読み込み
 - **Glob/Grep**: 各リポジトリの技術スタック調査（ローカルクローンがある場合）
 - **Write last**: 設計書を最後に保存
 - **WebSearch/WebFetch**: 最新の設計パターンやベストプラクティスが必要な場合のみ使用
 
-## Output Description
+## 出力説明
 以下の情報を出力してください：
 
 1. **生成された設計書のパス**: `docs/michi/{project}/overview/architecture.md`
@@ -256,7 +255,6 @@ sequenceDiagram
    - 技術スタックバージョン監査結果
 4. **次のステップ**:
    - 設計書の確認
-   - Confluence同期
    - 各リポジトリでの個別実装
 
 **出力形式**:
@@ -295,15 +293,14 @@ sequenceDiagram
 ### 次のステップ
 1. 設計書を確認: `docs/michi/{project}/overview/architecture.md`
 2. 技術スタック更新（必要に応じて）
-3. Confluenceに同期: `michi multi-repo:confluence-sync {project} --doc-type architecture`
 4. 各リポジトリで実装を開始:
    - `/michi:launch-pj` で個別仕様を作成
    - または直接実装を開始
 ```
 
-## Safety & Fallback
+## 安全性とフォールバック
 
-### Error Scenarios
+### エラーシナリオ
 - **要件定義書未作成**:
   ```
   エラー: 要件定義書が見つかりません: `docs/michi/{project}/overview/requirements.md`
@@ -317,7 +314,7 @@ sequenceDiagram
   エラー: プロジェクト '{project}' が見つかりません。
 
   次のコマンドでプロジェクトを初期化してください：
-  michi multi-repo:init {project} --jira {JIRA_KEY} --confluence-space {SPACE}
+  michi multi-repo:init {project}
   ```
 
 - **リポジトリアクセス不可**:
@@ -336,17 +333,16 @@ sequenceDiagram
   または `-y` フラグを使用して自動承認できます。
   ```
 
-### Fallback Strategy
+### フォールバック戦略
 - **設計原則ファイル不在**: 基本的な設計原則（SOLID、DRY等）を適用
 - **技術スタック不明**: README や設定ファイルから推測、または "未指定" として記載
 - **依存関係不明**: 基本的なクライアント-サーバー構成を仮定
 - **テンプレート不在**: インラインで基本構造を使用
 
-### Next Phase: Implementation
+### 次のフェーズ: 実装
 
 **設計書承認後**:
 1. 設計書を確認: `docs/michi/{project}/overview/architecture.md`
-2. Confluenceに同期: `michi multi-repo:confluence-sync {project} --doc-type architecture`
 3. **各リポジトリで個別実装**:
    - リポジトリごとに `/michi:launch-pj` で仕様作成
    - または直接実装を開始

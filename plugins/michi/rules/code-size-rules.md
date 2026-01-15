@@ -1,32 +1,32 @@
-# Code Size Rules
+# コードサイズルール
 
-## Threshold
+## 閾値
 
-| Metric | Value |
-|--------|-------|
-| Maximum Diff Lines | 500 lines |
-| Warning Threshold | 400 lines |
+| 指標 | 値 |
+|------|-----|
+| 最大差分行数 | 500行 |
+| 警告閾値 | 400行 |
 
-## Target Paths
+## 対象パス
 - src/
 - scripts/
 - test/
 - tests/
 
-## Exclusion Patterns (Lock Files)
+## 除外パターン（ロックファイル）
 - package-lock.json, yarn.lock, pnpm-lock.yaml
 - composer.lock, Gemfile.lock, poetry.lock, Pipfile.lock
 - Cargo.lock, go.sum
 
-## Exclusion Patterns (Generated Files)
+## 除外パターン（生成ファイル）
 - *.min.js, *.min.css, *.map
 - dist/*, build/*, coverage/*, .next/*
 - *.d.ts, *.generated.ts, `__snapshots__/*`
 
-## Status Indicators
+## ステータス表示
 
-| Status | Condition |
-|--------|-----------|
-| ✅ OK | diff < 400 lines |
-| ⚠️ Warning | 400 <= diff < 500 lines |
-| ❌ Exceeded | diff >= 500 lines |
+| ステータス | 条件 |
+|-----------|------|
+| ✅ OK | 差分 < 400行 |
+| ⚠️ 警告 | 400 <= 差分 < 500行 |
+| ❌ 超過 | 差分 >= 500行 |

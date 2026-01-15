@@ -1,6 +1,6 @@
 ---
 name: /michi:launch-pj
-description: JIRA連携チェック付きで新しい仕様を詳細なプロジェクト説明で初期化（Michiバージョン）
+description: 新しい仕様を詳細なプロジェクト説明で初期化
 allowed-tools: Bash, Read, Write, Glob
 argument-hint: <project-description>
 ---
@@ -13,7 +13,6 @@ argument-hint: <project-description>
   - プロジェクト説明から適切な機能名を生成
   - 競合のない一意の仕様構造を作成
   - 次のフェーズ（要件生成）への明確なパスを提供
-  - JIRA/Confluence連携セットアップを確認
 </background_information>
 
 ## 開発ガイドライン
@@ -53,12 +52,7 @@ argument-hint: <project-description>
 
 ### Michi拡張機能
 
-4. **JIRA/Confluence連携チェック**:
-   - 環境変数をチェック: `ATLASSIAN_URL`, `ATLASSIAN_EMAIL`, `ATLASSIAN_API_TOKEN`
-   - 設定済みの場合: 後のフェーズでJIRA同期が利用可能であることを表示
-   - 未設定の場合: `docs/guides/atlassian-integration.md` を参照するセットアップヒントを表示
-
-5. **次のステップナビゲーション**:
+4. **次のステップナビゲーション**:
    - ユーザーを `/michi:create-requirements` にガイド（`/base:spec-requirements` ではない）
    - Michiワークフロー概要を表示
 
@@ -74,7 +68,6 @@ argument-hint: <project-description>
 - **Glob** を使用して既存のプロジェクトディレクトリ（`{{MICHI_DIR}}/pj/`）をチェックし、名前の一意性を確認
 - **Read** を使用してテンプレートを取得: `init.json` と `requirements-init.md`
 - **Write** を使用してプレースホルダー置換後に spec.json と requirements.md を作成
-- **Bash** を使用してJIRA/Confluence連携の環境変数をチェック
 - ファイル書き込み操作の前に検証を実行
 
 ## 出力説明
@@ -108,14 +101,6 @@ echo "2. **設計書を生成**:"
 echo "   /michi:create-design <feature-name>"
 echo ""
 echo "---"
-
-# JIRA連携チェック
-if [ -n "$ATLASSIAN_URL" ] && [ -n "$ATLASSIAN_EMAIL" ] && [ -n "$ATLASSIAN_API_TOKEN" ]; then
-    echo "ℹ️  JIRA連携: 設定済み（タスク生成後にJIRA同期が利用可能）"
-else
-    echo "ℹ️  JIRA連携: 未設定"
-    echo "   設定方法: docs/guides/atlassian-integration.md を参照"
-fi
 echo ""
 ```
 
@@ -134,4 +119,3 @@ echo ""
 
 ---
 
-**Michi統合**: このコマンドは、基本仕様初期化をJIRA/Confluence連携チェックで拡張し、Michiワークフローへのシームレスなナビゲーションを提供します。

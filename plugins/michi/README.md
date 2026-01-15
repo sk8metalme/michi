@@ -7,7 +7,6 @@ AI駆動開発を支援するSpec-Driven Developmentフレームワーク for Cl
 Michiは、AI駆動Spec-Driven Developmentを実現するClaude Codeプラグインです：
 
 - **テスト計画自動化** (Phase 4): テストタイプ選択、テスト仕様書作成
-- **外部ツール連携**: JIRA/Confluence同期、自動チケット作成
 - **品質自動化**: Phase 7.1/8 テスト実行、ライセンス/バージョン監査
 - **TDD実装支援**: Phase 6サブフェーズ品質自動化（6.2:監査→6.3:TDD→6.4:レビュー→6.5:検証→6.8:アーカイブ）
 
@@ -40,18 +39,17 @@ Claude Code内で以下を実行：
 
 | コマンド | 説明 |
 |---------|------|
-| `/michi:launch-pj` | 仕様初期化 + JIRA連携設定確認 |
+| `/michi:launch-pj` | 仕様初期化 |
 | `/michi:create-requirements` | 要件定義 + Ultrathink有効化 |
 | `/michi:create-design` | 設計書作成（Phase 4ガイダンス付き） |
-| `/michi:create-tasks` | タスク分割 + JIRA同期確認 |
+| `/michi:create-tasks` | タスク分割 |
 | `/michi:dev` | TDD実装 + Phase 6品質自動化 |
 | `/michi:show-status` | 仕様ステータス + 品質メトリクス表示 |
-| `/michi:archive-pj` | 完了仕様のアーカイブ + Confluence同期 |
+| `/michi:archive-pj` | 完了仕様のアーカイブ |
 | `/michi:review-design` | テスト計画完了確認付き設計レビュー |
 | `/michi:review-dev` | 実装検証 + 品質ゲート |
-| `/michi:analyze-gap` | Gap分析 + JIRAチケット自動作成 |
+| `/michi:analyze-gap` | Gap分析 |
 | `/michi:plan-tests` | テスト計画（Phase 4統合実行） |
-| `/michi:sync-confluence` | Confluence同期（Markdown→Confluence変換） |
 | `削除済み` | PR関連の問題解決支援 |
 | `/michi:switch-pj` | プロジェクト切り替え |
 
@@ -70,7 +68,6 @@ Claude Code内で以下を実行：
 
 | ルール | 説明 |
 |-------|------|
-| `atlassian-integration` | JIRA/Confluence連携ルール |
 | `michi-core` | Michiコアワークフロールール |
 | `code-size-monitor` | コードサイズ監視ルール |
 | `code-size-rules` | タスク粒度ガイドライン（500行制限） |
@@ -111,7 +108,6 @@ Phase 8: リリース準備
   - Phase 8.1〜8.4: 統合/E2E/パフォーマンス/セキュリティテスト
 
 [連携フェーズ]
-Phase 9: 外部連携（JIRA/Confluence）
 
 [完了フェーズ]
 Phase 10: アーカイブ        (/michi:archive-pj)
@@ -123,7 +119,7 @@ Phase 10: アーカイブ        (/michi:archive-pj)
 2. `/michi:create-requirements {feature}` - 要件定義
 3. `/michi:create-design {feature}` - 設計（Phase 4ガイダンス付き）
 4. `/michi:plan-tests {feature}` - テスト計画（Phase 4）
-5. `/michi:create-tasks {feature}` - タスク分割（JIRA同期確認付き）
+5. `/michi:create-tasks {feature}` - タスク分割
 6. `/michi:dev {feature}` - TDD実装 + 品質自動化
 
 ## 関連リンク

@@ -1,11 +1,11 @@
 ---
 name: /michi:archive-pj
-description: Confluence同期オプション付きで完了した仕様をアーカイブ（Michiバージョン）
+description: 完了した仕様をアーカイブ
 allowed-tools: Bash, Read, Glob, Write, Edit
 argument-hint: <feature-name> [--reason <reason>]
 ---
 
-# Michi: Confluence同期付き仕様アーカイブ
+# Michi: 仕様アーカイブ
 
 <background_information>
 - **ミッション**: 完了した仕様を {{MICHI_DIR}}/archive-pj/ にアーカイブする
@@ -13,7 +13,6 @@ argument-hint: <feature-name> [--reason <reason>]
   - 仕様ディレクトリをアーカイブに移動
   - アーカイブタイムスタンプを記録
   - アーカイブ内の元の仕様にアクセス可能
-  - Confluence同期オプションを提供（設定されている場合）
 </background_information>
 
 ## 開発ガイドライン
@@ -38,12 +37,7 @@ argument-hint: <feature-name> [--reason <reason>]
 
 ### Michi拡張機能
 
-7. **Confluence同期オプション**:
-   - 環境変数をチェック: `ATLASSIAN_URL`, `ATLASSIAN_EMAIL`, `ATLASSIAN_API_TOKEN`
-   - 設定されている場合: アーカイブステータスをConfluenceに同期するオプションを提供
-   - Confluence同期コマンド提案を表示
-
-8. **次のステップガイダンス**:
+7. **次のステップガイダンス**:
    - リリースノート確認を提案
    - 次の機能開発へのガイド
    - 全体進捗確認コマンド
@@ -60,7 +54,6 @@ argument-hint: <feature-name> [--reason <reason>]
 - **Read** を使用して tasks.md の未完了タスクをチェック
 - **Bash** を使用してアーカイブディレクトリを作成し、仕様ディレクトリを移動
 - **Write** または **Edit** を使用してアーカイブメタデータで spec.json を更新
-- **Bash** を使用してConfluence統合のための環境変数をチェック
 
 ## 出力説明
 
@@ -81,9 +74,6 @@ spec.json で指定された言語で以下の出力を提供:
 ✅ Archived specification: <feature>
 📁 Archive path: .michi/archive-pj/<feature>-{timestamp}/
 📝 Reason: <reason>
-
-📚 Optional: Sync archive status to Confluence
-   /michi:sync-confluence <feature> --status archived
 
 📝 Next Steps:
 1. **リリースノート確認**: docs/release-notes/ にリリースノートが保存されているか確認
@@ -137,6 +127,6 @@ mv {{MICHI_DIR}}/archive-pj/{feature-name}-{timestamp} {{MICHI_DIR}}/pj/{feature
 
 ---
 
-**Michi統合**: このコマンドは、Confluence同期オプションとアーカイブ後の次のステップガイダンスで基本仕様アーカイブを拡張し、シームレスなワークフロー継続を実現します。
+**Michi統合**: このコマンドは、アーカイブ後の次のステップガイダンスで基本仕様アーカイブを拡張し、シームレスなワークフロー継続を実現します。
 
 think

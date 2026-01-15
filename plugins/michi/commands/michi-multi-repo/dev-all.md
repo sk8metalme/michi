@@ -201,8 +201,6 @@ repo-spec-executorサブエージェントを使用して、以下のリポジ�
    `michi multi-repo:ci-status $1`
 
 3. PRマージ後、リリース準備:
-   - Confluenceリリース手順書作成
-   - JIRAリリースチケット起票
 ```
 
 **一部失敗時**:

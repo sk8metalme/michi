@@ -4,7 +4,7 @@ globs:
 alwaysApply: false
 ---
 
-# Automatic Document Review
+# ドキュメント自動レビュー
 
 このルールは、Markdownドキュメント作成/編集時に自動的に適用され、ドキュメント品質をチェックします。
 

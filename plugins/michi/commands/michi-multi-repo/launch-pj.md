@@ -1,10 +1,10 @@
 ---
 description: Multi-Repoプロジェクトを初期化し、プロジェクト説明とメタデータを設定
 allowed-tools: Bash, Glob, Read, Write, Edit
-argument-hint: "<project-description>" --jira <JIRA_KEY> --confluence-space <SPACE>
+argument-hint: "<project-description>"
 ---
 
-# Multi-Repo Specification Initialization
+# Multi-Repo 仕様初期化
 
 <background_information>
 - **Mission**: Multi-Repoプロジェクトの初期化（`michi multi-repo:init` の代替）
@@ -17,34 +17,22 @@ argument-hint: "<project-description>" --jira <JIRA_KEY> --confluence-space <SPA
 </background_information>
 
 <instructions>
-## Core Task
+## コアタスク
 プロジェクト説明 **$1** から Multi-Repoプロジェクトを初期化し、`michi multi-repo:init` と同等の機能をAIコマンドとして提供します。
 
 ## 引数解析
 
 引数の形式:
 ```
-/michi-multi-repo:launch-pj "<プロジェクト説明>" --jira <JIRA_KEY> --confluence-space <SPACE>
+/michi-multi-repo:launch-pj "<プロジェクト説明>"
 ```
 
 パラメータ:
 - **$1**: プロジェクト説明（必須） - 例: "マイクロサービスアーキテクチャでECサイトを構築"
-- **--jira**: JIRAプロジェクトキー（必須） - 例: MSV
-- **--confluence-space**: Confluenceスペースキー（必須） - 例: MSV
 
-## Execution Steps
+## 実行手順
 
-### Step 1: 引数解析とバリデーション
-
-1. **プロジェクト説明の取得**: $1 からプロジェクト説明を抽出
-2. **JIRA/Confluenceキーの取得**:
-   - `--jira` オプションの値を取得（なければエラー）
-   - `--confluence-space` オプションの値を取得（なければエラー）
-3. **バリデーション**:
-   - JIRAキー: 2-10文字の大文字英字のみ（正規表現: `^[A-Z]{2,10}$`）
-   - Confluenceスペースキー: 空でない文字列
-
-### Step 2: プロジェクト名の生成
+### Step 1: プロジェクト名の生成
 
 1. **feature-name形式に変換**:
    - プロジェクト説明から簡潔なプロジェクト名を生成
@@ -85,8 +73,6 @@ docs/michi/{project-name}/
    - プレースホルダー置換:
      - `{{PROJECT_NAME}}` → 生成されたプロジェクト名
      - `{{CREATED_AT}}` → 現在のISO 8601タイムスタンプ
-     - `{{JIRA_KEY}}` → JIRAキー
-     - `{{CONFLUENCE_SPACE}}` → Confluenceスペースキー
    - 出力先: `docs/michi/{project-name}/spec.json`
 
 2. **requirements.mdの初期化**:
@@ -109,30 +95,26 @@ docs/michi/{project-name}/
    ```json
    {
      "name": "{project-name}",
-     "jiraKey": "{JIRA_KEY}",
-     "confluenceSpace": "{CONFLUENCE_SPACE}",
      "createdAt": "{ISO 8601 timestamp}",
      "repositories": []
    }
    ```
 3. **保存**: `.michi/config.json` を保存
 
-## Important Constraints
+## 重要な制約
 - プロジェクト名は1-100文字、パストラバーサル文字（`/`, `\`, `..`）、制御文字は禁止
-- JIRAキーは2-10文字の大文字英字のみ
-- Confluenceスペースキーは空でない文字列
 - 既存プロジェクト名と重複する場合は数値サフィックスを自動追加
 - DO NOT generate requirements/design at this stage（要件・設計は後続コマンドで生成）
 
 </instructions>
 
-## Tool Guidance
+## ツールガイダンス
 - **Glob**: `.michi/config.json` 存在確認、プロジェクト名の一意性チェック
 - **Read**: テンプレートファイル読み込み、config.json 読み込み
 - **Write**: spec.json、requirements.md、config.json、その他テンプレート出力
 - **Edit**: config.json の multiRepoProjects 配列に追加（必要に応じて）
 
-## Output Description
+## 出力説明
 日本語で以下の情報を出力してください:
 
 1. **生成されたプロジェクト名**: `{project-name}` 形式（1-2文で理由を説明）
@@ -175,31 +157,21 @@ docs/michi/{project-name}/
    \`\`\`bash
    /michi-multi-repo:create-design {project}
    \`\`\`
-
-4. **Confluenceに同期**:
-   \`\`\`bash
-   michi multi-repo:confluence-sync {project}
-   \`\`\`
 ```
 
-## Safety & Fallback
+## 安全性とフォールバック
 
-### Error Scenarios
+### エラーシナリオ
 
 - **引数不足**:
   ```
   エラー: 必須パラメータが不足しています。
 
   使用方法:
-  /michi-multi-repo:launch-pj "<プロジェクト説明>" --jira <JIRA_KEY> --confluence-space <SPACE>
+  /michi-multi-repo:launch-pj "<プロジェクト説明>"
 
   例:
-  /michi-multi-repo:launch-pj "マイクロサービスでECサイト構築" --jira MSV --confluence-space MSV
-  ```
-
-- **JIRAキーが不正**:
-  ```
-  エラー: JIRAキーは2-10文字の大文字英字のみです（例: MSV, PROJ）
+  /michi-multi-repo:launch-pj "マイクロサービスでECサイト構築"
   ```
 
 - **プロジェクト名重複**:
@@ -217,7 +189,7 @@ docs/michi/{project-name}/
   michi init
   ```
 
-### Fallback Strategy
+### フォールバック戦略
 - プロジェクト名生成が曖昧な場合: 2-3の候補を提示し、ユーザーに選択を求める
 - テンプレートファイル不在: エラーメッセージと対処方法を表示
 - ディレクトリ作成失敗: パーミッションまたはディスク容量の確認を促す

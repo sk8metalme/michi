@@ -1,6 +1,6 @@
 ---
 name: /michi:create-requirements
-description: ultrathink有効で包括的な要件定義書を生成（Michiバージョン）
+description: ultrathink有効で包括的な要件定義書を生成
 allowed-tools: Bash, Glob, Grep, LS, Read, Write, Edit, MultiEdit, Update, WebSearch, WebFetch
 argument-hint: <feature-name>
 ---
@@ -59,26 +59,6 @@ requirements.md のプロジェクト説明に基づいて、機能 **$1** の�
    - 拡張思考（ultrathink）がデフォルトで有効
    - より深い分析とより包括的な要件定義を提供
 
-6. **JIRA/Confluence統合事前チェック**:
-   - 実行開始時に環境変数をチェック:
-     ```bash
-     echo "=== Michi Requirements Generation ==="
-     echo ""
-
-     # JIRA連携チェック
-     if [ -n "$ATLASSIAN_URL" ] && [ -n "$ATLASSIAN_EMAIL" ] && [ -n "$ATLASSIAN_API_TOKEN" ]; then
-         JIRA_CONFIGURED=true
-         echo "✅ JIRA連携: 設定済み"
-     else
-         JIRA_CONFIGURED=false
-         echo "⚠️  JIRA連携: 未設定"
-         echo "   ヒント: Phase 9（タスクのJIRA同期）を利用する場合は設定が必要です"
-         echo "   設定方法: docs/guides/atlassian-integration.md"
-     fi
-     echo ""
-     ```
-   - Phase 9（JIRA同期）の準備状況を表示
-
 ## 重要な制約
 - HOWではなくWHATに焦点を当てる（実装詳細なし）
 - 要件はテスト可能で検証可能でなければならない
@@ -126,12 +106,6 @@ echo "- フィードバックを提供し、再度実行:"
 echo "  /michi:create-requirements $1"
 echo ""
 echo "---"
-
-if [ "$JIRA_CONFIGURED" = "true" ]; then
-    echo "ℹ️  JIRA連携: 設定済み"
-else
-    echo "ℹ️  JIRA連携: 未設定"
-fi
 echo "ℹ️  Ultrathink: 有効（深い分析モード）"
 echo ""
 ```
@@ -173,6 +147,5 @@ echo ""
 
 ---
 
-**Michi統合**: このコマンドは、ultrathink自動有効化とJIRA/Confluence統合事前チェックで基本要件定義生成を拡張し、より深い分析とMichiワークフローへのシームレスなナビゲーションを提供します。
 
 think hard

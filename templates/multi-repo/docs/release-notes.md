@@ -3,8 +3,6 @@
 ## プロジェクト情報
 
 - **プロジェクト名**: {{PROJECT_NAME}}
-- **JIRAキー**: {{JIRA_KEY}}
-- **Confluenceスペース**: {{CONFLUENCE_SPACE}}
 - **作成日時**: {{CREATED_AT}}
 
 ## リリースノート一覧
@@ -41,7 +39,6 @@
 
 **フォーマット例**:
 ```
-- [機能名] 簡潔な説明 (関連JIRA: {{JIRA_KEY}}-XXX)
 ```
 
 ### 改善 (Improvements)
@@ -50,7 +47,6 @@
 
 **フォーマット例**:
 ```
-- [改善内容] 詳細説明 (関連JIRA: {{JIRA_KEY}}-XXX)
 ```
 
 ### バグ修正 (Bug Fixes)
@@ -59,7 +55,6 @@
 
 **フォーマット例**:
 ```
-- [バグの内容] 修正内容 (関連JIRA: {{JIRA_KEY}}-XXX)
 ```
 
 ### Breaking Changes
@@ -69,7 +64,6 @@
 
 **フォーマット例**:
 ```
-- [変更内容] 影響範囲とマイグレーション手順 (関連JIRA: {{JIRA_KEY}}-XXX)
 ```
 
 ### 既知の問題 (Known Issues)
@@ -79,18 +73,9 @@
 
 **フォーマット例**:
 ```
-- [問題の内容] 回避策または対応予定 (関連JIRA: {{JIRA_KEY}}-XXX)
 ```
 
 ---
-
-## Confluence同期
-
-このリリースノートをConfluenceに同期するには、以下のコマンドを実行してください:
-
-```bash
-npm run michi multi-repo:sync {{PROJECT_NAME}} --doc release-notes
-```
 
 ## 変更履歴
 

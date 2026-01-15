@@ -3,8 +3,6 @@
 ## プロジェクト情報
 
 - **プロジェクト名**: {{PROJECT_NAME}}
-- **JIRAキー**: {{JIRA_KEY}}
-- **Confluenceスペース**: {{CONFLUENCE_SPACE}}
 - **最終更新**: {{CREATED_AT}}
 
 ## CI結果サマリー

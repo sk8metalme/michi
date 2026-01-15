@@ -4,7 +4,7 @@ allowed-tools: Bash, Glob, Grep, LS, Read, Write, Edit, MultiEdit, Update, WebSe
 argument-hint: <project-name>
 ---
 
-# Multi-Repo Requirements Generation
+# Multi-Repo 要件定義書生成
 
 <background_information>
 - **Mission**: Multi-Repoプロジェクトの包括的な要件定義書をEARS形式で生成
@@ -16,10 +16,10 @@ argument-hint: <project-name>
 </background_information>
 
 <instructions>
-## Core Task
+## コアタスク
 Multi-Repoプロジェクト **$1** の要件定義書を生成します。
 
-## Execution Steps
+## 実行手順
 
 ### Step 1: プロジェクト情報の取得
 1. `.michi/config.json` を読み込み、プロジェクト `$1` の情報を取得
@@ -41,7 +41,6 @@ Multi-Repoプロジェクト **$1** の要件定義書を生成します。
 以下のセクションを含む要件定義書を生成します：
 
 1. **プロジェクト概要**
-   - プロジェクト名、JIRAキー、Confluenceスペース
    - 複数リポジトリを統合したシステムの概要
    - ビジネス価値
 
@@ -118,7 +117,7 @@ graph TB
 - スキーマ: { userId, email, createdAt }
 ```
 
-## Important Constraints
+## 重要な制約
 - EARS形式を厳守（When/If/While/Where/The system shall）
 - サービス名を明確にする（例: The Frontend Service shall...）
 - 要件はテスト可能であること
@@ -126,19 +125,18 @@ graph TB
 
 </instructions>
 
-## Tool Guidance
+## ツールガイダンス
 - **Read first**: プロジェクト設定、EARS形式ルール、テンプレートを読み込み
 - **Write last**: 要件定義書を最後に保存
 - **WebSearch/WebFetch**: 外部ドメイン知識が必要な場合のみ使用
 
-## Output Description
+## 出力説明
 以下の情報を出力してください：
 
 1. **生成された要件定義書のパス**: `docs/michi/{project}/overview/requirements.md`
 2. **含まれるリポジトリ/サービスの一覧**: サービス名と役割の要約
 3. **次のステップ**:
    - `/michi-multi-repo:create-design $1` で設計書を生成
-   - `michi multi-repo:confluence-sync $1 --doc-type requirements` でConfluenceに同期
 
 **出力形式**:
 ```markdown
@@ -155,18 +153,17 @@ graph TB
 ### 次のステップ
 1. 要件定義書を確認: `docs/michi/{project}/overview/requirements.md`
 2. 設計書を生成: `/michi-multi-repo:create-design {project}`
-3. Confluenceに同期: `michi multi-repo:confluence-sync {project} --doc-type requirements`
 ```
 
-## Safety & Fallback
+## 安全性とフォールバック
 
-### Error Scenarios
+### エラーシナリオ
 - **プロジェクト未登録**:
   ```
   エラー: プロジェクト '{project}' が見つかりません。
 
   次のコマンドでプロジェクトを初期化してください：
-  michi multi-repo:init {project} --jira {JIRA_KEY} --confluence-space {SPACE}
+  michi multi-repo:init {project}
   ```
 
 - **リポジトリ未登録**:
@@ -190,7 +187,7 @@ graph TB
   - `.michi/settings/rules/ears-format.md` が存在しない場合、基本的なEARS形式を使用
   - 警告メッセージを表示
 
-### Fallback Strategy
+### フォールバック戦略
 - ローカルクローンがないリポジトリ: 設定情報（名前、URL）のみから推測
 - 技術スタック不明: "未指定" として記載
 - 依存関係不明: 基本的なクライアント-サーバー構成を仮定

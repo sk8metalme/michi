@@ -4,8 +4,6 @@
   "updated_at": "{{CREATED_AT}}",
   "language": "ja",
   "phase": "initialized",
-  "jira_key": "{{JIRA_KEY}}",
-  "confluence_space": "{{CONFLUENCE_SPACE}}",
   "approvals": {
     "requirements": {
       "generated": false,
