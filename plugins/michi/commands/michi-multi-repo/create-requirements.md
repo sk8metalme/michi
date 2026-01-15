@@ -178,8 +178,8 @@ graph TB
 
 1. **生成された要件定義書のパス**: `docs/michi/{YYYYMMDD-project名}/overview/requirements.md`
 2. **含まれるリポジトリ/コンポーネントの一覧**: コンポーネント名と役割の要約
-3. **次のステップ**:
-   - `/michi-multi-repo:create-design $1` で設計書を生成
+3. **次のステップ**: 要件定義のレビュー
+4. **要件定義レビューが完了したら**: `/michi-multi-repo:create-design $1` で設計書を生成
 
 **生成される要件定義書のテンプレート**:
 
@@ -225,7 +225,7 @@ graph TB
   エラー: プロジェクト '{project}' が見つかりません。
 
   次のコマンドでプロジェクトを初期化してください：
-  michi multi-repo:init {project}
+  /michi-multi-repo:launch-pj "{project}"
   ```
 
 - **リポジトリ未登録**:
