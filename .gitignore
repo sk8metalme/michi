@@ -81,13 +81,9 @@ docs/tmp/
 .~*.md  # Markdownエディタのロックファイル
 
 # ============================================================
-# MCP Credentials (local only - use template for sharing)
-# ============================================================
-~/.cursor/mcp.json
-
-# ============================================================
 # IDE-specific configurations
 # ============================================================
+# Note: MCP credentials are typically stored at ~/.cursor/mcp.json (outside repo)
 .claude/
 .cursor/
 
