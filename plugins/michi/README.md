@@ -176,14 +176,14 @@ Claude: TDD実装を開始します。[dev を自動実行]
 Michi ワークフローフェーズ:
 
 [計画フェーズ]
-Phase 1: 仕様初期化         (/michi:launch-pj)
-Phase 2: 要件定義           (/michi:create-requirements)
-Phase 3: 設計               (/michi:create-design)
-Phase 4: テスト計画         (/michi:plan-tests)
-Phase 5: タスク分割         (/michi:create-tasks)
+Phase 1: 仕様初期化         (launch-pj)
+Phase 2: 要件定義           (create-requirements)
+Phase 3: 設計               (create-design)
+Phase 4: テスト計画         (plan-tests)
+Phase 5: タスク分割         (create-tasks)
 
 [実装フェーズ]
-Phase 6: TDD実装            (/michi:dev)
+Phase 6: TDD実装            (dev)
   - Phase 6.1: コンテキストロード
   - Phase 6.2: 事前品質監査（License/Version Audit）
   - Phase 6.3: TDD実装サイクル（RED→GREEN→REFACTOR）
@@ -206,7 +206,7 @@ Phase 8: リリース準備
 [連携フェーズ]
 
 [完了フェーズ]
-Phase 10: アーカイブ        (/michi:archive-pj)
+Phase 10: アーカイブ        (archive-pj)
 ```
 
 ## 推奨ワークフロー

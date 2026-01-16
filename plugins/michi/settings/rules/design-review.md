@@ -184,13 +184,15 @@ GO決定後、Phase 4（テスト計画）の完了状況を確認します：
 - [ ] テスト仕様書が作成されている（Phase 4.2）
 
 **未完了の場合の推奨アクション**:
-1. Phase 4.1-4.2: テスト計画の作成
-   - `/michi:plan-tests {feature}` コマンドを実行
-   - 設計書の Testing Strategy セクションを基にテストタイプを対話的に選択
-   - テスト仕様書を自動生成（テンプレート: `templates/test-specs/unit-test-spec-template.md`）
-   - 出力先: `.michi/pj/{feature}/test-specs/`
 
-2. 完了後: `/michi:create-tasks {feature}` でタスク生成に進む
+#### Phase 4.1-4.2: テスト計画の作成
+- `/michi:plan-tests {feature}` コマンドを実行
+- 設計書の Testing Strategy セクションを基にテストタイプを対話的に選択
+- テスト仕様書を自動生成（テンプレート: `templates/test-specs/unit-test-spec-template.md`）
+- 出力先: `.michi/pj/{feature}/test-specs/`
+
+#### 完了後の次のステップ
+- `/michi:create-tasks {feature}` でタスク生成に進む
 
 ---
 
