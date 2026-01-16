@@ -1,15 +1,16 @@
-# Michi - Claude Code Plugin
+# Michi - Claude Code Skill
 
 AI駆動開発を支援するSpec-Driven Developmentフレームワーク for Claude Code
 
 ## 概要
 
-Michiは、AI駆動Spec-Driven Developmentを実現するClaude Codeプラグインです：
+Michiは、AI駆動Spec-Driven Developmentを実現するClaude Codeスキルです：
 
+- **自動発動**: Claude が文脈から自動的に適切なタイミングでスキルを発動
 - **テスト計画自動化** (Phase 4): テストタイプ選択、テスト仕様書作成
-- **外部ツール連携**: JIRA/Confluence同期、自動チケット作成
 - **品質自動化**: Phase 7.1/8 テスト実行、ライセンス/バージョン監査
 - **TDD実装支援**: Phase 6サブフェーズ品質自動化（6.2:監査→6.3:TDD→6.4:レビュー→6.5:検証→6.8:アーカイブ）
+- **マルチリポジトリ対応**: 複数リポジトリにまたがるプロジェクトの統合仕様管理
 
 ## インストール
 
@@ -34,43 +35,135 @@ Claude Code内で以下を実行：
 /plugin install michi@yourorg
 ```
 
-## 利用可能なコマンド
+### インストール後のセットアップ
 
-### Michiコマンド (14個)
+プラグインインストール後、グローバル設定をセットアップするために以下を実行してください：
 
-| コマンド | 説明 |
-|---------|------|
-| `/michi:launch-pj` | 仕様初期化 + JIRA連携設定確認 |
-| `/michi:create-requirements` | 要件定義 + Ultrathink有効化 |
-| `/michi:create-design` | 設計書作成（Phase 4ガイダンス付き） |
-| `/michi:create-tasks` | タスク分割 + JIRA同期確認 |
-| `/michi:dev` | TDD実装 + Phase 6品質自動化 |
-| `/michi:show-status` | 仕様ステータス + 品質メトリクス表示 |
-| `/michi:archive-pj` | 完了仕様のアーカイブ + Confluence同期 |
-| `/michi:review-design` | テスト計画完了確認付き設計レビュー |
-| `/michi:review-dev` | 実装検証 + 品質ゲート |
-| `/michi:analyze-gap` | Gap分析 + JIRAチケット自動作成 |
-| `/michi:plan-tests` | テスト計画（Phase 4統合実行） |
-| `/michi:sync-confluence` | Confluence同期（Markdown→Confluence変換） |
-| `削除済み` | PR関連の問題解決支援 |
-| `/michi:switch-pj` | プロジェクト切り替え |
+```bash
+# プラグインディレクトリに移動
+cd ~/.claude/plugins/michi  # または実際のインストール先
 
-### マルチリポジトリコマンド (6個)
+# セットアップスクリプトを実行
+bash scripts/setup.sh
+```
 
-| コマンド | 説明 |
-|---------|------|
-| `/michi-multi-repo:launch-pj` | マルチリポプロジェクト初期化 |
-| `/michi-multi-repo:create-requirements` | 要件定義書生成 |
-| `/michi-multi-repo:create-design` | 設計書生成（AI支援） |
-| `/michi-multi-repo:review-cross` | クロスリポジトリ仕様レビュー |
-| `/michi-multi-repo:propagate` | 各リポジトリへの仕様展開（並列実行） |
-| `/michi-multi-repo:dev-all` | 全リポジトリ実装（並列実行） |
+これにより、共通のルールとテンプレートが `~/.michi/settings/` に配置されます。
 
-## ルール (6個)
+**配置される内容**:
+- 9つのルールファイル（EARS形式、設計原則、発見プロセス、レビュー基準など）
+- 4つのspec用テンプレート（要件定義、設計、調査ログ、タスク）
+- マスタードキュメント用テンプレート
+
+**注意**: この設定は全プロジェクトで共通利用されます。プロジェクト固有の設定は各プロジェクトの `.michi/` ディレクトリで管理されます。
+
+## 使用方法
+
+Michiスキルは2つの方法で使用できます：
+
+### 1. 自動発動（推奨）
+
+Claude が会話の文脈から自動的に適切なタイミングでスキルを発動します。
+
+**例**:
+```
+ユーザー: 新しいプロジェクトを開始したい。ユーザー認証機能を実装する。
+Claude: プロジェクトを初期化します。[launch-pj を自動実行]
+
+ユーザー: 要件定義したい
+Claude: 要件定義書を作成します。[create-requirements を自動実行]
+
+ユーザー: 設計書を作成
+Claude: 設計書を作成します。[create-design を自動実行]
+
+ユーザー: 実装したい
+Claude: TDD実装を開始します。[dev を自動実行]
+```
+
+### 2. 明示的な発動
+
+スキルを直接呼び出すこともできます：
+
+```bash
+# プロジェクト初期化
+/michi launch-pj "ユーザー認証機能"
+
+# 要件定義
+/michi create-requirements user-auth
+
+# 設計書作成
+/michi create-design user-auth
+
+# テスト計画
+/michi plan-tests user-auth
+
+# タスク分割
+/michi create-tasks user-auth
+
+# TDD実装
+/michi dev user-auth
+
+# ステータス確認
+/michi show-status user-auth
+
+# マルチリポジトリプロジェクト初期化
+/michi-multi-repo launch-pj "EC Platform" --jira KEY --confluence-space SPACE
+```
+
+## 主要機能（19機能）
+
+### プロジェクト管理（4機能）
+
+| 機能 | 説明 |
+|------|------|
+| `launch-pj` | 仕様初期化 |
+| `show-status` | 仕様ステータス + 品質メトリクス表示 |
+| `archive-pj` | 完了仕様のアーカイブ |
+| `switch-pj` | プロジェクト切り替え |
+
+### 仕様作成（3機能）
+
+| 機能 | 説明 |
+|------|------|
+| `create-requirements` | 要件定義 + Ultrathink有効化 |
+| `create-design` | 設計書作成（Phase 4ガイダンス付き） |
+| `update-master-docs` | マスタードキュメント更新 |
+
+### テスト計画（1機能）
+
+| 機能 | 説明 |
+|------|------|
+| `plan-tests` | テスト計画（Phase 4統合実行） |
+
+### 開発実行（2機能）
+
+| 機能 | 説明 |
+|------|------|
+| `create-tasks` | タスク分割 |
+| `dev` | TDD実装 + Phase 6品質自動化 |
+
+### レビュー・検証（3機能）
+
+| 機能 | 説明 |
+|------|------|
+| `review-design` | テスト計画完了確認付き設計レビュー |
+| `review-dev` | 実装検証 + 品質ゲート |
+| `analyze-gap` | Gap分析 |
+
+### マルチリポジトリ（6機能）
+
+| 機能 | 説明 |
+|------|------|
+| `multi-repo:launch-pj` | マルチリポプロジェクト初期化 |
+| `multi-repo:create-requirements` | 要件定義書生成 |
+| `multi-repo:create-design` | 設計書生成（AI支援） |
+| `multi-repo:review-cross` | クロスリポジトリ仕様レビュー |
+| `multi-repo:propagate` | 各リポジトリへの仕様展開（並列実行） |
+| `multi-repo:dev-all` | 全リポジトリ実装（並列実行） |
+
+## ルール (5個)
 
 | ルール | 説明 |
 |-------|------|
-| `atlassian-integration` | JIRA/Confluence連携ルール |
 | `michi-core` | Michiコアワークフロールール |
 | `code-size-monitor` | コードサイズ監視ルール |
 | `code-size-rules` | タスク粒度ガイドライン（500行制限） |
@@ -111,7 +204,6 @@ Phase 8: リリース準備
   - Phase 8.1〜8.4: 統合/E2E/パフォーマンス/セキュリティテスト
 
 [連携フェーズ]
-Phase 9: 外部連携（JIRA/Confluence）
 
 [完了フェーズ]
 Phase 10: アーカイブ        (/michi:archive-pj)
@@ -119,12 +211,36 @@ Phase 10: アーカイブ        (/michi:archive-pj)
 
 ## 推奨ワークフロー
 
-1. `/michi:launch-pj "description"` - 仕様の初期化
-2. `/michi:create-requirements {feature}` - 要件定義
-3. `/michi:create-design {feature}` - 設計（Phase 4ガイダンス付き）
-4. `/michi:plan-tests {feature}` - テスト計画（Phase 4）
-5. `/michi:create-tasks {feature}` - タスク分割（JIRA同期確認付き）
-6. `/michi:dev {feature}` - TDD実装 + 品質自動化
+### 自動発動の場合
+
+```
+ユーザー: 新しいプロジェクトを開始したい。ユーザー認証機能を実装する。
+  → Claude が launch-pj を自動実行
+
+ユーザー: 要件定義したい
+  → Claude が create-requirements を自動実行
+
+ユーザー: 設計書を作成
+  → Claude が create-design を自動実行
+
+ユーザー: テスト計画を立てたい
+  → Claude が plan-tests を自動実行
+
+ユーザー: タスクに分割したい
+  → Claude が create-tasks を自動実行
+
+ユーザー: 実装したい
+  → Claude が dev を自動実行
+```
+
+### 明示的発動の場合
+
+1. `/michi launch-pj "description"` - 仕様の初期化
+2. `/michi create-requirements {feature}` - 要件定義
+3. `/michi create-design {feature}` - 設計（Phase 4ガイダンス付き）
+4. `/michi plan-tests {feature}` - テスト計画（Phase 4）
+5. `/michi create-tasks {feature}` - タスク分割
+6. `/michi dev {feature}` - TDD実装 + 品質自動化
 
 ## 関連リンク
 
