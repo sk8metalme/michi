@@ -6,7 +6,7 @@
 
 ## 適用場面
 
-- `/michi:review-design` コマンドで設計書をレビューする際
+- `/michi review-design` コマンドで設計書をレビューする際
 - 設計フェーズ完了後、タスク生成前の検証時
 - 設計書の品質チェック時
 
@@ -243,13 +243,13 @@ GO決定後、Phase 4（テスト計画）の完了状況を確認します：
 
 1. **フィードバックのレビュー**: 改善提案を確認
 2. **テスト計画の確認**: Phase 4 が完了しているか確認
-3. **タスク生成**: `/michi:create-tasks {feature}` で実装タスクを生成
+3. **タスク生成**: `/michi create-tasks {feature}` で実装タスクを生成
 
 ### NO-GO決定の場合
 
 1. **クリティカルな問題への対処**: 特定された問題を修正
-2. **設計の再生成**: `/michi:create-design {feature}` を再実行
-3. **再検証**: `/michi:review-design {feature}` で再度レビュー
+2. **設計の再生成**: `/michi create-design {feature}` を再実行
+3. **再検証**: `/michi review-design {feature}` で再度レビュー
 
 ---
 
