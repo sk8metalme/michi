@@ -1,29 +1,48 @@
+# ============================================================
+# .gitignore - Michi Project (Markdown-based Claude Code Skill)
+# Version: v1.3.0+ optimized
+# Last Updated: 2026-01-16
+# ============================================================
+
+# ============================================================
 # Backup Files
-# Exclude backup files created by ai-agent-setup scripts
-*.backup.*  # AI設定スクリプト生成バックアップ（ダブルエクステンション）
+# ============================================================
+# AI設定スクリプト生成バックアップ（ダブルエクステンション）
+*.backup.*
 *.bak
 *~
 .#*
 #*#
 .michi-backup-*  # Michi バックアップディレクトリ
 
-# Dependencies
-node_modules/
-.pnp
-.pnp.js
-
+# ============================================================
 # Environment Variables
+# ============================================================
 .env
 .env.local
 .env.*.local
+.env.*.production  # 本番環境変数を明示的に除外
 
-# Build Outputs
-dist/
-build/
-*.tsbuildinfo
-*.tgz  # npm pack で生成されるビルド成果物
+# ============================================================
+# Credentials & Secrets
+# ============================================================
+*.key
+*.pem
+credentials.json
+secrets.json
+auth.json
+token.json
 
+# ============================================================
+# SSH Keys
+# ============================================================
+id_rsa*
+id_ed25519*
+*.ppk
+
+# ============================================================
 # Logs
+# ============================================================
 logs/
 *.log
 npm-debug.log*
@@ -31,13 +50,9 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# Testing
-coverage/
-.nyc_output/
-.vitest/
-*.lcov
-
+# ============================================================
 # IDE
+# ============================================================
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
@@ -46,32 +61,39 @@ coverage/
 .idea/
 *.swp
 *.swo
-*~
 
+# ============================================================
 # OS
+# ============================================================
 .DS_Store
+._*  # macOS拡張属性ファイル
 Thumbs.db
 Desktop.ini
 
+# ============================================================
 # Temporary Files
+# ============================================================
 tmp/
 temp/
 *.tmp
 docs/tmp/
+*.md~  # Markdownエディタのバックアップ
+.~*.md  # Markdownエディタのロックファイル
 
-# Package Manager
-# package-lock.json  # OSSプロジェクトではリポジトリに含める（npm ciに必要）
-yarn.lock
-pnpm-lock.yaml
-
+# ============================================================
 # MCP Credentials (local only - use template for sharing)
+# ============================================================
 ~/.cursor/mcp.json
 
+# ============================================================
 # IDE-specific configurations
+# ============================================================
 .claude/
 .cursor/
 
+# ============================================================
 # Michi project settings (user/machine-specific configuration)
+# ============================================================
 # Contains config.json with user credentials, project-specific settings
 # Excludes: pj/, archive-pj/, multi-repo/ (user-specific data)
 # Includes in Git: settings/ (rules and templates shared across team)
@@ -79,12 +101,12 @@ pnpm-lock.yaml
 .michi/archive-pj/
 .michi/multi-repo/
 
+# ============================================================
 # AI Context
+# ============================================================
 AGENTS.mdecho
-*.backup  # 一般的なバックアップファイル（ドキュメント編集時などに生成）
 
+# ============================================================
 # Development and test scripts
+# ============================================================
 test-confluence-auth.js
-
-# Backup files
-*.backup.*
