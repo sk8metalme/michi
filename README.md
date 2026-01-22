@@ -23,19 +23,8 @@ MichiはClaude Code向けの**Spec-Driven Development**フレームワークで�
 ### Claude Code内でインストール
 
 ```
-/plugin marketplace add yourorg/michi
-/plugin install michi@yourorg
-```
-
-### 前提条件
-
-**推奨プラグイン（ai-agent-setup）:**
-```
-/plugin marketplace add yourorg/ai-agent-setup
-/plugin install design-review@ai-agent-setup
-/plugin install oss-compliance@ai-agent-setup
-/plugin install version-audit@ai-agent-setup
-/plugin install e2e-planning@ai-agent-setup
+/plugin marketplace add sk8metalme/michi
+/plugin install michi@sk8metalme
 ```
 
 ---
