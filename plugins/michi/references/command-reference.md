@@ -484,18 +484,16 @@
 「マルチリポジトリプロジェクトを開始したい: EC Platform」
 
 # 明示的発動
-/michi-multi-repo launch-pj "EC Platform" --jira KEY --confluence-space SPACE
+/michi-multi-repo launch-pj "EC Platform"
 ```
 
 **処理内容**:
 1. マルチリポジトリプロジェクトのディレクトリ構造を作成
-2. project.json に JIRA/Confluence 連携情報を設定
-3. 統合仕様のテンプレートを生成
+2. 統合仕様のテンプレートを生成
 
 **出力**:
 - プロジェクト名
 - 作成されたファイルのリスト
-- JIRA/Confluence 連携情報
 - 次のステップ（統合要件定義）へのガイダンス
 
 ---

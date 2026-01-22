@@ -106,7 +106,7 @@ Claude: TDD実装を開始します。[dev を自動実行]
 /michi show-status user-auth
 
 # マルチリポジトリプロジェクト初期化
-/michi-multi-repo launch-pj "EC Platform" --jira KEY --confluence-space SPACE
+/michi-multi-repo launch-pj "EC Platform"
 ```
 
 ## 主要機能（19機能）

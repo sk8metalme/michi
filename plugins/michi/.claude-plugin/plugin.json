@@ -1,19 +1,9 @@
 {
   "name": "michi",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Michi - Claude Code用AI駆動仕様駆動開発ワークフロー",
   "author": {
-    "name": "yourorg"
+    "name": "sk8metalme"
   },
-  "license": "MIT",
-  "repository": "https://github.com/yourorg/michi",
-  "homepage": "https://github.com/yourorg/michi",
-  "keywords": [
-    "claude-code",
-    "plugin",
-    "spec-driven-development",
-    "michi",
-    "tdd",
-    "workflow"
-  ]
+  "license": "MIT"
 }

@@ -13,7 +13,6 @@ MichiはClaude Code向けの**Spec-Driven Development**フレームワークで�
 
 **主な機能:**
 - 仕様駆動開発（Spec-Driven Development）の自動化
-- JIRA/Confluence連携（タスク同期、仕様書公開）
 - テスト計画・TDD実装支援
 - マルチリポジトリプロジェクト対応
 
@@ -47,22 +46,22 @@ MichiはClaude Code向けの**Spec-Driven Development**フレームワークで�
 
 ```bash
 # 1. 仕様初期化
-/michi:launch-pj "機能の説明"
+/launch-pj "機能の説明"
 
 # 2. 要件定義
-/michi:create-requirements {feature-name}
+/create-requirements {feature-name}
 
 # 3. 設計
-/michi:create-design {feature-name}
+/create-design {feature-name}
 
 # 4. テスト計画
-/michi:plan-tests {feature-name}
+/plan-tests {feature-name}
 
 # 5. タスク分割
-/michi:create-tasks {feature-name}
+/create-tasks {feature-name}
 
 # 6. 実装（TDD + 品質自動化）
-/michi:dev {feature-name}
+/dev {feature-name}
 ```
 
 ---
@@ -77,7 +76,7 @@ MichiはClaude Code向けの**Spec-Driven Development**フレームワークで�
 
 ## バージョン
 
-**v1.2.0** - ディレクトリ構造変更とClaude Code Plugin化
+**v1.4.0** - 19個の独立したスキルに分割（保守性向上、発動制御の精密化）
 
 ---
 
