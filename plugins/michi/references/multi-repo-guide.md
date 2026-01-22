@@ -23,7 +23,6 @@
 - **統合仕様管理**: 1つの仕様書で複数リポジトリを管理
 - **クロスリポジトリ整合性検証**: リポジトリ間のインターフェース不整合を検出
 - **並行実装**: 複数リポジトリで並行してTDD実装
-- **JIRA/Confluence連携**: 外部ツールとの統合
 
 ---
 
@@ -33,7 +32,7 @@
 
 ```
 Phase 1: マルチリポジトリプロジェクト初期化
-  /michi-multi-repo launch-pj "EC Platform" --jira KEY --confluence-space SPACE
+  /michi-multi-repo launch-pj "EC Platform"
 
 Phase 2: 統合要件定義
   /michi-multi-repo create-requirements {project-name}
@@ -61,19 +60,18 @@ Phase 6: 全リポジトリ並行実装
 
 **コマンド**:
 ```bash
-/michi-multi-repo launch-pj "EC Platform" --jira KEY --confluence-space SPACE
+/michi-multi-repo launch-pj "EC Platform"
 ```
 
 **処理内容**:
 1. マルチリポジトリプロジェクトのディレクトリ構造を作成
-2. project.json に JIRA/Confluence 連携情報を設定
-3. 統合仕様のテンプレートを生成
+2. 統合仕様のテンプレートを生成
 
 **ディレクトリ構造**:
 ```
 .michi/multi-repo/
 └── YYYYMMDD-ec-platform/
-    ├── project.json             # JIRA/Confluence連携情報
+    ├── project.json             # プロジェクトメタデータ
     └── repos.json               # リポジトリ一覧
 
 docs/michi-multi-repo/YYYYMMDD-ec-platform/

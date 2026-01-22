@@ -163,7 +163,7 @@ Claude: 設計書を作成します。
 **ワークフロー**:
 ```
 1. マルチリポジトリプロジェクト初期化
-   /michi-multi-repo launch-pj "EC Platform" --jira ECPF --confluence-space ECPLATFORM
+   /michi-multi-repo launch-pj "EC Platform"
 
 2. 統合要件定義
    /michi-multi-repo create-requirements ec-platform

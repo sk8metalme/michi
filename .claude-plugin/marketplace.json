@@ -1,14 +1,14 @@
 {
-  "name": "yourorg-michi",
+  "name": "sk8metalme-michi",
   "owner": {
-    "name": "yourorg"
+    "name": "sk8metalme"
   },
   "plugins": [
     {
       "name": "michi",
       "source": "./plugins/michi",
       "description": "Michi - AI-driven Spec-Driven Development workflow for Claude Code",
-      "version": "1.3.0"
+      "version": "1.4.0"
     }
   ]
 }

@@ -5,6 +5,49 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2026-01-23
+
+### Changed
+- **BREAKING**: Split unified skill into 19 independent skills
+- Each skill now has its own `SKILL.md` file in dedicated directory
+- Multi-repo skills moved from `skills/multi-repo/*/` to `skills/multi-repo-*/`
+- Command invocation changed: `/michi:*` → `/skill-name` or `/michi skill-name`
+- Improved skill discoverability and trigger control
+
+### Removed
+- Removed unified skill: `plugins/michi/skills/michi/SKILL.md`
+- Removed `plugins/michi/skills/michi/references/` (moved to `plugins/michi/references/`)
+
+### Added
+- 19 independent skill directories under `plugins/michi/skills/`
+  - 13 core skills: launch-pj, create-requirements, create-design, etc.
+  - 6 multi-repo skills: multi-repo-launch-pj, multi-repo-create-requirements, etc.
+- Shared references directory: `plugins/michi/references/`
+- Individual trigger keywords for each skill
+- Improved maintainability and modularity
+
+### Technical Details
+
+**v1.3.0 → v1.4.0 Migration**:
+- Old: Single `skills/michi/SKILL.md` with 19 functions
+- New: 19 independent `skills/{skill-name}/SKILL.md` files
+- Old: `skills/multi-repo/launch-pj/SKILL.md`
+- New: `skills/multi-repo-launch-pj/SKILL.md`
+
+**Skill Structure**:
+```
+plugins/michi/
+├── skills/
+│   ├── launch-pj/SKILL.md
+│   ├── create-requirements/SKILL.md
+│   ├── multi-repo-launch-pj/SKILL.md
+│   └── ... (19 skills total)
+└── references/
+    ├── command-reference.md
+    ├── workflow-guide.md
+    └── multi-repo-guide.md
+```
+
 ## [1.3.0] - 2026-01-16
 
 ### Changed
@@ -93,7 +136,6 @@ plugins/michi/skills/michi/
   - `/michi-multi-repo:review-cross`
   - `/michi-multi-repo:propagate`
   - `/michi-multi-repo:dev-all`
-- JIRA/Confluence 連携機能
 
 ### Changed
 - プラグイン構造の整理
