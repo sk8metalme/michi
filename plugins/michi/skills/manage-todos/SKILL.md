@@ -75,6 +75,18 @@ TODO管理スキルは、プロジェクトの不明点、仮定、リスク、�
 - [ ] TODO: [A] DBはPostgreSQLを使用すると仮定
 ```
 
+**具体的な抽出方法**:
+```bash
+# requirements.md から Question を抽出
+grep -n "TODO: \[Q\]" docs/michi/YYYYMMDD-{pj-name}/spec/requirements.md
+
+# architecture.md から Risk を抽出
+grep -n "TODO: \[R\]" docs/michi/YYYYMMDD-{pj-name}/spec/architecture.md
+
+# すべてのドキュメントから TODO を抽出
+grep -rn "TODO: \[" docs/michi/YYYYMMDD-{pj-name}/spec/
+```
+
 #### 2. show - TODO一覧表示
 
 TODO一覧を表示します。
@@ -84,7 +96,7 @@ TODO一覧を表示します。
 ```
 
 **表示形式**:
-```
+```text
 TODO一覧: user-auth
 
 [Q] Question (2件)
@@ -111,11 +123,15 @@ TODO一覧: user-auth
 /michi manage-todos add {pj-name}
 ```
 
-**対話フロー**:
+**対話フロー** (AskUserQuestion ツール使用):
 1. カテゴリ選択（Q / A / R / T）
+   - AskUserQuestion でカテゴリを選択
 2. 優先度選択（High / Medium / Low）
+   - AskUserQuestion で優先度を選択
 3. TODO内容入力
+   - ユーザーに入力を促す
 4. `todos/todos.md` に追加
+   - TODOをファイルに書き込み
 
 #### 4. resolve - TODO解決
 
@@ -126,9 +142,29 @@ TODOを解決済みにマークします。
 ```
 
 **実行内容**:
-- 指定TODOを解決済みにマーク
-- 解決日時を記録
-- `project.json` を更新
+1. TODO内容を確認
+   - 指定されたTODO IDの内容を表示
+   - AskUserQuestion で解決を確認
+2. 解決内容を入力
+   - ユーザーに解決方法・決定事項を入力させる
+3. TODOを解決済みにマーク
+   - 解決日時を記録
+   - 解決内容を追記
+   - `project.json` を更新
+
+**対話的な確認フロー**:
+```text
+TODO-Q-001の内容:
+  認証トークンの有効期限は何分にすべきか？
+
+このTODOを解決済みにしますか？
+> はい
+
+解決内容を入力してください:
+> 15分に決定。セキュリティ要件と合わせて確認済み。
+
+✓ TODO-Q-001 を解決済みにマークしました
+```
 
 ## 実行内容
 
@@ -136,7 +172,7 @@ TODOを解決済みにマークします。
 
 TODOは以下の構造で管理されます：
 
-```
+```text
 docs/michi/YYYYMMDD-{pj-name}/
 └── todos/
     └── todos.md              # TODO一覧

@@ -58,6 +58,10 @@ trigger_keywords:
 - 現在のフェーズ
 - タスクの完了状況（`docs/michi/YYYYMMDD-{pj-name}/tasks/tasks.md` を参照）
 - 承認状況（`project.json` の `approvals` フィールド）
+- **TODO状況**（`docs/michi/YYYYMMDD-{pj-name}/todos/todos.md` を参照）
+  - 全TODO数
+  - 未解決TODO数
+  - 高優先度TODO数
 
 ### 3. ステータス表示
 

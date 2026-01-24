@@ -173,7 +173,7 @@
 - 高優先度TODOの警告
 
 **ファイル構造**:
-```
+```text
 docs/michi/YYYYMMDD-{pj-name}/
 └── todos/
     └── todos.md              # TODO一覧
