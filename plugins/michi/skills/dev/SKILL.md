@@ -25,8 +25,9 @@ TDD実装 + 品質自動化スキルは、テスト駆動開発（Red-Green-Refa
 
 ### Phase 6.1: 実装準備
 1. タスク一覧を確認
-2. ブランチ作成（feature/{pj-name}）
-3. 実装対象タスクを選択
+2. **TODO状況確認**（高優先度TODOの警告表示）
+3. ブランチ作成（feature/{pj-name}）
+4. 実装対象タスクを選択
 
 ### Phase 6.2: 事前品質監査
 1. OSS License Check（`oss-license-checker` エージェント）
@@ -92,11 +93,23 @@ TDD実装 + 品質自動化スキルは、テスト駆動開発（Red-Green-Refa
    - `docs/michi/YYYYMMDD-{pj-name}/tasks/tasks.md` を読み込み
    - 未完了タスクを表示
 
-2. **タスク選択**:
+2. **TODO状況確認**:
+   - `docs/michi/YYYYMMDD-{pj-name}/todos/todos.md` を読み込み
+   - 未解決の高優先度TODOがある場合は警告表示
+   ```
+   ⚠️ 警告: 未解決の高優先度TODOがあります
+
+   TODO-Q-001: 認証トークンの有効期限は何分にすべきか？
+
+   実装を続行しますか？
+   ```text
+   - ユーザーが続行を選択した場合のみ次に進む
+
+3. **タスク選択**:
    - ユーザーに実装するタスクを選択させる
    - 依存関係を確認
 
-3. **ブランチ作成**:
+4. **ブランチ作成**:
    ```bash
    git checkout -b feature/{pj-name}/{task-id}
    ```

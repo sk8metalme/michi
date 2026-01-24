@@ -102,6 +102,17 @@ Phase 7: アーカイブ (archive-pj)
 - すべての要件がEARS形式に従っている
 - 受入基準が明確に定義されている
 
+**オプション: TODO抽出**:
+要件定義書から不明点や仮定を抽出してTODO管理を開始できます。
+
+```bash
+/michi manage-todos scan 20260115-user-auth
+```
+
+抽出対象:
+- 「前提条件」セクションの仮定（Assumption）
+- 「制約事項」セクションの不明点（Question）
+
 **次のステップ**: Phase 3: 設計
 
 ---
@@ -132,6 +143,19 @@ Phase 7: アーカイブ (archive-pj)
 - sequence.md が生成された
 - C4モデルの階層構造が適切
 - Mermaid図が正しく記述されている
+
+**オプション: TODO抽出**:
+設計書からリスクや不明点を抽出してTODO管理を更新できます。
+
+```bash
+/michi manage-todos scan 20260115-user-auth
+```
+
+抽出対象:
+- 設計上のリスク（Risk）
+- 技術選定の仮定（Assumption）
+- 詳細設計の不明点（Question）
+- 技術的負債（Tech Debt）
 
 **次のステップ**: Phase 4: テスト計画
 

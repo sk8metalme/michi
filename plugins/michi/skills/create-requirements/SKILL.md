@@ -117,9 +117,41 @@ project.json のフェーズを更新します：
 }
 ```
 
+### 6. TODO抽出の自動提案
+
+要件定義書生成後、Claude は自動的に TODO 抽出を提案します：
+
+```text
+要件定義書を生成しました。
+
+不明点や仮定を TODO として管理しますか？
+  - manage-todos scan {pj-name} を実行
+```
+
+ユーザーが同意した場合、`manage-todos scan` を実行して、要件定義書から TODO を抽出します。
+
 ## 次のステップ
 
 要件定義が完了したら、次のステップに進みます：
+
+### 推奨: TODO抽出
+
+要件定義書から不明点や仮定を抽出してTODO管理を開始します。
+
+`manage-todos` スキルを使用してTODOを抽出します：
+
+```bash
+/michi manage-todos scan {pj-name}
+```
+
+または自動発動：
+```text
+TODOを確認したい
+```
+
+**抽出対象**:
+- 「前提条件」セクションの仮定（Assumption）
+- 「制約事項」セクションの不明点（Question）
 
 ### 推奨: 設計書作成
 

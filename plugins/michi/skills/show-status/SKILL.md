@@ -58,6 +58,10 @@ trigger_keywords:
 - 現在のフェーズ
 - タスクの完了状況（`docs/michi/YYYYMMDD-{pj-name}/tasks/tasks.md` を参照）
 - 承認状況（`project.json` の `approvals` フィールド）
+- **TODO状況**（`docs/michi/YYYYMMDD-{pj-name}/todos/todos.md` を参照）
+  - 全TODO数
+  - 未解決TODO数
+  - 高優先度TODO数
 
 ### 3. ステータス表示
 
@@ -71,8 +75,10 @@ trigger_keywords:
 更新日: 2026-01-17
 
 タスク進捗: 3 / 10 完了 (30%)
+TODO状況: 未解決 4件（高優先度 2件）
 
 次のアクション:
+  - 高優先度TODOを解決（manage-todos show）
   - テスト計画を立てる（plan-tests）
   - タスクに分割する（create-tasks）
 ```

@@ -136,9 +136,43 @@ project.json のフェーズを更新します：
 }
 ```
 
+### 7. TODO抽出の自動提案
+
+設計書生成後、Claude は自動的に TODO 抽出を提案します：
+
+```text
+設計書を生成しました。
+
+設計上のリスクや不明点を TODO として管理しますか？
+  - manage-todos scan {pj-name} を実行
+```
+
+ユーザーが同意した場合、`manage-todos scan` を実行して、設計書から TODO を抽出します。
+
 ## 次のステップ
 
 設計が完了したら、次のステップに進みます：
+
+### 推奨: TODO抽出
+
+設計書からリスクや不明点を抽出してTODO管理を更新します。
+
+`manage-todos` スキルを使用してTODOを抽出します：
+
+```bash
+/michi manage-todos scan {pj-name}
+```
+
+または自動発動：
+```text
+TODOを確認したい
+```
+
+**抽出対象**:
+- 設計上のリスク（Risk）
+- 技術選定の仮定（Assumption）
+- 詳細設計の不明点（Question）
+- 技術的負債（Tech Debt）
 
 ### オプション1: テスト計画
 
