@@ -1,6 +1,6 @@
 # Michi スキル - コマンドリファレンス
 
-このドキュメントは、Michiスキルで利用可能な全19機能の詳細リファレンスです。
+このドキュメントは、Michiスキルで利用可能な全20機能の詳細リファレンスです。
 
 ## 目次
 
@@ -123,9 +123,73 @@
 
 ---
 
+### 5. manage-todos - TODO管理
+
+**用途**: 要件定義・設計段階での不明点、仮定、リスク、技術的負債を一元管理します。
+
+**使用方法**:
+```bash
+# 自動発動
+「TODOを確認したい」
+「不明点を整理」
+
+# 明示的発動 - サブコマンド
+/michi manage-todos scan {pj-name}    # TODO抽出
+/michi manage-todos show {pj-name}    # TODO一覧表示
+/michi manage-todos add {pj-name}     # TODO追加
+/michi manage-todos resolve {pj-name} TODO-Q-001  # TODO解決
+```
+
+**TODOカテゴリ**:
+- **Question (Q)**: 確認が必要な不明点
+- **Assumption (A)**: 暫定的に仮定している事項
+- **Risk (R)**: 識別されたリスク
+- **Tech Debt (T)**: 技術的負債
+
+**処理内容**:
+
+1. **scan**: 既存ドキュメントからTODOを抽出
+   - `requirements.md`: 前提条件、制約事項
+   - `architecture.md`: 設計上のリスク、技術選定の仮定
+   - `design.md`: 詳細設計の不明点
+   - `research.md`: リスクセクション
+
+2. **show**: TODO一覧を表示
+   - カテゴリ別、優先度別に表示
+   - 統計情報（全TODO、未解決、高優先度）
+
+3. **add**: 新規TODOを対話的に追加
+   - カテゴリ選択
+   - 優先度選択（High / Medium / Low）
+   - TODO内容入力
+
+4. **resolve**: TODOを解決済みにマーク
+   - 解決日時を記録
+   - `project.json` を更新
+
+**出力**:
+- TODO一覧（カテゴリ別）
+- 統計情報
+- 高優先度TODOの警告
+
+**ファイル構造**:
+```
+docs/michi/YYYYMMDD-{pj-name}/
+└── todos/
+    └── todos.md              # TODO一覧
+```
+
+**既存スキルとの連携**:
+- `create-requirements`: 要件定義後にTODO抽出を提案
+- `create-design`: 設計後にリスク・不明点を抽出
+- `show-status`: TODO状況サマリーを表示
+- `dev`: 実装前に高優先度TODOの警告表示
+
+---
+
 ## 仕様作成
 
-### 5. create-requirements - 要件定義書作成
+### 6. create-requirements - 要件定義書作成
 
 **用途**: EARS形式の包括的な要件定義書を生成します。
 

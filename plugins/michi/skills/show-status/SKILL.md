@@ -71,8 +71,10 @@ trigger_keywords:
 更新日: 2026-01-17
 
 タスク進捗: 3 / 10 完了 (30%)
+TODO状況: 未解決 4件（高優先度 2件）
 
 次のアクション:
+  - 高優先度TODOを解決（manage-todos show）
   - テスト計画を立てる（plan-tests）
   - タスクに分割する（create-tasks）
 ```

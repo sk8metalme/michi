@@ -140,6 +140,27 @@ project.json のフェーズを更新します：
 
 設計が完了したら、次のステップに進みます：
 
+### 推奨: TODO抽出
+
+設計書からリスクや不明点を抽出してTODO管理を更新します。
+
+`manage-todos` スキルを使用してTODOを抽出します：
+
+```bash
+/michi manage-todos scan {pj-name}
+```
+
+または自動発動：
+```
+TODOを確認したい
+```
+
+**抽出対象**:
+- 設計上のリスク（Risk）
+- 技術選定の仮定（Assumption）
+- 詳細設計の不明点（Question）
+- 技術的負債（Tech Debt）
+
 ### オプション1: テスト計画
 
 `plan-tests` スキルを使用してテスト計画を作成します。

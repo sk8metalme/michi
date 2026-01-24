@@ -73,7 +73,8 @@ docs/michi/YYYYMMDD-{pj-name}/       # 仕様書（Git管理される）
 ├── spec/
 ├── tasks/
 ├── research/
-└── test-plan/
+├── test-plan/
+└── todos/
 ```
 
 ### 3. メタデータ初期化
