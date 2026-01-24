@@ -8,7 +8,7 @@
       "name": "michi",
       "source": "./plugins/michi",
       "description": "Michi - AI-driven Spec-Driven Development workflow for Claude Code",
-      "version": "1.5.0"
+      "version": "1.6.0"
     }
   ]
 }

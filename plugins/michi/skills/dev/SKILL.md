@@ -116,19 +116,38 @@ TDD実装 + 品質自動化スキルは、テスト駆動開発（Red-Green-Refa
 
 ### Phase 6.2: 事前品質監査
 
+**サブエージェント活用（Bashエージェント並行実行）**:
+
+品質監査を複数のBashエージェントで並行実行します：
+
+| エージェント | タイプ | コマンド | 目的 |
+|-------------|-------|---------|------|
+| ライセンスチェック | Bash | `npx license-checker --summary` | OSS License 監査 |
+| バージョン監査 | Bash | `npm outdated --json` | EOL/非推奨バージョン検出 |
+| 依存脆弱性 | Bash | `npm audit --json` | 既知脆弱性チェック |
+
+→ Critical検出時は即時停止
+
+**実行内容**:
+
 1. **OSS License Check**:
-   - `oss-license-checker` エージェントを自動実行
+   - `npx license-checker --summary` を実行
    - 違反ライセンスを検出
    - 代替パッケージを提案
 
 2. **Version Audit**:
-   - `stable-version-auditor` エージェントを自動実行
+   - `npm outdated --json` を実行
    - EOLバージョンを検出
    - アップグレードを提案
 
 3. **問題修正**:
    - 検出された問題を自動修正
    - 修正不可能な場合はユーザーに報告
+
+**メリット**:
+- 複数のnpmコマンドを並行実行
+- 品質チェックの待ち時間を大幅短縮
+- 各コマンドの結果を独立して評価
 
 ### Phase 6.3: TDD実装
 
@@ -186,6 +205,13 @@ TDD実装 + 品質自動化スキルは、テスト駆動開発（Red-Green-Refa
 
 ### Phase 6.5: カバレッジ検証
 
+**サブエージェント活用（Bashエージェント並行実行）**:
+
+| エージェント | タイプ | コマンド | 目的 |
+|-------------|-------|---------|------|
+| テスト実行 | Bash | `npm test -- --coverage` | カバレッジ95%以上確認 |
+| Mutation Testing | Bash | `npx stryker run` | テスト品質検証（オプション） |
+
 ```bash
 npm test -- --coverage
 ```
@@ -195,6 +221,10 @@ npm test -- --coverage
 - Branches: 90%以上
 - Functions: 95%以上
 - Lines: 95%以上
+
+**メリット**:
+- カバレッジ測定とMutation Testingを並行実行
+- 最終検証の時間を短縮
 
 ### Phase 6.6: Mutation Testing（オプション）
 

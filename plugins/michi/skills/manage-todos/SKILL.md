@@ -68,6 +68,8 @@ TODO管理スキルは、プロジェクトの不明点、仮定、リスク、�
   - 詳細設計の不明点
 - `docs/michi/YYYYMMDD-{pj-name}/research/research.md`
   - リスクセクション
+- `src/**/*.ts`, `src/**/*.js`
+  - コード内のTODOコメント（// TODO:, /* TODO:）
 
 **認識パターン**:
 ```markdown
@@ -75,17 +77,29 @@ TODO管理スキルは、プロジェクトの不明点、仮定、リスク、�
 - [ ] TODO: [A] DBはPostgreSQLを使用すると仮定
 ```
 
-**具体的な抽出方法**:
-```bash
-# requirements.md から Question を抽出
-grep -n "TODO: \[Q\]" docs/michi/YYYYMMDD-{pj-name}/spec/requirements.md
+**サブエージェント活用（並列TODO抽出）**:
 
-# architecture.md から Risk を抽出
-grep -n "TODO: \[R\]" docs/michi/YYYYMMDD-{pj-name}/spec/architecture.md
+scanサブコマンドで複数ドキュメントを並列検索します：
 
-# すべてのドキュメントから TODO を抽出
-grep -rn "TODO: \[" docs/michi/YYYYMMDD-{pj-name}/spec/
-```
+#### Phase 1: 並列TODO抽出
+
+| エージェント | 対象 | パターン | 出力 |
+|-------------|------|---------|------|
+| 要件定義TODO | spec/requirements.md | TODO: [Q], TODO: [A] | 要件TODOリスト |
+| 設計TODO | spec/architecture.md, design.md | TODO: [R], TODO: [A], TODO: [T] | 設計TODOリスト |
+| 調査ログTODO | research/research.md | すべてのカテゴリ | 調査TODOリスト |
+| コードTODO | src/**/*.ts, src/**/*.js | // TODO:, /* TODO: | コードTODOリスト |
+
+#### Phase 2: TODO統合（メインエージェント）
+
+- Phase 1の結果をマージ
+- 重複排除、優先度設定
+- todos.md生成
+
+**メリット**:
+- ドキュメント横断検索の高速化
+- 各ドキュメントを独立して探索
+- TODO抽出精度の向上
 
 #### 2. show - TODO一覧表示
 
