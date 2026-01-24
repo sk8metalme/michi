@@ -38,7 +38,7 @@ Planエージェントで各リポジトリの依存関係を分析：
 - 並行実行可能なリポジトリを特定
 
 **例**:
-```
+```text
 backend-api: 依存なし → Phase 1で実装
 frontend-web: backend-api に依存 → Phase 2で実装
 mobile-app: backend-api に依存 → Phase 2で実装
@@ -53,7 +53,7 @@ mobile-app: backend-api に依存 → Phase 2で実装
 - PR作成
 
 **並行実行例**:
-```
+```text
 Phase 1: backend-api を実装（general-purpose x 1）
 Phase 2: frontend-web と mobile-app を並行実装（general-purpose x 2）
 ```

@@ -228,7 +228,7 @@ docs/michi/YYYYMMDD-{pj-name}/
 
 ---
 
-### 6. create-design - 設計書作成
+### 7. create-design - 設計書作成
 
 **用途**: アーキテクチャ設計とシーケンス図を生成します。
 
@@ -264,7 +264,7 @@ docs/michi/YYYYMMDD-{pj-name}/
 
 ---
 
-### 7. update-master-docs - マスタードキュメント更新
+### 8. update-master-docs - マスタードキュメント更新
 
 **用途**: プロジェクト横断の共通知識を更新します。
 

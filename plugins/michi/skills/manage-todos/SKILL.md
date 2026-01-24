@@ -68,6 +68,8 @@ TODO管理スキルは、プロジェクトの不明点、仮定、リスク、�
   - 詳細設計の不明点
 - `docs/michi/YYYYMMDD-{pj-name}/research/research.md`
   - リスクセクション
+- `src/**/*.ts`, `src/**/*.js`
+  - コード内のTODOコメント（// TODO:, /* TODO:）
 
 **認識パターン**:
 ```markdown

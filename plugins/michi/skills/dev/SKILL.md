@@ -131,12 +131,12 @@ TDD実装 + 品質自動化スキルは、テスト駆動開発（Red-Green-Refa
 **実行内容**:
 
 1. **OSS License Check**:
-   - `oss-license-checker` エージェントを自動実行
+   - `npx license-checker --summary` を実行
    - 違反ライセンスを検出
    - 代替パッケージを提案
 
 2. **Version Audit**:
-   - `stable-version-auditor` エージェントを自動実行
+   - `npm outdated --json` を実行
    - EOLバージョンを検出
    - アップグレードを提案
 
