@@ -291,7 +291,7 @@ Michiスキルは、新規プロジェクト、既存プロジェクトへの追
 
 詳細については、以下のドキュメントを参照してください：
 
-- **command-reference.md**: 全19機能の詳細リファレンス
+- **command-reference.md**: 全20機能の詳細リファレンス
 - **workflow-guide.md**: 開発ワークフローの全体説明
 - **multi-repo-guide.md**: マルチリポジトリ開発の詳細
 - **triggers.md**: 発動トリガーの一覧
